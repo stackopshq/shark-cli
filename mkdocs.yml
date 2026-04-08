@@ -1,0 +1,63 @@
+site_name: shark-cli
+site_description: A professional CLI for the Sharktech Cloud Provider API
+site_url: https://stackopshq.github.io/shark-cli/
+repo_url: https://github.com/stackopshq/shark-cli
+repo_name: stackopshq/shark-cli
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: blue grey
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: blue grey
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - content.code.copy
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - toc:
+      permalink: true
+  - attr_list
+  - md_in_html
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Commands:
+      - Overview: commands/index.md
+      - Compute (server): commands/server.md
+      - Flavors: commands/flavor.md
+      - Images: commands/image.md
+      - Networks: commands/network.md
+      - Key Pairs: commands/keypair.md
+      - Volumes: commands/volume.md
+      - Security Groups: commands/security-group.md
+      - Floating IPs: commands/floating-ip.md
+      - Load Balancers (Octavia): commands/loadbalancer.md
+      - Secrets (Barbican): commands/secret.md
+      - Clusters (Magnum): commands/cluster.md
+      - Metrics (Gnocchi): commands/metric.md
+      - Service Catalog: commands/catalog.md

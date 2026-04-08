@@ -2,131 +2,80 @@
 
 A professional, modular CLI for the [Sharktech](https://sharktech.net) Cloud Provider API.
 
-## Features
+**[Full Documentation](https://stackopshq.github.io/shark-cli/)**
 
-- **Modular architecture** — one file per resource, easily extensible.
-- **Secure configuration** — env vars > YAML config file; secrets never hard-coded; config file written with `0600` permissions.
-- **Rich output** — coloured tables powered by [Rich](https://github.com/Textualize/rich).
-- **Shell auto-completion** — native support for Bash, Zsh, and Fish.
+## Highlights
 
-## Installation
+- **14 command groups** covering all major OpenStack services
+- **100+ sub-commands** for full lifecycle management
+- **Rich terminal output** — coloured tables powered by [Rich](https://github.com/Textualize/rich)
+- **Shell auto-completion** — Bash, Zsh, and Fish
+- **Secure configuration** — env vars > YAML config; `0600` permissions
+
+## Quick Start
 
 ```bash
-# With pip (from source)
-pip install .
-
-# Or with Poetry
-poetry install
+pip install .        # or: poetry install
+shark setup          # interactive credential setup
+shark server list    # list your VMs
 ```
 
-After installation the `shark` command is available globally.
+## Supported Services
 
-## Configuration
-
-You need credentials from your **Sharktech Client Area** (cloud service information page):
-
-| Field | Description | Example |
+| Command | Service | Backend |
 |---|---|---|
-| **Auth URL** | Keystone endpoint | `https://cloud-xx.sharktech.net:5000` |
-| **Username** | OpenStack user | `myuser` |
-| **Password** | OpenStack password | — |
-| **Domain ID** | OpenStack domain name | `mydomain` |
-| **Project ID** | OpenStack project name | `myproject` |
+| `shark server` | Compute | Nova |
+| `shark flavor` | Flavors | Nova |
+| `shark image` | Images | Glance |
+| `shark network` | Networks, Subnets, Ports, Routers | Neutron |
+| `shark keypair` | SSH Key Pairs | Nova |
+| `shark volume` | Block Storage & Snapshots | Cinder |
+| `shark security-group` | Security Groups & Rules | Neutron |
+| `shark floating-ip` | Floating IPs | Neutron |
+| `shark loadbalancer` | Load Balancers, Listeners, Pools, Members | Octavia |
+| `shark secret` | Secrets & Containers | Barbican |
+| `shark cluster` | Kubernetes Clusters & Templates | Magnum |
+| `shark metric` | Metrics, Measures & Resources | Gnocchi |
+| `shark catalog` | Service Endpoint Discovery | Keystone |
 
-### Option 1 — Interactive setup
+## Documentation
 
-```bash
-shark setup
-```
+Full documentation is available at **[stackopshq.github.io/shark-cli](https://stackopshq.github.io/shark-cli/)**.
 
-This prompts for all fields and stores them in `~/.shark/config.yaml` (permissions `600`).
-
-### Option 2 — Environment variables
-
-```bash
-export SHARK_AUTH_URL="https://cloud-xx.sharktech.net:5000"
-export SHARK_USERNAME="myuser"
-export SHARK_PASSWORD="mypassword"
-export SHARK_DOMAIN_ID="mydomain"
-export SHARK_PROJECT_ID="myproject"
-```
-
-Environment variables always take precedence over the config file.
-
-## Usage
+To build the docs locally:
 
 ```bash
-# Show version
-shark --version
-
-# List compute servers (Nova)
-shark compute list
-
-# Show a specific server
-shark compute show <server-id>
-
-# List networks (Neutron)
-shark network list
+pip install mkdocs-material
+mkdocs serve
 ```
-
-## Shell Auto-Completion
-
-### Bash
-
-Add the following line to your `~/.bashrc`:
-
-```bash
-eval "$(_SHARK_COMPLETE=bash_source shark)"
-```
-
-Then reload:
-
-```bash
-source ~/.bashrc
-```
-
-### Zsh
-
-Add the following line to your `~/.zshrc`:
-
-```zsh
-eval "$(_SHARK_COMPLETE=zsh_source shark)"
-```
-
-Then reload:
-
-```zsh
-source ~/.zshrc
-```
-
-### Fish
-
-```fish
-_SHARK_COMPLETE=fish_source shark > ~/.config/fish/completions/shark.fish
-```
-
-You can also run `shark completion <shell>` to display these instructions at any time.
 
 ## Project Structure
 
 ```
 sharktech-cli/
-├── pyproject.toml                # Poetry packaging & dependencies
+├── pyproject.toml          # Poetry packaging & dependencies
+├── mkdocs.yml              # MkDocs Material configuration
+├── docs/                   # Documentation source (MkDocs)
 ├── README.md
 └── shark_cli/
-    ├── __init__.py               # Package version
-    ├── main.py                   # Click group & entry point
+    ├── __init__.py          # Package version
+    ├── main.py              # Click group & entry point
     ├── core/
-    │   ├── client.py             # Centralised httpx API client
-    │   ├── config.py             # YAML / env-var config loader
-    │   ├── context.py            # Shared SharkContext object
-    │   ├── exceptions.py         # Domain-specific exceptions
-    │   └── validators.py         # Input validators (IDs, IPs, …)
+    │   ├── client.py        # Centralised httpx API client
+    │   ├── config.py        # YAML / env-var config loader
+    │   ├── context.py       # Shared SharkContext object
+    │   ├── exceptions.py    # Domain-specific exceptions
+    │   └── validators.py    # Input validators
     └── commands/
-        ├── setup.py              # shark setup
-        ├── compute.py            # shark compute list / show
-        ├── network.py            # shark network list
-        └── completion.py         # shark completion <shell>
+        ├── server.py        # shark server (28 commands)
+        ├── image.py         # shark image (11 commands)
+        ├── network.py       # shark network (21 commands)
+        ├── volume.py        # shark volume (13 commands)
+        ├── loadbalancer.py  # shark loadbalancer (18 commands)
+        ├── secret.py        # shark secret (8 commands)
+        ├── cluster.py       # shark cluster (10 commands)
+        ├── metric.py        # shark metric (8 commands)
+        └── ...              # flavor, keypair, security-group, floating-ip, catalog
 ```
 
 ## License
