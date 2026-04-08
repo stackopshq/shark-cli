@@ -95,3 +95,107 @@ def sg_show(ctx: click.Context, group_id: str) -> None:
         )
 
     console.print(table)
+
+
+@security_group.command("create")
+@click.argument("name")
+@click.option("--description", default="", help="Description.")
+@click.pass_context
+def sg_create(ctx: click.Context, name: str, description: str) -> None:
+    """Create a security group."""
+    client = ctx.find_object(SharkContext).ensure_client()
+    url = f"{client.network_url}/v2.0/security-groups"
+    data = client.post(url, json={"security_group": {"name": name, "description": description}})
+    sg = data.get("security_group", data)
+    console.print(f"[green]Security group '{sg.get('name')}' ({sg.get('id')}) created.[/green]")
+
+
+@security_group.command("update")
+@click.argument("group_id", callback=validate_id)
+@click.option("--name", default=None, help="New name.")
+@click.option("--description", default=None, help="New description.")
+@click.pass_context
+def sg_update(ctx: click.Context, group_id: str, name: str | None, description: str | None) -> None:
+    """Update a security group."""
+    body: dict = {}
+    if name is not None:
+        body["name"] = name
+    if description is not None:
+        body["description"] = description
+    if not body:
+        console.print("[yellow]Nothing to update.[/yellow]")
+        return
+    client = ctx.find_object(SharkContext).ensure_client()
+    url = f"{client.network_url}/v2.0/security-groups/{group_id}"
+    client.put(url, json={"security_group": body})
+    console.print(f"[green]Security group {group_id} updated.[/green]")
+
+
+@security_group.command("delete")
+@click.argument("group_id", callback=validate_id)
+@click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
+@click.pass_context
+def sg_delete(ctx: click.Context, group_id: str, yes: bool) -> None:
+    """Delete a security group."""
+    if not yes:
+        click.confirm(f"Delete security group {group_id}?", abort=True)
+    client = ctx.find_object(SharkContext).ensure_client()
+    url = f"{client.network_url}/v2.0/security-groups/{group_id}"
+    client.delete(url)
+    console.print(f"[green]Security group {group_id} deleted.[/green]")
+
+
+@security_group.command("rule-add")
+@click.argument("group_id", callback=validate_id)
+@click.option("--direction", type=click.Choice(["ingress", "egress"]), required=True)
+@click.option("--protocol", default=None, help="Protocol (tcp, udp, icmp, or number).")
+@click.option("--port-min", type=int, default=None, help="Min port (or single port).")
+@click.option("--port-max", type=int, default=None, help="Max port. Defaults to port-min.")
+@click.option("--remote-ip", default=None, help="Remote IP prefix (CIDR).")
+@click.option("--remote-group", default=None, help="Remote security group ID.")
+@click.option("--ethertype", type=click.Choice(["IPv4", "IPv6"]), default="IPv4", show_default=True)
+@click.pass_context
+def sg_rule_add(ctx: click.Context, group_id: str, direction: str, protocol: str | None,
+                port_min: int | None, port_max: int | None,
+                remote_ip: str | None, remote_group: str | None, ethertype: str) -> None:
+    """Add a rule to a security group.
+
+    \b
+    Examples:
+      shark security-group rule-add <id> --direction ingress --protocol tcp --port-min 22
+      shark security-group rule-add <id> --direction ingress --protocol tcp --port-min 80 --port-max 443 --remote-ip 0.0.0.0/0
+    """
+    client = ctx.find_object(SharkContext).ensure_client()
+    body: dict = {
+        "security_group_id": group_id,
+        "direction": direction,
+        "ethertype": ethertype,
+    }
+    if protocol:
+        body["protocol"] = protocol
+    if port_min is not None:
+        body["port_range_min"] = port_min
+        body["port_range_max"] = port_max if port_max is not None else port_min
+    if remote_ip:
+        body["remote_ip_prefix"] = remote_ip
+    if remote_group:
+        body["remote_group_id"] = remote_group
+
+    url = f"{client.network_url}/v2.0/security-group-rules"
+    data = client.post(url, json={"security_group_rule": body})
+    rule = data.get("security_group_rule", data)
+    console.print(f"[green]Rule {rule.get('id')} added to {group_id}.[/green]")
+
+
+@security_group.command("rule-delete")
+@click.argument("rule_id", callback=validate_id)
+@click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
+@click.pass_context
+def sg_rule_delete(ctx: click.Context, rule_id: str, yes: bool) -> None:
+    """Delete a security group rule."""
+    if not yes:
+        click.confirm(f"Delete rule {rule_id}?", abort=True)
+    client = ctx.find_object(SharkContext).ensure_client()
+    url = f"{client.network_url}/v2.0/security-group-rules/{rule_id}"
+    client.delete(url)
+    console.print(f"[green]Rule {rule_id} deleted.[/green]")

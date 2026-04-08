@@ -36,7 +36,7 @@ class SharkClient:
         self._token: str | None = None
         self._catalog: list[dict] = []
 
-        self._http = httpx.Client(timeout=30.0, verify=not insecure)
+        self._http = httpx.Client(timeout=httpx.Timeout(30.0, read=600.0, write=600.0), verify=not insecure)
 
         # Authenticate immediately so errors surface early
         self._authenticate()
@@ -113,12 +113,43 @@ class SharkClient:
         """Keystone (identity) public endpoint."""
         return self._endpoint_for("identity")
 
+    @property
+    def image_url(self) -> str:
+        """Glance (image) public endpoint."""
+        return self._endpoint_for("image")
+
+    @property
+    def volume_url(self) -> str:
+        """Cinder (volume) public endpoint."""
+        return self._endpoint_for("volumev3")
+
+    @property
+    def container_infra_url(self) -> str:
+        """Magnum (container-infra) public endpoint."""
+        return self._endpoint_for("container-infra")
+
+    @property
+    def metric_url(self) -> str:
+        """Gnocchi (metric) public endpoint."""
+        return self._endpoint_for("metric")
+
+    @property
+    def key_manager_url(self) -> str:
+        """Barbican (key-manager) public endpoint."""
+        return self._endpoint_for("key-manager")
+
+    @property
+    def load_balancer_url(self) -> str:
+        """Octavia (load-balancer) public endpoint."""
+        return self._endpoint_for("load-balancer")
+
     # ── Generic HTTP helpers ──────────────────────────────────────────
 
     def _headers(self) -> Dict[str, str]:
         return {
             "X-Auth-Token": self._token or "",
             "Accept": "application/json",
+            "X-OpenStack-Nova-API-Version": "2.79",
         }
 
     def _handle_response(self, response: httpx.Response) -> Any:
@@ -148,9 +179,32 @@ class SharkClient:
         resp = self._http.put(url, headers=self._headers(), json=json)
         return self._handle_response(resp)
 
-    def delete(self, url: str) -> Any:
-        resp = self._http.delete(url, headers=self._headers())
+    def patch(self, url: str, json: Optional[Dict[str, Any]] = None,
+              content: Optional[bytes] = None,
+              content_type: Optional[str] = None) -> Any:
+        headers = self._headers()
+        if content_type:
+            headers["Content-Type"] = content_type
+        if content is not None:
+            resp = self._http.patch(url, headers=headers, content=content)
+        else:
+            resp = self._http.patch(url, headers=headers, json=json)
         return self._handle_response(resp)
+
+    def delete(self, url: str, params: Optional[Dict[str, Any]] = None) -> Any:
+        resp = self._http.delete(url, headers=self._headers(), params=params)
+        return self._handle_response(resp)
+
+    def put_stream(self, url: str, stream, content_type: str = "application/octet-stream") -> Any:
+        """PUT with a file-like stream body (for large uploads)."""
+        headers = self._headers()
+        headers["Content-Type"] = content_type
+        resp = self._http.put(url, headers=headers, content=stream)
+        return self._handle_response(resp)
+
+    def get_stream(self, url: str):
+        """GET that returns a streaming response context manager."""
+        return self._http.stream("GET", url, headers=self._headers())
 
     def close(self) -> None:
         self._http.close()

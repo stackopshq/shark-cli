@@ -31,6 +31,11 @@ from shark_cli.commands.volume import volume  # noqa: E402
 from shark_cli.commands.security_group import security_group  # noqa: E402
 from shark_cli.commands.floating_ip import floating_ip  # noqa: E402
 from shark_cli.commands.completion import completion  # noqa: E402
+from shark_cli.commands.catalog import catalog  # noqa: E402
+from shark_cli.commands.cluster import cluster  # noqa: E402
+from shark_cli.commands.metric import metric  # noqa: E402
+from shark_cli.commands.secret import secret  # noqa: E402
+from shark_cli.commands.loadbalancer import loadbalancer  # noqa: E402
 
 cli.add_command(setup)
 cli.add_command(server)
@@ -41,6 +46,11 @@ cli.add_command(keypair)
 cli.add_command(volume)
 cli.add_command(security_group)
 cli.add_command(floating_ip)
+cli.add_command(cluster)
+cli.add_command(metric)
+cli.add_command(secret)
+cli.add_command(loadbalancer)
+cli.add_command(catalog)
 cli.add_command(completion)
 
 

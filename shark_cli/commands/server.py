@@ -237,6 +237,353 @@ def server_reboot(ctx: click.Context, server_id: str, hard: bool) -> None:
     _server_action(ctx, server_id, {"reboot": {"type": reboot_type}}, f"Reboot ({reboot_type})")
 
 
+# ── pause / unpause ──────────────────────────────────────────────────────
+
+@server.command("pause")
+@click.argument("server_id", callback=validate_id)
+@click.pass_context
+def server_pause(ctx: click.Context, server_id: str) -> None:
+    """Pause a server (freeze in memory)."""
+    _server_action(ctx, server_id, {"pause": None}, "Pause")
+
+
+@server.command("unpause")
+@click.argument("server_id", callback=validate_id)
+@click.pass_context
+def server_unpause(ctx: click.Context, server_id: str) -> None:
+    """Unpause a paused server."""
+    _server_action(ctx, server_id, {"unpause": None}, "Unpause")
+
+
+# ── suspend / resume ─────────────────────────────────────────────────────
+
+@server.command("suspend")
+@click.argument("server_id", callback=validate_id)
+@click.pass_context
+def server_suspend(ctx: click.Context, server_id: str) -> None:
+    """Suspend a server (save to disk)."""
+    _server_action(ctx, server_id, {"suspend": None}, "Suspend")
+
+
+@server.command("resume")
+@click.argument("server_id", callback=validate_id)
+@click.pass_context
+def server_resume(ctx: click.Context, server_id: str) -> None:
+    """Resume a suspended server."""
+    _server_action(ctx, server_id, {"resume": None}, "Resume")
+
+
+# ── lock / unlock ─────────────────────────────────────────────────────────
+
+@server.command("lock")
+@click.argument("server_id", callback=validate_id)
+@click.pass_context
+def server_lock(ctx: click.Context, server_id: str) -> None:
+    """Lock a server (prevent actions by non-admin)."""
+    _server_action(ctx, server_id, {"lock": None}, "Lock")
+
+
+@server.command("unlock")
+@click.argument("server_id", callback=validate_id)
+@click.pass_context
+def server_unlock(ctx: click.Context, server_id: str) -> None:
+    """Unlock a locked server."""
+    _server_action(ctx, server_id, {"unlock": None}, "Unlock")
+
+
+# ── rescue / unrescue ─────────────────────────────────────────────────────
+
+@server.command("rescue")
+@click.argument("server_id", callback=validate_id)
+@click.option("--image", default=None, help="Rescue image ID (optional).")
+@click.option("--password", "admin_pass", default=None, help="Admin password for rescue mode.")
+@click.pass_context
+def server_rescue(ctx: click.Context, server_id: str, image: str | None, admin_pass: str | None) -> None:
+    """Put a server in rescue mode."""
+    body: dict = {}
+    if image:
+        body["rescue_image_ref"] = image
+    if admin_pass:
+        body["adminPass"] = admin_pass
+
+    client = ctx.find_object(SharkContext).ensure_client()
+    url = f"{client.compute_url}/servers/{server_id}/action"
+    data = client.post(url, json={"rescue": body if body else None})
+
+    if data and data.get("adminPass"):
+        console.print(f"[green]Rescue mode enabled for {server_id}.[/green]")
+        console.print(f"  [cyan]Rescue password:[/cyan] {data['adminPass']}")
+    else:
+        console.print(f"[green]Rescue mode enabled for {server_id}.[/green]")
+
+
+@server.command("unrescue")
+@click.argument("server_id", callback=validate_id)
+@click.pass_context
+def server_unrescue(ctx: click.Context, server_id: str) -> None:
+    """Exit rescue mode."""
+    _server_action(ctx, server_id, {"unrescue": None}, "Unrescue")
+
+
+# ── shelve / unshelve ─────────────────────────────────────────────────────
+
+@server.command("shelve")
+@click.argument("server_id", callback=validate_id)
+@click.pass_context
+def server_shelve(ctx: click.Context, server_id: str) -> None:
+    """Shelve a server (snapshot + shut down, frees resources)."""
+    _server_action(ctx, server_id, {"shelve": None}, "Shelve")
+
+
+@server.command("unshelve")
+@click.argument("server_id", callback=validate_id)
+@click.pass_context
+def server_unshelve(ctx: click.Context, server_id: str) -> None:
+    """Unshelve (restore) a shelved server."""
+    _server_action(ctx, server_id, {"unshelve": None}, "Unshelve")
+
+
+# ── resize / confirm / revert ─────────────────────────────────────────────
+
+@server.command("resize")
+@click.argument("server_id", callback=validate_id)
+@click.option("--flavor", required=True, help="Target flavor ID.")
+@click.pass_context
+def server_resize(ctx: click.Context, server_id: str, flavor: str) -> None:
+    """Resize a server to a new flavor."""
+    _server_action(ctx, server_id, {"resize": {"flavorRef": flavor}}, "Resize")
+    console.print("[dim]Use 'shark server confirm-resize' or 'shark server revert-resize' after.[/dim]")
+
+
+@server.command("confirm-resize")
+@click.argument("server_id", callback=validate_id)
+@click.pass_context
+def server_confirm_resize(ctx: click.Context, server_id: str) -> None:
+    """Confirm a pending resize."""
+    _server_action(ctx, server_id, {"confirmResize": None}, "Confirm resize")
+
+
+@server.command("revert-resize")
+@click.argument("server_id", callback=validate_id)
+@click.pass_context
+def server_revert_resize(ctx: click.Context, server_id: str) -> None:
+    """Revert a pending resize (restore original flavor)."""
+    _server_action(ctx, server_id, {"revertResize": None}, "Revert resize")
+
+
+# ── rebuild ───────────────────────────────────────────────────────────────
+
+@server.command("rebuild")
+@click.argument("server_id", callback=validate_id)
+@click.option("--image", required=True, help="New image ID.")
+@click.option("--name", "new_name", default=None, help="New server name (optional).")
+@click.option("--password", "admin_pass", default=None, help="New admin password (optional).")
+@click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
+@click.pass_context
+def server_rebuild(ctx: click.Context, server_id: str, image: str, new_name: str | None, admin_pass: str | None, yes: bool) -> None:
+    """Rebuild a server with a new image (reinstall)."""
+    if not yes:
+        click.confirm(f"Rebuild server {server_id}? This will reinstall the OS.", abort=True)
+
+    body: dict = {"imageRef": image}
+    if new_name:
+        body["name"] = new_name
+    if admin_pass:
+        body["adminPass"] = admin_pass
+
+    client = ctx.find_object(SharkContext).ensure_client()
+    url = f"{client.compute_url}/servers/{server_id}/action"
+    data = client.post(url, json={"rebuild": body})
+
+    srv = data.get("server", data) if data else {}
+    console.print(f"[green]Rebuild started for {server_id}.[/green]")
+    if srv.get("adminPass"):
+        console.print(f"  [cyan]New password:[/cyan] {srv['adminPass']}")
+
+
+# ── rename ────────────────────────────────────────────────────────────────
+
+@server.command("rename")
+@click.argument("server_id", callback=validate_id)
+@click.argument("new_name")
+@click.pass_context
+def server_rename(ctx: click.Context, server_id: str, new_name: str) -> None:
+    """Rename a server."""
+    client = ctx.find_object(SharkContext).ensure_client()
+    url = f"{client.compute_url}/servers/{server_id}"
+    client.put(url, json={"server": {"name": new_name}})
+    console.print(f"[green]Server {server_id} renamed to '{new_name}'.[/green]")
+
+
+# ── create-image (snapshot) ───────────────────────────────────────────────
+
+@server.command("create-image")
+@click.argument("server_id", callback=validate_id)
+@click.argument("image_name")
+@click.pass_context
+def server_create_image(ctx: click.Context, server_id: str, image_name: str) -> None:
+    """Create a snapshot image from a server."""
+    client = ctx.find_object(SharkContext).ensure_client()
+    url = f"{client.compute_url}/servers/{server_id}/action"
+    client.post(url, json={"createImage": {"name": image_name}})
+    console.print(f"[green]Image '{image_name}' creation started from {server_id}.[/green]")
+    console.print("[dim]Use 'shark image list' to track progress.[/dim]")
+
+
+# ── volume attachments ────────────────────────────────────────────────────
+
+@server.command("attach-volume")
+@click.argument("server_id", callback=validate_id)
+@click.argument("volume_id", callback=validate_id)
+@click.option("--device", default=None, help="Device name (e.g. /dev/vdb). Auto-assigned if omitted.")
+@click.pass_context
+def server_attach_volume(ctx: click.Context, server_id: str, volume_id: str, device: str | None) -> None:
+    """Attach a volume to a server.
+
+    \b
+    Examples:
+      shark server attach-volume <server-id> <volume-id>
+      shark server attach-volume <server-id> <volume-id> --device /dev/vdc
+    """
+    client = ctx.find_object(SharkContext).ensure_client()
+    url = f"{client.compute_url}/servers/{server_id}/os-volume_attachments"
+    body: dict = {"volumeId": volume_id}
+    if device:
+        body["device"] = device
+    data = client.post(url, json={"volumeAttachment": body})
+
+    att = data.get("volumeAttachment", data) if data else {}
+    dev = att.get("device", "auto")
+    console.print(f"[green]Volume {volume_id} attached to {server_id} as {dev}.[/green]")
+
+
+@server.command("detach-volume")
+@click.argument("server_id", callback=validate_id)
+@click.argument("volume_id", callback=validate_id)
+@click.pass_context
+def server_detach_volume(ctx: click.Context, server_id: str, volume_id: str) -> None:
+    """Detach a volume from a server."""
+    client = ctx.find_object(SharkContext).ensure_client()
+    url = f"{client.compute_url}/servers/{server_id}/os-volume_attachments/{volume_id}"
+    client.delete(url)
+    console.print(f"[green]Volume {volume_id} detached from {server_id}.[/green]")
+
+
+@server.command("list-volumes")
+@click.argument("server_id", callback=validate_id)
+@click.pass_context
+def server_list_volumes(ctx: click.Context, server_id: str) -> None:
+    """List volumes attached to a server."""
+    from rich.table import Table
+
+    client = ctx.find_object(SharkContext).ensure_client()
+    url = f"{client.compute_url}/servers/{server_id}/os-volume_attachments"
+    data = client.get(url)
+
+    attachments = data.get("volumeAttachments", [])
+    if not attachments:
+        console.print("[yellow]No volumes attached.[/yellow]")
+        return
+
+    table = Table(title=f"Volumes attached to {server_id}", show_lines=True)
+    table.add_column("Volume ID", style="cyan", no_wrap=True)
+    table.add_column("Device", style="bold")
+    table.add_column("Attachment ID", style="dim")
+
+    for att in attachments:
+        table.add_row(
+            att.get("volumeId", ""),
+            att.get("device", ""),
+            att.get("id", ""),
+        )
+
+    console.print(table)
+
+
+# ── network interface attachments ─────────────────────────────────────────
+
+@server.command("attach-interface")
+@click.argument("server_id", callback=validate_id)
+@click.option("--port-id", default=None, help="Existing port ID to attach.")
+@click.option("--net-id", default=None, help="Network ID (creates a new port automatically).")
+@click.option("--fixed-ip", default=None, help="Fixed IP for the new port (requires --net-id).")
+@click.pass_context
+def server_attach_interface(ctx: click.Context, server_id: str, port_id: str | None,
+                            net_id: str | None, fixed_ip: str | None) -> None:
+    """Attach a network interface (port) to a server.
+
+    \b
+    Examples:
+      shark server attach-interface <server-id> --port-id <port-id>
+      shark server attach-interface <server-id> --net-id <network-id>
+    """
+    if not port_id and not net_id:
+        raise click.ClickException("Provide --port-id or --net-id.")
+
+    client = ctx.find_object(SharkContext).ensure_client()
+    url = f"{client.compute_url}/servers/{server_id}/os-interface"
+    body: dict = {}
+    if port_id:
+        body["port_id"] = port_id
+    elif net_id:
+        body["net_id"] = net_id
+        if fixed_ip:
+            body["fixed_ips"] = [{"ip_address": fixed_ip}]
+
+    data = client.post(url, json={"interfaceAttachment": body})
+    att = data.get("interfaceAttachment", data) if data else {}
+    ips = ", ".join(ip.get("ip_address", "") for ip in att.get("fixed_ips", []))
+    console.print(f"[green]Interface attached to {server_id} — port {att.get('port_id', '')} ({ips}).[/green]")
+
+
+@server.command("detach-interface")
+@click.argument("server_id", callback=validate_id)
+@click.argument("port_id", callback=validate_id)
+@click.pass_context
+def server_detach_interface(ctx: click.Context, server_id: str, port_id: str) -> None:
+    """Detach a network interface (port) from a server."""
+    client = ctx.find_object(SharkContext).ensure_client()
+    url = f"{client.compute_url}/servers/{server_id}/os-interface/{port_id}"
+    client.delete(url)
+    console.print(f"[green]Interface {port_id} detached from {server_id}.[/green]")
+
+
+@server.command("list-interfaces")
+@click.argument("server_id", callback=validate_id)
+@click.pass_context
+def server_list_interfaces(ctx: click.Context, server_id: str) -> None:
+    """List network interfaces attached to a server."""
+    from rich.table import Table
+
+    client = ctx.find_object(SharkContext).ensure_client()
+    url = f"{client.compute_url}/servers/{server_id}/os-interface"
+    data = client.get(url)
+
+    attachments = data.get("interfaceAttachments", [])
+    if not attachments:
+        console.print("[yellow]No interfaces attached.[/yellow]")
+        return
+
+    table = Table(title=f"Interfaces on {server_id}", show_lines=True)
+    table.add_column("Port ID", style="cyan", no_wrap=True)
+    table.add_column("Network ID")
+    table.add_column("Fixed IPs")
+    table.add_column("MAC", style="dim")
+    table.add_column("Status", style="green")
+
+    for att in attachments:
+        ips = ", ".join(ip.get("ip_address", "") for ip in att.get("fixed_ips", []))
+        table.add_row(
+            att.get("port_id", ""),
+            att.get("net_id", ""),
+            ips,
+            att.get("mac_addr", ""),
+            att.get("port_state", ""),
+        )
+
+    console.print(table)
+
+
 # ── password ──────────────────────────────────────────────────────────────
 
 @server.command("password")
@@ -413,39 +760,22 @@ def server_console_url(ctx: click.Context, server_id: str, console_type: str) ->
       shark server console-url <server-id> --type serial
     """
     client = ctx.find_object(SharkContext).ensure_client()
-    url = f"{client.compute_url}/servers/{server_id}/action"
 
-    # Map console type to the Nova action name
-    action_map = {
-        "novnc": "os-getVNCConsole",
-        "xvpvnc": "os-getVNCConsole",
-        "spice-html5": "os-getSPICEConsole",
-        "rdp-html5": "os-getRDPConsole",
-        "serial": "os-getSerialConsole",
+    protocol_map = {
+        "novnc": ("vnc", "novnc"),
+        "xvpvnc": ("vnc", "xvpvnc"),
+        "spice-html5": ("spice", "spice-html5"),
+        "rdp-html5": ("rdp", "rdp-html5"),
+        "serial": ("serial", "serial"),
     }
+    protocol, remote_type = protocol_map.get(console_type, ("vnc", "novnc"))
 
-    action = action_map.get(console_type, "os-getVNCConsole")
+    url = f"{client.compute_url}/servers/{server_id}/remote-consoles"
+    data = client.post(url, json={
+        "remote_console": {"protocol": protocol, "type": remote_type}
+    })
 
-    # Try the modern remote-consoles API first (microversion 2.6+)
-    try:
-        modern_url = f"{client.compute_url}/servers/{server_id}/remote-consoles"
-        protocol_map = {
-            "novnc": ("vnc", "novnc"),
-            "xvpvnc": ("vnc", "xvpvnc"),
-            "spice-html5": ("spice", "spice-html5"),
-            "rdp-html5": ("rdp", "rdp-html5"),
-            "serial": ("serial", "serial"),
-        }
-        protocol, remote_type = protocol_map.get(console_type, ("vnc", "novnc"))
-        data = client.post(modern_url, json={
-            "remote_console": {"protocol": protocol, "type": remote_type}
-        })
-        console_data = data.get("remote_console", data)
-    except Exception:
-        # Fallback to legacy action API
-        data = client.post(url, json={action: {"type": console_type}})
-        console_data = data.get("console", data)
-
+    console_data = data.get("remote_console", data)
     console_url = console_data.get("url", "")
 
     if not console_url:

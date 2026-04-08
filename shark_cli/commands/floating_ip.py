@@ -78,3 +78,56 @@ def fip_delete(ctx: click.Context, floating_ip_id: str, yes: bool) -> None:
     url = f"{client.network_url}/v2.0/floatingips/{floating_ip_id}"
     client.delete(url)
     console.print(f"[green]Floating IP {floating_ip_id} released.[/green]")
+
+
+@floating_ip.command("show")
+@click.argument("floating_ip_id", callback=validate_id)
+@click.pass_context
+def fip_show(ctx: click.Context, floating_ip_id: str) -> None:
+    """Show floating IP details."""
+    client = ctx.find_object(SharkContext).ensure_client()
+    url = f"{client.network_url}/v2.0/floatingips/{floating_ip_id}"
+    data = client.get(url)
+    fip = data.get("floatingip", data)
+
+    table = Table(title=f"Floating IP {fip.get('floating_ip_address', floating_ip_id)}", show_lines=True)
+    table.add_column("Property", style="bold cyan")
+    table.add_column("Value")
+
+    for key in ["id", "floating_ip_address", "fixed_ip_address", "floating_network_id",
+                "port_id", "router_id", "status", "created_at"]:
+        table.add_row(key, str(fip.get(key, "") or ""))
+    console.print(table)
+
+
+@floating_ip.command("associate")
+@click.argument("floating_ip_id", callback=validate_id)
+@click.option("--port-id", required=True, help="Port ID to associate with.")
+@click.option("--fixed-ip", default=None, help="Fixed IP on the port (if multiple).")
+@click.pass_context
+def fip_associate(ctx: click.Context, floating_ip_id: str, port_id: str, fixed_ip: str | None) -> None:
+    """Associate a floating IP with a port.
+
+    \b
+    Examples:
+      shark floating-ip associate <fip-id> --port-id <port-id>
+    """
+    client = ctx.find_object(SharkContext).ensure_client()
+    body: dict = {"port_id": port_id}
+    if fixed_ip:
+        body["fixed_ip_address"] = fixed_ip
+
+    url = f"{client.network_url}/v2.0/floatingips/{floating_ip_id}"
+    client.put(url, json={"floatingip": body})
+    console.print(f"[green]Floating IP {floating_ip_id} associated with port {port_id}.[/green]")
+
+
+@floating_ip.command("disassociate")
+@click.argument("floating_ip_id", callback=validate_id)
+@click.pass_context
+def fip_disassociate(ctx: click.Context, floating_ip_id: str) -> None:
+    """Disassociate a floating IP from its port."""
+    client = ctx.find_object(SharkContext).ensure_client()
+    url = f"{client.network_url}/v2.0/floatingips/{floating_ip_id}"
+    client.put(url, json={"floatingip": {"port_id": None}})
+    console.print(f"[green]Floating IP {floating_ip_id} disassociated.[/green]")
