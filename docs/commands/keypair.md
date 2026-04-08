@@ -1,29 +1,88 @@
 # Key Pairs — `shark keypair`
 
-Manage SSH key pairs (Nova).
+Manage SSH key pairs (Nova). Key pairs are used to inject SSH public keys into servers at boot for password-less authentication. You can generate keys server-side, generate them locally and upload the public half, or import existing keys.
 
-## Commands
+---
 
-| Command | Description |
-|---|---|
-| `list` | List key pairs |
-| `show <name>` | Show key pair details (fingerprint & public key) |
-| `create <name>` | Generate a new key pair (returns private key) |
-| `upload <name>` | Import an existing public key |
-| `generate <name>` | Generate locally and upload the public key |
-| `delete <name>` | Delete a key pair |
+## list
 
-## Examples
-
-### Generate and save a key pair
+List all key pairs in the project with their type and fingerprint.
 
 ```bash
-shark keypair create my-key > ~/.ssh/my-key.pem
-chmod 600 ~/.ssh/my-key.pem
+shark keypair list
 ```
 
-### Upload an existing public key
+---
+
+## show
+
+Display key pair details including the public key content.
 
 ```bash
-shark keypair upload my-key --public-key ~/.ssh/id_rsa.pub
+shark keypair show my-key
+```
+
+---
+
+## create
+
+Generate a key pair server-side. The private key is returned **once** and saved to disk. The public key is stored in Nova.
+
+```bash
+shark keypair create my-key
+shark keypair create my-key --save-to /tmp/my-key.pem
+```
+
+| Option | Default | Description |
+|---|---|---|
+| `--save-to` | `~/.ssh/<name>.pem` | Path to save the private key |
+
+!!! warning
+    The private key is only returned once. If lost, delete and recreate the key pair.
+
+---
+
+## generate
+
+Generate a key pair **locally** using `ssh-keygen` and upload the public key to OpenStack. The private key never leaves your machine. *This is the recommended method.*
+
+```bash
+shark keypair generate my-key
+shark keypair generate my-key --type rsa --bits 4096
+shark keypair generate my-key --save-to ~/.ssh/custom-key
+```
+
+| Option | Default | Description |
+|---|---|---|
+| `--type` | `ed25519` | `ed25519`, `rsa`, `ecdsa` |
+| `--bits` | `4096` (RSA only) | Key size |
+| `--save-to` | `~/.ssh/shark-<name>` | Private key path |
+
+---
+
+## upload
+
+Import an existing public key into OpenStack. Useful if you already have a key pair and want to use it with Sharktech servers.
+
+```bash
+shark keypair upload my-key --public-key-file ~/.ssh/id_ed25519.pub
+shark keypair upload my-key --public-key "ssh-ed25519 AAAA..."
+```
+
+| Option | Default | Description |
+|---|---|---|
+| `--public-key-file` | `~/.ssh/id_rsa.pub` | Path to public key file |
+| `--public-key` | — | Public key content as string |
+
+If neither option is given, the CLI tries `~/.ssh/id_rsa.pub` then `~/.ssh/id_ed25519.pub`.
+
+---
+
+## delete
+
+Delete a key pair from OpenStack. This does not delete local files.
+
+```bash
+shark keypair delete my-key
+shark keypair delete my-key -y
 ```
