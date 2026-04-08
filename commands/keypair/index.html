@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -570,10 +570,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#commands" class="md-nav__link">
+  <a href="#list" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Commands
+        list
       
     </span>
   </a>
@@ -581,41 +581,57 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
+  <a href="#show" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Examples
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Examples">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#generate-and-save-a-key-pair" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Generate and save a key pair
+        show
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#upload-an-existing-public-key" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#create" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Upload an existing public key
+        create
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#generate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        generate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upload" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        upload
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#delete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete
+      
+    </span>
+  </a>
   
 </li>
       
@@ -886,10 +902,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#commands" class="md-nav__link">
+  <a href="#list" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Commands
+        list
       
     </span>
   </a>
@@ -897,41 +913,57 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
+  <a href="#show" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Examples
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Examples">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#generate-and-save-a-key-pair" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Generate and save a key pair
+        show
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#upload-an-existing-public-key" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#create" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Upload an existing public key
+        create
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#generate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        generate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upload" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        upload
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#delete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete
+      
+    </span>
+  </a>
   
 </li>
       
@@ -956,49 +988,109 @@
 
 
 <h1 id="key-pairs-shark-keypair">Key Pairs — <code>shark keypair</code><a class="headerlink" href="#key-pairs-shark-keypair" title="Permanent link">&para;</a></h1>
-<p>Manage SSH key pairs (Nova).</p>
-<h2 id="commands">Commands<a class="headerlink" href="#commands" title="Permanent link">&para;</a></h2>
+<p>Manage SSH key pairs (Nova). Key pairs are used to inject SSH public keys into servers at boot for password-less authentication. You can generate keys server-side, generate them locally and upload the public half, or import existing keys.</p>
+<hr />
+<h2 id="list">list<a class="headerlink" href="#list" title="Permanent link">&para;</a></h2>
+<p>List all key pairs in the project with their type and fingerprint.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>shark<span class="w"> </span>keypair<span class="w"> </span>list
+</code></pre></div>
+<hr />
+<h2 id="show">show<a class="headerlink" href="#show" title="Permanent link">&para;</a></h2>
+<p>Display key pair details including the public key content.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>shark<span class="w"> </span>keypair<span class="w"> </span>show<span class="w"> </span>my-key
+</code></pre></div>
+<hr />
+<h2 id="create">create<a class="headerlink" href="#create" title="Permanent link">&para;</a></h2>
+<p>Generate a key pair server-side. The private key is returned <strong>once</strong> and saved to disk. The public key is stored in Nova.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>shark<span class="w"> </span>keypair<span class="w"> </span>create<span class="w"> </span>my-key
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>shark<span class="w"> </span>keypair<span class="w"> </span>create<span class="w"> </span>my-key<span class="w"> </span>--save-to<span class="w"> </span>/tmp/my-key.pem
+</code></pre></div>
 <table>
 <thead>
 <tr>
-<th>Command</th>
+<th>Option</th>
+<th>Default</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>list</code></td>
-<td>List key pairs</td>
-</tr>
-<tr>
-<td><code>show &lt;name&gt;</code></td>
-<td>Show key pair details (fingerprint &amp; public key)</td>
-</tr>
-<tr>
-<td><code>create &lt;name&gt;</code></td>
-<td>Generate a new key pair (returns private key)</td>
-</tr>
-<tr>
-<td><code>upload &lt;name&gt;</code></td>
-<td>Import an existing public key</td>
-</tr>
-<tr>
-<td><code>generate &lt;name&gt;</code></td>
-<td>Generate locally and upload the public key</td>
-</tr>
-<tr>
-<td><code>delete &lt;name&gt;</code></td>
-<td>Delete a key pair</td>
+<td><code>--save-to</code></td>
+<td><code>~/.ssh/&lt;name&gt;.pem</code></td>
+<td>Path to save the private key</td>
 </tr>
 </tbody>
 </table>
-<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="generate-and-save-a-key-pair">Generate and save a key pair<a class="headerlink" href="#generate-and-save-a-key-pair" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>shark<span class="w"> </span>keypair<span class="w"> </span>create<span class="w"> </span>my-key<span class="w"> </span>&gt;<span class="w"> </span>~/.ssh/my-key.pem
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>~/.ssh/my-key.pem
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The private key is only returned once. If lost, delete and recreate the key pair.</p>
+</div>
+<hr />
+<h2 id="generate">generate<a class="headerlink" href="#generate" title="Permanent link">&para;</a></h2>
+<p>Generate a key pair <strong>locally</strong> using <code>ssh-keygen</code> and upload the public key to OpenStack. The private key never leaves your machine. <em>This is the recommended method.</em></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>shark<span class="w"> </span>keypair<span class="w"> </span>generate<span class="w"> </span>my-key
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>shark<span class="w"> </span>keypair<span class="w"> </span>generate<span class="w"> </span>my-key<span class="w"> </span>--type<span class="w"> </span>rsa<span class="w"> </span>--bits<span class="w"> </span><span class="m">4096</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>shark<span class="w"> </span>keypair<span class="w"> </span>generate<span class="w"> </span>my-key<span class="w"> </span>--save-to<span class="w"> </span>~/.ssh/custom-key
 </code></pre></div>
-<h3 id="upload-an-existing-public-key">Upload an existing public key<a class="headerlink" href="#upload-an-existing-public-key" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>shark<span class="w"> </span>keypair<span class="w"> </span>upload<span class="w"> </span>my-key<span class="w"> </span>--public-key<span class="w"> </span>~/.ssh/id_rsa.pub
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--type</code></td>
+<td><code>ed25519</code></td>
+<td><code>ed25519</code>, <code>rsa</code>, <code>ecdsa</code></td>
+</tr>
+<tr>
+<td><code>--bits</code></td>
+<td><code>4096</code> (RSA only)</td>
+<td>Key size</td>
+</tr>
+<tr>
+<td><code>--save-to</code></td>
+<td><code>~/.ssh/shark-&lt;name&gt;</code></td>
+<td>Private key path</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="upload">upload<a class="headerlink" href="#upload" title="Permanent link">&para;</a></h2>
+<p>Import an existing public key into OpenStack. Useful if you already have a key pair and want to use it with Sharktech servers.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>shark<span class="w"> </span>keypair<span class="w"> </span>upload<span class="w"> </span>my-key<span class="w"> </span>--public-key-file<span class="w"> </span>~/.ssh/id_ed25519.pub
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>shark<span class="w"> </span>keypair<span class="w"> </span>upload<span class="w"> </span>my-key<span class="w"> </span>--public-key<span class="w"> </span><span class="s2">&quot;ssh-ed25519 AAAA...&quot;</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--public-key-file</code></td>
+<td><code>~/.ssh/id_rsa.pub</code></td>
+<td>Path to public key file</td>
+</tr>
+<tr>
+<td><code>--public-key</code></td>
+<td>—</td>
+<td>Public key content as string</td>
+</tr>
+</tbody>
+</table>
+<p>If neither option is given, the CLI tries <code>~/.ssh/id_rsa.pub</code> then <code>~/.ssh/id_ed25519.pub</code>.</p>
+<hr />
+<h2 id="delete">delete<a class="headerlink" href="#delete" title="Permanent link">&para;</a></h2>
+<p>Delete a key pair from OpenStack. This does not delete local files.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>shark<span class="w"> </span>keypair<span class="w"> </span>delete<span class="w"> </span>my-key
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>shark<span class="w"> </span>keypair<span class="w"> </span>delete<span class="w"> </span>my-key<span class="w"> </span>-y
 </code></pre></div>
 
 
@@ -1055,10 +1147,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "content.code.copy"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>

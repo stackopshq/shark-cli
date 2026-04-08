@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -654,10 +654,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#commands" class="md-nav__link">
+  <a href="#list" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Commands
+        list
       
     </span>
   </a>
@@ -665,41 +665,68 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
+  <a href="#show" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Examples
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Examples">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#allocate-and-associate" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Allocate and associate
+        show
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#disassociate-and-release" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#create" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Disassociate and release
+        create
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#associate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        associate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#disassociate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        disassociate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#delete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#full-example-make-a-server-public" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full Example: Make a Server Public
+      
+    </span>
+  </a>
   
 </li>
       
@@ -886,10 +913,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#commands" class="md-nav__link">
+  <a href="#list" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Commands
+        list
       
     </span>
   </a>
@@ -897,41 +924,68 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
+  <a href="#show" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Examples
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Examples">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#allocate-and-associate" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Allocate and associate
+        show
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#disassociate-and-release" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#create" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Disassociate and release
+        create
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#associate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        associate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#disassociate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        disassociate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#delete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#full-example-make-a-server-public" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full Example: Make a Server Public
+      
+    </span>
+  </a>
   
 </li>
       
@@ -956,53 +1010,102 @@
 
 
 <h1 id="floating-ips-shark-floating-ip">Floating IPs — <code>shark floating-ip</code><a class="headerlink" href="#floating-ips-shark-floating-ip" title="Permanent link">&para;</a></h1>
-<p>Manage floating IPs (Neutron).</p>
-<h2 id="commands">Commands<a class="headerlink" href="#commands" title="Permanent link">&para;</a></h2>
+<p>Manage floating IPs (Neutron). Floating IPs are public IPv4 addresses that can be dynamically associated with servers to make them reachable from the internet. They are allocated from an external network and can be moved between servers at any time.</p>
+<hr />
+<h2 id="list">list<a class="headerlink" href="#list" title="Permanent link">&para;</a></h2>
+<p>List all floating IPs in the project with their public address, associated fixed IP, port, and status.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>shark<span class="w"> </span>floating-ip<span class="w"> </span>list
+</code></pre></div>
+<hr />
+<h2 id="show">show<a class="headerlink" href="#show" title="Permanent link">&para;</a></h2>
+<p>Display detailed properties of a floating IP: addresses, network, port, router, status, and timestamps.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>shark<span class="w"> </span>floating-ip<span class="w"> </span>show<span class="w"> </span>&lt;floating-ip-id&gt;
+</code></pre></div>
+<hr />
+<h2 id="create">create<a class="headerlink" href="#create" title="Permanent link">&para;</a></h2>
+<p>Allocate a new floating IP from an external network. The IP is reserved but not yet associated with any server.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>shark<span class="w"> </span>floating-ip<span class="w"> </span>create<span class="w"> </span>--network<span class="w"> </span>&lt;ext-network-id&gt;
+</code></pre></div>
 <table>
 <thead>
 <tr>
-<th>Command</th>
+<th>Option</th>
+<th>Required</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>list</code></td>
-<td>List floating IPs</td>
-</tr>
-<tr>
-<td><code>show &lt;id&gt;</code></td>
-<td>Show floating IP details</td>
-</tr>
-<tr>
-<td><code>create</code></td>
-<td>Allocate a floating IP from an external network</td>
-</tr>
-<tr>
-<td><code>delete &lt;id&gt;</code></td>
-<td>Release a floating IP</td>
-</tr>
-<tr>
-<td><code>associate &lt;id&gt;</code></td>
-<td>Associate with a port</td>
-</tr>
-<tr>
-<td><code>disassociate &lt;id&gt;</code></td>
-<td>Disassociate from its port</td>
+<td><code>--network</code></td>
+<td>yes</td>
+<td>External network ID to allocate from</td>
 </tr>
 </tbody>
 </table>
-<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="allocate-and-associate">Allocate and associate<a class="headerlink" href="#allocate-and-associate" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Allocate from external network</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>shark<span class="w"> </span>floating-ip<span class="w"> </span>create<span class="w"> </span>--network<span class="w"> </span>&lt;ext-network-id&gt;
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Associate with a server port</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>shark<span class="w"> </span>floating-ip<span class="w"> </span>associate<span class="w"> </span>&lt;fip-id&gt;<span class="w"> </span>--port-id<span class="w"> </span>&lt;port-id&gt;
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Find your external network with <code>shark network list</code> — look for networks with <code>External = True</code>.</p>
+</div>
+<hr />
+<h2 id="associate">associate<a class="headerlink" href="#associate" title="Permanent link">&para;</a></h2>
+<p>Associate a floating IP with a port (typically the port of a server). This makes the server reachable from the internet on that public IP.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>shark<span class="w"> </span>floating-ip<span class="w"> </span>associate<span class="w"> </span>&lt;floating-ip-id&gt;<span class="w"> </span>--port-id<span class="w"> </span>&lt;port-id&gt;
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>shark<span class="w"> </span>floating-ip<span class="w"> </span>associate<span class="w"> </span>&lt;floating-ip-id&gt;<span class="w"> </span>--port-id<span class="w"> </span>&lt;port-id&gt;<span class="w"> </span>--fixed-ip<span class="w"> </span><span class="m">10</span>.0.0.5
 </code></pre></div>
-<h3 id="disassociate-and-release">Disassociate and release<a class="headerlink" href="#disassociate-and-release" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>shark<span class="w"> </span>floating-ip<span class="w"> </span>disassociate<span class="w"> </span>&lt;fip-id&gt;
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>shark<span class="w"> </span>floating-ip<span class="w"> </span>delete<span class="w"> </span>&lt;fip-id&gt;<span class="w"> </span>-y
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--port-id</code></td>
+<td>yes</td>
+<td>Port ID to associate with</td>
+</tr>
+<tr>
+<td><code>--fixed-ip</code></td>
+<td>no</td>
+<td>Fixed IP on the port (if the port has multiple IPs)</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Find a server's port ID with <code>shark server list-interfaces &lt;server-id&gt;</code>.</p>
+</div>
+<hr />
+<h2 id="disassociate">disassociate<a class="headerlink" href="#disassociate" title="Permanent link">&para;</a></h2>
+<p>Disassociate a floating IP from its port. The IP remains allocated and can be re-associated later.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>shark<span class="w"> </span>floating-ip<span class="w"> </span>disassociate<span class="w"> </span>&lt;floating-ip-id&gt;
+</code></pre></div>
+<hr />
+<h2 id="delete">delete<a class="headerlink" href="#delete" title="Permanent link">&para;</a></h2>
+<p>Release a floating IP back to the external network pool. The IP is no longer reserved. Asks for confirmation.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>shark<span class="w"> </span>floating-ip<span class="w"> </span>delete<span class="w"> </span>&lt;floating-ip-id&gt;
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>shark<span class="w"> </span>floating-ip<span class="w"> </span>delete<span class="w"> </span>&lt;floating-ip-id&gt;<span class="w"> </span>-y
+</code></pre></div>
+<hr />
+<h2 id="full-example-make-a-server-public">Full Example: Make a Server Public<a class="headerlink" href="#full-example-make-a-server-public" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># 1. Allocate a floating IP</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>shark<span class="w"> </span>floating-ip<span class="w"> </span>create<span class="w"> </span>--network<span class="w"> </span>&lt;ext-network-id&gt;
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="c1"># → Floating IP 203.0.113.42 allocated (fip-id)</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="c1"># 2. Find the server&#39;s port</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>shark<span class="w"> </span>server<span class="w"> </span>list-interfaces<span class="w"> </span>&lt;server-id&gt;
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="c1"># 3. Associate</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>shark<span class="w"> </span>floating-ip<span class="w"> </span>associate<span class="w"> </span>&lt;fip-id&gt;<span class="w"> </span>--port-id<span class="w"> </span>&lt;port-id&gt;
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="c1"># 4. SSH to server</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>ssh<span class="w"> </span>-i<span class="w"> </span>~/.ssh/shark-my-key<span class="w"> </span>ubuntu@203.0.113.42
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="c1"># 5. Later: disassociate and release</span>
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>shark<span class="w"> </span>floating-ip<span class="w"> </span>disassociate<span class="w"> </span>&lt;fip-id&gt;
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>shark<span class="w"> </span>floating-ip<span class="w"> </span>delete<span class="w"> </span>&lt;fip-id&gt;<span class="w"> </span>-y
 </code></pre></div>
 
 
@@ -1059,10 +1162,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "content.code.copy"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>

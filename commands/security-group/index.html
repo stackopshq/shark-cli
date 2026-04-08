@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -626,10 +626,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#commands" class="md-nav__link">
+  <a href="#list" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Commands
+        list
       
     </span>
   </a>
@@ -637,30 +637,79 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
+  <a href="#show" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Examples
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Examples">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#create-a-security-group-with-rules" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Create a security group with rules
+        show
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#create" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        create
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#update" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        update
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#delete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-add" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rule-add
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-delete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rule-delete
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#full-example-web-server-security-group" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full Example: Web Server Security Group
+      
+    </span>
+  </a>
   
 </li>
       
@@ -875,10 +924,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#commands" class="md-nav__link">
+  <a href="#list" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Commands
+        list
       
     </span>
   </a>
@@ -886,30 +935,79 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
+  <a href="#show" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Examples
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Examples">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#create-a-security-group-with-rules" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Create a security group with rules
+        show
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#create" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        create
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#update" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        update
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#delete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-add" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rule-add
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-delete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rule-delete
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#full-example-web-server-security-group" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full Example: Web Server Security Group
+      
+    </span>
+  </a>
   
 </li>
       
@@ -934,64 +1032,155 @@
 
 
 <h1 id="security-groups-shark-security-group">Security Groups — <code>shark security-group</code><a class="headerlink" href="#security-groups-shark-security-group" title="Permanent link">&para;</a></h1>
-<p>Manage security groups &amp; rules (Neutron).</p>
-<h2 id="commands">Commands<a class="headerlink" href="#commands" title="Permanent link">&para;</a></h2>
+<p>Manage security groups and firewall rules (Neutron). Security groups act as virtual firewalls for servers — they control which inbound (ingress) and outbound (egress) traffic is allowed based on protocol, port, and source/destination IP.</p>
+<hr />
+<h2 id="list">list<a class="headerlink" href="#list" title="Permanent link">&para;</a></h2>
+<p>List all security groups in the project with their description and rule count.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>shark<span class="w"> </span>security-group<span class="w"> </span>list
+</code></pre></div>
+<hr />
+<h2 id="show">show<a class="headerlink" href="#show" title="Permanent link">&para;</a></h2>
+<p>Display a security group's details and all its rules (direction, protocol, ports, remote IP/group).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>shark<span class="w"> </span>security-group<span class="w"> </span>show<span class="w"> </span>&lt;group-id&gt;
+</code></pre></div>
+<hr />
+<h2 id="create">create<a class="headerlink" href="#create" title="Permanent link">&para;</a></h2>
+<p>Create a new security group. By default it includes egress-allow-all rules.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>shark<span class="w"> </span>security-group<span class="w"> </span>create<span class="w"> </span>web-sg
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>shark<span class="w"> </span>security-group<span class="w"> </span>create<span class="w"> </span>web-sg<span class="w"> </span>--description<span class="w"> </span><span class="s2">&quot;Web servers&quot;</span>
+</code></pre></div>
 <table>
 <thead>
 <tr>
-<th>Command</th>
+<th>Option</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>list</code></td>
-<td>List security groups</td>
-</tr>
-<tr>
-<td><code>show &lt;id&gt;</code></td>
-<td>Show details and rules</td>
-</tr>
-<tr>
-<td><code>create &lt;name&gt;</code></td>
-<td>Create a security group</td>
-</tr>
-<tr>
-<td><code>update &lt;id&gt;</code></td>
-<td>Update name or description</td>
-</tr>
-<tr>
-<td><code>delete &lt;id&gt;</code></td>
-<td>Delete a security group</td>
-</tr>
-<tr>
-<td><code>rule-add &lt;sg-id&gt;</code></td>
-<td>Add a rule</td>
-</tr>
-<tr>
-<td><code>rule-delete &lt;rule-id&gt;</code></td>
-<td>Delete a rule</td>
+<td><code>--description</code></td>
+<td>Description for the security group</td>
 </tr>
 </tbody>
 </table>
-<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="create-a-security-group-with-rules">Create a security group with rules<a class="headerlink" href="#create-a-security-group-with-rules" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>shark<span class="w"> </span>security-group<span class="w"> </span>create<span class="w"> </span>web-sg<span class="w"> </span>--description<span class="w"> </span><span class="s2">&quot;Web servers&quot;</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># Allow HTTP</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>shark<span class="w"> </span>security-group<span class="w"> </span>rule-add<span class="w"> </span>&lt;sg-id&gt;<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span>--protocol<span class="w"> </span>tcp<span class="w"> </span>--port-min<span class="w"> </span><span class="m">80</span><span class="w"> </span>--port-max<span class="w"> </span><span class="m">80</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span>--remote-ip<span class="w"> </span><span class="m">0</span>.0.0.0/0
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1"># Allow HTTPS</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>shark<span class="w"> </span>security-group<span class="w"> </span>rule-add<span class="w"> </span>&lt;sg-id&gt;<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">  </span>--protocol<span class="w"> </span>tcp<span class="w"> </span>--port-min<span class="w"> </span><span class="m">443</span><span class="w"> </span>--port-max<span class="w"> </span><span class="m">443</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">  </span>--remote-ip<span class="w"> </span><span class="m">0</span>.0.0.0/0
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="c1"># Allow SSH</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>shark<span class="w"> </span>security-group<span class="w"> </span>rule-add<span class="w"> </span>&lt;sg-id&gt;<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">  </span>--protocol<span class="w"> </span>tcp<span class="w"> </span>--port-min<span class="w"> </span><span class="m">22</span><span class="w"> </span>--port-max<span class="w"> </span><span class="m">22</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">  </span>--remote-ip<span class="w"> </span><span class="m">10</span>.0.0.0/8
+<hr />
+<h2 id="update">update<a class="headerlink" href="#update" title="Permanent link">&para;</a></h2>
+<p>Update the name or description of an existing security group.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>shark<span class="w"> </span>security-group<span class="w"> </span>update<span class="w"> </span>&lt;group-id&gt;<span class="w"> </span>--name<span class="w"> </span>new-name
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>shark<span class="w"> </span>security-group<span class="w"> </span>update<span class="w"> </span>&lt;group-id&gt;<span class="w"> </span>--description<span class="w"> </span><span class="s2">&quot;Updated description&quot;</span>
+</code></pre></div>
+<hr />
+<h2 id="delete">delete<a class="headerlink" href="#delete" title="Permanent link">&para;</a></h2>
+<p>Delete a security group. It must not be in use by any port. Asks for confirmation.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>shark<span class="w"> </span>security-group<span class="w"> </span>delete<span class="w"> </span>&lt;group-id&gt;
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>shark<span class="w"> </span>security-group<span class="w"> </span>delete<span class="w"> </span>&lt;group-id&gt;<span class="w"> </span>-y
+</code></pre></div>
+<hr />
+<h2 id="rule-add">rule-add<a class="headerlink" href="#rule-add" title="Permanent link">&para;</a></h2>
+<p>Add a firewall rule to a security group. Rules specify the direction, protocol, port range, and allowed source/destination.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Allow SSH from anywhere</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>shark<span class="w"> </span>security-group<span class="w"> </span>rule-add<span class="w"> </span>&lt;sg-id&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span>--direction<span class="w"> </span>ingress<span class="w"> </span>--protocol<span class="w"> </span>tcp<span class="w"> </span>--port-min<span class="w"> </span><span class="m">22</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="c1"># Allow HTTP/HTTPS from specific CIDR</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>shark<span class="w"> </span>security-group<span class="w"> </span>rule-add<span class="w"> </span>&lt;sg-id&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">  </span>--direction<span class="w"> </span>ingress<span class="w"> </span>--protocol<span class="w"> </span>tcp<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">  </span>--port-min<span class="w"> </span><span class="m">80</span><span class="w"> </span>--port-max<span class="w"> </span><span class="m">443</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">  </span>--remote-ip<span class="w"> </span><span class="m">0</span>.0.0.0/0
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="c1"># Allow ICMP (ping)</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>shark<span class="w"> </span>security-group<span class="w"> </span>rule-add<span class="w"> </span>&lt;sg-id&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">  </span>--direction<span class="w"> </span>ingress<span class="w"> </span>--protocol<span class="w"> </span>icmp
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="c1"># Allow traffic from another security group</span>
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>shark<span class="w"> </span>security-group<span class="w"> </span>rule-add<span class="w"> </span>&lt;sg-id&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="w">  </span>--direction<span class="w"> </span>ingress<span class="w"> </span>--protocol<span class="w"> </span>tcp<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="w">  </span>--port-min<span class="w"> </span><span class="m">3306</span><span class="w"> </span>--remote-group<span class="w"> </span>&lt;other-sg-id&gt;
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Required</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--direction</code></td>
+<td>yes</td>
+<td>—</td>
+<td><code>ingress</code> or <code>egress</code></td>
+</tr>
+<tr>
+<td><code>--protocol</code></td>
+<td>no</td>
+<td>any</td>
+<td><code>tcp</code>, <code>udp</code>, <code>icmp</code>, or protocol number</td>
+</tr>
+<tr>
+<td><code>--port-min</code></td>
+<td>no</td>
+<td>any</td>
+<td>Minimum port (or single port)</td>
+</tr>
+<tr>
+<td><code>--port-max</code></td>
+<td>no</td>
+<td>= port-min</td>
+<td>Maximum port</td>
+</tr>
+<tr>
+<td><code>--remote-ip</code></td>
+<td>no</td>
+<td>—</td>
+<td>Remote IP prefix (CIDR)</td>
+</tr>
+<tr>
+<td><code>--remote-group</code></td>
+<td>no</td>
+<td>—</td>
+<td>Remote security group ID</td>
+</tr>
+<tr>
+<td><code>--ethertype</code></td>
+<td>no</td>
+<td><code>IPv4</code></td>
+<td><code>IPv4</code> or <code>IPv6</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="rule-delete">rule-delete<a class="headerlink" href="#rule-delete" title="Permanent link">&para;</a></h2>
+<p>Delete a specific security group rule by its ID. Asks for confirmation.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>shark<span class="w"> </span>security-group<span class="w"> </span>rule-delete<span class="w"> </span>&lt;rule-id&gt;
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>shark<span class="w"> </span>security-group<span class="w"> </span>rule-delete<span class="w"> </span>&lt;rule-id&gt;<span class="w"> </span>-y
+</code></pre></div>
+<hr />
+<h2 id="full-example-web-server-security-group">Full Example: Web Server Security Group<a class="headerlink" href="#full-example-web-server-security-group" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Create the group</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>shark<span class="w"> </span>security-group<span class="w"> </span>create<span class="w"> </span>web-sg<span class="w"> </span>--description<span class="w"> </span><span class="s2">&quot;Web servers&quot;</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># Allow SSH from office</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>shark<span class="w"> </span>security-group<span class="w"> </span>rule-add<span class="w"> </span>&lt;sg-id&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">  </span>--direction<span class="w"> </span>ingress<span class="w"> </span>--protocol<span class="w"> </span>tcp<span class="w"> </span>--port-min<span class="w"> </span><span class="m">22</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">  </span>--remote-ip<span class="w"> </span><span class="m">203</span>.0.113.0/24
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="c1"># Allow HTTP and HTTPS from everywhere</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>shark<span class="w"> </span>security-group<span class="w"> </span>rule-add<span class="w"> </span>&lt;sg-id&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">  </span>--direction<span class="w"> </span>ingress<span class="w"> </span>--protocol<span class="w"> </span>tcp<span class="w"> </span>--port-min<span class="w"> </span><span class="m">80</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">  </span>--remote-ip<span class="w"> </span><span class="m">0</span>.0.0.0/0
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>shark<span class="w"> </span>security-group<span class="w"> </span>rule-add<span class="w"> </span>&lt;sg-id&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">  </span>--direction<span class="w"> </span>ingress<span class="w"> </span>--protocol<span class="w"> </span>tcp<span class="w"> </span>--port-min<span class="w"> </span><span class="m">443</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="w">  </span>--remote-ip<span class="w"> </span><span class="m">0</span>.0.0.0/0
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="c1"># Allow ICMP (ping)</span>
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a>shark<span class="w"> </span>security-group<span class="w"> </span>rule-add<span class="w"> </span>&lt;sg-id&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="w">  </span>--direction<span class="w"> </span>ingress<span class="w"> </span>--protocol<span class="w"> </span>icmp
+<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>
+<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="c1"># Use when creating a server</span>
+<a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a>shark<span class="w"> </span>server<span class="w"> </span>create<span class="w"> </span>--name<span class="w"> </span>web01<span class="w"> </span>...<span class="w"> </span>--security-group<span class="w"> </span>web-sg
 </code></pre></div>
 
 
@@ -1048,10 +1237,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "content.code.copy"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>
