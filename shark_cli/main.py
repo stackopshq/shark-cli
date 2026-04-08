@@ -36,7 +36,6 @@ from shark_cli.commands.cluster import cluster  # noqa: E402
 from shark_cli.commands.metric import metric  # noqa: E402
 from shark_cli.commands.secret import secret  # noqa: E402
 from shark_cli.commands.loadbalancer import loadbalancer  # noqa: E402
-from shark_cli.commands.baby import baby  # noqa: E402
 
 cli.add_command(setup)
 cli.add_command(server)
@@ -53,7 +52,6 @@ cli.add_command(secret)
 cli.add_command(loadbalancer)
 cli.add_command(catalog)
 cli.add_command(completion)
-cli.add_command(baby)
 
 
 def main() -> None:
