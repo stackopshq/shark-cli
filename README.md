@@ -1,81 +1,55 @@
-# shark-cli
+# orca
 
-A professional, modular CLI for the [Sharktech](https://sharktech.net) Cloud Provider API.
+OpenStack Rich Command-line Alternative — a unified CLI for managing OpenStack cloud infrastructure.
 
-**[Full Documentation](https://stackopshq.github.io/shark-cli/)**
+**[Full Documentation](https://stackopshq.github.io/orca-cli/)**
 
 ## Highlights
 
-- **14 command groups** covering all major OpenStack services
-- **100+ sub-commands** for full lifecycle management
+- **60+ command groups** covering all major OpenStack services
 - **Rich terminal output** — coloured tables powered by [Rich](https://github.com/Textualize/rich)
+- **Multi-account profiles** — named profiles, `clouds.yaml` and `OS_*` env var support
 - **Shell auto-completion** — Bash, Zsh, and Fish
-- **Secure configuration** — env vars > YAML config; `0600` permissions
+- **Orca-exclusive** — `overview`, `watch`, `doctor`, `audit`, `cleanup`, `export`
 
 ## Quick Start
 
 ```bash
 pip install .        # or: poetry install
-shark setup          # interactive credential setup
-shark server list    # list your VMs
+orca setup           # interactive credential setup
+orca server list     # list your VMs
 ```
 
 ## Supported Services
 
 | Command | Service | Backend |
 |---|---|---|
-| `shark server` | Compute | Nova |
-| `shark flavor` | Flavors | Nova |
-| `shark image` | Images | Glance |
-| `shark network` | Networks, Subnets, Ports, Routers | Neutron |
-| `shark keypair` | SSH Key Pairs | Nova |
-| `shark volume` | Block Storage & Snapshots | Cinder |
-| `shark security-group` | Security Groups & Rules | Neutron |
-| `shark floating-ip` | Floating IPs | Neutron |
-| `shark loadbalancer` | Load Balancers, Listeners, Pools, Members | Octavia |
-| `shark secret` | Secrets & Containers | Barbican |
-| `shark cluster` | Kubernetes Clusters & Templates | Magnum |
-| `shark metric` | Metrics, Measures & Resources | Gnocchi |
-| `shark catalog` | Service Endpoint Discovery | Keystone |
+| `orca server` | Compute | Nova |
+| `orca flavor` | Flavors | Nova |
+| `orca image` | Images | Glance |
+| `orca network` | Networks, Subnets, Ports, Routers | Neutron |
+| `orca keypair` | SSH Key Pairs | Nova |
+| `orca volume` | Block Storage & Snapshots | Cinder |
+| `orca security-group` | Security Groups & Rules | Neutron |
+| `orca floating-ip` | Floating IPs | Neutron |
+| `orca loadbalancer` | Load Balancers, Listeners, Pools, Members | Octavia |
+| `orca secret` | Secrets & Containers | Barbican |
+| `orca cluster` | Kubernetes Clusters & Templates | Magnum |
+| `orca metric` | Metrics, Measures & Resources | Gnocchi |
+| `orca placement` | Placement API | Placement |
+| `orca stack` | Orchestration | Heat |
+| `orca backup` | Backups | Freezer |
+| `orca zone` / `orca recordset` | DNS | Designate |
+| `orca alarm` | Alarms | Aodh |
+| `orca catalog` | Service Endpoint Discovery | Keystone |
 
 ## Documentation
 
-Full documentation is available at **[stackopshq.github.io/shark-cli](https://stackopshq.github.io/shark-cli/)**.
-
-To build the docs locally:
+Full documentation: **[stackopshq.github.io/orca-cli](https://stackopshq.github.io/orca-cli/)**
 
 ```bash
 pip install mkdocs-material
 mkdocs serve
-```
-
-## Project Structure
-
-```
-sharktech-cli/
-├── pyproject.toml          # Poetry packaging & dependencies
-├── mkdocs.yml              # MkDocs Material configuration
-├── docs/                   # Documentation source (MkDocs)
-├── README.md
-└── shark_cli/
-    ├── __init__.py          # Package version
-    ├── main.py              # Click group & entry point
-    ├── core/
-    │   ├── client.py        # Centralised httpx API client
-    │   ├── config.py        # YAML / env-var config loader
-    │   ├── context.py       # Shared SharkContext object
-    │   ├── exceptions.py    # Domain-specific exceptions
-    │   └── validators.py    # Input validators
-    └── commands/
-        ├── server.py        # shark server (28 commands)
-        ├── image.py         # shark image (11 commands)
-        ├── network.py       # shark network (21 commands)
-        ├── volume.py        # shark volume (13 commands)
-        ├── loadbalancer.py  # shark loadbalancer (18 commands)
-        ├── secret.py        # shark secret (8 commands)
-        ├── cluster.py       # shark cluster (10 commands)
-        ├── metric.py        # shark metric (8 commands)
-        └── ...              # flavor, keypair, security-group, floating-ip, catalog
 ```
 
 ## License
