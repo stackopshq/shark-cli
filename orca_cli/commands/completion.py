@@ -1,4 +1,4 @@
-"""``shark completion`` — generate shell auto-completion scripts."""
+"""``orca completion`` — generate shell auto-completion scripts."""
 
 from __future__ import annotations
 
@@ -10,15 +10,15 @@ console = Console()
 INSTRUCTIONS = {
     "bash": (
         'Add this to your ~/.bashrc:\n'
-        '  eval "$(_SHARK_COMPLETE=bash_source shark)"'
+        '  eval "$(_ORCA_COMPLETE=bash_source orca)"'
     ),
     "zsh": (
         'Add this to your ~/.zshrc:\n'
-        '  eval "$(_SHARK_COMPLETE=zsh_source shark)"'
+        '  eval "$(_ORCA_COMPLETE=zsh_source orca)"'
     ),
     "fish": (
         'Run the following command:\n'
-        '  _SHARK_COMPLETE=fish_source shark > ~/.config/fish/completions/shark.fish'
+        '  _ORCA_COMPLETE=fish_source orca > ~/.config/fish/completions/orca.fish'
     ),
 }
 

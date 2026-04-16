@@ -1,4 +1,4 @@
-"""``shark keypair`` — manage SSH key pairs (Nova)."""
+"""``orca keypair`` — manage SSH key pairs (Nova)."""
 
 from __future__ import annotations
 
@@ -7,12 +7,9 @@ import stat
 from pathlib import Path
 
 import click
-from rich.console import Console
-from rich.table import Table
 
-from shark_cli.core.context import SharkContext
-
-console = Console()
+from orca_cli.core.context import OrcaContext
+from orca_cli.core.output import output_options, print_list, print_detail, console
 
 _DEFAULT_KEY_DIR = Path.home() / ".ssh"
 
@@ -27,64 +24,61 @@ def keypair(ctx: click.Context) -> None:
 # ── list ──────────────────────────────────────────────────────────────────
 
 @keypair.command("list")
+@output_options
 @click.pass_context
-def keypair_list(ctx: click.Context) -> None:
+def keypair_list(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List key pairs."""
-    client = ctx.find_object(SharkContext).ensure_client()
+    client = ctx.find_object(OrcaContext).ensure_client()
     url = f"{client.compute_url}/os-keypairs"
     data = client.get(url)
 
-    keypairs = data.get("keypairs", [])
+    keypairs = [kp.get("keypair", kp) for kp in data.get("keypairs", [])]
 
-    if not keypairs:
-        console.print("[yellow]No key pairs found.[/yellow]")
-        return
-
-    table = Table(title="Key Pairs", show_lines=True)
-    table.add_column("Name", style="bold")
-    table.add_column("Type")
-    table.add_column("Fingerprint", style="dim")
-
-    for kp_wrapper in keypairs:
-        kp = kp_wrapper.get("keypair", kp_wrapper)
-        table.add_row(
-            kp.get("name", ""),
-            kp.get("type", "ssh"),
-            kp.get("fingerprint", ""),
-        )
-
-    console.print(table)
+    print_list(
+        keypairs,
+        [
+            ("Name", "name", {"style": "bold"}),
+            ("Type", lambda kp: kp.get("type", "ssh")),
+            ("Fingerprint", "fingerprint", {"style": "dim"}),
+        ],
+        title="Key Pairs",
+        output_format=output_format, fit_width=fit_width, max_width=max_width, noindent=noindent,
+        columns=columns,
+        empty_msg="No key pairs found.",
+    )
 
 
 # ── show ──────────────────────────────────────────────────────────────────
 
 @keypair.command("show")
 @click.argument("name")
+@output_options
 @click.pass_context
-def keypair_show(ctx: click.Context, name: str) -> None:
+def keypair_show(ctx: click.Context, name: str, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show key pair details (fingerprint & public key)."""
-    client = ctx.find_object(SharkContext).ensure_client()
+    client = ctx.find_object(OrcaContext).ensure_client()
     url = f"{client.compute_url}/os-keypairs/{name}"
     data = client.get(url)
 
     kp = data.get("keypair", data)
 
-    table = Table(title=f"Key Pair: {kp.get('name', name)}", show_lines=True)
-    table.add_column("Property", style="bold cyan")
-    table.add_column("Value")
+    print_detail(
+        [
+            ("Name", kp.get("name", "")),
+            ("Type", kp.get("type", "ssh")),
+            ("Fingerprint", kp.get("fingerprint", "")),
+            ("Created", kp.get("created_at", "")),
+        ],
+        output_format=output_format, fit_width=fit_width, max_width=max_width, noindent=noindent,
+        columns=columns,
+    )
 
-    table.add_row("Name", kp.get("name", ""))
-    table.add_row("Type", kp.get("type", "ssh"))
-    table.add_row("Fingerprint", kp.get("fingerprint", ""))
-    table.add_row("Created", kp.get("created_at", ""))
-
-    console.print(table)
-
-    pub_key = kp.get("public_key", "")
-    if pub_key:
-        console.print("\n[bold]Public key:[/bold]")
-        console.print(pub_key.strip())
-        console.print()
+    if output_format == "table":
+        pub_key = kp.get("public_key", "")
+        if pub_key:
+            console.print("\n[bold]Public key:[/bold]")
+            console.print(pub_key.strip())
+            console.print()
 
 
 # ── create ────────────────────────────────────────────────────────────────
@@ -104,7 +98,7 @@ def keypair_create(ctx: click.Context, name: str, save_to: str | None) -> None:
     OpenStack generates both keys. The private key is returned ONCE
     and saved locally. The public key is stored server-side.
     """
-    client = ctx.find_object(SharkContext).ensure_client()
+    client = ctx.find_object(OrcaContext).ensure_client()
 
     url = f"{client.compute_url}/os-keypairs"
     data = client.post(url, json={"keypair": {"name": name}})
@@ -117,8 +111,9 @@ def keypair_create(ctx: click.Context, name: str, save_to: str | None) -> None:
     console.print(f"  [cyan]Fingerprint:[/cyan] {fingerprint}")
 
     if private_key:
-        # Determine save path
         dest = Path(save_to) if save_to else _DEFAULT_KEY_DIR / f"{name}.pem"
+        if dest.is_dir():
+            dest = dest / f"{name}.pem"
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(private_key)
         dest.chmod(stat.S_IRUSR | stat.S_IWUSR)  # 600
@@ -147,7 +142,7 @@ def keypair_create(ctx: click.Context, name: str, save_to: str | None) -> None:
     "--save-to",
     type=click.Path(),
     default=None,
-    help="Private key path. Default: ~/.ssh/shark-<name>",
+    help="Private key path. Default: ~/.ssh/orca-<name>",
 )
 @click.pass_context
 def keypair_generate(ctx: click.Context, name: str, key_type: str, bits: int | None, save_to: str | None) -> None:
@@ -157,13 +152,12 @@ def keypair_generate(ctx: click.Context, name: str, key_type: str, bits: int | N
 
     \b
     Examples:
-      shark keypair generate my-key
-      shark keypair generate my-key --type rsa --bits 4096
+      orca keypair generate my-key
+      orca keypair generate my-key --type rsa --bits 4096
     """
     import subprocess
 
-    # Determine paths
-    priv_path = Path(save_to) if save_to else _DEFAULT_KEY_DIR / f"shark-{name}"
+    priv_path = Path(save_to) if save_to else _DEFAULT_KEY_DIR / f"orca-{name}"
     pub_path = Path(f"{priv_path}.pub")
 
     if priv_path.exists():
@@ -171,13 +165,12 @@ def keypair_generate(ctx: click.Context, name: str, key_type: str, bits: int | N
 
     priv_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Build ssh-keygen command
     cmd = [
         "ssh-keygen",
         "-t", key_type.lower(),
         "-f", str(priv_path),
-        "-N", "",  # no passphrase
-        "-C", f"shark-cli:{name}",
+        "-N", "",
+        "-C", f"orca:{name}",
     ]
     if key_type.lower() == "rsa":
         cmd.extend(["-b", str(bits or 4096)])
@@ -187,15 +180,13 @@ def keypair_generate(ctx: click.Context, name: str, key_type: str, bits: int | N
     if result.returncode != 0:
         raise click.ClickException(f"ssh-keygen failed: {result.stderr.strip()}")
 
-    # Set permissions
     priv_path.chmod(stat.S_IRUSR | stat.S_IWUSR)  # 600
 
     console.print(f"  [cyan]Private key:[/cyan] {priv_path}")
     console.print(f"  [cyan]Public key:[/cyan]  {pub_path}")
 
-    # Upload public key to OpenStack
     pub_content = pub_path.read_text().strip()
-    client = ctx.find_object(SharkContext).ensure_client()
+    client = ctx.find_object(OrcaContext).ensure_client()
     url = f"{client.compute_url}/os-keypairs"
     data = client.post(url, json={"keypair": {"name": name, "public_key": pub_content}})
 
@@ -227,16 +218,14 @@ def keypair_upload(ctx: click.Context, name: str, public_key_file: str | None, p
 
     \b
     Examples:
-      shark keypair upload my-key --public-key-file ~/.ssh/id_ed25519.pub
-      shark keypair upload my-key --public-key "ssh-ed25519 AAAA..."
+      orca keypair upload my-key --public-key-file ~/.ssh/id_ed25519.pub
+      orca keypair upload my-key --public-key "ssh-ed25519 AAAA..."
     """
-    # Resolve the public key content
     if public_key_string:
         pub_content = public_key_string.strip()
     elif public_key_file:
         pub_content = Path(public_key_file).read_text().strip()
     else:
-        # Default: try ~/.ssh/id_rsa.pub, then id_ed25519.pub
         for default_name in ("id_rsa.pub", "id_ed25519.pub"):
             default_path = _DEFAULT_KEY_DIR / default_name
             if default_path.exists():
@@ -249,7 +238,7 @@ def keypair_upload(ctx: click.Context, name: str, public_key_file: str | None, p
                 "Use --public-key-file or --public-key."
             )
 
-    client = ctx.find_object(SharkContext).ensure_client()
+    client = ctx.find_object(OrcaContext).ensure_client()
     url = f"{client.compute_url}/os-keypairs"
     data = client.post(url, json={"keypair": {"name": name, "public_key": pub_content}})
 
@@ -269,7 +258,7 @@ def keypair_delete(ctx: click.Context, name: str, yes: bool) -> None:
     if not yes:
         click.confirm(f"Delete key pair '{name}'?", abort=True)
 
-    client = ctx.find_object(SharkContext).ensure_client()
+    client = ctx.find_object(OrcaContext).ensure_client()
     url = f"{client.compute_url}/os-keypairs/{name}"
     client.delete(url)
     console.print(f"[green]Key pair '{name}' deleted.[/green]")
