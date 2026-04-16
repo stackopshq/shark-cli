@@ -1,5 +1,5 @@
-site_name: shark-cli
-site_description: A professional CLI for the Sharktech Cloud Provider API
+site_name: orca
+site_description: OpenStack Rich Command-line Alternative
 site_url: https://stackopshq.github.io/shark-cli/
 repo_url: https://github.com/stackopshq/shark-cli
 repo_name: stackopshq/shark-cli
@@ -48,16 +48,76 @@ nav:
   - Getting Started: getting-started.md
   - Commands:
       - Overview: commands/index.md
-      - Compute (server): commands/server.md
-      - Flavors: commands/flavor.md
-      - Images: commands/image.md
-      - Networks: commands/network.md
-      - Key Pairs: commands/keypair.md
-      - Volumes: commands/volume.md
-      - Security Groups: commands/security-group.md
-      - Floating IPs: commands/floating-ip.md
-      - Load Balancers (Octavia): commands/loadbalancer.md
-      - Secrets (Barbican): commands/secret.md
-      - Clusters (Magnum): commands/cluster.md
-      - Metrics (Gnocchi): commands/metric.md
-      - Service Catalog: commands/catalog.md
+      - Orca-exclusive:
+          - overview: commands/overview.md
+          - watch: commands/watch.md
+          - doctor: commands/doctor.md
+          - audit: commands/audit.md
+          - cleanup: commands/cleanup.md
+          - export: commands/export.md
+          - profile: commands/profile.md
+      - Compute:
+          - server: commands/server.md
+          - flavor: commands/flavor.md
+          - keypair: commands/keypair.md
+          - aggregate: commands/aggregate.md
+          - availability-zone: commands/availability-zone.md
+          - compute-service: commands/compute-service.md
+          - hypervisor: commands/hypervisor.md
+          - server-group: commands/server-group.md
+          - event: commands/event.md
+          - usage: commands/usage.md
+      - Image:
+          - image: commands/image.md
+      - Block Storage:
+          - volume: commands/volume.md
+          - backup (Freezer): commands/backup.md
+      - Object Storage:
+          - container: commands/container.md
+          - object: commands/object.md
+      - Network:
+          - network: commands/network.md
+          - floating-ip: commands/floating-ip.md
+          - security-group: commands/security-group.md
+          - qos: commands/qos.md
+          - subnet-pool: commands/subnet-pool.md
+          - trunk: commands/trunk.md
+      - Load Balancer:
+          - loadbalancer: commands/loadbalancer.md
+      - DNS:
+          - zone: commands/zone.md
+          - recordset: commands/recordset.md
+      - Orchestration:
+          - stack (Heat): commands/stack.md
+      - Clusters:
+          - cluster (Magnum): commands/cluster.md
+      - Metrics & Alarms:
+          - metric (Gnocchi): commands/metric.md
+          - alarm (Aodh): commands/alarm.md
+      - Placement:
+          - placement: commands/placement.md
+      - Secrets:
+          - secret (Barbican): commands/secret.md
+      - Identity:
+          - user: commands/user.md
+          - project: commands/project.md
+          - domain: commands/domain.md
+          - role: commands/role.md
+          - group: commands/group.md
+          - credential: commands/credential.md
+          - application-credential: commands/application-credential.md
+          - access-rule: commands/access-rule.md
+          - trust: commands/trust.md
+          - token: commands/token.md
+          - auth: commands/auth.md
+          - endpoint: commands/endpoint.md
+          - endpoint-group: commands/endpoint-group.md
+          - region: commands/region.md
+          - service: commands/service.md
+          - limit: commands/limit.md
+      - Utilities:
+          - ip: commands/ip.md
+          - limits: commands/limits.md
+          - quota: commands/quota.md
+          - catalog: commands/catalog.md
+          - completion: commands/completion.md

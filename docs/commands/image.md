@@ -1,136 +1,356 @@
-# Images — `shark image`
+# `orca image` — image
 
-Manage Glance images. Images are the base OS templates used to create servers. You can list available images, upload custom images, download them, and manage their metadata and tags.
-
----
-
-## list
-
-List all images in the project, sorted by name. Shows ID, name, status, min disk/RAM, and size.
-
-```bash
-shark image list
-```
+Manage images.
 
 ---
 
-## show
+## cache-clear
 
-Display detailed metadata for an image: format, visibility, OS info, size, and timestamps.
+Clear the entire image cache (admin).
 
 ```bash
-shark image show <image-id>
+orca image cache-clear [OPTIONS]
 ```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## cache-delete
+
+Remove a specific image from the cache (admin).
+
+```bash
+orca image cache-delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## cache-list
+
+List cached and queued images (admin).
+
+```bash
+orca image cache-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## cache-queue
+
+Queue an image for pre-caching (admin).
+
+```bash
+orca image cache-queue [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
 
 ---
 
 ## create
 
-Create a new image record in Glance. Optionally upload image data from a local file in the same step.
+Create a new image (and optionally upload data).
 
 ```bash
-# Create metadata only
-shark image create "Ubuntu 24.04"
-
-# Create and upload in one step
-shark image create "Ubuntu 24.04" --file ubuntu-24.04.qcow2
-
-# With custom format
-shark image create "Flatcar" --disk-format raw --file flatcar.img
-```
-
-| Option | Default | Description |
-|---|---|---|
-| `--disk-format` | `qcow2` | `raw`, `qcow2`, `vmdk`, `vdi`, `vhd`, `vhdx`, `iso`, `aki`, `ari`, `ami` |
-| `--container-format` | `bare` | `bare`, `ovf`, `ova`, `aki`, `ari`, `ami`, `docker` |
-| `--min-disk` | `0` | Minimum disk size in GB |
-| `--min-ram` | `0` | Minimum RAM in MB |
-| `--visibility` | `private` | `private`, `shared`, `community`, `public` |
-| `--file` | — | Upload image data from this file |
-
----
-
-## upload
-
-Upload image data to an existing image (must be in `queued` status). Streams from disk without loading into memory — supports large files.
-
-```bash
-shark image upload <image-id> /path/to/ubuntu.qcow2
-```
-
----
-
-## download
-
-Download image data to a local file. Streams to disk with a progress bar.
-
-```bash
-shark image download <image-id> -o /tmp/my-image.qcow2
-```
-
-| Option | Required | Description |
-|---|---|---|
-| `-o` / `--output` | yes | Output file path |
-
----
-
-## update
-
-Update image properties using JSON-Patch. Useful for changing name, visibility, or min disk/RAM requirements.
-
-```bash
-shark image update <image-id> --name "New Name"
-shark image update <image-id> --visibility shared
-shark image update <image-id> --min-disk 10 --min-ram 512
+orca image create [OPTIONS]
 ```
 
 | Option | Description |
-|---|---|
-| `--name` | New name |
-| `--min-disk` | New minimum disk (GB) |
-| `--min-ram` | New minimum RAM (MB) |
-| `--visibility` | `private`, `shared`, `community`, `public` |
-
----
-
-## delete
-
-Permanently delete an image and its data. Asks for confirmation.
-
-```bash
-shark image delete <image-id>
-shark image delete <image-id> -y
-```
+|--------|-------------|
+| `--disk-format [raw|qcow2|vmdk|vdi|vhd|vhdx|iso|aki|ari|ami]` | |
+| `--container-format [bare|ovf|ova|aki|ari|ami|docker]` | |
+| `--min-disk INTEGER` | Min disk (GB).  [default: 0] |
+| `--min-ram INTEGER` | Min RAM (MB).  [default: 0] |
+| `--visibility [private|shared|community|public]` | |
+| `--file PATH` | Upload image data from file immediately. |
+| `--help` | Show this message and exit. |
 
 ---
 
 ## deactivate
 
-Deactivate an image — the metadata stays visible but the image data becomes unavailable for download or server creation.
+Deactivate an image (make data unavailable).
 
 ```bash
-shark image deactivate <image-id>
+orca image deactivate [OPTIONS]
 ```
+
+| Option | Description |
+|--------|-------------|
+
+---
+
+## delete
+
+Delete an image.
+
+```bash
+orca image delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## download
+
+Download image data to a local file.
+
+```bash
+orca image download [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-o, --output PATH` | Output file path.  [required] |
+| `--help` | Show this message and exit. |
+
+---
+
+## import
+
+Import image data using the Glance v2 import API.
+
+```bash
+orca image import [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--method [web-download|glance-direct|copy-image]` | |
+| `--uri TEXT` | Source URI (required for web-download). |
+| `--store TEXT` | Target store(s) for copy-image (repeatable). |
+| `--help` | Show this message and exit. |
+
+---
+
+## list
+
+List available images.
+
+```bash
+orca image list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## member-create
+
+PROJECT_ID
+
+```bash
+orca image member-create [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+
+---
+
+## member-delete
+
+PROJECT_ID
+
+```bash
+orca image member-delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## member-list
+
+List all projects that have access to a shared image.
+
+```bash
+orca image member-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## member-set
+
+Accept, reject, or reset a shared image invitation.
+
+```bash
+orca image member-set [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--status [accepted|rejected|pending]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## member-show
+
+Show a specific project's membership status for a shared image.
+
+```bash
+orca image member-show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
 
 ---
 
 ## reactivate
 
-Reactivate a deactivated image, making its data available again.
+Reactivate a deactivated image.
 
 ```bash
-shark image reactivate <image-id>
+orca image reactivate [OPTIONS]
 ```
+
+| Option | Description |
+|--------|-------------|
+
+---
+
+## share-and-accept
+
+PROJECT_ID
+
+```bash
+orca image share-and-accept [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## show
+
+Show image details.
+
+```bash
+orca image show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## shrink
+
+Convert a raw image to qcow2 with compression to save space.
+
+```bash
+orca image shrink [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## stage
+
+Upload image data to the staging area (interruptible import).
+
+```bash
+orca image stage [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+
+---
+
+## stores-info
+
+List available Glance storage backends (multi-store only).
+
+```bash
+orca image stores-info [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--detail` | Show store properties (admin only, requires |
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
 
 ---
 
 ## tag-add
 
-Add a tag to an image. Tags are arbitrary strings useful for filtering and organisation.
+Add a tag to an image.
 
 ```bash
-shark image tag-add <image-id> production
+orca image tag-add [OPTIONS]
 ```
+
+| Option | Description |
+|--------|-------------|
 
 ---
 
@@ -139,5 +359,98 @@ shark image tag-add <image-id> production
 Remove a tag from an image.
 
 ```bash
-shark image tag-delete <image-id> production
+orca image tag-delete [OPTIONS]
 ```
+
+| Option | Description |
+|--------|-------------|
+
+---
+
+## task-list
+
+List Glance async tasks.
+
+```bash
+orca image task-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--type [import|export|clone]` | Filter by task type. |
+| `--status [pending|processing|success|failure]` | |
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## task-show
+
+Show details of a Glance async task.
+
+```bash
+orca image task-show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## unused
+
+Find images not used by any server instance.
+
+```bash
+orca image unused [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-d, --delete` | Actually delete unused images. |
+| `-y, --yes` | Skip confirmation (with --delete). |
+| `--include-snapshots` | Include snapshot images in the scan. |
+| `--help` | Show this message and exit. |
+
+---
+
+## update
+
+Update image properties (JSON-Patch).
+
+```bash
+orca image update [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--name TEXT` | New name. |
+| `--min-disk INTEGER` | New min disk (GB). |
+| `--min-ram INTEGER` | New min RAM (MB). |
+| `--visibility [private|shared|community|public]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## upload
+
+Upload image data from a local file.
+
+```bash
+orca image upload [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+
+---

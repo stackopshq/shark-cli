@@ -1,31 +1,38 @@
-# `orca metric` — metric (Gnocchi)
+# `orca placement` — placement
 
-Query metrics, measures & resources (Gnocchi).
+Manage Placement resources (resource providers, classes, traits, etc.).
 
 ---
 
-## archive-policy-create
+## allocation-candidate-list
 
-[OPTIONS] NAME
+[OPTIONS]
 
 ```bash
-orca metric archive-policy-create [OPTIONS]
+orca placement allocation-candidate-list [OPTIONS]
 ```
 
 | Option | Description |
 |--------|-------------|
-| `--definition GRANULARITY:POINTS` | |
-| `--aggregation-method TEXT` | Aggregation method (repeatable). |
+| `--resource CLASS=AMOUNT` | Requested resource, e.g. VCPU=4. Repeatable. |
+| `--required TRAIT` | Required trait. Repeatable. |
+| `--forbidden TRAIT` | Forbidden trait. Repeatable. |
+| `--limit INTEGER` | Max number of candidates. |
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
 | `--help` | Show this message and exit. |
 
 ---
 
-## archive-policy-delete
+## allocation-delete
 
-[OPTIONS] NAME
+[OPTIONS] CONSUMER_UUID
 
 ```bash
-orca metric archive-policy-delete [OPTIONS]
+orca placement allocation-delete [OPTIONS]
 ```
 
 | Option | Description |
@@ -35,12 +42,30 @@ orca metric archive-policy-delete [OPTIONS]
 
 ---
 
-## archive-policy-list
+## allocation-set
 
-List archive policies.
+CONSUMER_UUID
 
 ```bash
-orca metric archive-policy-list [OPTIONS]
+orca placement allocation-set [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--resource-provider TEXT` | Resource provider UUID.  [required] |
+| `--resource CLASS=AMOUNT` | Resource class and amount, e.g. VCPU=4. |
+| `--project-id TEXT` | Consumer project UUID.  [required] |
+| `--user-id TEXT` | Consumer user UUID.  [required] |
+| `--help` | Show this message and exit. |
+
+---
+
+## allocation-show
+
+CONSUMER_UUID
+
+```bash
+orca placement allocation-show [OPTIONS]
 ```
 
 | Option | Description |
@@ -54,178 +79,25 @@ orca metric archive-policy-list [OPTIONS]
 
 ---
 
-## archive-policy-show
-
-Show an archive policy.
-
-```bash
-orca metric archive-policy-show [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-| `--noindent` | Disable JSON indentation. |
-| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
-| `--fit-width` | Fit table to terminal width. |
-| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
-| `-f, --format [table|json|value]` | |
-| `--help` | Show this message and exit. |
-
----
-
-## create
-
-Create a Gnocchi metric.
-
-```bash
-orca metric create [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-| `--name TEXT` | Metric name.  [required] |
-| `--archive-policy-name TEXT` | Archive policy to use (default: low). |
-| `--resource-id TEXT` | Resource ID to attach the metric to. |
-| `--help` | Show this message and exit. |
-
----
-
-## delete
-
-Delete a Gnocchi metric.
-
-```bash
-orca metric delete [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-| `-y, --yes` | Skip confirmation. |
-| `--help` | Show this message and exit. |
-
----
-
-## list
-
-List metrics.
-
-```bash
-orca metric list [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-| `--limit INTEGER` | Max results. |
-| `--noindent` | Disable JSON indentation. |
-| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
-| `--fit-width` | Fit table to terminal width. |
-| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
-| `-f, --format [table|json|value]` | |
-| `--help` | Show this message and exit. |
-
----
-
-## measures
-
-Get measures (datapoints) for a metric.
-
-```bash
-orca metric measures [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-| `--start TEXT` | Start timestamp (ISO 8601 or relative e.g. |
-| `--stop TEXT` | Stop timestamp. |
-| `--granularity TEXT` | Granularity in seconds. |
-| `--aggregation TEXT` | Aggregation method.  [default: mean] |
-| `--limit INTEGER` | Max measures to return. |
-| `--noindent` | Disable JSON indentation. |
-| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
-| `--fit-width` | Fit table to terminal width. |
-| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
-| `-f, --format [table|json|value]` | |
-| `--help` | Show this message and exit. |
-
----
-
-## measures-add
-
-Push measures to a metric.
-
-```bash
-orca metric measures-add [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-| `--measure TIMESTAMP:VALUE` | Measure as timestamp:value (repeatable). |
-| `--help` | Show this message and exit. |
-
----
-
-## resource-list
-
-List resources.
-
-```bash
-orca metric resource-list [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-| `--type TEXT` | Resource type to list.  [default: generic] |
-| `--limit INTEGER` | Max results. Gnocchi can return very large |
-| `--noindent` | Disable JSON indentation. |
-| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
-| `--fit-width` | Fit table to terminal width. |
-| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
-| `-f, --format [table|json|value]` | |
-| `--help` | Show this message and exit. |
-
----
-
-## resource-show
-
-Show resource details and its metrics.
-
-```bash
-orca metric resource-show [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-| `--type TEXT` | Resource type.  [default: generic] |
-| `--noindent` | Disable JSON indentation. |
-| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
-| `--fit-width` | Fit table to terminal width. |
-| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
-| `-f, --format [table|json|value]` | |
-| `--help` | Show this message and exit. |
-
----
-
-## resource-type-create
+## resource-class-create
 
 [OPTIONS] NAME
 
 ```bash
-orca metric resource-type-create [OPTIONS]
+orca placement resource-class-create [OPTIONS]
 ```
 
 | Option | Description |
 |--------|-------------|
-| `--attribute KEY:TYPE` | Resource attribute key:type (repeatable). E.g. |
-| `--help` | Show this message and exit. |
 
 ---
 
-## resource-type-delete
+## resource-class-delete
 
-[OPTIONS] RESOURCE_TYPE
+[OPTIONS] NAME
 
 ```bash
-orca metric resource-type-delete [OPTIONS]
+orca placement resource-class-delete [OPTIONS]
 ```
 
 | Option | Description |
@@ -235,12 +107,12 @@ orca metric resource-type-delete [OPTIONS]
 
 ---
 
-## resource-type-list
+## resource-class-list
 
-List resource types.
+[OPTIONS]
 
 ```bash
-orca metric resource-type-list [OPTIONS]
+orca placement resource-class-list [OPTIONS]
 ```
 
 | Option | Description |
@@ -254,12 +126,99 @@ orca metric resource-type-list [OPTIONS]
 
 ---
 
-## resource-type-show
+## resource-class-show
 
-RESOURCE_TYPE
+[OPTIONS] NAME
 
 ```bash
-orca metric resource-type-show [OPTIONS]
+orca placement resource-class-show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+
+---
+
+## resource-provider-create
+
+[OPTIONS] NAME
+
+```bash
+orca placement resource-provider-create [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--uuid TEXT` | Explicit UUID for the new provider. |
+| `--parent-uuid TEXT` | UUID of the parent provider. |
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## resource-provider-delete
+
+[OPTIONS] UUID
+
+```bash
+orca placement resource-provider-delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## resource-provider-list
+
+[OPTIONS]
+
+```bash
+orca placement resource-provider-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--name TEXT` | Filter by name. |
+| `--uuid TEXT` | Filter by UUID. |
+| `--in-tree UUID` | Limit to providers in this tree. |
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## resource-provider-set
+
+[OPTIONS] UUID
+
+```bash
+orca placement resource-provider-set [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--name TEXT` | New name. |
+| `--parent-uuid TEXT` | New parent provider UUID. |
+| `--help` | Show this message and exit. |
+
+---
+
+## resource-provider-show
+
+[OPTIONS] UUID
+
+```bash
+orca placement resource-provider-show [OPTIONS]
 ```
 
 | Option | Description |
@@ -273,12 +232,27 @@ orca metric resource-type-show [OPTIONS]
 
 ---
 
-## show
+## resource-provider-trait-delete
 
-Show metric details.
+[OPTIONS] UUID
 
 ```bash
-orca metric show [OPTIONS]
+orca placement resource-provider-trait-delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## resource-provider-trait-list
+
+[OPTIONS] UUID
+
+```bash
+orca placement resource-provider-trait-list [OPTIONS]
 ```
 
 | Option | Description |
@@ -292,16 +266,99 @@ orca metric show [OPTIONS]
 
 ---
 
-## status
+## resource-provider-trait-set
 
-Show Gnocchi processing status.
+[OPTIONS] UUID TRAITS...
 
 ```bash
-orca metric status [OPTIONS]
+orca placement resource-provider-trait-set [OPTIONS]
 ```
 
 | Option | Description |
 |--------|-------------|
+
+---
+
+## resource-provider-usage
+
+[OPTIONS] UUID
+
+```bash
+orca placement resource-provider-usage [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## trait-create
+
+Create a custom trait (must start with CUSTOM_).
+
+```bash
+orca placement trait-create [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+
+---
+
+## trait-delete
+
+Delete a custom trait.
+
+```bash
+orca placement trait-delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## trait-list
+
+List traits.
+
+```bash
+orca placement trait-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--name TEXT` | Filter traits by name prefix. |
+| `--associated` | Only traits associated with a resource |
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## usage-list
+
+Show aggregated usages by project/user.
+
+```bash
+orca placement usage-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--project-id TEXT` | Filter by project UUID. |
+| `--user-id TEXT` | Filter by user UUID. |
 | `--noindent` | Disable JSON indentation. |
 | `--max-width INTEGER` | Maximum table width (0 = unlimited). |
 | `--fit-width` | Fit table to terminal width. |

@@ -1,198 +1,294 @@
-# Clusters — `shark cluster`
+# `orca cluster` — cluster (Magnum)
 
-Manage Kubernetes clusters and cluster templates (Magnum). Magnum provisions production-ready Kubernetes clusters on top of the Sharktech Cloud infrastructure, including master/worker nodes, networking, and load balancing.
-
----
-
-## Clusters
-
-### list
-
-List all Kubernetes clusters with their status, node/master count, and template.
-
-```bash
-shark cluster list
-```
-
-### show
-
-Display detailed cluster properties: UUID, status, status reason, COE version, API address, node/master addresses, keypair, stack ID, and timestamps.
-
-```bash
-shark cluster show <cluster-id>
-```
-
-### create
-
-Create a new Kubernetes cluster from a cluster template. The cluster creation is asynchronous — use `show` to track progress.
-
-```bash
-shark cluster create my-k8s --template <template-id>
-
-shark cluster create my-k8s \
-  --template <template-id> \
-  --node-count 3 \
-  --master-count 1 \
-  --keypair my-keypair
-
-shark cluster create prod \
-  --template <id> \
-  --master-count 3 \
-  --node-count 5 \
-  --flavor <flavor-id> \
-  --master-flavor <master-flavor-id>
-```
-
-| Option | Required | Default | Description |
-|---|---|---|---|
-| `--template` | yes | — | Cluster template UUID or name |
-| `--node-count` | no | `1` | Number of worker nodes |
-| `--master-count` | no | `1` | Number of master nodes |
-| `--keypair` | no | — | SSH keypair name |
-| `--timeout` | no | `60` | Creation timeout in minutes |
-| `--flavor` | no | — | Node flavor (overrides template) |
-| `--master-flavor` | no | — | Master flavor (overrides template) |
-
-### delete
-
-Delete a cluster and all its resources (VMs, networks, volumes). The deletion is asynchronous.
-
-```bash
-shark cluster delete <cluster-id>
-shark cluster delete <cluster-id> -y
-```
-
-### resize
-
-Scale the number of worker nodes up or down. Masters are not affected.
-
-```bash
-shark cluster resize <cluster-id> --node-count 5
-shark cluster resize <cluster-id> --node-count 1
-```
-
-| Option | Required | Description |
-|---|---|---|
-| `--node-count` | yes | New number of worker nodes |
-
-### kubeconfig
-
-Display the cluster's API address and connection information. Use this to configure `kubectl`.
-
-```bash
-shark cluster kubeconfig <cluster-id>
-```
-
-!!! tip
-    The API address is only available once the cluster reaches `CREATE_COMPLETE` status.
+Manage Kubernetes clusters & cluster templates (Magnum).
 
 ---
 
-## Cluster Templates
+## create
 
-Templates define the blueprint for clusters: base image, flavors, networking, COE, and driver options.
-
-### template-list
-
-List all cluster templates with their COE, image, network driver, and public flag.
+Create a Kubernetes cluster.
 
 ```bash
-shark cluster template-list
+orca cluster create [OPTIONS]
 ```
 
-### template-show
-
-Display detailed template properties: image, flavors, network config, DNS, labels, TLS settings.
-
-```bash
-shark cluster template-show <template-id>
-```
-
-### template-create
-
-Create a cluster template. This defines the infrastructure blueprint that clusters will use.
-
-```bash
-# Basic template
-shark cluster template-create k8s-template \
-  --image <image-id> \
-  --external-network <ext-net-id>
-
-# Full-featured template
-shark cluster template-create k8s-prod \
-  --image <image-id> \
-  --external-network <ext-net-id> \
-  --coe kubernetes \
-  --keypair my-keypair \
-  --flavor <flavor-id> \
-  --master-flavor <master-flavor-id> \
-  --network-driver flannel \
-  --docker-volume-size 50 \
-  --dns 8.8.8.8 \
-  --master-lb \
-  --label boot_volume_size=20 \
-  --label boot_volume_type=ceph-ssd
-```
-
-| Option | Required | Default | Description |
-|---|---|---|---|
-| `--image` | yes | — | Base image UUID or name |
-| `--external-network` | yes | — | External network ID |
-| `--coe` | no | `kubernetes` | `kubernetes`, `swarm`, `mesos` |
-| `--keypair` | no | — | SSH keypair name |
-| `--flavor` | no | — | Node flavor |
-| `--master-flavor` | no | — | Master flavor |
-| `--network-driver` | no | — | Network driver (`flannel`, `calico`, etc.) |
-| `--docker-volume-size` | no | — | Docker volume size in GB |
-| `--dns` | no | `8.8.8.8` | DNS nameserver |
-| `--master-lb/--no-master-lb` | no | `True` | Enable master load balancing |
-| `--floating-ip/--no-floating-ip` | no | `True` | Assign floating IPs |
-| `--label` | no | — | Key=value label (repeatable) |
-
-!!! tip "Labels"
-    Use `--label key=value` (repeatable) to set Magnum driver labels. Common labels:
-
-    - `boot_volume_size` — Root volume size in GB (required for boot-from-volume clouds)
-    - `boot_volume_type` — Volume type (e.g. `ceph-ssd`)
-    - `kube_tag` — Kubernetes version tag
-
-### template-delete
-
-Delete a cluster template. It must not be in use by any cluster.
-
-```bash
-shark cluster template-delete <template-id>
-shark cluster template-delete <template-id> -y
-```
+| Option | Description |
+|--------|-------------|
+| `--template TEXT` | Cluster template UUID or name.  [required] |
+| `--node-count INTEGER` | Number of worker nodes.  [default: 1] |
+| `--master-count INTEGER` | Number of master nodes.  [default: 1] |
+| `--keypair TEXT` | SSH keypair name. |
+| `--timeout INTEGER` | Creation timeout (minutes).  [default: 60] |
+| `--flavor TEXT` | Node flavor (overrides template). |
+| `--master-flavor TEXT` | Master flavor (overrides template). |
+| `--help` | Show this message and exit. |
 
 ---
 
-## Full Example: Deploy a Kubernetes Cluster
+## delete
+
+Delete a cluster.
 
 ```bash
-# 1. Create a template
-shark cluster template-create k8s-template \
-  --image <image-id> \
-  --external-network <ext-net-id> \
-  --keypair my-key \
-  --flavor <flavor-id> \
-  --label boot_volume_size=20
-
-# 2. Create a cluster
-shark cluster create my-k8s \
-  --template k8s-template \
-  --node-count 3 \
-  --master-count 1
-
-# 3. Monitor progress
-shark cluster show my-k8s
-
-# 4. Get connection info
-shark cluster kubeconfig my-k8s
-
-# 5. Scale up workers
-shark cluster resize my-k8s --node-count 5
-
-# 6. Tear down
-shark cluster delete my-k8s -y
+orca cluster delete [OPTIONS]
 ```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## kubeconfig
+
+Show the cluster API address and connection info.
+
+```bash
+orca cluster kubeconfig [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+
+---
+
+## list
+
+List clusters.
+
+```bash
+orca cluster list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## nodegroup-create
+
+Create a node group in a cluster.
+
+```bash
+orca cluster nodegroup-create [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--name TEXT` | Node group name.  [required] |
+| `--flavor-id TEXT` | Flavor ID for nodes.  [required] |
+| `--node-count INTEGER` | Initial number of nodes.  [default: 1] |
+| `--min-node-count INTEGER` | Minimum node count (for autoscaling). |
+| `--max-node-count INTEGER` | Maximum node count (for autoscaling). |
+| `--role TEXT` | Node group role (worker/infra).  [default: worker] |
+| `--image-id TEXT` | Override image ID. |
+| `--help` | Show this message and exit. |
+
+---
+
+## nodegroup-delete
+
+NODEGROUP_ID
+
+```bash
+orca cluster nodegroup-delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## nodegroup-list
+
+List node groups in a cluster.
+
+```bash
+orca cluster nodegroup-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## nodegroup-show
+
+NODEGROUP_ID
+
+```bash
+orca cluster nodegroup-show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## nodegroup-update
+
+NODEGROUP_ID
+
+```bash
+orca cluster nodegroup-update [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--node-count INTEGER` | New node count. |
+| `--min-node-count INTEGER` | New minimum node count. |
+| `--max-node-count INTEGER` | New maximum node count. |
+| `--help` | Show this message and exit. |
+
+---
+
+## resize
+
+Resize a cluster (change worker node count).
+
+```bash
+orca cluster resize [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--node-count INTEGER` | New number of worker nodes.  [required] |
+| `--help` | Show this message and exit. |
+
+---
+
+## show
+
+Show cluster details.
+
+```bash
+orca cluster show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## template-create
+
+Create a cluster template.
+
+```bash
+orca cluster template-create [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--image TEXT` | Base image UUID or name.  [required] |
+| `--external-network TEXT` | External network ID.  [required] |
+| `--coe [kubernetes|swarm|mesos]` | [default: kubernetes] |
+| `--keypair TEXT` | SSH keypair name. |
+| `--flavor TEXT` | Node flavor. |
+| `--master-flavor TEXT` | Master flavor. |
+| `--network-driver TEXT` | Network driver (flannel, calico, etc.). |
+| `--docker-volume-size INTEGER` | Docker volume size in GB. |
+| `--dns TEXT` | DNS nameserver.  [default: 8.8.8.8] |
+| `--master-lb / --no-master-lb` | [default: master-lb] |
+| `--floating-ip / --no-floating-ip` | |
+| `--label TEXT` | Key=value label (repeatable). E.g. --label |
+| `--help` | Show this message and exit. |
+
+---
+
+## template-delete
+
+Delete a cluster template.
+
+```bash
+orca cluster template-delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## template-list
+
+List cluster templates.
+
+```bash
+orca cluster template-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## template-show
+
+Show cluster template details.
+
+```bash
+orca cluster template-show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## upgrade
+
+Upgrade a cluster to a new template version.
+
+```bash
+orca cluster upgrade [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--template-id TEXT` | New cluster template ID to upgrade to.  [required] |
+| `--max-batch-size INTEGER` | Max number of nodes to upgrade simultaneously. |
+| `--nodegroup TEXT` | Specific nodegroup to upgrade. |
+| `--help` | Show this message and exit. |
+
+---

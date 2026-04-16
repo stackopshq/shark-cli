@@ -1,61 +1,50 @@
-# `orca security-group` — security-group
+# `orca trunk` — trunk
 
-Manage security groups.
+Manage Neutron trunks (VLAN trunk ports).
 
 ---
 
-## cleanup
+## add-subport
 
-Find security groups not attached to any port.
+Add a sub-port to a trunk.
 
 ```bash
-orca security-group cleanup [OPTIONS]
+orca trunk add-subport [OPTIONS]
 ```
 
 | Option | Description |
 |--------|-------------|
-| `-d, --delete` | Actually delete the unused security groups. |
-| `-y, --yes` | Skip confirmation (with --delete). |
-| `--help` | Show this message and exit. |
-
----
-
-## clone
-
-NEW_NAME
-
-```bash
-orca security-group clone [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-| `--description TEXT` | Description for the new group. |
+| `--port TEXT` | Sub-port port ID.  [required] |
+| `--segmentation-type [vlan|inherit]` | |
+| `--segmentation-id INTEGER` | VLAN ID (1–4094).  [required] |
 | `--help` | Show this message and exit. |
 
 ---
 
 ## create
 
-Create a security group.
+Create a trunk.
 
 ```bash
-orca security-group create [OPTIONS]
+orca trunk create [OPTIONS]
 ```
 
 | Option | Description |
 |--------|-------------|
+| `--port TEXT` | Parent port ID (the trunk port).  [required] |
+| `--name TEXT` | Trunk name. |
 | `--description TEXT` | Description. |
+| `--disable` | Create trunk in administratively down state. |
 | `--help` | Show this message and exit. |
 
 ---
 
 ## delete
 
-Delete a security group.
+Delete a trunk.
 
 ```bash
-orca security-group delete [OPTIONS]
+orca trunk delete [OPTIONS]
 ```
 
 | Option | Description |
@@ -67,10 +56,10 @@ orca security-group delete [OPTIONS]
 
 ## list
 
-List security groups.
+List trunks.
 
 ```bash
-orca security-group list [OPTIONS]
+orca trunk list [OPTIONS]
 ```
 
 | Option | Description |
@@ -84,73 +73,73 @@ orca security-group list [OPTIONS]
 
 ---
 
-## rule-add
+## remove-subport
 
-Add a rule to a security group.
+Remove a sub-port from a trunk.
 
 ```bash
-orca security-group rule-add [OPTIONS]
+orca trunk remove-subport [OPTIONS]
 ```
 
 | Option | Description |
 |--------|-------------|
-| `--direction [ingress|egress]` | [required] |
-| `--protocol TEXT` | Protocol (tcp, udp, icmp, or number). |
-| `--port-min INTEGER` | Min port (or single port). |
-| `--port-max INTEGER` | Max port. Defaults to port-min. |
-| `--remote-ip TEXT` | Remote IP prefix (CIDR). |
-| `--remote-group TEXT` | Remote security group ID. |
-| `--ethertype [IPv4|IPv6]` | [default: IPv4] |
-| `--help` | Show this message and exit. |
-
----
-
-## rule-delete
-
-Delete a security group rule.
-
-```bash
-orca security-group rule-delete [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
+| `--port TEXT` | Sub-port port ID to remove.  [required] |
 | `-y, --yes` | Skip confirmation. |
 | `--help` | Show this message and exit. |
 
 ---
 
-## show
+## set
 
-Show security group details and rules.
-
-```bash
-orca security-group show [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-| `--noindent` | Disable JSON indentation. |
-| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
-| `--fit-width` | Fit table to terminal width. |
-| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
-| `-f, --format [table|json|value]` | |
-| `--help` | Show this message and exit. |
-
----
-
-## update
-
-Update a security group.
+Update a trunk.
 
 ```bash
-orca security-group update [OPTIONS]
+orca trunk set [OPTIONS]
 ```
 
 | Option | Description |
 |--------|-------------|
 | `--name TEXT` | New name. |
 | `--description TEXT` | New description. |
+| `--enable / --disable` | Enable or disable the trunk. |
+| `--help` | Show this message and exit. |
+
+---
+
+## show
+
+Show trunk details.
+
+```bash
+orca trunk show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## subport-list
+
+List sub-ports on a trunk.
+
+```bash
+orca trunk subport-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
 | `--help` | Show this message and exit. |
 
 ---

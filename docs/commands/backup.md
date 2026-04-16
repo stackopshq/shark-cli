@@ -1,101 +1,36 @@
-# `orca metric` — metric (Gnocchi)
+# `orca backup` — backup (Freezer)
 
-Query metrics, measures & resources (Gnocchi).
+Manage backups, jobs, sessions & clients (Freezer).
 
 ---
 
-## archive-policy-create
+## action-create
 
-[OPTIONS] NAME
+Create a standalone backup action.
 
 ```bash
-orca metric archive-policy-create [OPTIONS]
+orca backup action-create [OPTIONS]
 ```
 
 | Option | Description |
 |--------|-------------|
-| `--definition GRANULARITY:POINTS` | |
-| `--aggregation-method TEXT` | Aggregation method (repeatable). |
+| `--action [backup|restore|admin]` | |
+| `--path TEXT` | Path to back up or restore.  [required] |
+| `--container TEXT` | Swift container name. |
+| `--storage [swift|local|ssh|s3]` | [default: swift] |
+| `--mode [fs|mysql|mongo|mssql|cinder|nova]` | |
+| `--backup-name TEXT` | Name for the backup. |
+| `--max-level INTEGER` | Max incremental backup level. |
 | `--help` | Show this message and exit. |
 
 ---
 
-## archive-policy-delete
+## action-delete
 
-[OPTIONS] NAME
-
-```bash
-orca metric archive-policy-delete [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-| `-y, --yes` | Skip confirmation. |
-| `--help` | Show this message and exit. |
-
----
-
-## archive-policy-list
-
-List archive policies.
+Delete a backup action.
 
 ```bash
-orca metric archive-policy-list [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-| `--noindent` | Disable JSON indentation. |
-| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
-| `--fit-width` | Fit table to terminal width. |
-| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
-| `-f, --format [table|json|value]` | |
-| `--help` | Show this message and exit. |
-
----
-
-## archive-policy-show
-
-Show an archive policy.
-
-```bash
-orca metric archive-policy-show [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-| `--noindent` | Disable JSON indentation. |
-| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
-| `--fit-width` | Fit table to terminal width. |
-| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
-| `-f, --format [table|json|value]` | |
-| `--help` | Show this message and exit. |
-
----
-
-## create
-
-Create a Gnocchi metric.
-
-```bash
-orca metric create [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-| `--name TEXT` | Metric name.  [required] |
-| `--archive-policy-name TEXT` | Archive policy to use (default: low). |
-| `--resource-id TEXT` | Resource ID to attach the metric to. |
-| `--help` | Show this message and exit. |
-
----
-
-## delete
-
-Delete a Gnocchi metric.
-
-```bash
-orca metric delete [OPTIONS]
+orca backup action-delete [OPTIONS]
 ```
 
 | Option | Description |
@@ -105,12 +40,12 @@ orca metric delete [OPTIONS]
 
 ---
 
-## list
+## action-list
 
-List metrics.
+List backup actions.
 
 ```bash
-orca metric list [OPTIONS]
+orca backup action-list [OPTIONS]
 ```
 
 | Option | Description |
@@ -125,21 +60,16 @@ orca metric list [OPTIONS]
 
 ---
 
-## measures
+## action-show
 
-Get measures (datapoints) for a metric.
+Show backup action details.
 
 ```bash
-orca metric measures [OPTIONS]
+orca backup action-show [OPTIONS]
 ```
 
 | Option | Description |
 |--------|-------------|
-| `--start TEXT` | Start timestamp (ISO 8601 or relative e.g. |
-| `--stop TEXT` | Stop timestamp. |
-| `--granularity TEXT` | Granularity in seconds. |
-| `--aggregation TEXT` | Aggregation method.  [default: mean] |
-| `--limit INTEGER` | Max measures to return. |
 | `--noindent` | Disable JSON indentation. |
 | `--max-width INTEGER` | Maximum table width (0 = unlimited). |
 | `--fit-width` | Fit table to terminal width. |
@@ -149,83 +79,12 @@ orca metric measures [OPTIONS]
 
 ---
 
-## measures-add
+## client-delete
 
-Push measures to a metric.
-
-```bash
-orca metric measures-add [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-| `--measure TIMESTAMP:VALUE` | Measure as timestamp:value (repeatable). |
-| `--help` | Show this message and exit. |
-
----
-
-## resource-list
-
-List resources.
+Unregister a backup client.
 
 ```bash
-orca metric resource-list [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-| `--type TEXT` | Resource type to list.  [default: generic] |
-| `--limit INTEGER` | Max results. Gnocchi can return very large |
-| `--noindent` | Disable JSON indentation. |
-| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
-| `--fit-width` | Fit table to terminal width. |
-| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
-| `-f, --format [table|json|value]` | |
-| `--help` | Show this message and exit. |
-
----
-
-## resource-show
-
-Show resource details and its metrics.
-
-```bash
-orca metric resource-show [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-| `--type TEXT` | Resource type.  [default: generic] |
-| `--noindent` | Disable JSON indentation. |
-| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
-| `--fit-width` | Fit table to terminal width. |
-| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
-| `-f, --format [table|json|value]` | |
-| `--help` | Show this message and exit. |
-
----
-
-## resource-type-create
-
-[OPTIONS] NAME
-
-```bash
-orca metric resource-type-create [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-| `--attribute KEY:TYPE` | Resource attribute key:type (repeatable). E.g. |
-| `--help` | Show this message and exit. |
-
----
-
-## resource-type-delete
-
-[OPTIONS] RESOURCE_TYPE
-
-```bash
-orca metric resource-type-delete [OPTIONS]
+orca backup client-delete [OPTIONS]
 ```
 
 | Option | Description |
@@ -235,12 +94,47 @@ orca metric resource-type-delete [OPTIONS]
 
 ---
 
-## resource-type-list
+## client-list
 
-List resource types.
+List registered backup clients (agents).
 
 ```bash
-orca metric resource-type-list [OPTIONS]
+orca backup client-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--limit INTEGER` | Max results. |
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## client-register
+
+Register a new backup client.
+
+```bash
+orca backup client-register [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--description TEXT` | Client description. |
+| `--help` | Show this message and exit. |
+
+---
+
+## client-show
+
+Show backup client details.
+
+```bash
+orca backup client-show [OPTIONS]
 ```
 
 | Option | Description |
@@ -254,12 +148,84 @@ orca metric resource-type-list [OPTIONS]
 
 ---
 
-## resource-type-show
+## delete
 
-RESOURCE_TYPE
+Delete a backup.
 
 ```bash
-orca metric resource-type-show [OPTIONS]
+orca backup delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## job-create
+
+Create a backup job.
+
+```bash
+orca backup job-create [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--description TEXT` | Job description. |
+| `--client-id TEXT` | Freezer client ID.  [required] |
+| `--action [backup|restore|admin]` | |
+| `--path TEXT` | Path to back up or restore.  [required] |
+| `--container TEXT` | Swift container name for storage. |
+| `--storage [swift|local|ssh|s3]` | Storage backend.  [default: swift] |
+| `--mode [fs|mysql|mongo|mssql|cinder|nova]` | |
+| `--schedule-interval TEXT` | Schedule interval (e.g. '24 hours', '7 |
+| `--help` | Show this message and exit. |
+
+---
+
+## job-delete
+
+Delete a backup job.
+
+```bash
+orca backup job-delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## job-list
+
+List backup jobs.
+
+```bash
+orca backup job-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--limit INTEGER` | Max results. |
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## job-show
+
+Show backup job details.
+
+```bash
+orca backup job-show [OPTIONS]
 ```
 
 | Option | Description |
@@ -270,34 +236,171 @@ orca metric resource-type-show [OPTIONS]
 | `-c, --column TEXT` | Column to include (repeatable). Shows all if |
 | `-f, --format [table|json|value]` | |
 | `--help` | Show this message and exit. |
+
+---
+
+## job-start
+
+Start (trigger) a backup job.
+
+```bash
+orca backup job-start [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+
+---
+
+## job-stop
+
+Stop a running backup job.
+
+```bash
+orca backup job-stop [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+
+---
+
+## list
+
+List backups.
+
+```bash
+orca backup list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--limit INTEGER` | Max results. |
+| `--offset INTEGER` | Offset for pagination. |
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## session-add-job
+
+JOB_ID
+
+```bash
+orca backup session-add-job [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+
+---
+
+## session-create
+
+Create a backup session.
+
+```bash
+orca backup session-create [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--description TEXT` | Session description. |
+| `--schedule-interval TEXT` | Schedule interval (e.g. '24 hours'). |
+| `--help` | Show this message and exit. |
+
+---
+
+## session-delete
+
+Delete a backup session.
+
+```bash
+orca backup session-delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## session-list
+
+List backup sessions.
+
+```bash
+orca backup session-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--limit INTEGER` | Max results. |
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## session-remove-job
+
+JOB_ID
+
+```bash
+orca backup session-remove-job [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+
+---
+
+## session-show
+
+Show backup session details.
+
+```bash
+orca backup session-show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## session-start
+
+Start a backup session (triggers all its jobs).
+
+```bash
+orca backup session-start [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
 
 ---
 
 ## show
 
-Show metric details.
+Show backup details.
 
 ```bash
-orca metric show [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-| `--noindent` | Disable JSON indentation. |
-| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
-| `--fit-width` | Fit table to terminal width. |
-| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
-| `-f, --format [table|json|value]` | |
-| `--help` | Show this message and exit. |
-
----
-
-## status
-
-Show Gnocchi processing status.
-
-```bash
-orca metric status [OPTIONS]
+orca backup show [OPTIONS]
 ```
 
 | Option | Description |

@@ -1,103 +1,154 @@
-# Floating IPs — `shark floating-ip`
+# `orca floating-ip` — floating-ip
 
-Manage floating IPs (Neutron). Floating IPs are public IPv4 addresses that can be dynamically associated with servers to make them reachable from the internet. They are allocated from an external network and can be moved between servers at any time.
-
----
-
-## list
-
-List all floating IPs in the project with their public address, associated fixed IP, port, and status.
-
-```bash
-shark floating-ip list
-```
-
----
-
-## show
-
-Display detailed properties of a floating IP: addresses, network, port, router, status, and timestamps.
-
-```bash
-shark floating-ip show <floating-ip-id>
-```
-
----
-
-## create
-
-Allocate a new floating IP from an external network. The IP is reserved but not yet associated with any server.
-
-```bash
-shark floating-ip create --network <ext-network-id>
-```
-
-| Option | Required | Description |
-|---|---|---|
-| `--network` | yes | External network ID to allocate from |
-
-!!! tip
-    Find your external network with `shark network list` — look for networks with `External = True`.
+Manage floating IPs.
 
 ---
 
 ## associate
 
-Associate a floating IP with a port (typically the port of a server). This makes the server reachable from the internet on that public IP.
+Associate a floating IP with a port.
 
 ```bash
-shark floating-ip associate <floating-ip-id> --port-id <port-id>
-shark floating-ip associate <floating-ip-id> --port-id <port-id> --fixed-ip 10.0.0.5
+orca floating-ip associate [OPTIONS]
 ```
 
-| Option | Required | Description |
-|---|---|---|
-| `--port-id` | yes | Port ID to associate with |
-| `--fixed-ip` | no | Fixed IP on the port (if the port has multiple IPs) |
-
-!!! tip
-    Find a server's port ID with `shark server list-interfaces <server-id>`.
+| Option | Description |
+|--------|-------------|
+| `--port-id TEXT` | Port ID to associate with.  [required] |
+| `--fixed-ip TEXT` | Fixed IP on the port (if multiple). |
+| `--help` | Show this message and exit. |
 
 ---
 
-## disassociate
+## bulk-release
 
-Disassociate a floating IP from its port. The IP remains allocated and can be re-associated later.
+Bulk-release floating IPs to free up unused addresses.
 
 ```bash
-shark floating-ip disassociate <floating-ip-id>
+orca floating-ip bulk-release [OPTIONS]
 ```
+
+| Option | Description |
+|--------|-------------|
+| `-s, --status TEXT` | Release floating IPs with this status (DOWN, ERROR, |
+| `-u, --unassociated` | Release all unassociated floating IPs (no port_id), |
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## create
+
+Allocate a floating IP from an external network.
+
+```bash
+orca floating-ip create [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--network TEXT` | External network ID.  [required] |
+| `--help` | Show this message and exit. |
 
 ---
 
 ## delete
 
-Release a floating IP back to the external network pool. The IP is no longer reserved. Asks for confirmation.
+Release a floating IP.
 
 ```bash
-shark floating-ip delete <floating-ip-id>
-shark floating-ip delete <floating-ip-id> -y
+orca floating-ip delete [OPTIONS]
 ```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
 
 ---
 
-## Full Example: Make a Server Public
+## disassociate
+
+FLOATING_IP_ID
 
 ```bash
-# 1. Allocate a floating IP
-shark floating-ip create --network <ext-network-id>
-# → Floating IP 203.0.113.42 allocated (fip-id)
-
-# 2. Find the server's port
-shark server list-interfaces <server-id>
-
-# 3. Associate
-shark floating-ip associate <fip-id> --port-id <port-id>
-
-# 4. SSH to server
-ssh -i ~/.ssh/shark-my-key ubuntu@203.0.113.42
-
-# 5. Later: disassociate and release
-shark floating-ip disassociate <fip-id>
-shark floating-ip delete <fip-id> -y
+orca floating-ip disassociate [OPTIONS]
 ```
+
+| Option | Description |
+|--------|-------------|
+
+---
+
+## list
+
+List floating IPs.
+
+```bash
+orca floating-ip list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## set
+
+Set floating IP properties.
+
+```bash
+orca floating-ip set [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--port TEXT` | Associate with port ID. |
+| `--fixed-ip-address TEXT` | Fixed IP on the port (if multiple). |
+| `--description TEXT` | Set description. |
+| `--qos-policy TEXT` | Attach QoS policy ID. |
+| `--no-qos-policy` | Remove attached QoS policy. |
+| `--help` | Show this message and exit. |
+
+---
+
+## show
+
+Show floating IP details.
+
+```bash
+orca floating-ip show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## unset
+
+Unset floating IP properties.
+
+```bash
+orca floating-ip unset [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--port` | Disassociate port. |
+| `--qos-policy` | Remove QoS policy. |
+| `--help` | Show this message and exit. |
+
+---

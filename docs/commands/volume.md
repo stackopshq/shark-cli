@@ -1,174 +1,1227 @@
-# Volumes — `shark volume`
+# `orca volume` — volume
 
-Manage block storage volumes and snapshots (Cinder v3). Volumes are persistent block devices that can be attached to servers. Snapshots provide point-in-time copies of a volume's data.
-
----
-
-## Volumes
-
-### list
-
-List all volumes with their size, status, type, and server attachments.
-
-```bash
-shark volume list
-```
-
-### show
-
-Display detailed properties of a volume: type, bootable flag, encryption, multi-attach, availability zone, and attachment info.
-
-```bash
-shark volume show <volume-id>
-```
-
-### create
-
-Create a new block storage volume. You can create an empty volume, clone from a snapshot, clone from another volume, or create from an image.
-
-```bash
-# Empty volume
-shark volume create --name data-vol --size 50
-
-# From snapshot
-shark volume create --name restored --size 50 --snapshot-id <snap-id>
-
-# From image (bootable)
-shark volume create --name boot-vol --size 20 --image-id <image-id>
-
-# With specific type
-shark volume create --name fast-vol --size 100 --type ceph-ssd
-```
-
-| Option | Required | Description |
-|---|---|---|
-| `--name` | yes | Volume name |
-| `--size` | yes | Size in GB |
-| `--type` | no | Volume type |
-| `--description` | no | Description |
-| `--snapshot-id` | no | Create from snapshot |
-| `--source-vol` | no | Clone from existing volume |
-| `--image-id` | no | Create from image |
-
-### update
-
-Update a volume's name or description. The volume can be in any status.
-
-```bash
-shark volume update <volume-id> --name new-name
-shark volume update <volume-id> --description "Production database"
-```
-
-### extend
-
-Extend a volume to a larger size. The new size must be greater than the current size. The volume must be in `available` status (or `in-use` if the backend supports online resize).
-
-```bash
-shark volume extend <volume-id> --size 100
-```
-
-### retype
-
-Change the volume type (e.g. from HDD to SSD). The data may be migrated depending on the migration policy.
-
-```bash
-shark volume retype <volume-id> --type ceph-ssd
-shark volume retype <volume-id> --type ceph-ssd --migration-policy on-demand
-```
-
-| Option | Default | Description |
-|---|---|---|
-| `--type` | *required* | New volume type |
-| `--migration-policy` | `never` | `never` or `on-demand` |
-
-### set-bootable
-
-Set or unset the bootable flag on a volume. A bootable volume can be used to boot a server.
-
-```bash
-shark volume set-bootable <volume-id> true
-shark volume set-bootable <volume-id> false
-```
-
-### set-readonly
-
-Set or unset the read-only flag on a volume to prevent writes.
-
-```bash
-shark volume set-readonly <volume-id> true
-shark volume set-readonly <volume-id> false
-```
-
-### delete
-
-Permanently delete a volume. The volume must be in `available` status (not attached). Asks for confirmation.
-
-```bash
-shark volume delete <volume-id>
-shark volume delete <volume-id> -y
-```
+Manage block storage volumes & snapshots.
 
 ---
 
-## Snapshots
+## attachment-complete
 
-### snapshot-list
-
-List all volume snapshots with their source volume, size, and status.
+ATTACHMENT_ID
 
 ```bash
-shark volume snapshot-list
+orca volume attachment-complete [OPTIONS]
 ```
 
-### snapshot-show
-
-Display snapshot details: source volume, size, status, description, timestamps.
-
-```bash
-shark volume snapshot-show <snapshot-id>
-```
-
-### snapshot-create
-
-Create a point-in-time snapshot of a volume. Use `--force` to snapshot an in-use volume (crash-consistent).
-
-```bash
-shark volume snapshot-create <volume-id> --name daily-backup
-shark volume snapshot-create <volume-id> --name live-snap --force
-shark volume snapshot-create <volume-id> --name snap --description "Before upgrade"
-```
-
-| Option | Required | Description |
-|---|---|---|
-| `--name` | yes | Snapshot name |
-| `--description` | no | Description |
-| `--force` | no | Force snapshot of in-use volume |
-
-### snapshot-delete
-
-Delete a volume snapshot. Asks for confirmation.
-
-```bash
-shark volume snapshot-delete <snapshot-id>
-shark volume snapshot-delete <snapshot-id> -y
-```
+| Option | Description |
+|--------|-------------|
 
 ---
 
-## Full Example: Data Volume Lifecycle
+## attachment-create
+
+INSTANCE_ID
 
 ```bash
-# 1. Create a data volume
-shark volume create --name data-vol --size 50
-
-# 2. Attach to a server
-shark server attach-volume <server-id> <volume-id>
-
-# 3. Snapshot before maintenance
-shark volume snapshot-create <volume-id> --name pre-maintenance
-
-# 4. Extend the volume
-shark server detach-volume <server-id> <volume-id>
-shark volume extend <volume-id> --size 100
-shark server attach-volume <server-id> <volume-id>
+orca volume attachment-create [OPTIONS]
 ```
+
+| Option | Description |
+|--------|-------------|
+| `--mode [rw|ro]` | Attach mode: read-write or read-only. |
+| `--connector JSON` | Connector info as JSON (host, initiator, |
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## attachment-delete
+
+ATTACHMENT_ID
+
+```bash
+orca volume attachment-delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## attachment-list
+
+List volume attachments (Cinder v3 attachment API).
+
+```bash
+orca volume attachment-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--volume-id TEXT` | Filter by volume ID. |
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## attachment-set
+
+Update (finalize) a volume attachment with connector info.
+
+```bash
+orca volume attachment-set [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--connector JSON` | Updated connector info as JSON.  [required] |
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## attachment-show
+
+Show a volume attachment.
+
+```bash
+orca volume attachment-show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## backup-create
+
+Create a Cinder volume backup.
+
+```bash
+orca volume backup-create [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--name TEXT` | Backup name. |
+| `--description TEXT` | Backup description. |
+| `--container TEXT` | Optional backup container name. |
+| `--snapshot-id TEXT` | Snapshot ID to backup instead of full volume. |
+| `--force` | Allow backing up an in-use volume. |
+| `--incremental` | Perform an incremental backup. |
+| `--wait` | Wait for backup to reach 'available'. |
+| `--help` | Show this message and exit. |
+
+---
+
+## backup-delete
+
+Delete a Cinder volume backup.
+
+```bash
+orca volume backup-delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--force` | Force delete even if backup is in error. |
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## backup-list
+
+List Cinder volume backups.
+
+```bash
+orca volume backup-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--all-projects` | Include all projects (admin). |
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## backup-restore
+
+Restore a Cinder volume backup.
+
+```bash
+orca volume backup-restore [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--volume-id TEXT` | Restore to this existing volume ID. |
+| `--name TEXT` | Name for the new volume (if not restoring to existing). |
+| `--wait` | Wait for restored volume to become 'available'. |
+| `--help` | Show this message and exit. |
+
+---
+
+## backup-show
+
+Show Cinder volume backup details.
+
+```bash
+orca volume backup-show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## create
+
+Create a volume.
+
+```bash
+orca volume create [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--name TEXT` | Volume name. |
+| `--size INTEGER` | Size in GB. |
+| `--type TEXT` | Volume type. |
+| `--description TEXT` | Volume description. |
+| `--snapshot-id TEXT` | Create from snapshot. |
+| `--source-vol TEXT` | Create from existing volume (clone). |
+| `--image-id TEXT` | Create from image. |
+| `--wait` | Wait until the volume reaches 'available' status. |
+| `-i, --interactive` | Step-by-step wizard — choose name, size, and type |
+| `--help` | Show this message and exit. |
+
+---
+
+## delete
+
+Delete a volume.
+
+```bash
+orca volume delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--dry-run` | Show what would be deleted without deleting. |
+| `--wait` | Wait until the volume is fully deleted. |
+| `--help` | Show this message and exit. |
+
+---
+
+## extend
+
+Extend a volume to a larger size.
+
+```bash
+orca volume extend [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--size INTEGER` | New size in GB (must be larger).  [required] |
+| `--help` | Show this message and exit. |
+
+---
+
+## group-create
+
+Create a volume group.
+
+```bash
+orca volume group-create [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--group-type TEXT` | Group type ID.  [required] |
+| `--volume-type TEXT` | Volume type ID (repeatable).  [required] |
+| `--description TEXT` | Description. |
+| `--availability-zone TEXT` | Availability zone. |
+| `--help` | Show this message and exit. |
+
+---
+
+## group-delete
+
+Delete a volume group.
+
+```bash
+orca volume group-delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--delete-volumes` | Also delete all volumes in the group. |
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## group-list
+
+List volume groups.
+
+```bash
+orca volume group-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## group-show
+
+Show a volume group.
+
+```bash
+orca volume group-show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## group-snapshot-create
+
+[OPTIONS] GROUP_ID
+
+```bash
+orca volume group-snapshot-create [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--name TEXT` | Snapshot name. |
+| `--description TEXT` | Snapshot description. |
+| `--help` | Show this message and exit. |
+
+---
+
+## group-snapshot-delete
+
+[OPTIONS] GROUP_SNAPSHOT_ID
+
+```bash
+orca volume group-snapshot-delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## group-snapshot-list
+
+List volume group snapshots.
+
+```bash
+orca volume group-snapshot-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## group-snapshot-show
+
+GROUP_SNAPSHOT_ID
+
+```bash
+orca volume group-snapshot-show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## group-type-create
+
+Create a volume group type.
+
+```bash
+orca volume group-type-create [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--description TEXT` | Group type description. |
+| `--public / --private` | Public or private group type. |
+| `--help` | Show this message and exit. |
+
+---
+
+## group-type-delete
+
+GROUP_TYPE_ID
+
+```bash
+orca volume group-type-delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## group-type-list
+
+List volume group types.
+
+```bash
+orca volume group-type-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## group-type-set
+
+Update a volume group type.
+
+```bash
+orca volume group-type-set [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--name TEXT` | New name. |
+| `--description TEXT` | New description. |
+| `--public / --private` | Change visibility. |
+| `--property KEY=VALUE` | Group spec key=value (repeatable). |
+| `--help` | Show this message and exit. |
+
+---
+
+## group-type-show
+
+Show a volume group type.
+
+```bash
+orca volume group-type-show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## group-type-unset
+
+Unset group spec properties on a group type.
+
+```bash
+orca volume group-type-unset [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--property KEY` | Group spec key to remove (repeatable). |
+| `--help` | Show this message and exit. |
+
+---
+
+## group-update
+
+Update a volume group — rename or add/remove volumes.
+
+```bash
+orca volume group-update [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--name TEXT` | New name. |
+| `--description TEXT` | New description. |
+| `--add-volume TEXT` | Volume ID to add to the group (repeatable). |
+| `--remove-volume TEXT` | Volume ID to remove from the group (repeatable). |
+| `--help` | Show this message and exit. |
+
+---
+
+## list
+
+List volumes.
+
+```bash
+orca volume list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## message-delete
+
+Delete a Cinder error message.
+
+```bash
+orca volume message-delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## message-list
+
+List Cinder error messages.
+
+```bash
+orca volume message-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--resource-id TEXT` | Filter by resource UUID. |
+| `--resource-type [volume|snapshot|backup|group]` | |
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## message-show
+
+Show a Cinder error message.
+
+```bash
+orca volume message-show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## migrate
+
+Migrate a volume to a different Cinder host/backend.
+
+```bash
+orca volume migrate [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--host TEXT` | Destination host (e.g. cinder@lvm#LVM).  [required] |
+| `--force-host-copy` | Bypass the driver, force host-level copy. |
+| `--lock-volume` | Lock the volume during migration. |
+| `--help` | Show this message and exit. |
+
+---
+
+## qos-associate
+
+Associate a QoS spec with a volume type.
+
+```bash
+orca volume qos-associate [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+
+---
+
+## qos-create
+
+Create a volume QoS spec.
+
+```bash
+orca volume qos-create [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--consumer [front-end|back-end|both]` | |
+| `--property KEY=VALUE` | QoS spec key=value (repeatable). |
+| `--help` | Show this message and exit. |
+
+---
+
+## qos-delete
+
+Delete a volume QoS spec.
+
+```bash
+orca volume qos-delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--force` | Delete even if associated with a volume type. |
+| `--help` | Show this message and exit. |
+
+---
+
+## qos-disassociate
+
+TYPE_ID
+
+```bash
+orca volume qos-disassociate [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--all` | Disassociate from all volume types. |
+
+---
+
+## qos-list
+
+List volume QoS specs.
+
+```bash
+orca volume qos-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## qos-set
+
+Add or update keys on a volume QoS spec.
+
+```bash
+orca volume qos-set [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--property KEY=VALUE` | QoS spec key=value to add or update (repeatable). |
+| `--help` | Show this message and exit. |
+
+---
+
+## qos-show
+
+Show volume QoS spec details.
+
+```bash
+orca volume qos-show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## retype
+
+Change volume type.
+
+```bash
+orca volume retype [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--type TEXT` | New volume type.  [required] |
+| `--migration-policy [never|on-demand]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## revert-to-snapshot
+
+SNAPSHOT_ID
+
+```bash
+orca volume revert-to-snapshot [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+
+---
+
+## service-list
+
+List Cinder services.
+
+```bash
+orca volume service-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--host TEXT` | Filter by host. |
+| `--binary TEXT` | Filter by binary (e.g. cinder-volume). |
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## service-set
+
+Enable or disable a Cinder service.
+
+```bash
+orca volume service-set [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--enable` | Enable the service. |
+| `--disable` | Disable the service. |
+| `--disabled-reason TEXT` | Reason for disabling. |
+| `--help` | Show this message and exit. |
+
+---
+
+## set
+
+Set volume properties or metadata.
+
+```bash
+orca volume set [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--property KEY=VALUE` | Metadata key=value pair (repeatable). |
+| `--name TEXT` | New name. |
+| `--description TEXT` | New description. |
+| `--help` | Show this message and exit. |
+
+---
+
+## set-bootable
+
+Set or unset bootable flag on a volume.
+
+```bash
+orca volume set-bootable [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--bootable / --no-bootable` | Mark volume as bootable or non-bootable. |
+| `--help` | Show this message and exit. |
+
+---
+
+## set-readonly
+
+Set or unset read-only flag on a volume.
+
+```bash
+orca volume set-readonly [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--readonly / --no-readonly` | Mark volume as read-only or read-write. |
+| `--help` | Show this message and exit. |
+
+---
+
+## show
+
+Show volume details.
+
+```bash
+orca volume show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## snapshot-create
+
+VOLUME_ID_OR_NAME
+
+```bash
+orca volume snapshot-create [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--name TEXT` | Snapshot name.  [required] |
+| `--description TEXT` | Snapshot description. |
+| `--force` | Force snapshot of in-use volume. |
+| `--help` | Show this message and exit. |
+
+---
+
+## snapshot-delete
+
+Delete a volume snapshot.
+
+```bash
+orca volume snapshot-delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## snapshot-list
+
+List volume snapshots.
+
+```bash
+orca volume snapshot-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## snapshot-set
+
+Update a snapshot's name, description, or metadata.
+
+```bash
+orca volume snapshot-set [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--name TEXT` | New name. |
+| `--description TEXT` | New description. |
+| `--property KEY=VALUE` | Metadata key=value (repeatable). |
+| `--help` | Show this message and exit. |
+
+---
+
+## snapshot-show
+
+Show snapshot details.
+
+```bash
+orca volume snapshot-show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## summary
+
+Show aggregated volume count and total size for the project.
+
+```bash
+orca volume summary [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## transfer-accept
+
+AUTH_KEY
+
+```bash
+orca volume transfer-accept [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+
+---
+
+## transfer-create
+
+Create a volume transfer request.
+
+```bash
+orca volume transfer-create [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--name TEXT` | Transfer name. |
+| `--help` | Show this message and exit. |
+
+---
+
+## transfer-delete
+
+Delete a volume transfer request.
+
+```bash
+orca volume transfer-delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## transfer-list
+
+List volume transfer requests.
+
+```bash
+orca volume transfer-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--all-projects` | List transfers from all projects (admin). |
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## transfer-show
+
+Show a volume transfer request.
+
+```bash
+orca volume transfer-show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## tree
+
+Display a volume / snapshot dependency tree.
+
+```bash
+orca volume tree [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--volume-id TEXT` | Show only this volume and its snapshots. |
+| `--help` | Show this message and exit. |
+
+---
+
+## type-access-add
+
+PROJECT_ID
+
+```bash
+orca volume type-access-add [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+
+---
+
+## type-access-list
+
+List projects that have access to a private volume type.
+
+```bash
+orca volume type-access-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## type-access-remove
+
+PROJECT_ID
+
+```bash
+orca volume type-access-remove [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## type-create
+
+Create a volume type.
+
+```bash
+orca volume type-create [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--description TEXT` | Description. |
+| `--public / --private` | Make type public or private.  [default: public] |
+| `--property KEY=VALUE` | Extra spec (repeatable). |
+| `--help` | Show this message and exit. |
+
+---
+
+## type-delete
+
+Delete a volume type.
+
+```bash
+orca volume type-delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## type-list
+
+List volume types.
+
+```bash
+orca volume type-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--default` | Show the default type only. |
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## type-set
+
+Update a volume type.
+
+```bash
+orca volume type-set [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--name TEXT` | New name. |
+| `--description TEXT` | New description. |
+| `--property KEY=VALUE` | Extra spec to add or update (repeatable). |
+| `--help` | Show this message and exit. |
+
+---
+
+## type-show
+
+Show volume type details.
+
+```bash
+orca volume type-show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## unset
+
+Unset volume metadata keys.
+
+```bash
+orca volume unset [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--property KEY` | Metadata key to remove (repeatable). |
+| `--help` | Show this message and exit. |
+
+---
+
+## update
+
+Update volume name or description.
+
+```bash
+orca volume update [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--name TEXT` | New name. |
+| `--description TEXT` | New description. |
+| `--help` | Show this message and exit. |
+
+---

@@ -1,112 +1,284 @@
-# Secrets — `shark secret`
+# `orca secret` — secret (Barbican)
 
-Manage secrets and containers (Barbican key-manager). Barbican securely stores sensitive data — passwords, API keys, symmetric/asymmetric keys, and certificates. All payloads are encrypted at rest.
+Manage secrets & containers (Barbican key-manager).
 
 ---
 
-## Secrets
+## acl-delete
 
-### list
-
-List all secrets in the project with their name, type, algorithm, status, and creation date.
+Delete the ACL on a secret (revert to project-wide access).
 
 ```bash
-shark secret list
-shark secret list --limit 20
+orca secret acl-delete [OPTIONS]
 ```
 
 | Option | Description |
-|---|---|
-| `--limit` | Max number of results |
-
-### show
-
-Display secret metadata: name, type, status, algorithm, bit length, content types, expiration, timestamps. The payload itself is not shown — use `get-payload` for that.
-
-```bash
-shark secret show <secret-id>
-```
-
-### create
-
-Create a new secret. You can store the payload inline or create metadata first and upload the payload later.
-
-```bash
-# Store a password
-shark secret create db-password \
-  --payload "s3cret!" \
-  --secret-type passphrase
-
-# Store a symmetric key (metadata only, no payload)
-shark secret create aes-key \
-  --secret-type symmetric \
-  --algorithm AES \
-  --bit-length 256
-
-# Store a certificate with expiration
-shark secret create tls-cert \
-  --payload "$(cat cert.pem)" \
-  --payload-content-type "application/x-pem-file" \
-  --secret-type certificate \
-  --expiration 2026-12-31T23:59:59
-```
-
-| Option | Default | Description |
-|---|---|---|
-| `--payload` | — | Secret payload (inline) |
-| `--payload-content-type` | `text/plain` | MIME type of payload |
-| `--secret-type` | `opaque` | `symmetric`, `public`, `private`, `passphrase`, `certificate`, `opaque` |
-| `--algorithm` | — | Algorithm (e.g. `AES`, `RSA`) |
-| `--bit-length` | — | Bit length |
-| `--expiration` | — | Expiration datetime (ISO 8601) |
-
-### get-payload
-
-Retrieve the decrypted secret payload. The raw value is printed to stdout.
-
-```bash
-shark secret get-payload <secret-id>
-```
-
-!!! warning
-    This prints the decrypted secret value. Treat the output as sensitive.
-
-### delete
-
-Delete a secret. Asks for confirmation.
-
-```bash
-shark secret delete <secret-id>
-shark secret delete <secret-id> -y
-```
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
 
 ---
 
-## Containers
+## acl-get
 
-Containers group related secrets together (e.g. a TLS certificate with its private key and CA chain).
-
-### container-list
-
-List all secret containers with their type and number of secrets.
+Get the ACL for a secret.
 
 ```bash
-shark secret container-list
+orca secret acl-get [OPTIONS]
 ```
 
-### container-show
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
 
-Display container details and the list of secrets it references.
+---
+
+## acl-set
+
+Set the ACL on a secret.
 
 ```bash
-shark secret container-show <container-id>
+orca secret acl-set [OPTIONS]
 ```
 
-### container-delete
+| Option | Description |
+|--------|-------------|
+| `--user TEXT` | User ID to grant read access to |
+| `--project-access / --no-project-access` | |
+| `--help` | Show this message and exit. |
 
-Delete a secret container. The contained secrets are not deleted.
+---
+
+## container-create
+
+Create a secret container.
 
 ```bash
-shark secret container-delete <container-id>
-shark secret container-delete <container-id> -y
+orca secret container-create [OPTIONS]
 ```
+
+| Option | Description |
+|--------|-------------|
+| `--name TEXT` | Container name. |
+| `--type [generic|rsa|certificate]` | |
+| `--secret NAME=SECRET_REF` | Secret reference (repeatable): name=<secret- |
+| `--help` | Show this message and exit. |
+
+---
+
+## container-delete
+
+Delete a secret container.
+
+```bash
+orca secret container-delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## container-list
+
+List secret containers.
+
+```bash
+orca secret container-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## container-show
+
+Show secret container details.
+
+```bash
+orca secret container-show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## create
+
+Create a secret.
+
+```bash
+orca secret create [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--payload TEXT` | Secret payload (inline). |
+| `--payload-content-type TEXT` | MIME type of payload.  [default: text/plain] |
+| `--secret-type [symmetric|public|private|passphrase|certificate|opaque]` | |
+| `--algorithm TEXT` | Algorithm (e.g. AES, RSA). |
+| `--bit-length INTEGER` | Bit length. |
+| `--expiration TEXT` | Expiration datetime (ISO 8601). |
+| `--help` | Show this message and exit. |
+
+---
+
+## delete
+
+Delete a secret.
+
+```bash
+orca secret delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## get-payload
+
+Retrieve secret payload.
+
+```bash
+orca secret get-payload [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+
+---
+
+## list
+
+List secrets.
+
+```bash
+orca secret list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--limit INTEGER` | Max results. |
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## order-create
+
+Create a secret order (async key/certificate generation).
+
+```bash
+orca secret order-create [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--type [key|asymmetric|certificate]` | |
+| `--name TEXT` | Secret name for the resulting secret. |
+| `--algorithm TEXT` | Key algorithm (e.g. aes, rsa). |
+| `--bit-length INTEGER` | Key bit length. |
+| `--mode TEXT` | Encryption mode (e.g. cbc). |
+| `--help` | Show this message and exit. |
+
+---
+
+## order-delete
+
+Delete a secret order.
+
+```bash
+orca secret order-delete [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-y, --yes` | Skip confirmation. |
+| `--help` | Show this message and exit. |
+
+---
+
+## order-list
+
+List secret orders.
+
+```bash
+orca secret order-list [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## order-show
+
+Show an order's details.
+
+```bash
+orca secret order-show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
+
+## show
+
+Show secret metadata.
+
+```bash
+orca secret show [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--noindent` | Disable JSON indentation. |
+| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
+| `--fit-width` | Fit table to terminal width. |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-f, --format [table|json|value]` | |
+| `--help` | Show this message and exit. |
+
+---
