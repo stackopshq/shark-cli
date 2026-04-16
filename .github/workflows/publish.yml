@@ -1,0 +1,40 @@
+name: Publish to PyPI
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  ci:
+    name: Lint + Tests
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    name: Build & Publish
+    runs-on: ubuntu-latest
+    needs: ci
+    environment: pypi
+    permissions:
+      id-token: write  # required for OIDC trusted publisher
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install poetry
+        run: pip install poetry
+
+      - name: Set version from tag
+        run: |
+          TAG=${GITHUB_REF#refs/tags/v}
+          poetry version "$TAG"
+
+      - name: Build package
+        run: poetry build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

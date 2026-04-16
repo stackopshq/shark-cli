@@ -13,14 +13,13 @@ from __future__ import annotations
 import click
 from click.shell_completion import CompletionItem
 
-
 # ── internal helpers ──────────────────────────────────────────────────────
 
 def _build_client(ctx: click.Context):
     """Build an OrcaClient for completion context (returns (client, profile))."""
     try:
-        from orca_cli.core.config import load_config, config_is_complete
         from orca_cli.core.client import OrcaClient
+        from orca_cli.core.config import config_is_complete, load_config
 
         # Walk context chain for --profile value
         profile = None

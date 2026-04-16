@@ -2,17 +2,16 @@
 
 from __future__ import annotations
 
-import stat
 import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, patch
 
 import pytest
 import yaml
 
-from orca_cli.core.client import OrcaClient, TOKEN_EXPIRY_BUFFER, TOKEN_CACHE_PATH
-from orca_cli.core.exceptions import AuthenticationError, APIError
+from orca_cli.core.client import TOKEN_EXPIRY_BUFFER, OrcaClient
+from orca_cli.core.exceptions import APIError, AuthenticationError
 
 
 @pytest.fixture(autouse=True)
@@ -81,7 +80,7 @@ class TestOrcaClientInit:
             "user_domain_name": "Default",
             "project_name": "demo",
         }
-        client = OrcaClient(cfg)
+        _ = OrcaClient(cfg)
 
         call_args = http.post.call_args
         payload = call_args.kwargs["json"]
@@ -107,7 +106,7 @@ class TestOrcaClientInit:
             "user_domain_id": "domain-uuid",
             "project_id": "project-uuid",
         }
-        client = OrcaClient(cfg)
+        _ = OrcaClient(cfg)
 
         call_args = http.post.call_args
         payload = call_args.kwargs["json"]
@@ -367,7 +366,7 @@ class TestTokenCaching:
         self._cache_path.write_text(yaml.dump(cache_data))
 
         with self._patch_cache_path():
-            client = OrcaClient(BASE_CFG)
+            _ = OrcaClient(BASE_CFG)
 
         http.post.assert_called_once()
 

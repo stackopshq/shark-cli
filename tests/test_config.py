@@ -2,28 +2,24 @@
 
 from __future__ import annotations
 
-import os
-from pathlib import Path
-
 import pytest
 import yaml
 
 from orca_cli.core.config import (
-    load_config,
-    config_is_complete,
-    list_profiles,
-    get_profile,
-    save_profile,
-    set_active_profile,
-    delete_profile,
-    rename_profile,
-    get_active_profile_name,
+    _has_os_env,
+    _load_os_env,
     _normalise_clouds_yaml,
     _normalise_legacy_keys,
-    _load_os_env,
-    _has_os_env,
+    config_is_complete,
+    delete_profile,
+    get_active_profile_name,
+    get_profile,
+    list_profiles,
+    load_config,
+    rename_profile,
+    save_profile,
+    set_active_profile,
 )
-
 
 # ── Profile CRUD ────────────────────────────────────────────────────────
 

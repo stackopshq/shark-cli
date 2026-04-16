@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from orca_cli.core.config import save_profile, set_active_profile
 
-
 # ── Helpers ────────────────────────────────────────────────────────────────
 
 SG_ID = "11112222-3333-4444-5555-666677778888"
@@ -157,7 +156,7 @@ class TestSGUpdate:
     def test_update_name(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["security-group", "update", SG_ID, "--name", "renamed"])
         assert result.exit_code == 0
@@ -235,7 +234,7 @@ class TestSGRuleDelete:
     def test_rule_delete(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["security-group", "rule-delete", RULE_ID, "-y"])
         assert result.exit_code == 0

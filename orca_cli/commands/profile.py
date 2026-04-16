@@ -8,21 +8,17 @@ from pathlib import Path
 import click
 
 from orca_cli.core.config import (
-    get_active_profile_name,
-    list_profiles,
-    get_profile,
-    save_profile,
-    set_active_profile,
-    delete_profile,
-    rename_profile,
-    load_config,
-    _load_clouds_yaml,
     _find_clouds_yaml,
     _normalise_legacy_keys,
-    REQUIRED_KEYS,
+    delete_profile,
+    get_active_profile_name,
+    get_profile,
+    list_profiles,
+    rename_profile,
+    save_profile,
+    set_active_profile,
 )
 from orca_cli.core.output import console
-
 
 _FIELDS = [
     ("auth_url", "Auth URL (Keystone)", "https://keystone.example.com:5000"),
@@ -184,7 +180,7 @@ def profile_add(name: str, copy_from: str | None, profile_color: str | None) -> 
 
     if len(profiles) == 0:
         set_active_profile(name)
-        console.print(f"[green]Set as active profile.[/green]\n")
+        console.print("[green]Set as active profile.[/green]\n")
     else:
         if click.confirm(f"Switch to '{name}' now?", default=False):
             set_active_profile(name)
@@ -331,8 +327,8 @@ def profile_remove(name: str, yes: bool) -> None:
 def _complete_regions(ctx: click.Context, param: click.Parameter, incomplete: str) -> list:
     """Shell completion for region names — authenticates and reads the catalog."""
     try:
-        from orca_cli.core.config import load_config, config_is_complete
         from orca_cli.core.client import OrcaClient
+        from orca_cli.core.config import config_is_complete, load_config
 
         config = load_config()
         if not config_is_complete(config):
@@ -428,7 +424,7 @@ def profile_regions(ctx: click.Context) -> None:
     if current:
         console.print(f"\n[dim]Current region: {current}. Switch with 'orca profile set-region <region>'.[/dim]")
     else:
-        console.print(f"\n[dim]No region set. Set with 'orca profile set-region <region>' or 'orca -R <region> <command>'.[/dim]")
+        console.print("\n[dim]No region set. Set with 'orca profile set-region <region>' or 'orca -R <region> <command>'.[/dim]")
     console.print()
 
 

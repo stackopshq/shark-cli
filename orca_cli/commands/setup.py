@@ -6,11 +6,11 @@ import click
 from rich.console import Console
 
 from orca_cli.core.config import (
+    get_active_profile_name,
+    list_profiles,
     load_config,
     save_profile,
-    get_active_profile_name,
     set_active_profile,
-    list_profiles,
 )
 from orca_cli.core.context import OrcaContext
 
@@ -83,7 +83,7 @@ def setup(ctx: click.Context, profile_name: str | None) -> None:
     if is_new:
         if not profiles:
             set_active_profile(name)
-            console.print(f"[green]Set as active profile.[/green]\n")
+            console.print("[green]Set as active profile.[/green]\n")
         elif click.confirm(f"Switch to '{name}' now?", default=True):
             set_active_profile(name)
             console.print(f"[green]Switched to '{name}'.[/green]\n")

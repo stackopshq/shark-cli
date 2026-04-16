@@ -18,7 +18,6 @@ the cached token directly — no Keystone round-trip — unless:
 from __future__ import annotations
 
 import hashlib
-import os
 import stat
 from datetime import datetime, timezone
 from pathlib import Path

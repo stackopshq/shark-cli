@@ -6,7 +6,6 @@ from datetime import datetime, timedelta, timezone
 
 from orca_cli.core.config import save_profile, set_active_profile
 
-
 # ── Helpers ────────────────────────────────────────────────────────────────
 
 def _fip(fip_id, port_id=None):
@@ -346,7 +345,7 @@ class TestCleanupDelete:
         set_active_profile("p")
 
         deleted_ids = []
-        original_delete = mock_client.delete
+        _ = mock_client.delete
 
         def track_delete(url, **kw):
             deleted_ids.append(url)

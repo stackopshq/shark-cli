@@ -5,7 +5,7 @@ from __future__ import annotations
 import click
 
 from orca_cli.core.context import OrcaContext
-from orca_cli.core.output import output_options, print_list, print_detail, console
+from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
 
 
@@ -421,7 +421,7 @@ def router_add_interface(ctx: click.Context, router_id: str, subnet_id: str) -> 
     """Add a subnet interface to a router."""
     client = ctx.find_object(OrcaContext).ensure_client()
     url = f"{_net_base(client)}/routers/{router_id}/add_router_interface"
-    data = client.put(url, json={"subnet_id": subnet_id})
+    client.put(url, json={"subnet_id": subnet_id})
     console.print(f"[green]Subnet {subnet_id} added to router {router_id}.[/green]")
 
 
@@ -433,7 +433,7 @@ def router_remove_interface(ctx: click.Context, router_id: str, subnet_id: str) 
     """Remove a subnet interface from a router."""
     client = ctx.find_object(OrcaContext).ensure_client()
     url = f"{_net_base(client)}/routers/{router_id}/remove_router_interface"
-    data = client.put(url, json={"subnet_id": subnet_id})
+    client.put(url, json={"subnet_id": subnet_id})
     console.print(f"[green]Subnet {subnet_id} removed from router {router_id}.[/green]")
 
 
@@ -479,7 +479,6 @@ def network_topology(ctx: click.Context, filter_net: str | None) -> None:
             servers = {}
 
         # Index
-        subnet_map = {s["id"]: s for s in subnets}
         router_map = {r["id"]: r.get("name", r["id"]) for r in routers}
 
         # Ports indexed by network
@@ -530,7 +529,7 @@ def network_topology(ctx: click.Context, filter_net: str | None) -> None:
                 elif owner:
                     dev_label = f"{owner}: {dev_id[:8]}"
                 else:
-                    dev_label = f"[dim]unbound[/dim]"
+                    dev_label = "[dim]unbound[/dim]"
 
                 port_label = f"{dev_label}  {ips}  [dim]{mac}[/dim]"
                 ports_node.add(port_label)
@@ -557,7 +556,6 @@ def net_trace(ctx: click.Context, server_id: str) -> None:
       orca network trace <server-name>
     """
     from rich.tree import Tree
-    from rich.panel import Panel
 
     client = ctx.find_object(OrcaContext).ensure_client()
     base = _net_base(client)
@@ -610,7 +608,6 @@ def net_trace(ctx: click.Context, server_id: str) -> None:
 
         routers_data = client.get(f"{base}/routers")
         routers = routers_data.get("routers", [])
-        router_map = {r["id"]: r for r in routers}
 
         subnets_data = client.get(f"{base}/subnets")
         subnet_map = {s["id"]: s for s in subnets_data.get("subnets", [])}
@@ -715,7 +712,7 @@ def net_trace(ctx: click.Context, server_id: str) -> None:
                     ip.get("ip_address", "")
                     for ip in (ext_gw.get("external_fixed_ips", []) if ext_gw else [])
                 )
-                router_branch = port_branch.add(
+                port_branch.add(
                     f"[magenta bold]Router:[/magenta bold] {r_name}  [dim]({r_id})[/dim]  "
                     f"→ ext: [cyan]{ext_net_name}[/cyan]"
                     + (f"  ({ext_ips})" if ext_ips else "")

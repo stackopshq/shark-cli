@@ -7,15 +7,15 @@ from datetime import datetime, timezone
 import click
 
 from orca_cli.core.config import (
-    load_config,
+    _find_clouds_yaml,
+    _load_clouds_yaml,
     config_is_complete,
     get_active_profile_name,
     list_profiles,
-    _find_clouds_yaml,
-    _load_clouds_yaml,
+    load_config,
 )
 from orca_cli.core.context import OrcaContext
-from orca_cli.core.output import console, output_options, print_detail
+from orca_cli.core.output import console
 
 
 @click.group()
@@ -122,7 +122,6 @@ def auth_token_debug(ctx: click.Context, raw: bool) -> None:
 
     from rich.table import Table
     from rich.tree import Tree
-    from rich.text import Text
 
     user = td.get("user", {})
     project = td.get("project", {})

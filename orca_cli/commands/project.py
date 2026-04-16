@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime
 
 import click
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import APIError
-from orca_cli.core.output import output_options, print_list, print_detail, console
+from orca_cli.core.output import console, output_options, print_detail, print_list
 
 
 def _iam(client) -> str:

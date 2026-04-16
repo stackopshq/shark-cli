@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from orca_cli.core.config import save_profile, set_active_profile
 
-
 # ── Helpers ────────────────────────────────────────────────────────────────
 
 IMG_ID = "11112222-3333-4444-5555-666677778888"
@@ -205,7 +204,7 @@ class TestImageUpdate:
     def test_update_name(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["image", "update", IMG_ID, "--name", "new-name"])
         assert result.exit_code == 0
@@ -297,7 +296,7 @@ class TestImageDelete:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["image", "delete", IMG_ID], input="n\n")
+        _ = invoke(["image", "delete", IMG_ID], input="n\n")
         assert len(state["deleted"]) == 0
 
 
@@ -385,7 +384,7 @@ class TestImageUnused:
                             images=[_image(img_id=IMG_ID2, name="orphan")],
                             servers=[])
 
-        result = invoke(["image", "unused", "--delete"], input="n\n")
+        _ = invoke(["image", "unused", "--delete"], input="n\n")
         assert len(state["deleted"]) == 0
 
 

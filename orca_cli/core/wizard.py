@@ -7,7 +7,6 @@ from rich.table import Table
 
 from orca_cli.core.output import console
 
-
 # ── Generic selector ──────────────────────────────────────────────────────
 
 def wizard_select(

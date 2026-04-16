@@ -14,8 +14,8 @@ from orca_cli.core.exceptions import OrcaCLIError
 def _complete_regions(ctx: click.Context, param: click.Parameter, incomplete: str) -> list:
     """Shell completion for the global --region flag."""
     try:
-        from orca_cli.core.config import load_config, config_is_complete
         from orca_cli.core.client import OrcaClient
+        from orca_cli.core.config import config_is_complete, load_config
 
         config = load_config()
         if not config_is_complete(config):
@@ -50,69 +50,72 @@ def cli(ctx: click.Context, profile: str | None, region: str | None) -> None:
 
 # ── Register sub-commands / groups ────────────────────────────────────────
 
-from orca_cli.commands.setup import setup  # noqa: E402
-from orca_cli.commands.server import server  # noqa: E402
-from orca_cli.commands.flavor import flavor  # noqa: E402
-from orca_cli.commands.image import image  # noqa: E402
-from orca_cli.commands.network import network  # noqa: E402
-from orca_cli.commands.keypair import keypair  # noqa: E402
-from orca_cli.commands.volume import volume  # noqa: E402
-from orca_cli.commands.security_group import security_group  # noqa: E402
-from orca_cli.commands.floating_ip import floating_ip  # noqa: E402
-from orca_cli.commands.completion import completion  # noqa: E402
-from orca_cli.commands.catalog import catalog  # noqa: E402
-from orca_cli.commands.cluster import cluster  # noqa: E402
-from orca_cli.commands.metric import metric  # noqa: E402
-from orca_cli.commands.secret import secret  # noqa: E402
-from orca_cli.commands.loadbalancer import loadbalancer  # noqa: E402
-from orca_cli.commands.overview import overview  # noqa: E402
-from orca_cli.commands.quota import quota  # noqa: E402
-from orca_cli.commands.backup import backup  # noqa: E402
-from orca_cli.commands.cleanup import cleanup  # noqa: E402
-from orca_cli.commands.ip_whois import ip_cmd  # noqa: E402
-from orca_cli.commands.audit import audit  # noqa: E402
-from orca_cli.commands.usage import usage  # noqa: E402
-from orca_cli.commands.profile import profile  # noqa: E402
-from orca_cli.commands.object_store import object_store  # noqa: E402
-from orca_cli.commands.stack import stack  # noqa: E402
-from orca_cli.commands.auth import auth  # noqa: E402
-from orca_cli.commands.event import event  # noqa: E402
-from orca_cli.commands.watch import watch  # noqa: E402
-from orca_cli.commands.export import export  # noqa: E402
-from orca_cli.commands.user import user  # noqa: E402
-from orca_cli.commands.project import project  # noqa: E402
-from orca_cli.commands.group import group  # noqa: E402
-from orca_cli.commands.role import role  # noqa: E402
-from orca_cli.commands.domain import domain  # noqa: E402
-from orca_cli.commands.application_credential import application_credential  # noqa: E402
-from orca_cli.commands.aggregate import aggregate  # noqa: E402
-from orca_cli.commands.hypervisor import hypervisor  # noqa: E402
-from orca_cli.commands.availability_zone import availability_zone  # noqa: E402
-from orca_cli.commands.server_group import server_group  # noqa: E402
-from orca_cli.commands.limits import limits  # noqa: E402
-from orca_cli.commands.zone import zone  # noqa: E402
-from orca_cli.commands.placement import placement  # noqa: E402
-from orca_cli.commands.alarm import alarm  # noqa: E402
-from orca_cli.commands.policy import policy  # noqa: E402
-from orca_cli.commands.federation import (  # noqa: E402
-    identity_provider, federation_protocol, mapping, service_provider,
-)
-from orca_cli.commands.limit import limit, registered_limit  # noqa: E402
 from orca_cli.commands.access_rule import access_rule  # noqa: E402
-from orca_cli.commands.token import token  # noqa: E402
-from orca_cli.commands.endpoint_group import endpoint_group  # noqa: E402
-from orca_cli.commands.recordset import recordset  # noqa: E402
-from orca_cli.commands.container import container  # noqa: E402
-from orca_cli.commands.doctor import doctor  # noqa: E402
-from orca_cli.commands.endpoint import endpoint  # noqa: E402
-from orca_cli.commands.service import service  # noqa: E402
-from orca_cli.commands.credential import credential  # noqa: E402
-from orca_cli.commands.region import region  # noqa: E402
-from orca_cli.commands.trust import trust  # noqa: E402
+from orca_cli.commands.aggregate import aggregate  # noqa: E402
+from orca_cli.commands.alarm import alarm  # noqa: E402
+from orca_cli.commands.application_credential import application_credential  # noqa: E402
+from orca_cli.commands.audit import audit  # noqa: E402
+from orca_cli.commands.auth import auth  # noqa: E402
+from orca_cli.commands.availability_zone import availability_zone  # noqa: E402
+from orca_cli.commands.backup import backup  # noqa: E402
+from orca_cli.commands.catalog import catalog  # noqa: E402
+from orca_cli.commands.cleanup import cleanup  # noqa: E402
+from orca_cli.commands.cluster import cluster  # noqa: E402
+from orca_cli.commands.completion import completion  # noqa: E402
 from orca_cli.commands.compute_service import compute_service  # noqa: E402
-from orca_cli.commands.subnet_pool import subnet_pool  # noqa: E402
+from orca_cli.commands.container import container  # noqa: E402
+from orca_cli.commands.credential import credential  # noqa: E402
+from orca_cli.commands.doctor import doctor  # noqa: E402
+from orca_cli.commands.domain import domain  # noqa: E402
+from orca_cli.commands.endpoint import endpoint  # noqa: E402
+from orca_cli.commands.endpoint_group import endpoint_group  # noqa: E402
+from orca_cli.commands.event import event  # noqa: E402
+from orca_cli.commands.export import export  # noqa: E402
+from orca_cli.commands.federation import (  # noqa: E402
+    federation_protocol,
+    identity_provider,
+    mapping,
+    service_provider,
+)
+from orca_cli.commands.flavor import flavor  # noqa: E402
+from orca_cli.commands.floating_ip import floating_ip  # noqa: E402
+from orca_cli.commands.group import group  # noqa: E402
+from orca_cli.commands.hypervisor import hypervisor  # noqa: E402
+from orca_cli.commands.image import image  # noqa: E402
+from orca_cli.commands.ip_whois import ip_cmd  # noqa: E402
+from orca_cli.commands.keypair import keypair  # noqa: E402
+from orca_cli.commands.limit import limit, registered_limit  # noqa: E402
+from orca_cli.commands.limits import limits  # noqa: E402
+from orca_cli.commands.loadbalancer import loadbalancer  # noqa: E402
+from orca_cli.commands.metric import metric  # noqa: E402
+from orca_cli.commands.network import network  # noqa: E402
+from orca_cli.commands.object_store import object_store  # noqa: E402
+from orca_cli.commands.overview import overview  # noqa: E402
+from orca_cli.commands.placement import placement  # noqa: E402
+from orca_cli.commands.policy import policy  # noqa: E402
+from orca_cli.commands.profile import profile  # noqa: E402
+from orca_cli.commands.project import project  # noqa: E402
 from orca_cli.commands.qos_policy import qos_policy  # noqa: E402
+from orca_cli.commands.quota import quota  # noqa: E402
+from orca_cli.commands.recordset import recordset  # noqa: E402
+from orca_cli.commands.region import region  # noqa: E402
+from orca_cli.commands.role import role  # noqa: E402
+from orca_cli.commands.secret import secret  # noqa: E402
+from orca_cli.commands.security_group import security_group  # noqa: E402
+from orca_cli.commands.server import server  # noqa: E402
+from orca_cli.commands.server_group import server_group  # noqa: E402
+from orca_cli.commands.service import service  # noqa: E402
+from orca_cli.commands.setup import setup  # noqa: E402
+from orca_cli.commands.stack import stack  # noqa: E402
+from orca_cli.commands.subnet_pool import subnet_pool  # noqa: E402
+from orca_cli.commands.token import token  # noqa: E402
 from orca_cli.commands.trunk import trunk  # noqa: E402
+from orca_cli.commands.trust import trust  # noqa: E402
+from orca_cli.commands.usage import usage  # noqa: E402
+from orca_cli.commands.user import user  # noqa: E402
+from orca_cli.commands.volume import volume  # noqa: E402
+from orca_cli.commands.watch import watch  # noqa: E402
+from orca_cli.commands.zone import zone  # noqa: E402
 
 cli.add_command(setup)
 cli.add_command(server)

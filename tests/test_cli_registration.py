@@ -6,7 +6,6 @@ import pytest
 
 from orca_cli.main import cli
 
-
 EXPECTED_COMMANDS = [
     "aggregate", "application-credential", "audit", "auth", "availability-zone",
     "backup", "catalog", "cleanup", "cluster", "completion", "compute-service", "credential",

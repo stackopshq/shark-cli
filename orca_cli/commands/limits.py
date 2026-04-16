@@ -5,7 +5,6 @@ from __future__ import annotations
 import click
 
 from orca_cli.core.context import OrcaContext
-from orca_cli.core.output import console
 
 
 def _nova(client) -> str:

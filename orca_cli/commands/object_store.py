@@ -5,7 +5,6 @@ from __future__ import annotations
 import hashlib
 import json
 import mimetypes
-import os
 from pathlib import Path
 
 import click
@@ -13,7 +12,6 @@ from rich.tree import Tree
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
-
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -513,7 +511,7 @@ def object_upload(ctx: click.Context, container: str, files: tuple[str, ...],
         global SLO_SEGMENT_SIZE
         SLO_SEGMENT_SIZE = segment_size * 1024 * 1024
 
-    from rich.progress import Progress, BarColumn, DownloadColumn, TransferSpeedColumn, TimeRemainingColumn
+    from rich.progress import BarColumn, DownloadColumn, Progress, TimeRemainingColumn, TransferSpeedColumn
 
     for filepath in files:
         path = Path(filepath)
@@ -553,7 +551,7 @@ def object_upload(ctx: click.Context, container: str, files: tuple[str, ...],
 @click.pass_context
 def object_download(ctx: click.Context, container: str, object_name: str, output_file: str | None) -> None:
     """Download an object from a container."""
-    from rich.progress import Progress, BarColumn, DownloadColumn, TransferSpeedColumn, TimeRemainingColumn
+    from rich.progress import BarColumn, DownloadColumn, Progress, TimeRemainingColumn, TransferSpeedColumn
 
     client = ctx.find_object(OrcaContext).ensure_client()
     base = client.object_store_url
@@ -716,7 +714,7 @@ def object_tree(ctx: click.Context, container: str | None, delimiter: str) -> No
         data = client.get(f"{base}?format=json")
         containers = data if isinstance(data, list) else []
 
-        tree = Tree(f"[bold]Account[/bold]")
+        tree = Tree("[bold]Account[/bold]")
         for c in containers:
             name = c.get("name", "")
             count = c.get("count", 0)

@@ -153,7 +153,7 @@ class TestFlavorExtended:
     def test_create(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_compute_mock(mock_client)
+        _ = _setup_compute_mock(mock_client)
 
         result = invoke(["flavor", "create", "m1.small",
                          "--vcpus", "1", "--ram", "2048", "--disk", "20"])
@@ -163,7 +163,7 @@ class TestFlavorExtended:
     def test_delete(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_compute_mock(mock_client)
+        _ = _setup_compute_mock(mock_client)
 
         result = invoke(["flavor", "delete", FLAVOR_ID, "-y"])
         assert result.exit_code == 0
@@ -191,7 +191,7 @@ class TestFlavorExtended:
     def test_unset(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_compute_mock(mock_client)
+        _ = _setup_compute_mock(mock_client)
 
         result = invoke(["flavor", "unset", FLAVOR_ID, "--property", "hw:cpu_policy"])
         assert result.exit_code == 0
@@ -270,7 +270,7 @@ class TestAggregate:
     def test_delete(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_compute_mock(mock_client)
+        _ = _setup_compute_mock(mock_client)
 
         result = invoke(["aggregate", "delete", AGG_ID, "-y"])
         assert result.exit_code == 0
@@ -388,7 +388,7 @@ class TestServerGroups:
     def test_delete(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_compute_mock(mock_client)
+        _ = _setup_compute_mock(mock_client)
 
         result = invoke(["server-group", "delete", SG_GROUP_ID, "-y"])
         assert result.exit_code == 0

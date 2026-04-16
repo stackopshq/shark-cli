@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-import os
 import stat
 from pathlib import Path
 
 import click
 
 from orca_cli.core.context import OrcaContext
-from orca_cli.core.output import output_options, print_list, print_detail, console
+from orca_cli.core.output import console, output_options, print_detail, print_list
 
 _DEFAULT_KEY_DIR = Path.home() / ".ssh"
 
@@ -119,8 +118,8 @@ def keypair_create(ctx: click.Context, name: str, save_to: str | None) -> None:
         dest.chmod(stat.S_IRUSR | stat.S_IWUSR)  # 600
 
         console.print(f"  [cyan]Private key saved to:[/cyan] {dest}")
-        console.print(f"  [dim]Permissions set to 600.[/dim]")
-        console.print(f"\n[bold yellow]This private key will NOT be shown again.[/bold yellow]")
+        console.print("  [dim]Permissions set to 600.[/dim]")
+        console.print("\n[bold yellow]This private key will NOT be shown again.[/bold yellow]")
         console.print(f"\n  ssh -i {dest} <user>@<ip>\n")
     else:
         console.print("[yellow]No private key returned (unexpected).[/yellow]")

@@ -12,7 +12,6 @@ import yaml
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 
-
 # ── Helpers ──────────────────────────────────────────────────────────────
 
 
@@ -668,8 +667,8 @@ def stack_diff(ctx: click.Context, stack_name_or_id: str, template_path: str) ->
         return
 
     # Count changes
-    additions = sum(1 for l in diff if l.startswith("+") and not l.startswith("+++"))
-    removals = sum(1 for l in diff if l.startswith("-") and not l.startswith("---"))
+    additions = sum(1 for item in diff if item.startswith("+") and not item.startswith("+++"))
+    removals = sum(1 for item in diff if item.startswith("-") and not item.startswith("---"))
 
     diff_text = "".join(diff)
     console.print(Syntax(diff_text, "diff", theme="monokai"))

@@ -2,12 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
-
-import pytest
-
 from orca_cli.core.exceptions import APIError
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Shared helpers
@@ -62,12 +57,18 @@ def _setup_happy_path(mock_client, sg_data=None):
     mock_client._token_data = _base_token()
 
     def _get(url, **kw):
-        if "nova" in url and "limits" in url:   return _limits()
-        if "cinder" in url and "limits" in url: return _vol_limits()
-        if "quotas" in url and PRJ_ID in url:   return _net_quota()
-        if "quotas/defaults" in url:            return {}
-        if "security-groups" in url:            return sg_data or _sg()
-        if "images" in url:                     return {"images": []}
+        if "nova" in url and "limits" in url:
+            return _limits()
+        if "cinder" in url and "limits" in url:
+            return _vol_limits()
+        if "quotas" in url and PRJ_ID in url:
+            return _net_quota()
+        if "quotas/defaults" in url:
+            return {}
+        if "security-groups" in url:
+            return sg_data or _sg()
+        if "images" in url:
+            return {"images": []}
         return {}
 
     mock_client.get.side_effect = _get
@@ -158,11 +159,16 @@ class TestDoctorServiceIsolation:
         def _get(url, **kw):
             if "nova" in url:
                 raise APIError(503, "Service unavailable")
-            if "cinder" in url and "limits" in url: return _vol_limits()
-            if "quotas" in url and PRJ_ID in url:   return _net_quota()
-            if "quotas/defaults" in url:            return {}
-            if "security-groups" in url:            return _sg()
-            if "images" in url:                     return {"images": []}
+            if "cinder" in url and "limits" in url:
+                return _vol_limits()
+            if "quotas" in url and PRJ_ID in url:
+                return _net_quota()
+            if "quotas/defaults" in url:
+                return {}
+            if "security-groups" in url:
+                return _sg()
+            if "images" in url:
+                return {"images": []}
             return {}
 
         mock_client.get.side_effect = _get
@@ -184,9 +190,12 @@ class TestDoctorServiceIsolation:
         def _get(url, **kw):
             if "neutron" in url:
                 raise APIError(503, "Service unavailable")
-            if "nova" in url and "limits" in url:   return _limits()
-            if "cinder" in url and "limits" in url: return _vol_limits()
-            if "images" in url:                     return {"images": []}
+            if "nova" in url and "limits" in url:
+                return _limits()
+            if "cinder" in url and "limits" in url:
+                return _vol_limits()
+            if "images" in url:
+                return {"images": []}
             return {}
 
         mock_client.get.side_effect = _get
@@ -214,11 +223,16 @@ class TestDoctorQuotaThresholds:
         def _get(url, **kw):
             if "nova" in url and "limits" in url:
                 return _limits(inst=inst, inst_max=inst_max)
-            if "cinder" in url and "limits" in url: return _vol_limits()
-            if "quotas" in url and PRJ_ID in url:   return _net_quota()
-            if "quotas/defaults" in url:            return {}
-            if "security-groups" in url:            return _sg()
-            if "images" in url:                     return {"images": []}
+            if "cinder" in url and "limits" in url:
+                return _vol_limits()
+            if "quotas" in url and PRJ_ID in url:
+                return _net_quota()
+            if "quotas/defaults" in url:
+                return {}
+            if "security-groups" in url:
+                return _sg()
+            if "images" in url:
+                return {"images": []}
             return {}
 
         mock_client.get.side_effect = _get
@@ -290,12 +304,18 @@ class TestDoctorFix:
         mock_client.post.return_value = {}
 
         def _get(url, **kw):
-            if "nova" in url and "limits" in url:   return _limits()
-            if "cinder" in url and "limits" in url: return _vol_limits()
-            if "quotas" in url and PRJ_ID in url:   return _net_quota()
-            if "quotas/defaults" in url:            return {}
-            if "security-groups" in url:            return _sg(has_ssh=False, has_icmp=False)
-            if "images" in url:                     return {"images": []}
+            if "nova" in url and "limits" in url:
+                return _limits()
+            if "cinder" in url and "limits" in url:
+                return _vol_limits()
+            if "quotas" in url and PRJ_ID in url:
+                return _net_quota()
+            if "quotas/defaults" in url:
+                return {}
+            if "security-groups" in url:
+                return _sg(has_ssh=False, has_icmp=False)
+            if "images" in url:
+                return {"images": []}
             return {}
 
         mock_client.get.side_effect = _get

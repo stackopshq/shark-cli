@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import click
-import pytest
 from click.testing import CliRunner
 
 from orca_cli.core import wizard as wiz
@@ -63,12 +62,18 @@ def _mock_client_for_server():
     mc.volume_url  = "https://cinder.example.com/v3"
 
     def _get(url, **kw):
-        if "images" in url:            return {"images": _images()}
-        if "flavors/detail" in url:    return {"flavors": _flavors()}
-        if "v2.0/networks" in url:     return {"networks": _networks()}
-        if "os-keypairs" in url:       return {"keypairs": _keypairs()}
-        if "security-groups" in url:   return {"security_groups": _sgs()}
-        if "limits" in url:            return _limits()
+        if "images" in url:
+            return {"images": _images()}
+        if "flavors/detail" in url:
+            return {"flavors": _flavors()}
+        if "v2.0/networks" in url:
+            return {"networks": _networks()}
+        if "os-keypairs" in url:
+            return {"keypairs": _keypairs()}
+        if "security-groups" in url:
+            return {"security_groups": _sgs()}
+        if "limits" in url:
+            return _limits()
         return {}
 
     mc.get.side_effect = _get
@@ -82,8 +87,10 @@ def _mock_client_for_volume():
     mc.volume_url  = "https://cinder.example.com/v3"
 
     def _get(url, **kw):
-        if "types" in url: return {"volume_types": _vtypes()}
-        if "limits" in url: return _limits()
+        if "types" in url:
+            return {"volume_types": _vtypes()}
+        if "limits" in url:
+            return _limits()
         return {}
 
     mc.get.side_effect = _get
@@ -434,9 +441,12 @@ def _setup_doctor(mock_client, sg_data=None):
                 "floatingip":     {"used": 2,  "limit": 10},
                 "security_group": {"used": 3,  "limit": 20},
             }}
-        if "quotas/defaults" in url: return {}
-        if "security-groups" in url: return sg_data or _sg()
-        if "images" in url:          return {"images": []}
+        if "quotas/defaults" in url:
+            return {}
+        if "security-groups" in url:
+            return sg_data or _sg()
+        if "images" in url:
+            return {"images": []}
         return {}
 
     mock_client.get.side_effect = _get
@@ -492,12 +502,18 @@ def _setup(mock_client):
     mock_client.volume_url  = "https://cinder.example.com/v3"
 
     def _get(url, **kw):
-        if "images" in url:            return {"images": _images()}
-        if "flavors/detail" in url:    return {"flavors": _flavors()}
-        if "v2.0/networks" in url:     return {"networks": _networks()}
-        if "os-keypairs" in url:       return {"keypairs": _keypairs()}
-        if "security-groups" in url:   return {"security_groups": _sgs()}
-        if "limits" in url:            return _limits()
+        if "images" in url:
+            return {"images": _images()}
+        if "flavors/detail" in url:
+            return {"flavors": _flavors()}
+        if "v2.0/networks" in url:
+            return {"networks": _networks()}
+        if "os-keypairs" in url:
+            return {"keypairs": _keypairs()}
+        if "security-groups" in url:
+            return {"security_groups": _sgs()}
+        if "limits" in url:
+            return _limits()
         return {}
 
     mock_client.get.side_effect = _get
@@ -510,8 +526,10 @@ def _setup_vol(mock_client):
     mock_client.volume_url  = "https://cinder.example.com/v3"
 
     def _get(url, **kw):
-        if "types" in url:  return {"volume_types": _vtypes()}
-        if "limits" in url: return _limits()
+        if "types" in url:
+            return {"volume_types": _vtypes()}
+        if "limits" in url:
+            return _limits()
         return {}
 
     mock_client.get.side_effect = _get

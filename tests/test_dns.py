@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-import json
-
 from orca_cli.core.config import save_profile, set_active_profile
-
 
 # ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -432,8 +429,8 @@ class TestZoneTree:
                        records=["10 mail.example.com."]),
         ]
 
-        call_count = {"n": 0}
-        original_get = mock_client.get
+        _ = {"n": 0}
+        _ = mock_client.get
 
         def _get(url, **kwargs):
             if "/recordsets" in url:

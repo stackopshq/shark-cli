@@ -4,10 +4,7 @@ from __future__ import annotations
 
 import json
 
-import yaml
-
 from orca_cli.core.config import save_profile, set_active_profile
-
 
 # ── Helpers ────────────────────────────────────────────────────────────────
 

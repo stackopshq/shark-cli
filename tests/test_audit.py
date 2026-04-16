@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-import pytest
-
 from orca_cli.core.config import save_profile, set_active_profile
-
 
 # ── Helpers ────────────────────────────────────────────────────────────────
 

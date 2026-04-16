@@ -48,11 +48,9 @@ def ip_whois(ctx: click.Context, address: str) -> None:
 
         # ── Ports ────────────────────────────────────────────────────
         ports = client.get(f"{client.network_url}/v2.0/ports").get("ports", [])
-        port_match = None
         for p in ports:
             for ip in p.get("fixed_ips", []):
                 if ip.get("ip_address") == address:
-                    port_match = p
                     owner = p.get("device_owner", "") or "unbound"
                     dev_id = p.get("device_id", "") or "—"
                     mac = p.get("mac_address", "")

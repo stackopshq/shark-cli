@@ -7,7 +7,6 @@ import click
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console
 
-
 _DANGEROUS_PORTS = {22, 3389, 3306, 5432, 6379, 27017, 9200, 11211}
 _DANGEROUS_LABELS = {
     22: "SSH", 3389: "RDP", 3306: "MySQL", 5432: "PostgreSQL",
@@ -88,7 +87,7 @@ def audit(ctx: click.Context) -> None:
             # Server in error
             if srv.get("status") == "ERROR":
                 findings.append(("LOW", f"Server: {srv_name}", srv_id,
-                                 f"Server in ERROR state"))
+                                 "Server in ERROR state"))
 
             # Check if server has floating IP (publicly reachable)
             has_floating = False

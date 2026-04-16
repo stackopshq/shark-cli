@@ -12,7 +12,6 @@ from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
 
-
 # ── Helpers ──────────────────────────────────────────────────────────────
 
 _ACTION_COLORS: dict[str, str] = {

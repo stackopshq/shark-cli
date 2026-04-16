@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from orca_cli.core.config import save_profile, set_active_profile
 
-
 # ── Helpers ────────────────────────────────────────────────────────────────
 
 CLUSTER_ID = "11112222-3333-4444-5555-666677778888"
@@ -191,7 +190,7 @@ class TestClusterResize:
     def test_resize(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["cluster", "resize", CLUSTER_ID, "--node-count", "5"])
         assert result.exit_code == 0

@@ -178,7 +178,7 @@ def zone_set(ctx: click.Context, zone: str, email: str | None,
         console.print("[yellow]Nothing to update — provide at least one option.[/yellow]")
         return
 
-    data = client.patch(f"{_dns(client)}/v2/zones/{zone_id}", json=body)
+    client.patch(f"{_dns(client)}/v2/zones/{zone_id}", json=body)
     console.print(f"[green]Zone {zone_id} updated.[/green]")
 
 

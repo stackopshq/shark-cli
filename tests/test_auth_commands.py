@@ -4,10 +4,7 @@ from __future__ import annotations
 
 import json
 
-import pytest
-
 from orca_cli.core.config import save_profile, set_active_profile
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  whoami
@@ -255,8 +252,9 @@ class TestCheck:
         save_profile("prod", sample_profile)
         set_active_profile("prod")
 
-        from tests.conftest import make_mock_client
         from unittest.mock import patch
+
+        from tests.conftest import make_mock_client
 
         with patch("orca_cli.core.client.OrcaClient") as mock_cls:
             mock_cls.return_value = make_mock_client()
@@ -270,8 +268,9 @@ class TestCheck:
         save_profile("staging", {**sample_profile, "username": "stage-user"})
         set_active_profile("prod")
 
-        from tests.conftest import make_mock_client
         from unittest.mock import patch
+
+        from tests.conftest import make_mock_client
 
         with patch("orca_cli.core.client.OrcaClient") as mock_cls:
             mock_cls.return_value = make_mock_client()
@@ -300,6 +299,7 @@ class TestCheck:
         set_active_profile("prod")
 
         from unittest.mock import patch
+
         from orca_cli.core.exceptions import AuthenticationError
 
         with patch("orca_cli.core.client.OrcaClient") as mock_cls:
@@ -313,8 +313,9 @@ class TestCheck:
         save_profile("prod", sample_profile)
         set_active_profile("prod")
 
-        from tests.conftest import make_mock_client
         from unittest.mock import patch
+
+        from tests.conftest import make_mock_client
 
         with patch("orca_cli.core.client.OrcaClient") as mock_cls:
             mock_cls.return_value = make_mock_client()
@@ -328,8 +329,9 @@ class TestCheck:
         save_profile("prod", sample_profile)
         set_active_profile("prod")
 
-        from tests.conftest import make_mock_client
         from unittest.mock import patch
+
+        from tests.conftest import make_mock_client
 
         with patch("orca_cli.core.client.OrcaClient") as mock_cls:
             mock_cls.return_value = make_mock_client()
@@ -345,8 +347,9 @@ class TestCheck:
         save_profile("bad", {"auth_url": "https://ks:5000", "username": "u"})
         set_active_profile("good")
 
-        from tests.conftest import make_mock_client
         from unittest.mock import patch
+
+        from tests.conftest import make_mock_client
 
         with patch("orca_cli.core.client.OrcaClient") as mock_cls:
             mock_cls.return_value = make_mock_client()
@@ -363,6 +366,7 @@ class TestCheck:
         set_active_profile("p1")
 
         from unittest.mock import patch
+
         from orca_cli.core.exceptions import AuthenticationError
 
         with patch("orca_cli.core.client.OrcaClient") as mock_cls:
@@ -377,8 +381,9 @@ class TestCheck:
         save_profile("prod", sample_profile)
         set_active_profile("prod")
 
-        from tests.conftest import make_mock_client
         from unittest.mock import patch
+
+        from tests.conftest import make_mock_client
 
         with patch("orca_cli.core.client.OrcaClient") as mock_cls:
             mock_cls.return_value = make_mock_client()
@@ -409,8 +414,9 @@ class TestCheck:
             }
         })
 
-        from tests.conftest import make_mock_client
         from unittest.mock import patch
+
+        from tests.conftest import make_mock_client
 
         with patch("orca_cli.core.client.OrcaClient") as mock_cls:
             mock_cls.return_value = make_mock_client()

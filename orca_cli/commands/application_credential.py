@@ -5,7 +5,7 @@ from __future__ import annotations
 import click
 
 from orca_cli.core.context import OrcaContext
-from orca_cli.core.output import output_options, print_list, print_detail, console
+from orca_cli.core.output import console, output_options, print_detail, print_list
 
 
 def _iam(client) -> str:
@@ -98,7 +98,7 @@ def app_credential_create(ctx, name, description, secret, expires_at, unrestrict
     console.print(f"[green]Application credential '{a.get('name')}' ({a.get('id')}) created.[/green]")
     if a.get("secret"):
         console.print(f"  [cyan]Secret:[/cyan] {a['secret']}")
-        console.print(f"  [bold yellow]This secret will NOT be shown again.[/bold yellow]")
+        console.print("  [bold yellow]This secret will NOT be shown again.[/bold yellow]")
 
 
 @application_credential.command("delete")

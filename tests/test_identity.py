@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from orca_cli.core.config import save_profile, set_active_profile
 
-
 # ── Fixtures ───────────────────────────────────────────────────────────────
 
 USER_ID   = "11112222-3333-4444-5555-666677778888"
@@ -166,7 +165,7 @@ class TestUserCreate:
     def test_create(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["user", "create", "alice",
                          "--password", "secret", "--email", "alice@example.com"])
@@ -179,7 +178,7 @@ class TestUserUpdate:
     def test_update(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["user", "set", USER_ID, "--email", "new@example.com"])
         assert result.exit_code == 0
@@ -213,7 +212,7 @@ class TestUserSetPassword:
     def test_set_password(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["user", "set-password", USER_ID, "--password", "newpass"])
         assert result.exit_code == 0
@@ -298,7 +297,7 @@ class TestProjectDelete:
     def test_delete(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["project", "delete", PROJECT_ID, "-y"])
         assert result.exit_code == 0
@@ -372,7 +371,7 @@ class TestDomainDelete:
     def test_delete(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["domain", "delete", DOMAIN_ID, "-y"])
         assert result.exit_code == 0
@@ -425,7 +424,7 @@ class TestRoleDelete:
     def test_delete(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["role", "delete", ROLE_ID, "-y"])
         assert result.exit_code == 0
@@ -448,7 +447,7 @@ class TestRoleAdd:
     def test_remove_from_project(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["role", "remove",
                          "--user", USER_ID, "--project", PROJECT_ID, ROLE_ID])
@@ -551,7 +550,7 @@ class TestGroupDelete:
     def test_delete(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["group", "delete", GROUP_ID, "-y"])
         assert result.exit_code == 0
@@ -573,7 +572,7 @@ class TestGroupUsers:
     def test_remove_user(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["group", "remove-user", GROUP_ID, USER_ID])
         assert result.exit_code == 0
@@ -627,7 +626,7 @@ class TestApplicationCredentials:
     def test_delete(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["application-credential", "delete", CRED_ID, "-y"])
         assert result.exit_code == 0

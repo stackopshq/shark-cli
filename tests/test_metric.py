@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from orca_cli.core.config import save_profile, set_active_profile
 
-
 # ── Helpers ────────────────────────────────────────────────────────────────
 
 METRIC_ID = "11112222-3333-4444-5555-666677778888"

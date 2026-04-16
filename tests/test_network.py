@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from orca_cli.core.config import save_profile, set_active_profile
 
-
 # ── Helpers ────────────────────────────────────────────────────────────────
 
 NET_ID = "11112222-3333-4444-5555-666677778888"
@@ -164,7 +163,7 @@ class TestNetworks:
     def test_update(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["network", "update", NET_ID, "--name", "renamed"])
         assert result.exit_code == 0
@@ -182,7 +181,7 @@ class TestNetworks:
     def test_delete(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["network", "delete", NET_ID, "-y"])
         assert result.exit_code == 0
@@ -217,7 +216,7 @@ class TestSubnets:
     def test_subnet_create(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["network", "subnet-create", "new-sub",
                          "--network-id", NET_ID, "--cidr", "10.0.1.0/24"])
@@ -241,7 +240,7 @@ class TestSubnets:
     def test_subnet_delete(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["network", "subnet-delete", SUB_ID, "-y"])
         assert result.exit_code == 0
@@ -275,7 +274,7 @@ class TestPorts:
     def test_port_create(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["network", "port-create", "--network-id", NET_ID])
         assert result.exit_code == 0
@@ -284,7 +283,7 @@ class TestPorts:
     def test_port_update(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["network", "port-update", PORT_ID, "--name", "renamed"])
         assert result.exit_code == 0
@@ -293,7 +292,7 @@ class TestPorts:
     def test_port_delete(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["network", "port-delete", PORT_ID, "-y"])
         assert result.exit_code == 0
@@ -328,7 +327,7 @@ class TestRouters:
     def test_router_create(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["network", "router-create", "new-rtr"])
         assert result.exit_code == 0
@@ -347,7 +346,7 @@ class TestRouters:
     def test_router_delete(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["network", "router-delete", RTR_ID, "-y"])
         assert result.exit_code == 0
@@ -356,7 +355,7 @@ class TestRouters:
     def test_router_add_interface(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["network", "router-add-interface", RTR_ID,
                          "--subnet-id", SUB_ID])
@@ -366,7 +365,7 @@ class TestRouters:
     def test_router_remove_interface(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["network", "router-remove-interface", RTR_ID,
                          "--subnet-id", SUB_ID])

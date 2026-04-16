@@ -6,7 +6,6 @@ from unittest.mock import MagicMock
 
 from orca_cli.core.config import save_profile, set_active_profile
 
-
 # ── Helpers ────────────────────────────────────────────────────────────────
 
 SECRET_ID = "11112222-3333-4444-5555-666677778888"
@@ -62,7 +61,7 @@ def _setup_mock(mock_client):
     def _post(url, **kwargs):
         body = kwargs.get("json", {})
         posted.update(body)
-        return {"secret_ref": f"https://barbican.example.com/v1/secrets/new-id"}
+        return {"secret_ref": "https://barbican.example.com/v1/secrets/new-id"}
 
     def _delete(url, **kwargs):
         deleted.append(url)
@@ -250,7 +249,7 @@ class TestContainerDelete:
     def test_delete(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["secret", "container-delete", CONTAINER_ID, "-y"])
         assert result.exit_code == 0

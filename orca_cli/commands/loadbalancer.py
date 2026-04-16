@@ -141,10 +141,10 @@ def listener_list(ctx: click.Context, output_format: str, columns: tuple[str, ..
         listeners,
         [
             ("ID", "id", {"style": "cyan", "no_wrap": True}),
-            ("Name", lambda l: l.get("name", "") or "—", {"style": "bold"}),
+            ("Name", lambda item: item.get("name", "") or "—", {"style": "bold"}),
             ("Protocol", "protocol"),
-            ("Port", lambda l: str(l.get("protocol_port", "")), {"justify": "right"}),
-            ("LB ID", lambda l: (l.get("loadbalancers") or [{}])[0].get("id", "") if l.get("loadbalancers") else ""),
+            ("Port", lambda item: str(item.get("protocol_port", "")), {"justify": "right"}),
+            ("LB ID", lambda item: (item.get("loadbalancers") or [{}])[0].get("id", "") if item.get("loadbalancers") else ""),
             ("Status", "provisioning_status", {"style": "green"}),
         ],
         title="Listeners",
@@ -174,8 +174,8 @@ def listener_create(ctx: click.Context, name: str, loadbalancer_id: str,
     if default_pool_id:
         body["default_pool_id"] = default_pool_id
     data = client.post(f"{_octavia(client)}/v2/lbaas/listeners", json={"listener": body})
-    l = data.get("listener", data)
-    console.print(f"[green]Listener '{l.get('name')}' ({l.get('id')}) created on port {protocol_port}.[/green]")
+    listener = data.get("listener", data)
+    console.print(f"[green]Listener '{listener.get('name')}' ({listener.get('id')}) created on port {protocol_port}.[/green]")
 
 
 @loadbalancer.command("listener-show")
@@ -186,10 +186,10 @@ def listener_show(ctx: click.Context, listener_id: str, output_format: str, colu
     """Show listener details."""
     client = ctx.find_object(OrcaContext).ensure_client()
     data = client.get(f"{_octavia(client)}/v2/lbaas/listeners/{listener_id}")
-    l = data.get("listener", data)
+    listener = data.get("listener", data)
 
     fields = [
-        (key, str(l.get(key, "")))
+        (key, str(listener.get(key, "")))
         for key in [
             "id", "name", "protocol", "protocol_port", "default_pool_id",
             "connection_limit", "provisioning_status", "operating_status",

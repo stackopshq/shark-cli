@@ -363,7 +363,7 @@ def server_create(
 
     cache.invalidate(orca_ctx.profile, "servers")
 
-    console.print(f"\n[bold green]Server created successfully![/bold green]")
+    console.print("\n[bold green]Server created successfully![/bold green]")
     console.print(f"  [cyan]ID:[/cyan]       {srv_id}")
     console.print(f"  [cyan]Name:[/cyan]     {name}")
     console.print(f"  [cyan]Disk:[/cyan]     {disk_size} GB (boot volume)")
@@ -400,7 +400,7 @@ def server_delete(ctx: click.Context, server_id: str, yes: bool, dry_run: bool, 
     if dry_run:
         data = client.get(url)
         srv = data.get("server", data)
-        console.print(f"[yellow]Would delete server:[/yellow]")
+        console.print("[yellow]Would delete server:[/yellow]")
         console.print(f"  ID:     {srv.get('id', server_id)}")
         console.print(f"  Name:   {srv.get('name', '—')}")
         console.print(f"  Status: {srv.get('status', '—')}")
@@ -1023,7 +1023,7 @@ def server_console_url(ctx: click.Context, server_id: str, console_type: str,
         webbrowser.open(console_url)
         console.print("[dim]  → Opening in default browser…[/dim]")
     else:
-        console.print(f"\n[dim]Tip: use --open to launch in browser automatically.[/dim]")
+        console.print("\n[dim]Tip: use --open to launch in browser automatically.[/dim]")
     console.print()
 
 
@@ -1088,7 +1088,6 @@ def server_ssh(ctx: click.Context, server_id: str, ssh_user: str | None, key_pat
 
     # Auto-detect user from image metadata
     if not ssh_user:
-        image_name = srv.get("image", {}).get("id", "") if isinstance(srv.get("image"), dict) else ""
         ssh_user = "root"
 
     # Find SSH key
@@ -1521,7 +1520,7 @@ def server_diff(ctx: click.Context, server_a: str, server_b: str) -> None:
     if diffs:
         console.print(f"\n  [red]{diffs} difference(s)[/red]\n")
     else:
-        console.print(f"\n  [green]Servers are identical.[/green]\n")
+        console.print("\n  [green]Servers are identical.[/green]\n")
 
 
 # ── port-forward (SSH tunnel) ───────────────────────────────────────────
@@ -1638,9 +1637,9 @@ def server_port_forward(
     if bg:
         import subprocess
         subprocess.Popen(cmd)
-        console.print(f"[green]Tunnel started in background.[/green]")
+        console.print("[green]Tunnel started in background.[/green]")
     else:
-        console.print(f"[dim]Press Ctrl+C to stop the tunnel.[/dim]")
+        console.print("[dim]Press Ctrl+C to stop the tunnel.[/dim]")
         os.execvp("ssh", cmd)
 
 
@@ -1793,6 +1792,7 @@ def server_metadata_list(ctx: click.Context, server_id: str) -> None:
         console.print("[yellow]No metadata set.[/yellow]")
         return
     from rich.table import Table
+
     from orca_cli.core.output import console as _console
     table = Table(title="Server Metadata", show_lines=False)
     table.add_column("Key", style="bold")

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from orca_cli.core.config import save_profile, set_active_profile
 
-
 # ── Helpers ────────────────────────────────────────────────────────────────
 
 SRV_ID = "11112222-3333-4444-5555-666677778888"
@@ -225,7 +224,7 @@ class TestServerActions:
     def test_start(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["server", "start", SRV_ID])
         assert result.exit_code == 0
@@ -359,7 +358,7 @@ class TestServerResize:
     def test_resize(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["server", "resize", SRV_ID, "--flavor", "m1.large"])
         assert result.exit_code == 0
@@ -411,7 +410,7 @@ class TestServerRename:
     def test_rename(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["server", "rename", SRV_ID, "new-name"])
         assert result.exit_code == 0
@@ -454,7 +453,7 @@ class TestServerVolumes:
     def test_detach_volume(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["server", "detach-volume", SRV_ID, VOL_ID])
         assert result.exit_code == 0
@@ -497,7 +496,7 @@ class TestServerInterfaces:
     def test_detach_interface(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["server", "detach-interface", SRV_ID, PORT_ID])
         assert result.exit_code == 0
@@ -774,7 +773,7 @@ class TestServerPortNetwork:
         assert "removed" in result.output
 
     def test_remove_network_not_found(self, invoke, mock_client):
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
         result = invoke(["server", "remove-network", SRV_ID, "no-such-net"])
         assert result.exit_code == 0
         assert "No interfaces found" in result.output

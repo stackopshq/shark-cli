@@ -6,7 +6,6 @@ from unittest.mock import MagicMock
 
 from orca_cli.core.config import save_profile, set_active_profile
 
-
 # ── Helpers ────────────────────────────────────────────────────────────────
 
 
@@ -28,7 +27,7 @@ def _setup_mock(mock_client):
     mock_client._http = http
 
     deleted = []
-    posted = {}
+    _ = {}
 
     def _get(url, **kwargs):
         # Container list (account level)
@@ -192,7 +191,7 @@ class TestContainerDelete:
     def test_delete(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["container", "delete", "old-bucket"])
         assert result.exit_code == 0
@@ -314,7 +313,7 @@ class TestContainerUnset:
     def test_unset_metadata(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         posted_headers = {}
 

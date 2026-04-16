@@ -36,7 +36,6 @@ def doctor(ctx: click.Context, fix: bool, cidr: str | None) -> None:
       Yellow 70–90%  — monitor closely
       Red    ≥ 90%   — critical, next deploy may fail
     """
-    from rich.table import Table
 
     orca_ctx = ctx.find_object(OrcaContext)
     client = orca_ctx.ensure_client()
@@ -88,13 +87,11 @@ def doctor(ctx: click.Context, fix: bool, cidr: str | None) -> None:
             _fix_cidr = select_cidr()
 
     # ── 1. Auth check — gates all subsequent checks ────────────────────────
-    auth_ok = False
     try:
         td = client._token_data
         user = td.get("user", {}).get("name", "unknown")
         project = td.get("project", {}).get("name", "unknown")
         _ok("Authentication", f"Authenticated as [bold]{user}[/bold] in project [bold]{project}[/bold]")
-        auth_ok = True
     except Exception as exc:
         _error("Authentication", f"Token data unavailable: {exc}")
         _info("Remaining checks", "Skipped — fix authentication first")
@@ -270,9 +267,9 @@ def _render(issues: list[tuple[str, str, str]], *, fix: bool) -> None:
     console.print(table)
     console.print()
 
-    errors = sum(1 for l, _, _ in issues if l == "ERROR")
-    warns  = sum(1 for l, _, _ in issues if l == "WARN")
-    oks    = sum(1 for l, _, _ in issues if l == "OK")
+    errors = sum(1 for level, _, _ in issues if level == "ERROR")
+    warns  = sum(1 for level, _, _ in issues if level == "WARN")
+    oks    = sum(1 for level, _, _ in issues if level == "OK")
 
     if errors:
         console.print(

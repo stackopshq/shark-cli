@@ -517,7 +517,7 @@ def allocation_candidate_list(ctx, resources, required_traits, forbidden_traits,
         if "=" not in item:
             raise click.BadParameter(f"Expected CLASS=AMOUNT, got '{item}'.", param_hint="--resource")
         rc, _, amount = item.partition("=")
-        params[f"resources"] = params.get("resources", "") + (
+        params["resources"] = params.get("resources", "") + (
             "," if params.get("resources") else ""
         ) + f"{rc.strip()}:{amount.strip()}"
     if required_traits:

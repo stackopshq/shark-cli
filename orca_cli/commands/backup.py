@@ -5,7 +5,7 @@ from __future__ import annotations
 import click
 
 from orca_cli.core.context import OrcaContext
-from orca_cli.core.output import output_options, print_list, print_detail, console
+from orca_cli.core.output import console, output_options, print_detail, print_list
 
 
 def _freezer(client) -> str:
@@ -172,10 +172,10 @@ def job_show(ctx: click.Context, job_id: str, output_format: str,
         for i, a in enumerate(actions):
             fa = a.get("freezer_action", {})
             fields.append((f"  Action {i + 1}", fa.get("action", "")))
-            fields.append((f"  Path", fa.get("path_to_backup", "") or fa.get("restore_abs_path", "") or "—"))
-            fields.append((f"  Container", fa.get("container", "") or "—"))
-            fields.append((f"  Storage", fa.get("storage", "") or "—"))
-            fields.append((f"  Mode", fa.get("mode", "") or "—"))
+            fields.append(("  Path", fa.get("path_to_backup", "") or fa.get("restore_abs_path", "") or "—"))
+            fields.append(("  Container", fa.get("container", "") or "—"))
+            fields.append(("  Storage", fa.get("storage", "") or "—"))
+            fields.append(("  Mode", fa.get("mode", "") or "—"))
 
     print_detail(fields, output_format=output_format, fit_width=fit_width,
                  max_width=max_width, noindent=noindent, columns=columns)

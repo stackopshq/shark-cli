@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from orca_cli.core.config import save_profile, set_active_profile
 
-
 # ── Helpers ────────────────────────────────────────────────────────────────
 
 FIP_ID = "11112222-3333-4444-5555-666677778888"
@@ -184,7 +183,7 @@ class TestFipDelete:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["floating-ip", "delete", FIP_ID], input="n\n")
+        _ = invoke(["floating-ip", "delete", FIP_ID], input="n\n")
         assert len(state["deleted"]) == 0
 
 
@@ -355,7 +354,7 @@ class TestFipBulkRelease:
     def test_bulk_release_by_status(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client, fips=[
+        _ = _setup_mock(mock_client, fips=[
             _fip(status="ERROR"),
             _fip(fip_id=FIP_ID2, ip="203.0.113.20", status="ERROR"),
         ])
@@ -367,7 +366,7 @@ class TestFipBulkRelease:
     def test_bulk_release_unassociated(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client, fips=[
+        _ = _setup_mock(mock_client, fips=[
             _fip(port_id=None, status="ACTIVE"),
             _fip(fip_id=FIP_ID2, ip="203.0.113.20", port_id=PORT_ID, status="ACTIVE"),
         ])
@@ -390,7 +389,7 @@ class TestFipBulkRelease:
         set_active_profile("p")
         state = _setup_mock(mock_client, fips=[_fip(status="DOWN")])
 
-        result = invoke(["floating-ip", "bulk-release"], input="n\n")
+        _ = invoke(["floating-ip", "bulk-release"], input="n\n")
         assert len(state["deleted"]) == 0
 
     def test_bulk_release_handles_failure(self, invoke, config_dir, mock_client, sample_profile):

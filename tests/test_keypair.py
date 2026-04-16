@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from orca_cli.core.config import save_profile, set_active_profile
 
-
 # ── Helpers ────────────────────────────────────────────────────────────────
 
 
@@ -242,7 +241,7 @@ class TestKeypairDelete:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["keypair", "delete", "old-key"], input="n\n")
+        _ = invoke(["keypair", "delete", "old-key"], input="n\n")
         assert len(state["deleted"]) == 0
 
 

@@ -5,11 +5,11 @@ from __future__ import annotations
 from pathlib import Path
 
 import click
-from rich.progress import Progress, BarColumn, DownloadColumn, TransferSpeedColumn, TimeRemainingColumn
+from rich.progress import BarColumn, DownloadColumn, Progress, TimeRemainingColumn, TransferSpeedColumn
 
+from orca_cli.core.client import APIError, AuthenticationError
 from orca_cli.core.context import OrcaContext
-from orca_cli.core.client import AuthenticationError, APIError
-from orca_cli.core.output import output_options, print_list, print_detail, console
+from orca_cli.core.output import console, output_options, print_detail, print_list
 
 CHUNK_SIZE = 64 * 1024  # 64 KB
 
@@ -114,7 +114,7 @@ def image_create(ctx: click.Context, name: str, disk_format: str, container_form
         upload_url = f"{client.image_url}/v2/images/{image_id}/file"
         with open(p, "rb") as f:
             client.put_stream(upload_url, stream=f)
-        console.print(f"  [green]Upload complete.[/green]")
+        console.print("  [green]Upload complete.[/green]")
 
 
 @image.command("update")
@@ -210,7 +210,7 @@ def image_upload(ctx: click.Context, image_id: str, file_path: str) -> None:
     if not resp.is_success:
         raise APIError(resp.status_code, resp.text[:300])
 
-    console.print(f"[green]Upload complete.[/green]")
+    console.print("[green]Upload complete.[/green]")
 
 
 @image.command("stage")
@@ -499,7 +499,7 @@ def image_shrink(ctx: click.Context, image_id: str, yes: bool) -> None:
     # Deactivate original
     client.post(f"{base_url}/{image_id}/actions/deactivate")
 
-    console.print(f"\n[green]Done![/green]")
+    console.print("\n[green]Done![/green]")
     console.print(f"  New image: {new_id} ('{name} (shrunk)')")
     console.print(f"  Original {image_id} has been deactivated (not deleted).")
     console.print(f"  Verify the new image, then run: [cyan]orca image delete {image_id} -y[/cyan]")

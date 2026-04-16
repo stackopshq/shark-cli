@@ -5,7 +5,7 @@ from __future__ import annotations
 import click
 
 from orca_cli.core.context import OrcaContext
-from orca_cli.core.output import console, output_options, print_detail, print_list
+from orca_cli.core.output import console, output_options, print_list
 
 
 @click.group("compute-service")

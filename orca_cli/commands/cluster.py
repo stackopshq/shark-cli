@@ -5,8 +5,7 @@ from __future__ import annotations
 import click
 
 from orca_cli.core.context import OrcaContext
-from orca_cli.core.output import output_options, print_list, print_detail, console
-from orca_cli.core.validators import validate_id
+from orca_cli.core.output import console, output_options, print_detail, print_list
 
 
 def _magnum(client) -> str:
@@ -253,7 +252,7 @@ def template_create(ctx: click.Context, name: str, image_id: str, external_netwo
     if docker_volume_size:
         body["docker_volume_size"] = docker_volume_size
     if labels:
-        body["labels"] = dict(l.split("=", 1) for l in labels)
+        body["labels"] = dict(item.split("=", 1) for item in labels)
 
     data = client.post(f"{_magnum(client)}/clustertemplates", json=body)
     console.print(f"[green]Template '{data.get('name')}' ({data.get('uuid')}) created.[/green]")

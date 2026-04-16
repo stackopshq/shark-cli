@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from orca_cli.core.config import save_profile, set_active_profile
 
-
 # ── Helpers ────────────────────────────────────────────────────────────────
 
 LB_ID = "11112222-3333-4444-5555-666677778888"
@@ -171,7 +170,7 @@ class TestLBCore:
     def test_delete_cascade(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["loadbalancer", "delete", LB_ID, "--cascade", "-y"])
         assert result.exit_code == 0
@@ -206,7 +205,7 @@ class TestListeners:
     def test_listener_create(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["loadbalancer", "listener-create", "lis-1",
                          "--lb-id", LB_ID, "--protocol", "HTTP", "--port", "80"])
@@ -216,7 +215,7 @@ class TestListeners:
     def test_listener_delete(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["loadbalancer", "listener-delete", LISTENER_ID, "-y"])
         assert result.exit_code == 0
@@ -251,7 +250,7 @@ class TestPools:
     def test_pool_create(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["loadbalancer", "pool-create", "my-pool",
                          "--lb-id", LB_ID, "--protocol", "HTTP",
@@ -262,7 +261,7 @@ class TestPools:
     def test_pool_delete(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["loadbalancer", "pool-delete", POOL_ID, "-y"])
         assert result.exit_code == 0
@@ -289,7 +288,7 @@ class TestMembers:
     def test_member_add(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["loadbalancer", "member-add", POOL_ID,
                          "--address", "10.0.0.20", "--port", "8080"])
@@ -299,7 +298,7 @@ class TestMembers:
     def test_member_remove(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["loadbalancer", "member-remove", POOL_ID, MEMBER_ID, "-y"])
         assert result.exit_code == 0
@@ -325,7 +324,7 @@ class TestHealthMonitors:
     def test_hm_create(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["loadbalancer", "healthmonitor-create", "hm-1",
                          "--pool-id", POOL_ID, "--type", "HTTP",
@@ -336,7 +335,7 @@ class TestHealthMonitors:
     def test_hm_delete(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        state = _setup_mock(mock_client)
+        _ = _setup_mock(mock_client)
 
         result = invoke(["loadbalancer", "healthmonitor-delete", HM_ID, "-y"])
         assert result.exit_code == 0
