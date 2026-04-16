@@ -394,6 +394,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#profiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Profiles
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#import-from-cloudsyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Import from clouds.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#environment-variables" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3120,6 +3142,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#profiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Profiles
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#import-from-cloudsyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Import from clouds.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#environment-variables" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3192,7 +3236,7 @@
 <h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Python 3.9+</li>
-<li>A Sharktech Cloud account with API credentials</li>
+<li>An OpenStack account with API credentials</li>
 </ul>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">pip</label><label for="__tabbed_1_2">Poetry</label></div>
@@ -3207,84 +3251,58 @@
 </div>
 </div>
 </div>
-<p>After installation the <code>shark</code> command is available globally.</p>
+<p>After installation the <code>orca</code> command is available globally.</p>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
-<p>You need credentials from your <strong>Sharktech Client Area</strong> (cloud service information page):</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-<th>Example</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Auth URL</strong></td>
-<td>Keystone endpoint</td>
-<td><code>https://cloud-xx.sharktech.net:5000</code></td>
-</tr>
-<tr>
-<td><strong>Username</strong></td>
-<td>OpenStack user</td>
-<td><code>myuser</code></td>
-</tr>
-<tr>
-<td><strong>Password</strong></td>
-<td>OpenStack password</td>
-<td>—</td>
-</tr>
-<tr>
-<td><strong>Domain ID</strong></td>
-<td>OpenStack domain</td>
-<td><code>mydomain</code></td>
-</tr>
-<tr>
-<td><strong>Project ID</strong></td>
-<td>OpenStack project</td>
-<td><code>myproject</code></td>
-</tr>
-</tbody>
-</table>
 <h3 id="interactive-setup">Interactive setup<a class="headerlink" href="#interactive-setup" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>shark<span class="w"> </span>setup
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>orca<span class="w"> </span>setup
 </code></pre></div>
-<p>This prompts for all fields and stores them in <code>~/.shark/config.yaml</code> (permissions <code>600</code>).</p>
+<p>This prompts for all fields and stores them in <code>~/.orca/config.yaml</code> (permissions <code>600</code>).</p>
+<h3 id="profiles">Profiles<a class="headerlink" href="#profiles" title="Permanent link">&para;</a></h3>
+<p>orca supports multiple named profiles for managing several clouds:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>orca<span class="w"> </span>profile<span class="w"> </span>add<span class="w">         </span><span class="c1"># add a new profile interactively</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>orca<span class="w"> </span>profile<span class="w"> </span>list<span class="w">        </span><span class="c1"># list all profiles</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>orca<span class="w"> </span>profile<span class="w"> </span>switch<span class="w"> </span>prod<span class="w"> </span><span class="c1"># switch active profile</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>orca<span class="w"> </span>--profile<span class="w"> </span>dev<span class="w"> </span>server<span class="w"> </span>list<span class="w">  </span><span class="c1"># use a specific profile for one command</span>
+</code></pre></div>
+<h3 id="import-from-cloudsyaml">Import from clouds.yaml<a class="headerlink" href="#import-from-cloudsyaml" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>orca<span class="w"> </span>profile<span class="w"> </span>from-clouds<span class="w"> </span>mycloud
+</code></pre></div>
 <h3 id="environment-variables">Environment variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">SHARK_AUTH_URL</span><span class="o">=</span><span class="s2">&quot;https://cloud-xx.sharktech.net:5000&quot;</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">SHARK_USERNAME</span><span class="o">=</span><span class="s2">&quot;myuser&quot;</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">SHARK_PASSWORD</span><span class="o">=</span><span class="s2">&quot;mypassword&quot;</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="nb">export</span><span class="w"> </span><span class="nv">SHARK_DOMAIN_ID</span><span class="o">=</span><span class="s2">&quot;mydomain&quot;</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="nb">export</span><span class="w"> </span><span class="nv">SHARK_PROJECT_ID</span><span class="o">=</span><span class="s2">&quot;myproject&quot;</span>
+<p>Standard OpenStack <code>OS_*</code> variables are supported:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">OS_AUTH_URL</span><span class="o">=</span><span class="s2">&quot;https://keystone.example.com:5000/v3&quot;</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">OS_USERNAME</span><span class="o">=</span><span class="s2">&quot;myuser&quot;</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">OS_PASSWORD</span><span class="o">=</span><span class="s2">&quot;mypassword&quot;</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="nb">export</span><span class="w"> </span><span class="nv">OS_USER_DOMAIN_NAME</span><span class="o">=</span><span class="s2">&quot;Default&quot;</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="nb">export</span><span class="w"> </span><span class="nv">OS_PROJECT_NAME</span><span class="o">=</span><span class="s2">&quot;myproject&quot;</span>
 </code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>Environment variables <strong>always</strong> take precedence over the config file.</p>
+<p>Priority: <code>--profile</code> flag &gt; <code>OS_*</code> env vars &gt; <code>OS_CLOUD</code> → <code>clouds.yaml</code> &gt; active orca profile.</p>
 </div>
 <h2 id="shell-auto-completion">Shell Auto-Completion<a class="headerlink" href="#shell-auto-completion" title="Permanent link">&para;</a></h2>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Bash</label><label for="__tabbed_2_2">Zsh</label><label for="__tabbed_2_3">Fish</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Add to <code>~/.bashrc</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nb">eval</span><span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span><span class="nv">_SHARK_COMPLETE</span><span class="o">=</span>bash_source<span class="w"> </span>shark<span class="k">)</span><span class="s2">&quot;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nb">eval</span><span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span><span class="nv">_ORCA_COMPLETE</span><span class="o">=</span>bash_source<span class="w"> </span>orca<span class="k">)</span><span class="s2">&quot;</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <p>Add to <code>~/.zshrc</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nb">eval</span><span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span><span class="nv">_SHARK_COMPLETE</span><span class="o">=</span>zsh_source<span class="w"> </span>shark<span class="k">)</span><span class="s2">&quot;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nb">eval</span><span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span><span class="nv">_ORCA_COMPLETE</span><span class="o">=</span>zsh_source<span class="w"> </span>orca<span class="k">)</span><span class="s2">&quot;</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nv">_SHARK_COMPLETE</span><span class="o">=</span>fish_source shark <span class="o">&gt;</span> ~/.config/fish/completions/shark.fish
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nv">_ORCA_COMPLETE</span><span class="o">=</span>fish_source orca <span class="o">&gt;</span> ~/.config/fish/completions/orca.fish
 </code></pre></div>
 </div>
 </div>
 </div>
-<p>You can also run <code>shark completion &lt;shell&gt;</code> to display these instructions.</p>
+<p>You can also run <code>orca completion &lt;shell&gt;</code> to display these instructions.</p>
 <h2 id="verify-installation">Verify Installation<a class="headerlink" href="#verify-installation" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>shark<span class="w"> </span>--version
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>shark<span class="w"> </span>catalog<span class="w">        </span><span class="c1"># List available service endpoints</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>shark<span class="w"> </span>server<span class="w"> </span>list<span class="w">    </span><span class="c1"># List your compute instances</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>orca<span class="w"> </span>--version
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>orca<span class="w"> </span>catalog<span class="w">        </span><span class="c1"># List available service endpoints</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>orca<span class="w"> </span>server<span class="w"> </span>list<span class="w">    </span><span class="c1"># List your compute instances</span>
 </code></pre></div>
 <h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <p>Browse the <a href="../commands/">command reference</a> for detailed usage of each service.</p>

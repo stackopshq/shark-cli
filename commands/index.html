@@ -441,6 +441,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#orca-exclusive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Orca-exclusive
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#common-patterns" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3042,6 +3053,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#orca-exclusive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Orca-exclusive
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#common-patterns" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3101,97 +3123,144 @@
 
 
 <h1 id="command-reference">Command Reference<a class="headerlink" href="#command-reference" title="Permanent link">&para;</a></h1>
-<p><code>shark-cli</code> organises commands by OpenStack service. Every command supports <code>--help</code> for inline documentation.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>shark<span class="w"> </span>--help<span class="w">              </span><span class="c1"># List all command groups</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>shark<span class="w"> </span>server<span class="w"> </span>--help<span class="w">       </span><span class="c1"># List all server sub-commands</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>shark<span class="w"> </span>server<span class="w"> </span>create<span class="w"> </span>--help<span class="w">  </span><span class="c1"># Detailed help for a specific command</span>
+<p><code>orca</code> organises commands by OpenStack service. Every command supports <code>--help</code> for inline documentation.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>orca<span class="w"> </span>--help<span class="w">              </span><span class="c1"># List all command groups</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>orca<span class="w"> </span>server<span class="w"> </span>--help<span class="w">       </span><span class="c1"># List all server sub-commands</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>orca<span class="w"> </span>server<span class="w"> </span>create<span class="w"> </span>--help<span class="w">  </span><span class="c1"># Detailed help for a specific command</span>
 </code></pre></div>
 <h2 id="command-groups">Command Groups<a class="headerlink" href="#command-groups" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
 <th>Group</th>
-<th style="text-align: center;">Commands</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><a href="server/"><code>server</code></a></td>
-<td style="text-align: center;">28</td>
 <td>Compute instances — full lifecycle</td>
 </tr>
 <tr>
 <td><a href="flavor/"><code>flavor</code></a></td>
-<td style="text-align: center;">1</td>
 <td>List available flavors</td>
 </tr>
 <tr>
 <td><a href="image/"><code>image</code></a></td>
-<td style="text-align: center;">11</td>
 <td>Glance image management</td>
 </tr>
 <tr>
 <td><a href="network/"><code>network</code></a></td>
-<td style="text-align: center;">21</td>
 <td>Networks, subnets, ports &amp; routers</td>
 </tr>
 <tr>
 <td><a href="keypair/"><code>keypair</code></a></td>
-<td style="text-align: center;">5</td>
 <td>SSH key pair management</td>
 </tr>
 <tr>
 <td><a href="volume/"><code>volume</code></a></td>
-<td style="text-align: center;">13</td>
 <td>Block storage volumes &amp; snapshots</td>
 </tr>
 <tr>
 <td><a href="security-group/"><code>security-group</code></a></td>
-<td style="text-align: center;">7</td>
 <td>Security groups &amp; rules</td>
 </tr>
 <tr>
 <td><a href="floating-ip/"><code>floating-ip</code></a></td>
-<td style="text-align: center;">6</td>
 <td>Floating IP allocation &amp; association</td>
 </tr>
 <tr>
 <td><a href="loadbalancer/"><code>loadbalancer</code></a></td>
-<td style="text-align: center;">18</td>
 <td>Load balancers, listeners, pools, members &amp; health monitors</td>
 </tr>
 <tr>
 <td><a href="secret/"><code>secret</code></a></td>
-<td style="text-align: center;">8</td>
 <td>Secrets &amp; containers (Barbican)</td>
 </tr>
 <tr>
 <td><a href="cluster/"><code>cluster</code></a></td>
-<td style="text-align: center;">10</td>
 <td>Kubernetes clusters &amp; templates (Magnum)</td>
 </tr>
 <tr>
 <td><a href="metric/"><code>metric</code></a></td>
-<td style="text-align: center;">8</td>
 <td>Metrics, measures &amp; resources (Gnocchi)</td>
 </tr>
 <tr>
+<td><a href="alarm/"><code>alarm</code></a></td>
+<td>Alarms (Aodh)</td>
+</tr>
+<tr>
+<td><a href="placement/"><code>placement</code></a></td>
+<td>Placement resources</td>
+</tr>
+<tr>
+<td><a href="stack/"><code>stack</code></a></td>
+<td>Orchestration stacks (Heat)</td>
+</tr>
+<tr>
+<td><a href="backup/"><code>backup</code></a></td>
+<td>Backups (Freezer)</td>
+</tr>
+<tr>
+<td><a href="zone/"><code>zone</code></a> / <a href="recordset/"><code>recordset</code></a></td>
+<td>DNS (Designate)</td>
+</tr>
+<tr>
 <td><a href="catalog/"><code>catalog</code></a></td>
-<td style="text-align: center;">1</td>
 <td>Service endpoint discovery</td>
+</tr>
+</tbody>
+</table>
+<h2 id="orca-exclusive">Orca-exclusive<a class="headerlink" href="#orca-exclusive" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="overview/"><code>overview</code></a></td>
+<td>Project dashboard</td>
+</tr>
+<tr>
+<td><a href="watch/"><code>watch</code></a></td>
+<td>Live auto-refreshing dashboard</td>
+</tr>
+<tr>
+<td><a href="doctor/"><code>doctor</code></a></td>
+<td>Pre-deployment health check</td>
+</tr>
+<tr>
+<td><a href="audit/"><code>audit</code></a></td>
+<td>Security audit</td>
+</tr>
+<tr>
+<td><a href="cleanup/"><code>cleanup</code></a></td>
+<td>Orphaned resource detection</td>
+</tr>
+<tr>
+<td><a href="export/"><code>export</code></a></td>
+<td>Infrastructure snapshot to YAML/JSON</td>
+</tr>
+<tr>
+<td><a href="profile/"><code>profile</code></a></td>
+<td>Multi-account profile management</td>
 </tr>
 </tbody>
 </table>
 <h2 id="common-patterns">Common Patterns<a class="headerlink" href="#common-patterns" title="Permanent link">&para;</a></h2>
 <h3 id="confirmation-prompts">Confirmation prompts<a class="headerlink" href="#confirmation-prompts" title="Permanent link">&para;</a></h3>
-<p>Destructive commands (delete, remove) ask for confirmation. Skip with <code>-y</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>shark<span class="w"> </span>server<span class="w"> </span>delete<span class="w"> </span>&lt;id&gt;<span class="w"> </span>-y
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>shark<span class="w"> </span>loadbalancer<span class="w"> </span>delete<span class="w"> </span>&lt;id&gt;<span class="w"> </span>--cascade<span class="w"> </span>-y
+<p>Destructive commands ask for confirmation. Skip with <code>-y</code>/<code>--yes</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>orca<span class="w"> </span>server<span class="w"> </span>delete<span class="w"> </span>&lt;id&gt;<span class="w"> </span>-y
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>orca<span class="w"> </span>loadbalancer<span class="w"> </span>delete<span class="w"> </span>&lt;id&gt;<span class="w"> </span>--cascade<span class="w"> </span>-y
 </code></pre></div>
 <h3 id="output-format">Output format<a class="headerlink" href="#output-format" title="Permanent link">&para;</a></h3>
-<p>All commands output rich, coloured tables. Pipe to <code>less -R</code> for paging:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>shark<span class="w"> </span>server<span class="w"> </span>list<span class="w"> </span><span class="p">|</span><span class="w"> </span>less<span class="w"> </span>-R
+<p>All list/show commands support <code>--format</code> and <code>--column</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>orca<span class="w"> </span>server<span class="w"> </span>list<span class="w"> </span>--format<span class="w"> </span>json
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>orca<span class="w"> </span>server<span class="w"> </span>list<span class="w"> </span>--column<span class="w"> </span>id<span class="w"> </span>--column<span class="w"> </span>name
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>orca<span class="w"> </span>server<span class="w"> </span>list<span class="w"> </span><span class="p">|</span><span class="w"> </span>less<span class="w"> </span>-R
 </code></pre></div>
 
 

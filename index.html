@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#shark-cli" class="md-skip">
+        <a href="#orca" class="md-skip">
           Skip to content
         </a>
       
@@ -320,10 +320,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-is-shark-cli" class="md-nav__link">
+  <a href="#what-is-orca" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What is shark-cli?
+        What is orca?
       
     </span>
   </a>
@@ -3023,10 +3023,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-is-shark-cli" class="md-nav__link">
+  <a href="#what-is-orca" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What is shark-cli?
+        What is orca?
       
     </span>
   </a>
@@ -3086,17 +3086,17 @@
   
 
 
-<h1 id="shark-cli">shark-cli<a class="headerlink" href="#shark-cli" title="Permanent link">&para;</a></h1>
-<p>A professional, modular CLI for the <strong>Sharktech Cloud Provider</strong> API.</p>
-<h2 id="what-is-shark-cli">What is shark-cli?<a class="headerlink" href="#what-is-shark-cli" title="Permanent link">&para;</a></h2>
-<p><code>shark-cli</code> lets you manage your entire Sharktech Cloud infrastructure from the terminal — virtual machines, networks, load balancers, secrets, Kubernetes clusters, metrics, and more.</p>
+<h1 id="orca">orca<a class="headerlink" href="#orca" title="Permanent link">&para;</a></h1>
+<p>OpenStack Rich Command-line Alternative — a unified CLI for managing OpenStack cloud infrastructure.</p>
+<h2 id="what-is-orca">What is orca?<a class="headerlink" href="#what-is-orca" title="Permanent link">&para;</a></h2>
+<p><code>orca</code> lets you manage your entire OpenStack infrastructure from the terminal — virtual machines, networks, load balancers, secrets, Kubernetes clusters, metrics, and more.</p>
 <h2 id="highlights">Highlights<a class="headerlink" href="#highlights" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>14 command groups</strong> covering all major OpenStack services</li>
-<li><strong>100+ sub-commands</strong> for full lifecycle management</li>
+<li><strong>60+ command groups</strong> covering all major OpenStack services</li>
 <li><strong>Rich terminal output</strong> — coloured tables powered by <a href="https://github.com/Textualize/rich">Rich</a></li>
+<li><strong>Multi-account profiles</strong> — named profiles with <code>clouds.yaml</code> and <code>OS_*</code> env var support</li>
 <li><strong>Shell auto-completion</strong> — Bash, Zsh, and Fish</li>
-<li><strong>Secure configuration</strong> — env vars take precedence; config file written with <code>0600</code> permissions</li>
+<li><strong>Orca-exclusive</strong> — <code>overview</code>, <code>watch</code>, <code>doctor</code>, <code>audit</code>, <code>cleanup</code>, <code>export</code></li>
 </ul>
 <h2 id="supported-services">Supported Services<a class="headerlink" href="#supported-services" title="Permanent link">&para;</a></h2>
 <table>
@@ -3110,75 +3110,100 @@
 <tbody>
 <tr>
 <td>Compute</td>
-<td><code>shark server</code></td>
+<td><code>orca server</code></td>
 <td>Nova</td>
 </tr>
 <tr>
 <td>Flavors</td>
-<td><code>shark flavor</code></td>
+<td><code>orca flavor</code></td>
 <td>Nova</td>
 </tr>
 <tr>
 <td>Images</td>
-<td><code>shark image</code></td>
+<td><code>orca image</code></td>
 <td>Glance</td>
 </tr>
 <tr>
 <td>Networks</td>
-<td><code>shark network</code></td>
+<td><code>orca network</code></td>
 <td>Neutron</td>
 </tr>
 <tr>
 <td>Key Pairs</td>
-<td><code>shark keypair</code></td>
+<td><code>orca keypair</code></td>
 <td>Nova</td>
 </tr>
 <tr>
 <td>Volumes</td>
-<td><code>shark volume</code></td>
+<td><code>orca volume</code></td>
 <td>Cinder</td>
 </tr>
 <tr>
 <td>Security Groups</td>
-<td><code>shark security-group</code></td>
+<td><code>orca security-group</code></td>
 <td>Neutron</td>
 </tr>
 <tr>
 <td>Floating IPs</td>
-<td><code>shark floating-ip</code></td>
+<td><code>orca floating-ip</code></td>
 <td>Neutron</td>
 </tr>
 <tr>
 <td>Load Balancers</td>
-<td><code>shark loadbalancer</code></td>
+<td><code>orca loadbalancer</code></td>
 <td>Octavia</td>
 </tr>
 <tr>
 <td>Secrets</td>
-<td><code>shark secret</code></td>
+<td><code>orca secret</code></td>
 <td>Barbican</td>
 </tr>
 <tr>
 <td>Clusters</td>
-<td><code>shark cluster</code></td>
+<td><code>orca cluster</code></td>
 <td>Magnum</td>
 </tr>
 <tr>
 <td>Metrics</td>
-<td><code>shark metric</code></td>
+<td><code>orca metric</code></td>
 <td>Gnocchi</td>
 </tr>
 <tr>
+<td>Alarms</td>
+<td><code>orca alarm</code></td>
+<td>Aodh</td>
+</tr>
+<tr>
+<td>Placement</td>
+<td><code>orca placement</code></td>
+<td>Placement</td>
+</tr>
+<tr>
+<td>Orchestration</td>
+<td><code>orca stack</code></td>
+<td>Heat</td>
+</tr>
+<tr>
+<td>Backup</td>
+<td><code>orca backup</code></td>
+<td>Freezer</td>
+</tr>
+<tr>
+<td>DNS</td>
+<td><code>orca zone</code> / <code>orca recordset</code></td>
+<td>Designate</td>
+</tr>
+<tr>
 <td>Service Catalog</td>
-<td><code>shark catalog</code></td>
+<td><code>orca catalog</code></td>
 <td>Keystone</td>
 </tr>
 </tbody>
 </table>
 <h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>.
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>shark<span class="w"> </span>setup
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>shark<span class="w"> </span>server<span class="w"> </span>list
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>orca<span class="w"> </span>setup
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>orca<span class="w"> </span>server<span class="w"> </span>list
 </code></pre></div>
 <p>See the <a href="getting-started/">Getting Started</a> guide for full installation and configuration instructions.</p>
 

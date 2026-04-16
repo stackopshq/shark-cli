@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#key-pairs-shark-keypair" class="md-skip">
+        <a href="#key-pairs-orca-keypair" class="md-skip">
           Skip to content
         </a>
       
@@ -3132,23 +3132,23 @@
   
 
 
-<h1 id="key-pairs-shark-keypair">Key Pairs — <code>shark keypair</code><a class="headerlink" href="#key-pairs-shark-keypair" title="Permanent link">&para;</a></h1>
+<h1 id="key-pairs-orca-keypair">Key Pairs — <code>orca keypair</code><a class="headerlink" href="#key-pairs-orca-keypair" title="Permanent link">&para;</a></h1>
 <p>Manage SSH key pairs (Nova). Key pairs are used to inject SSH public keys into servers at boot for password-less authentication. You can generate keys server-side, generate them locally and upload the public half, or import existing keys.</p>
 <hr />
 <h2 id="list">list<a class="headerlink" href="#list" title="Permanent link">&para;</a></h2>
 <p>List all key pairs in the project with their type and fingerprint.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>shark<span class="w"> </span>keypair<span class="w"> </span>list
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>orca<span class="w"> </span>keypair<span class="w"> </span>list
 </code></pre></div>
 <hr />
 <h2 id="show">show<a class="headerlink" href="#show" title="Permanent link">&para;</a></h2>
 <p>Display key pair details including the public key content.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>shark<span class="w"> </span>keypair<span class="w"> </span>show<span class="w"> </span>my-key
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>orca<span class="w"> </span>keypair<span class="w"> </span>show<span class="w"> </span>my-key
 </code></pre></div>
 <hr />
 <h2 id="create">create<a class="headerlink" href="#create" title="Permanent link">&para;</a></h2>
 <p>Generate a key pair server-side. The private key is returned <strong>once</strong> and saved to disk. The public key is stored in Nova.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>shark<span class="w"> </span>keypair<span class="w"> </span>create<span class="w"> </span>my-key
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>shark<span class="w"> </span>keypair<span class="w"> </span>create<span class="w"> </span>my-key<span class="w"> </span>--save-to<span class="w"> </span>/tmp/my-key.pem
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>orca<span class="w"> </span>keypair<span class="w"> </span>create<span class="w"> </span>my-key
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>orca<span class="w"> </span>keypair<span class="w"> </span>create<span class="w"> </span>my-key<span class="w"> </span>--save-to<span class="w"> </span>/tmp/my-key.pem
 </code></pre></div>
 <table>
 <thead>
@@ -3173,9 +3173,9 @@
 <hr />
 <h2 id="generate">generate<a class="headerlink" href="#generate" title="Permanent link">&para;</a></h2>
 <p>Generate a key pair <strong>locally</strong> using <code>ssh-keygen</code> and upload the public key to OpenStack. The private key never leaves your machine. <em>This is the recommended method.</em></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>shark<span class="w"> </span>keypair<span class="w"> </span>generate<span class="w"> </span>my-key
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>shark<span class="w"> </span>keypair<span class="w"> </span>generate<span class="w"> </span>my-key<span class="w"> </span>--type<span class="w"> </span>rsa<span class="w"> </span>--bits<span class="w"> </span><span class="m">4096</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>shark<span class="w"> </span>keypair<span class="w"> </span>generate<span class="w"> </span>my-key<span class="w"> </span>--save-to<span class="w"> </span>~/.ssh/custom-key
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>orca<span class="w"> </span>keypair<span class="w"> </span>generate<span class="w"> </span>my-key
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>orca<span class="w"> </span>keypair<span class="w"> </span>generate<span class="w"> </span>my-key<span class="w"> </span>--type<span class="w"> </span>rsa<span class="w"> </span>--bits<span class="w"> </span><span class="m">4096</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>orca<span class="w"> </span>keypair<span class="w"> </span>generate<span class="w"> </span>my-key<span class="w"> </span>--save-to<span class="w"> </span>~/.ssh/custom-key
 </code></pre></div>
 <table>
 <thead>
@@ -3198,16 +3198,16 @@
 </tr>
 <tr>
 <td><code>--save-to</code></td>
-<td><code>~/.ssh/shark-&lt;name&gt;</code></td>
+<td><code>~/.ssh/orca-&lt;name&gt;</code></td>
 <td>Private key path</td>
 </tr>
 </tbody>
 </table>
 <hr />
 <h2 id="upload">upload<a class="headerlink" href="#upload" title="Permanent link">&para;</a></h2>
-<p>Import an existing public key into OpenStack. Useful if you already have a key pair and want to use it with Sharktech servers.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>shark<span class="w"> </span>keypair<span class="w"> </span>upload<span class="w"> </span>my-key<span class="w"> </span>--public-key-file<span class="w"> </span>~/.ssh/id_ed25519.pub
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>shark<span class="w"> </span>keypair<span class="w"> </span>upload<span class="w"> </span>my-key<span class="w"> </span>--public-key<span class="w"> </span><span class="s2">&quot;ssh-ed25519 AAAA...&quot;</span>
+<p>Import an existing public key into OpenStack.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>orca<span class="w"> </span>keypair<span class="w"> </span>upload<span class="w"> </span>my-key<span class="w"> </span>--public-key-file<span class="w"> </span>~/.ssh/id_ed25519.pub
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>orca<span class="w"> </span>keypair<span class="w"> </span>upload<span class="w"> </span>my-key<span class="w"> </span>--public-key<span class="w"> </span><span class="s2">&quot;ssh-ed25519 AAAA...&quot;</span>
 </code></pre></div>
 <table>
 <thead>
@@ -3234,8 +3234,8 @@
 <hr />
 <h2 id="delete">delete<a class="headerlink" href="#delete" title="Permanent link">&para;</a></h2>
 <p>Delete a key pair from OpenStack. This does not delete local files.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>shark<span class="w"> </span>keypair<span class="w"> </span>delete<span class="w"> </span>my-key
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>shark<span class="w"> </span>keypair<span class="w"> </span>delete<span class="w"> </span>my-key<span class="w"> </span>-y
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>orca<span class="w"> </span>keypair<span class="w"> </span>delete<span class="w"> </span>my-key
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>orca<span class="w"> </span>keypair<span class="w"> </span>delete<span class="w"> </span>my-key<span class="w"> </span>-y
 </code></pre></div>
 
 
