@@ -1,0 +1,96 @@
+"""``orca hypervisor`` — manage hypervisors (Nova)."""
+
+from __future__ import annotations
+
+import click
+
+from orca_cli.core.context import OrcaContext
+from orca_cli.core.output import output_options, print_list, print_detail, console
+
+
+def _nova(client) -> str:
+    return client.compute_url
+
+
+@click.group()
+@click.pass_context
+def hypervisor(ctx: click.Context) -> None:
+    """Manage hypervisors (Nova)."""
+    pass
+
+
+@hypervisor.command("list")
+@output_options
+@click.pass_context
+def hypervisor_list(ctx, output_format, columns, fit_width, max_width, noindent):
+    """List hypervisors."""
+    client = ctx.find_object(OrcaContext).ensure_client()
+    data = client.get(f"{_nova(client)}/os-hypervisors/detail")
+    print_list(
+        data.get("hypervisors", []),
+        [
+            ("ID", "id", {"style": "cyan"}),
+            ("Hostname", "hypervisor_hostname", {"style": "bold"}),
+            ("Type", "hypervisor_type"),
+            ("State", lambda h: f"[green]{h.get('state')}[/green]" if h.get("state") == "up" else f"[red]{h.get('state')}[/red]"),
+            ("Status", lambda h: f"[green]{h.get('status')}[/green]" if h.get("status") == "enabled" else f"[yellow]{h.get('status')}[/yellow]"),
+            ("vCPUs", lambda h: f"{h.get('vcpus_used', 0)}/{h.get('vcpus', 0)}", {"justify": "right"}),
+            ("RAM used/total (MB)", lambda h: f"{h.get('memory_mb_used', 0)}/{h.get('memory_mb', 0)}", {"justify": "right"}),
+            ("Running VMs", "running_vms", {"justify": "right"}),
+        ],
+        title="Hypervisors",
+        output_format=output_format, columns=columns,
+        fit_width=fit_width, max_width=max_width, noindent=noindent,
+        empty_msg="No hypervisors found.",
+    )
+
+
+@hypervisor.command("show")
+@click.argument("hypervisor_id")
+@output_options
+@click.pass_context
+def hypervisor_show(ctx, hypervisor_id, output_format, columns, fit_width, max_width, noindent):
+    """Show hypervisor details."""
+    client = ctx.find_object(OrcaContext).ensure_client()
+    data = client.get(f"{_nova(client)}/os-hypervisors/{hypervisor_id}")
+    h = data.get("hypervisor", data)
+    print_detail(
+        [
+            ("ID", str(h.get("id", ""))),
+            ("Hostname", h.get("hypervisor_hostname", "")),
+            ("Type", h.get("hypervisor_type", "")),
+            ("Version", str(h.get("hypervisor_version", ""))),
+            ("State", h.get("state", "")),
+            ("Status", h.get("status", "")),
+            ("Host IP", h.get("host_ip", "")),
+            ("vCPUs (used/total)", f"{h.get('vcpus_used', 0)}/{h.get('vcpus', 0)}"),
+            ("RAM used (MB)", str(h.get("memory_mb_used", 0))),
+            ("RAM total (MB)", str(h.get("memory_mb", 0))),
+            ("Disk used (GB)", str(h.get("local_gb_used", 0))),
+            ("Disk total (GB)", str(h.get("local_gb", 0))),
+            ("Running VMs", str(h.get("running_vms", 0))),
+            ("Current Workload", str(h.get("current_workload", 0))),
+        ],
+        output_format=output_format, columns=columns,
+        fit_width=fit_width, max_width=max_width, noindent=noindent,
+    )
+
+
+@hypervisor.command("stats")
+@click.pass_context
+def hypervisor_stats(ctx):
+    """Show aggregated hypervisor statistics."""
+    client = ctx.find_object(OrcaContext).ensure_client()
+    data = client.get(f"{_nova(client)}/os-hypervisors/statistics")
+    stats = data.get("hypervisor_statistics", data)
+
+    from rich.table import Table
+    table = Table(title="Hypervisor Statistics", show_header=False)
+    table.add_column("Metric", style="bold")
+    table.add_column("Value", justify="right")
+
+    for k, v in stats.items():
+        table.add_row(k.replace("_", " ").title(), str(v))
+
+    from orca_cli.core.output import console as _console
+    _console.print(table)
