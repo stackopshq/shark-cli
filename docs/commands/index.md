@@ -1,46 +1,65 @@
 # Command Reference
 
-`shark-cli` organises commands by OpenStack service. Every command supports `--help` for inline documentation.
+`orca` organises commands by OpenStack service. Every command supports `--help` for inline documentation.
 
 ```bash
-shark --help              # List all command groups
-shark server --help       # List all server sub-commands
-shark server create --help  # Detailed help for a specific command
+orca --help              # List all command groups
+orca server --help       # List all server sub-commands
+orca server create --help  # Detailed help for a specific command
 ```
 
 ## Command Groups
 
-| Group | Commands | Description |
-|---|:---:|---|
-| [`server`](server.md) | 28 | Compute instances — full lifecycle |
-| [`flavor`](flavor.md) | 1 | List available flavors |
-| [`image`](image.md) | 11 | Glance image management |
-| [`network`](network.md) | 21 | Networks, subnets, ports & routers |
-| [`keypair`](keypair.md) | 5 | SSH key pair management |
-| [`volume`](volume.md) | 13 | Block storage volumes & snapshots |
-| [`security-group`](security-group.md) | 7 | Security groups & rules |
-| [`floating-ip`](floating-ip.md) | 6 | Floating IP allocation & association |
-| [`loadbalancer`](loadbalancer.md) | 18 | Load balancers, listeners, pools, members & health monitors |
-| [`secret`](secret.md) | 8 | Secrets & containers (Barbican) |
-| [`cluster`](cluster.md) | 10 | Kubernetes clusters & templates (Magnum) |
-| [`metric`](metric.md) | 8 | Metrics, measures & resources (Gnocchi) |
-| [`catalog`](catalog.md) | 1 | Service endpoint discovery |
+| Group | Description |
+|---|---|
+| [`server`](server.md) | Compute instances — full lifecycle |
+| [`flavor`](flavor.md) | List available flavors |
+| [`image`](image.md) | Glance image management |
+| [`network`](network.md) | Networks, subnets, ports & routers |
+| [`keypair`](keypair.md) | SSH key pair management |
+| [`volume`](volume.md) | Block storage volumes & snapshots |
+| [`security-group`](security-group.md) | Security groups & rules |
+| [`floating-ip`](floating-ip.md) | Floating IP allocation & association |
+| [`loadbalancer`](loadbalancer.md) | Load balancers, listeners, pools, members & health monitors |
+| [`secret`](secret.md) | Secrets & containers (Barbican) |
+| [`cluster`](cluster.md) | Kubernetes clusters & templates (Magnum) |
+| [`metric`](metric.md) | Metrics, measures & resources (Gnocchi) |
+| [`alarm`](alarm.md) | Alarms (Aodh) |
+| [`placement`](placement.md) | Placement resources |
+| [`stack`](stack.md) | Orchestration stacks (Heat) |
+| [`backup`](backup.md) | Backups (Freezer) |
+| [`zone`](zone.md) / [`recordset`](recordset.md) | DNS (Designate) |
+| [`catalog`](catalog.md) | Service endpoint discovery |
+
+## Orca-exclusive
+
+| Command | Description |
+|---|---|
+| [`overview`](overview.md) | Project dashboard |
+| [`watch`](watch.md) | Live auto-refreshing dashboard |
+| [`doctor`](doctor.md) | Pre-deployment health check |
+| [`audit`](audit.md) | Security audit |
+| [`cleanup`](cleanup.md) | Orphaned resource detection |
+| [`export`](export.md) | Infrastructure snapshot to YAML/JSON |
+| [`profile`](profile.md) | Multi-account profile management |
 
 ## Common Patterns
 
 ### Confirmation prompts
 
-Destructive commands (delete, remove) ask for confirmation. Skip with `-y`:
+Destructive commands ask for confirmation. Skip with `-y`/`--yes`:
 
 ```bash
-shark server delete <id> -y
-shark loadbalancer delete <id> --cascade -y
+orca server delete <id> -y
+orca loadbalancer delete <id> --cascade -y
 ```
 
 ### Output format
 
-All commands output rich, coloured tables. Pipe to `less -R` for paging:
+All list/show commands support `--format` and `--column`:
 
 ```bash
-shark server list | less -R
+orca server list --format json
+orca server list --column id --column name
+orca server list | less -R
 ```

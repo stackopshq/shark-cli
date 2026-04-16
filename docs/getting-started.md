@@ -3,7 +3,7 @@
 ## Requirements
 
 - Python 3.9+
-- A Sharktech Cloud account with API credentials
+- An OpenStack account with API credentials
 
 ## Installation
 
@@ -19,40 +19,49 @@
     poetry install
     ```
 
-After installation the `shark` command is available globally.
+After installation the `orca` command is available globally.
 
 ## Configuration
-
-You need credentials from your **Sharktech Client Area** (cloud service information page):
-
-| Field | Description | Example |
-|---|---|---|
-| **Auth URL** | Keystone endpoint | `https://cloud-xx.sharktech.net:5000` |
-| **Username** | OpenStack user | `myuser` |
-| **Password** | OpenStack password | — |
-| **Domain ID** | OpenStack domain | `mydomain` |
-| **Project ID** | OpenStack project | `myproject` |
 
 ### Interactive setup
 
 ```bash
-shark setup
+orca setup
 ```
 
-This prompts for all fields and stores them in `~/.shark/config.yaml` (permissions `600`).
+This prompts for all fields and stores them in `~/.orca/config.yaml` (permissions `600`).
+
+### Profiles
+
+orca supports multiple named profiles for managing several clouds:
+
+```bash
+orca profile add         # add a new profile interactively
+orca profile list        # list all profiles
+orca profile switch prod # switch active profile
+orca --profile dev server list  # use a specific profile for one command
+```
+
+### Import from clouds.yaml
+
+```bash
+orca profile from-clouds mycloud
+```
 
 ### Environment variables
 
+Standard OpenStack `OS_*` variables are supported:
+
 ```bash
-export SHARK_AUTH_URL="https://cloud-xx.sharktech.net:5000"
-export SHARK_USERNAME="myuser"
-export SHARK_PASSWORD="mypassword"
-export SHARK_DOMAIN_ID="mydomain"
-export SHARK_PROJECT_ID="myproject"
+export OS_AUTH_URL="https://keystone.example.com:5000/v3"
+export OS_USERNAME="myuser"
+export OS_PASSWORD="mypassword"
+export OS_USER_DOMAIN_NAME="Default"
+export OS_PROJECT_NAME="myproject"
 ```
 
 !!! tip
-    Environment variables **always** take precedence over the config file.
+    Priority: `--profile` flag > `OS_*` env vars > `OS_CLOUD` → `clouds.yaml` > active orca profile.
 
 ## Shell Auto-Completion
 
@@ -61,7 +70,7 @@ export SHARK_PROJECT_ID="myproject"
     Add to `~/.bashrc`:
 
     ```bash
-    eval "$(_SHARK_COMPLETE=bash_source shark)"
+    eval "$(_ORCA_COMPLETE=bash_source orca)"
     ```
 
 === "Zsh"
@@ -69,23 +78,23 @@ export SHARK_PROJECT_ID="myproject"
     Add to `~/.zshrc`:
 
     ```zsh
-    eval "$(_SHARK_COMPLETE=zsh_source shark)"
+    eval "$(_ORCA_COMPLETE=zsh_source orca)"
     ```
 
 === "Fish"
 
     ```fish
-    _SHARK_COMPLETE=fish_source shark > ~/.config/fish/completions/shark.fish
+    _ORCA_COMPLETE=fish_source orca > ~/.config/fish/completions/orca.fish
     ```
 
-You can also run `shark completion <shell>` to display these instructions.
+You can also run `orca completion <shell>` to display these instructions.
 
 ## Verify Installation
 
 ```bash
-shark --version
-shark catalog        # List available service endpoints
-shark server list    # List your compute instances
+orca --version
+orca catalog        # List available service endpoints
+orca server list    # List your compute instances
 ```
 
 ## Next Steps
