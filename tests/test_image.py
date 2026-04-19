@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from unittest.mock import MagicMock
+
 from orca_cli.core.config import save_profile, set_active_profile
 
 # ── Helpers ────────────────────────────────────────────────────────────────
@@ -416,3 +418,103 @@ class TestImageHelp:
     def test_image_shrink_help(self, invoke):
         result = invoke(["image", "shrink", "--help"])
         assert result.exit_code == 0
+
+
+# ══════════════════════════════════════════════════════════════════════════
+#  image upload — streaming chunked PUT to /v2/images/{id}/file
+# ══════════════════════════════════════════════════════════════════════════
+
+GL = "https://glance.example.com"
+
+
+class TestImageUpload:
+    """`orca image upload` streams the file in 256 KB chunks via PUT."""
+
+    def _mock_put(self, mock_client, status_code=204, body=b""):
+        """Patch _http.put to record the call and consume the streamed body."""
+        captured: dict = {}
+
+        def _put(url, headers=None, content=None, **kwargs):
+            captured["url"] = url
+            captured["headers"] = headers or {}
+            captured["chunks"] = list(content) if content is not None else []
+            resp = MagicMock()
+            resp.status_code = status_code
+            resp.is_success = 200 <= status_code < 300
+            resp.text = body.decode() if isinstance(body, bytes) else str(body)
+            return resp
+
+        mock_client.image_url = GL
+        mock_client._http.put = _put
+        mock_client._headers = lambda: {"X-Auth-Token": "tok"}
+        return captured
+
+    def test_upload_posts_to_file_endpoint(self, invoke, mock_client, tmp_path):
+        img_file = tmp_path / "disk.img"
+        img_file.write_bytes(b"x" * 1024)
+        captured = self._mock_put(mock_client)
+
+        result = invoke(["image", "upload", IMG_ID, str(img_file)])
+
+        assert result.exit_code == 0, result.output
+        assert captured["url"] == f"{GL}/v2/images/{IMG_ID}/file"
+
+    def test_upload_sets_content_type_and_length(self, invoke, mock_client, tmp_path):
+        img_file = tmp_path / "disk.img"
+        img_file.write_bytes(b"abcd" * 256)  # 1024 bytes
+        captured = self._mock_put(mock_client)
+
+        result = invoke(["image", "upload", IMG_ID, str(img_file)])
+
+        assert result.exit_code == 0
+        assert captured["headers"]["Content-Type"] == "application/octet-stream"
+        assert captured["headers"]["Content-Length"] == "1024"
+
+    def test_upload_streams_in_256kb_chunks(self, invoke, mock_client, tmp_path):
+        """700 KB file → 3 chunks of 256/256/188 KB (no whole-file read)."""
+        size = 256 * 1024 * 2 + 188 * 1024  # 700 KB
+        img_file = tmp_path / "big.img"
+        img_file.write_bytes(b"z" * size)
+        captured = self._mock_put(mock_client)
+
+        result = invoke(["image", "upload", IMG_ID, str(img_file)])
+
+        assert result.exit_code == 0
+        chunks = captured["chunks"]
+        assert len(chunks) == 3
+        assert len(chunks[0]) == 256 * 1024
+        assert len(chunks[1]) == 256 * 1024
+        assert len(chunks[2]) == 188 * 1024
+        assert sum(len(c) for c in chunks) == size
+
+    def test_upload_small_file_single_chunk(self, invoke, mock_client, tmp_path):
+        """File smaller than chunk size → one chunk."""
+        img_file = tmp_path / "small.img"
+        img_file.write_bytes(b"tiny")
+        captured = self._mock_put(mock_client)
+
+        result = invoke(["image", "upload", IMG_ID, str(img_file)])
+
+        assert result.exit_code == 0
+        assert captured["chunks"] == [b"tiny"]
+
+    def test_upload_server_error_raises_apierror(self, invoke, mock_client, tmp_path):
+        img_file = tmp_path / "disk.img"
+        img_file.write_bytes(b"data")
+        self._mock_put(mock_client, status_code=500, body=b"boom")
+
+        result = invoke(["image", "upload", IMG_ID, str(img_file)])
+
+        assert result.exit_code != 0
+        assert "500" in result.output or "boom" in result.output.lower()
+
+    def test_upload_auth_error_raises(self, invoke, mock_client, tmp_path):
+        img_file = tmp_path / "disk.img"
+        img_file.write_bytes(b"data")
+        self._mock_put(mock_client, status_code=401)
+
+        result = invoke(["image", "upload", IMG_ID, str(img_file)])
+
+        assert result.exit_code != 0
+        assert "auth" in result.output.lower() or "authentic" in result.output.lower() \
+            or "expired" in result.output.lower()

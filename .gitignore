@@ -11,5 +11,7 @@ build/
 .mypy_cache/
 .pytest_cache/
 .ruff_cache/
+.coverage
+htmlcov/
 site/
 CLAUDE.md

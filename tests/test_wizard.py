@@ -202,6 +202,57 @@ class TestBuildServerCommand:
         assert "sg2" in cmd
 
 
+class TestSelectSecurityGroups:
+    """Multi-select parser for SGs: comma-separated indices, skip blank, skip bad ints."""
+
+    def _client(self, sgs):
+        c = MagicMock()
+        c.network_url = "https://neutron.example.com"
+        c.get.return_value = {"security_groups": sgs}
+        return c
+
+    def test_blank_returns_empty(self):
+        c = self._client([{"name": "default", "description": ""}])
+        @click.command()
+        def cmd():
+            result = wiz.select_security_groups(c)
+            click.echo(f"SGS:{result}")
+        r = CliRunner().invoke(cmd, input="\n")
+        assert "SGS:[]" in r.output
+
+    def test_single_selection(self):
+        sgs = [{"name": "web", "description": "Web SG"},
+               {"name": "db", "description": "DB SG"}]
+        c = self._client(sgs)
+        @click.command()
+        def cmd():
+            result = wiz.select_security_groups(c)
+            click.echo(f"SGS:{result}")
+        r = CliRunner().invoke(cmd, input="1\n")
+        assert "SGS:['web']" in r.output
+
+    def test_multi_selection_with_comma(self):
+        sgs = [{"name": "a"}, {"name": "b"}, {"name": "c"}]
+        c = self._client(sgs)
+        @click.command()
+        def cmd():
+            result = wiz.select_security_groups(c)
+            click.echo(f"SGS:{result}")
+        r = CliRunner().invoke(cmd, input="1,3\n")
+        assert "SGS:['a', 'c']" in r.output
+
+    def test_ignores_bad_int_and_out_of_range(self):
+        """'foo' should be skipped silently; '99' out of range; '1' kept."""
+        sgs = [{"name": "only"}]
+        c = self._client(sgs)
+        @click.command()
+        def cmd():
+            result = wiz.select_security_groups(c)
+            click.echo(f"SGS:{result}")
+        r = CliRunner().invoke(cmd, input="1,foo,99\n")
+        assert "SGS:['only']" in r.output
+
+
 class TestSelectCidr:
 
     def test_option_1_returns_open(self):

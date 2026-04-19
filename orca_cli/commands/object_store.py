@@ -33,9 +33,12 @@ def _human_size(num_bytes: int | float | str | None) -> str:
 def _head(client, url: str) -> dict[str, str]:
     """Perform a HEAD request and return the response headers as a dict."""
     resp = client._http.head(url, headers=client._headers())
-    if resp.status_code in (401, 403):
+    if resp.status_code == 401:
         from orca_cli.core.exceptions import AuthenticationError
         raise AuthenticationError()
+    if resp.status_code == 403:
+        from orca_cli.core.exceptions import PermissionDeniedError
+        raise PermissionDeniedError()
     if not resp.is_success:
         from orca_cli.core.exceptions import APIError
         raise APIError(resp.status_code, resp.text[:300])
@@ -48,9 +51,12 @@ def _post_no_body(client, url: str, extra_headers: dict[str, str] | None = None)
     if extra_headers:
         headers.update(extra_headers)
     resp = client._http.post(url, headers=headers)
-    if resp.status_code in (401, 403):
+    if resp.status_code == 401:
         from orca_cli.core.exceptions import AuthenticationError
         raise AuthenticationError()
+    if resp.status_code == 403:
+        from orca_cli.core.exceptions import PermissionDeniedError
+        raise PermissionDeniedError()
     if not resp.is_success:
         from orca_cli.core.exceptions import APIError
         raise APIError(resp.status_code, resp.text[:300])
@@ -176,9 +182,12 @@ def container_create(ctx: click.Context, container: str) -> None:
     url = f"{base}/{container}"
     headers = client._headers()
     resp = client._http.put(url, headers=headers)
-    if resp.status_code in (401, 403):
+    if resp.status_code == 401:
         from orca_cli.core.exceptions import AuthenticationError
         raise AuthenticationError()
+    if resp.status_code == 403:
+        from orca_cli.core.exceptions import PermissionDeniedError
+        raise PermissionDeniedError()
     if not resp.is_success:
         from orca_cli.core.exceptions import APIError
         raise APIError(resp.status_code, resp.text[:300])
@@ -402,9 +411,12 @@ def _upload_simple(client, base, container, obj_name, path, content_type, file_s
             content=_iter(f),
         )
 
-    if resp.status_code in (401, 403):
+    if resp.status_code == 401:
         from orca_cli.core.exceptions import AuthenticationError
         raise AuthenticationError()
+    if resp.status_code == 403:
+        from orca_cli.core.exceptions import PermissionDeniedError
+        raise PermissionDeniedError()
     if not resp.is_success:
         from orca_cli.core.exceptions import APIError
         raise APIError(resp.status_code, resp.text[:300])
@@ -454,9 +466,12 @@ def _upload_slo(client, base, container, obj_name, path, content_type, file_size
                 content=_seg_iter(),
             )
 
-            if resp.status_code in (401, 403):
+            if resp.status_code == 401:
                 from orca_cli.core.exceptions import AuthenticationError
                 raise AuthenticationError()
+            if resp.status_code == 403:
+                from orca_cli.core.exceptions import PermissionDeniedError
+                raise PermissionDeniedError()
             if not resp.is_success:
                 from orca_cli.core.exceptions import APIError
                 raise APIError(resp.status_code, resp.text[:300])
@@ -480,9 +495,12 @@ def _upload_slo(client, base, container, obj_name, path, content_type, file_size
         content=manifest_body,
     )
 
-    if resp.status_code in (401, 403):
+    if resp.status_code == 401:
         from orca_cli.core.exceptions import AuthenticationError
         raise AuthenticationError()
+    if resp.status_code == 403:
+        from orca_cli.core.exceptions import PermissionDeniedError
+        raise PermissionDeniedError()
     if not resp.is_success:
         from orca_cli.core.exceptions import APIError
         raise APIError(resp.status_code, resp.text[:300])
@@ -560,9 +578,12 @@ def object_download(ctx: click.Context, container: str, object_name: str, output
     dest.parent.mkdir(parents=True, exist_ok=True)
 
     with client._http.stream("GET", url, headers=client._headers()) as resp:
-        if resp.status_code in (401, 403):
+        if resp.status_code == 401:
             from orca_cli.core.exceptions import AuthenticationError
             raise AuthenticationError()
+        if resp.status_code == 403:
+            from orca_cli.core.exceptions import PermissionDeniedError
+            raise PermissionDeniedError()
         if not resp.is_success:
             resp.read()
             from orca_cli.core.exceptions import APIError

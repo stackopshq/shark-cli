@@ -109,6 +109,73 @@ class TestWaitForResource:
             wait_for_resource(client, "https://nova/servers/1", "server", "DELETED",
                               label="Server 1", delete_mode=True, timeout=30)
 
+    def test_delete_mode_non_404_reraises(self):
+        """In delete_mode, a 500 (or any non-404) still propagates."""
+        from orca_cli.core.exceptions import APIError
+        client = MagicMock()
+        client.get.side_effect = APIError(500, "Server error")
+        with patch("time.sleep"), pytest.raises(APIError):
+            wait_for_resource(client, "https://nova/servers/1", "server", "DELETED",
+                              label="Server 1", delete_mode=True, timeout=30)
+
+    def test_fault_message_included_on_error(self):
+        """When status=ERROR, the fault.message from the response is surfaced."""
+        client = MagicMock()
+        client.get.return_value = {
+            "server": {"status": "ERROR", "fault": {"message": "Network allocation failed"}}
+        }
+        with patch("time.sleep"), pytest.raises(Exception, match="Network allocation failed"):
+            wait_for_resource(client, "https://nova/servers/1", "server", "ACTIVE",
+                              label="Server 1", timeout=30)
+
+    def test_message_falls_back_when_no_fault(self):
+        """If the ERROR payload has only top-level 'message', that is used."""
+        client = MagicMock()
+        client.get.return_value = {
+            "server": {"status": "ERROR", "message": "Flavor not found"}
+        }
+        with patch("time.sleep"), pytest.raises(Exception, match="Flavor not found"):
+            wait_for_resource(client, "https://nova/servers/1", "server", "ACTIVE",
+                              label="Server 1", timeout=30)
+
+    def test_target_status_case_insensitive(self):
+        """Caller may pass target in lowercase — comparison is upper-cased."""
+        client = self._client(["ACTIVE"])
+        wait_for_resource(client, "https://nova/servers/1", "server", "active",
+                          label="Server 1", timeout=10)
+        assert client.get.call_count == 1
+
+    def test_resource_key_fallback_when_missing(self):
+        """If response lacks the nested key, the whole body is treated as the resource."""
+        client = MagicMock()
+        client.get.return_value = {"status": "ACTIVE"}  # no "server" wrapper
+        wait_for_resource(client, "https://nova/servers/1", "server", "ACTIVE",
+                          label="Server 1", timeout=10)
+        assert client.get.call_count == 1
+
+    def test_custom_error_status(self):
+        """error_status override triggers on the named state, not 'ERROR'."""
+        client = MagicMock()
+        responses = iter([
+            {"stack": {"status": "BUILDING"}},
+            {"stack": {"status": "FAILED"}},
+        ])
+        client.get.side_effect = lambda url, **kw: next(responses)
+        with patch("time.sleep"), pytest.raises(Exception, match="FAILED"):
+            wait_for_resource(client, "https://heat/stacks/1", "stack", "COMPLETE",
+                              label="Stack 1", error_status="FAILED", timeout=30)
+
+    def test_custom_interval_passed_to_sleep(self):
+        """interval kwarg reaches time.sleep on every non-terminal poll."""
+        client = self._client(["BUILD", "BUILD", "ACTIVE"])
+        with patch("orca_cli.core.waiter.time.sleep") as sleep_mock:
+            wait_for_resource(client, "https://nova/servers/1", "server", "ACTIVE",
+                              label="Server 1", interval=7, timeout=30)
+        # Two non-terminal polls → two sleeps, each with interval=7.
+        assert sleep_mock.call_count == 2
+        for call in sleep_mock.call_args_list:
+            assert call.args[0] == 7
+
 
 # ══════════════════════════════════════════════════════════════════════════
 #  server delete --dry-run

@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import hashlib
 import stat
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -26,12 +27,33 @@ from typing import Any, Dict, Optional
 import httpx
 import yaml
 
-from orca_cli.core.exceptions import APIError, AuthenticationError
+from orca_cli.core.exceptions import APIError, AuthenticationError, PermissionDeniedError
 
 # Seconds before actual expiry to treat the token as expired (5 min buffer)
 TOKEN_EXPIRY_BUFFER = 300
 
 TOKEN_CACHE_PATH = Path.home() / ".orca" / "token_cache.yaml"
+
+# ── Transient-error retry policy ─────────────────────────────────────────────
+# HTTP statuses that indicate a transient server/infra problem.
+RETRY_STATUSES = frozenset({500, 502, 503, 504})
+# Idempotent methods — only these are retried. POST/PATCH can create duplicates
+# and are never retried, even on transient failures.
+RETRY_METHODS = frozenset({"get", "delete", "put", "head", "options"})
+# Total retries on transient failures (initial attempt + MAX_RETRIES retries).
+MAX_RETRIES = 2
+# Exponential backoff base: sleeps are RETRY_BACKOFF_BASE * 2**attempt
+# → with MAX_RETRIES=2 and base=0.5: 0.5s, 1.0s between attempts.
+RETRY_BACKOFF_BASE = 0.5
+# httpx transport exceptions that we treat as retryable network blips.
+_TRANSIENT_EXCEPTIONS = (
+    httpx.ConnectError,
+    httpx.ConnectTimeout,
+    httpx.ReadTimeout,
+    httpx.WriteTimeout,
+    httpx.PoolTimeout,
+    httpx.RemoteProtocolError,
+)
 
 
 class OrcaClient:
@@ -311,15 +333,24 @@ class OrcaClient:
 
     # ── Generic HTTP helpers ──────────────────────────────────────────────────
 
-    def _headers(self, extra: Optional[Dict[str, str]] = None) -> Dict[str, str]:
-        h = {
+    def _headers(self, extra: Optional[Dict[str, str]] = None,
+                 url: Optional[str] = None) -> Dict[str, str]:
+        h: Dict[str, str] = {
             "X-Auth-Token": self._token or "",
             "Accept": "application/json",
-            "X-OpenStack-Nova-API-Version": "2.79",
         }
+        if url and self._is_compute_url(url):
+            h["X-OpenStack-Nova-API-Version"] = "2.79"
         if extra:
             h.update(extra)
         return h
+
+    def _is_compute_url(self, url: str) -> bool:
+        """True if the URL targets Nova — the only service that honours the microversion header."""
+        try:
+            return url.startswith(self.compute_url)
+        except APIError:
+            return False
 
     @staticmethod
     def _extract_error_message(body: dict) -> str:
@@ -335,10 +366,42 @@ class OrcaClient:
                 return value["message"]
         return str(body)
 
+    @staticmethod
+    def _is_html_response(response: httpx.Response) -> bool:
+        """True if the body is HTML — typically a load-balancer 404 page for
+        an endpoint that is advertised in the catalogue but not actually
+        exposed on this cloud."""
+        content_type = response.headers.get("content-type", "").lower()
+        if "text/html" in content_type:
+            return True
+        # Some gateways don't set content-type correctly; sniff the first bytes.
+        preview = response.text[:200].lstrip().lower()
+        return preview.startswith("<!doctype html") or preview.startswith("<html")
+
     def _handle_response(self, response: httpx.Response) -> Any:
-        if response.status_code in (401, 403):
+        if response.status_code == 401:
             raise AuthenticationError()
+        if response.status_code == 403:
+            detail = ""
+            try:
+                body = response.json()
+                detail = self._extract_error_message(body)
+            except Exception:
+                pass
+            msg = (
+                "Permission denied (403). Your token is valid but lacks the required "
+                "role for this action — typically an admin-only operation."
+            )
+            if detail:
+                msg += f" — {detail}"
+            raise PermissionDeniedError(msg)
         if not response.is_success:
+            if self._is_html_response(response):
+                raise APIError(
+                    response.status_code,
+                    "Service returned an HTML error page — the endpoint is advertised "
+                    "in the catalogue but not actually exposed on this cloud.",
+                )
             detail = ""
             try:
                 body = response.json()
@@ -350,23 +413,46 @@ class OrcaClient:
             return None
         return response.json()
 
+    def _send(self, method: str, url: str,
+              extra_headers: Optional[Dict[str, str]] = None,
+              **kwargs: Any) -> httpx.Response:
+        """Single HTTP send with inline 401→re-auth retry (once, cached token only)."""
+        resp = getattr(self._http, method)(url, headers=self._headers(extra_headers, url=url), **kwargs)
+        if resp.status_code == 401 and self._token_from_cache:
+            # Cached token was rejected — clear cache, re-auth, retry once.
+            self._clear_token_cache()
+            self._authenticate()
+            resp = getattr(self._http, method)(url, headers=self._headers(extra_headers, url=url), **kwargs)
+        return resp
+
     def _request(self, method: str, url: str,
                  extra_headers: Optional[Dict[str, str]] = None,
                  **kwargs: Any) -> Any:
-        """Execute an HTTP request, transparently re-authenticating once on 401.
+        """Execute an HTTP request with two independent recovery mechanisms:
 
-        When a cached token is rejected by the server the cache is cleared,
-        a fresh token is obtained, and the request is retried exactly once.
+        1. 401 with cached token → clear cache, re-authenticate, retry once.
+        2. Transient failure (5xx or network error) on an idempotent method →
+           exponential-backoff retry up to MAX_RETRIES times. POST/PATCH are
+           never retried here because they are not guaranteed idempotent.
         """
-        resp = getattr(self._http, method)(url, headers=self._headers(extra_headers), **kwargs)
+        is_idempotent = method.lower() in RETRY_METHODS
 
-        if resp.status_code == 401 and self._token_from_cache:
-            # The cached token was rejected — clear cache, re-auth, retry
-            self._clear_token_cache()
-            self._authenticate()
-            resp = getattr(self._http, method)(url, headers=self._headers(extra_headers), **kwargs)
+        for attempt in range(MAX_RETRIES + 1):
+            try:
+                resp = self._send(method, url, extra_headers=extra_headers, **kwargs)
+            except _TRANSIENT_EXCEPTIONS as exc:
+                if is_idempotent and attempt < MAX_RETRIES:
+                    time.sleep(RETRY_BACKOFF_BASE * (2 ** attempt))
+                    continue
+                raise APIError(0, f"Network error: {exc}")
 
-        return self._handle_response(resp)
+            if (resp.status_code in RETRY_STATUSES
+                    and is_idempotent
+                    and attempt < MAX_RETRIES):
+                time.sleep(RETRY_BACKOFF_BASE * (2 ** attempt))
+                continue
+
+            return self._handle_response(resp)
 
     # ── Public HTTP methods ───────────────────────────────────────────────────
 
@@ -403,7 +489,7 @@ class OrcaClient:
 
     def get_stream(self, url: str):
         """GET that returns a streaming response context manager."""
-        return self._http.stream("GET", url, headers=self._headers())
+        return self._http.stream("GET", url, headers=self._headers(url=url))
 
     def close(self) -> None:
         self._http.close()

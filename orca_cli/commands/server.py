@@ -564,19 +564,29 @@ def server_unrescue(ctx: click.Context, server_id: str) -> None:
 # ── shelve / unshelve ─────────────────────────────────────────────────────
 
 @server.command("shelve")
-@click.argument("server_id", callback=validate_id)
+@click.argument("server_id", callback=validate_id, shell_complete=complete_servers)
+@click.option("--wait", is_flag=True, help="Wait until the server reaches SHELVED_OFFLOADED status.")
 @click.pass_context
-def server_shelve(ctx: click.Context, server_id: str) -> None:
+def server_shelve(ctx: click.Context, server_id: str, wait: bool) -> None:
     """Shelve a server (snapshot + shut down, frees resources)."""
     _server_action(ctx, server_id, {"shelve": None}, "Shelve")
+    if wait:
+        client = ctx.find_object(OrcaContext).ensure_client()
+        wait_for_resource(client, f"{client.compute_url}/servers/{server_id}",
+                          "server", "SHELVED_OFFLOADED", label=f"Server {server_id}")
 
 
 @server.command("unshelve")
-@click.argument("server_id", callback=validate_id)
+@click.argument("server_id", callback=validate_id, shell_complete=complete_servers)
+@click.option("--wait", is_flag=True, help="Wait until the server reaches ACTIVE status.")
 @click.pass_context
-def server_unshelve(ctx: click.Context, server_id: str) -> None:
+def server_unshelve(ctx: click.Context, server_id: str, wait: bool) -> None:
     """Unshelve (restore) a shelved server."""
     _server_action(ctx, server_id, {"unshelve": None}, "Unshelve")
+    if wait:
+        client = ctx.find_object(OrcaContext).ensure_client()
+        wait_for_resource(client, f"{client.compute_url}/servers/{server_id}",
+                          "server", "ACTIVE", label=f"Server {server_id}")
 
 
 # ── resize / confirm / revert ─────────────────────────────────────────────
@@ -1029,40 +1039,140 @@ def server_console_url(ctx: click.Context, server_id: str, console_type: str,
 
 # ── ssh ──────────────────────────────────────────────────────────────────
 
-def _resolve_server_ip(srv: dict) -> str | None:
-    """Pick the best IP: floating > fixed."""
+# os_distro → default cloud-init SSH user (matches official cloud images).
+_DISTRO_USER: dict[str, str] = {
+    "ubuntu": "ubuntu",
+    "debian": "debian",
+    "centos": "centos",
+    "rhel": "cloud-user",
+    "rocky": "rocky",
+    "almalinux": "almalinux",
+    "fedora": "fedora",
+    "amazon": "ec2-user",
+    "opensuse": "opensuse",
+    "suse": "opensuse",
+    "arch": "arch",
+    "alpine": "alpine",
+    "freebsd": "freebsd",
+    "coreos": "core",
+    "flatcar": "core",
+}
+
+
+def _pick_ssh_ip(srv: dict, prefer_fixed: bool = False) -> str | None:
+    """Pick the best IP. Floating wins unless prefer_fixed is set."""
     floating = None
     fixed = None
     for _net, addrs in srv.get("addresses", {}).items():
         for a in addrs:
             if a.get("OS-EXT-IPS:type") == "floating":
-                floating = a.get("addr")
+                floating = floating or a.get("addr")
             elif not fixed:
                 fixed = a.get("addr")
+    if prefer_fixed:
+        return fixed or floating
     return floating or fixed
 
 
-@server.command("ssh")
-@click.argument("server_id")
-@click.option("--user", "-u", "ssh_user", default=None, help="SSH user. Default: auto-detect from image or 'root'.")
-@click.option("--key", "-i", "key_path", type=click.Path(), default=None, help="Private key path.")
-@click.option("--port", "-p", "ssh_port", type=int, default=22, show_default=True, help="SSH port.")
-@click.option("--extra", default=None, help="Extra SSH options (e.g. '-o StrictHostKeyChecking=no').")
+def _detect_ssh_user(client, srv: dict) -> str | None:
+    """Read image metadata, map os_distro → cloud-init default user.
+
+    For boot-from-volume servers Nova returns ``"image": ""`` (or a dict
+    without ``id``). Fall back to the ``volume_image_metadata`` carried on
+    the attached boot volume — Cinder preserves the source image's
+    ``os_distro`` there.
+    """
+    distro: str = ""
+
+    # 1) Try image reference on the server
+    image = srv.get("image")
+    if isinstance(image, dict) and image.get("id"):
+        try:
+            data = client.get(f"{client.image_url}/v2/images/{image['id']}")
+            distro = (data.get("os_distro") or "").lower()
+        except Exception:
+            distro = ""
+
+    # 2) Fallback: look at the boot volume's image metadata
+    if not distro:
+        volumes = srv.get("os-extended-volumes:volumes_attached") or []
+        if volumes:
+            vol_id = volumes[0].get("id")
+            if vol_id:
+                try:
+                    vol = client.get(f"{client.volume_url}/volumes/{vol_id}")
+                    vmeta = vol.get("volume", {}).get("volume_image_metadata") or {}
+                    distro = (vmeta.get("os_distro") or "").lower()
+                except Exception:
+                    distro = ""
+
+    return _DISTRO_USER.get(distro) if distro else None
+
+
+def _find_ssh_key(keypair_name: str | None) -> str | None:
+    """Search ~/.ssh for a private key matching the keypair name.
+
+    Tries exact filename variants in order of specificity. Falls back to
+    default keys (id_ed25519/id_rsa/id_ecdsa) only if no name-specific match
+    is found. Never returns an unrelated key that merely shares the ``orca-``
+    prefix — that silent mismatch led to auth failures on hosts with leftover
+    keys from earlier projects.
+    """
+    from pathlib import Path
+    ssh_dir = Path.home() / ".ssh"
+    if not ssh_dir.is_dir():
+        return None
+
+    candidates: list = []
+    if keypair_name:
+        candidates += [
+            ssh_dir / f"orca-{keypair_name}",        # keypair generate default
+            ssh_dir / f"orca-{keypair_name}.pem",
+            ssh_dir / f"{keypair_name}.pem",         # keypair create default
+            ssh_dir / keypair_name,
+            ssh_dir / f"{keypair_name}.key",
+        ]
+    candidates += [ssh_dir / "id_ed25519", ssh_dir / "id_rsa", ssh_dir / "id_ecdsa"]
+
+    for c in candidates:
+        if c.is_file() and not c.name.endswith(".pub"):
+            return str(c)
+    return None
+
+
+@server.command("ssh", context_settings=dict(ignore_unknown_options=True))
+@click.argument("server_id", shell_complete=complete_servers)
+@click.argument("remote_args", nargs=-1, type=click.UNPROCESSED)
+@click.option("--user", "-u", "ssh_user", default=None,
+              help="SSH user. Default: auto-detected from image os_distro.")
+@click.option("--key", "-i", "key_path", type=click.Path(), default=None,
+              help="Private key path. Default: matched from keypair name in ~/.ssh.")
+@click.option("--port", "-p", "ssh_port", type=int, default=22, show_default=True,
+              help="SSH port.")
+@click.option("--fixed", "use_fixed", is_flag=True,
+              help="Use the fixed IP instead of the floating IP.")
+@click.option("--dry-run", is_flag=True,
+              help="Print the ssh command without executing it.")
+@click.option("--extra", default=None,
+              help="Extra SSH options (e.g. '-o StrictHostKeyChecking=no').")
 @click.pass_context
-def server_ssh(ctx: click.Context, server_id: str, ssh_user: str | None, key_path: str | None,
-               ssh_port: int, extra: str | None) -> None:
+def server_ssh(ctx: click.Context, server_id: str, remote_args: tuple,
+               ssh_user: str | None, key_path: str | None, ssh_port: int,
+               use_fixed: bool, dry_run: bool, extra: str | None) -> None:
     """SSH into a server by name or ID.
 
-    Resolves the IP (floating preferred) and finds an SSH key automatically.
+    Auto-resolves the IP (floating > fixed), the SSH user (from image
+    ``os_distro`` metadata), and the private key (matched from the attached
+    keypair name in ``~/.ssh/``).
 
     \b
     Examples:
-      orca server ssh <id>
-      orca server ssh <id> --user ubuntu --key ~/.ssh/my-key
-      orca server ssh <name> -u debian -p 2222
+      orca server ssh web-1                      # auto-detect everything
+      orca server ssh web-1 ls /var/log          # run a remote command
+      orca server ssh web-1 -u root -i ~/.ssh/k  # override user / key
+      orca server ssh web-1 --fixed              # use fixed IP
+      orca server ssh web-1 --dry-run            # print command, don't exec
     """
-    from pathlib import Path
-
     client = ctx.find_object(OrcaContext).ensure_client()
 
     # Resolve server — try by ID, fallback to name search
@@ -1070,7 +1180,6 @@ def server_ssh(ctx: click.Context, server_id: str, ssh_user: str | None, key_pat
         data = client.get(f"{client.compute_url}/servers/{server_id}")
         srv = data.get("server", data)
     except Exception:
-        # Search by name
         data = client.get(f"{client.compute_url}/servers/detail", params={"name": server_id})
         matches = data.get("servers", [])
         if not matches:
@@ -1082,35 +1191,18 @@ def server_ssh(ctx: click.Context, server_id: str, ssh_user: str | None, key_pat
             raise click.ClickException("Be more specific or use the server ID.")
         srv = matches[0]
 
-    ip = _resolve_server_ip(srv)
+    name = srv.get("name") or server_id
+
+    ip = _pick_ssh_ip(srv, prefer_fixed=use_fixed)
     if not ip:
-        raise click.ClickException(f"No IP address found for server '{srv.get('name', server_id)}'.")
+        raise click.ClickException(f"No IP address found for server '{name}'.")
 
-    # Auto-detect user from image metadata
     if not ssh_user:
-        ssh_user = "root"
+        ssh_user = _detect_ssh_user(client, srv) or "root"
 
-    # Find SSH key
     if not key_path:
-        ssh_dir = Path.home() / ".ssh"
-        # Try server key_name first
-        srv_key = srv.get("key_name", "")
-        candidates = []
-        if srv_key:
-            candidates = [
-                ssh_dir / f"orca-{srv_key}",
-                ssh_dir / srv_key,
-                ssh_dir / f"{srv_key}.pem",
-            ]
-        candidates += sorted(ssh_dir.glob("orca-*"))
-        candidates += [ssh_dir / "id_ed25519", ssh_dir / "id_rsa", ssh_dir / "id_ecdsa"]
+        key_path = _find_ssh_key(srv.get("key_name"))
 
-        for c in candidates:
-            if c.exists() and not c.name.endswith(".pub"):
-                key_path = str(c)
-                break
-
-    # Build SSH command
     cmd = ["ssh"]
     if key_path:
         cmd.extend(["-i", key_path])
@@ -1119,9 +1211,18 @@ def server_ssh(ctx: click.Context, server_id: str, ssh_user: str | None, key_pat
     if extra:
         cmd.extend(extra.split())
     cmd.append(f"{ssh_user}@{ip}")
+    if remote_args:
+        cmd.extend(remote_args)
 
+    console.print(
+        f"[dim]→[/dim] [bold cyan]{ssh_user}@{ip}[/bold cyan]  "
+        f"[dim](server={name}, key={key_path or 'default'})[/dim]"
+    )
     console.print(f"[dim]$ {' '.join(cmd)}[/dim]")
-    os.execvp("ssh", cmd)
+
+    if dry_run:
+        return
+    os.execvp("ssh", cmd)  # pragma: no cover
 
 
 # ── snapshot (server + volumes) ──────────────────────────────────────────
@@ -1555,7 +1656,6 @@ def server_port_forward(
       orca server port-forward <id> 9090:localhost:9090 -R     # reverse tunnel
       orca server port-forward <id> 5432:localhost:5432 -b     # background
     """
-    from pathlib import Path
 
     client = ctx.find_object(OrcaContext).ensure_client()
 
@@ -1576,7 +1676,7 @@ def server_port_forward(
             raise click.ClickException("Be more specific or use the server ID.")
         srv = matches[0]
 
-    ip = _resolve_server_ip(srv)
+    ip = _pick_ssh_ip(srv)
     if not ip:
         raise click.ClickException(
             f"No IP address found for server '{srv.get('name', server_id)}'.")
@@ -1594,22 +1694,7 @@ def server_port_forward(
 
     # Find SSH key (same logic as server ssh)
     if not key_path:
-        ssh_dir = Path.home() / ".ssh"
-        srv_key = srv.get("key_name", "")
-        candidates = []
-        if srv_key:
-            candidates = [
-                ssh_dir / f"orca-{srv_key}",
-                ssh_dir / srv_key,
-                ssh_dir / f"{srv_key}.pem",
-            ]
-        candidates += sorted(ssh_dir.glob("orca-*"))
-        candidates += [ssh_dir / "id_ed25519", ssh_dir / "id_rsa",
-                       ssh_dir / "id_ecdsa"]
-        for c in candidates:
-            if c.exists() and not c.name.endswith(".pub"):
-                key_path = str(c)
-                break
+        key_path = _find_ssh_key(srv.get("key_name"))
 
     # Build SSH tunnel command
     flag = "-R" if reverse else "-L"

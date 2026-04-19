@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from orca_cli.commands import event as event_mod
 from orca_cli.core.config import save_profile, set_active_profile
 
 # ── Helpers ────────────────────────────────────────────────────────────────
@@ -362,6 +363,34 @@ class TestEventTimeline:
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
+
+
+class TestDropEmptyColumns:
+    """Regression for the ``event list`` empty-columns rendering bug —
+    when every row has an empty ``message`` / ``user_id`` those columns
+    are dropped so Rich doesn't paint visibly-blank columns at the edges."""
+
+    def test_drops_column_with_all_empty_string_values(self):
+        items = [{"a": "x", "b": ""}, {"a": "y", "b": ""}]
+        defs = [("A", "a"), ("B", "b")]
+        assert event_mod._drop_empty_columns(items, defs) == [("A", "a")]
+
+    def test_keeps_column_with_any_nonempty_value(self):
+        items = [{"a": "x", "b": ""}, {"a": "y", "b": "hit"}]
+        defs = [("A", "a"), ("B", "b")]
+        assert event_mod._drop_empty_columns(items, defs) == defs
+
+    def test_handles_callable_accessor(self):
+        items = [{"a": "x"}, {"a": "y"}]
+        defs = [("A", lambda i: i["a"]), ("B", lambda _i: "")]
+        result = event_mod._drop_empty_columns(items, defs)
+        assert len(result) == 1 and result[0][0] == "A"
+
+    def test_never_returns_empty_list(self):
+        """If every column is empty, keep original defs to preserve headers."""
+        items = [{"a": "", "b": ""}]
+        defs = [("A", "a"), ("B", "b")]
+        assert event_mod._drop_empty_columns(items, defs) == defs
 
 
 class TestEventHelp:

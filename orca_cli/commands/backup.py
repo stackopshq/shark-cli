@@ -19,7 +19,10 @@ def _freezer(client) -> str:
 @click.group()
 @click.pass_context
 def backup(ctx: click.Context) -> None:
-    """Manage backups, jobs, sessions & clients (Freezer)."""
+    """Manage Freezer backups, jobs, sessions & clients.
+
+    For Cinder volume backups see ``orca volume backup-list`` etc.
+    """
     pass
 
 

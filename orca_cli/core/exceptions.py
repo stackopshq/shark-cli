@@ -11,9 +11,22 @@ class OrcaCLIError(click.ClickException):
 
 
 class AuthenticationError(OrcaCLIError):
-    """Raised when API authentication fails (HTTP 401/403)."""
+    """Raised when API authentication fails (HTTP 401)."""
 
     def __init__(self, message: str = "Authentication failed. Run 'orca setup' to configure your API key.") -> None:
+        super().__init__(message)
+
+
+class PermissionDeniedError(OrcaCLIError):
+    """Raised when the API returns HTTP 403 — authenticated but not authorized."""
+
+    def __init__(
+        self,
+        message: str = (
+            "Permission denied (403). Your token is valid but lacks the required role "
+            "for this action — typically an admin-only operation."
+        ),
+    ) -> None:
         super().__init__(message)
 
 

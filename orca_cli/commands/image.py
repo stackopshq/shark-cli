@@ -9,6 +9,7 @@ from rich.progress import BarColumn, DownloadColumn, Progress, TimeRemainingColu
 
 from orca_cli.core.client import APIError, AuthenticationError
 from orca_cli.core.context import OrcaContext
+from orca_cli.core.exceptions import PermissionDeniedError
 from orca_cli.core.output import console, output_options, print_detail, print_list
 
 CHUNK_SIZE = 64 * 1024  # 64 KB
@@ -205,8 +206,10 @@ def image_upload(ctx: click.Context, image_id: str, file_path: str) -> None:
         with open(p, "rb") as f:
             resp = client._http.put(url, headers=headers, content=_iter(f))
 
-    if resp.status_code in (401, 403):
+    if resp.status_code == 401:
         raise AuthenticationError()
+    if resp.status_code == 403:
+        raise PermissionDeniedError()
     if not resp.is_success:
         raise APIError(resp.status_code, resp.text[:300])
 
@@ -263,8 +266,10 @@ def image_stage(ctx: click.Context, image_id: str, file_path: str) -> None:
         with open(p, "rb") as f:
             resp = client._http.put(url, headers=headers, content=_iter(f))
 
-    if resp.status_code in (401, 403):
+    if resp.status_code == 401:
         raise AuthenticationError()
+    if resp.status_code == 403:
+        raise PermissionDeniedError()
     if not resp.is_success:
         raise APIError(resp.status_code, resp.text[:300])
 
@@ -300,8 +305,10 @@ def image_download(ctx: click.Context, image_id: str, output_path: str) -> None:
         if resp.status_code == 204:
             console.print("[yellow]No image data available.[/yellow]")
             return
-        if resp.status_code in (401, 403):
+        if resp.status_code == 401:
             raise AuthenticationError()
+        if resp.status_code == 403:
+            raise PermissionDeniedError()
         if not resp.is_success:
             raise APIError(resp.status_code, resp.text[:300] if hasattr(resp, 'text') else "Download failed")
 

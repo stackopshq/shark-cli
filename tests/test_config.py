@@ -384,3 +384,100 @@ class TestLoadConfigPriority:
 
         cfg = load_config()
         assert cfg["username"] == "env-user"  # OS_* wins
+
+
+# ── Edge cases & error paths ─────────────────────────────────────────────
+
+class TestConfigEdgeCases:
+
+    def test_get_active_profile_env_override(self, config_dir, sample_profile, monkeypatch):
+        """ORCA_PROFILE env var takes precedence over config file active_profile."""
+        save_profile("prod", sample_profile)
+        save_profile("staging", sample_profile)
+        monkeypatch.setenv("ORCA_PROFILE", "staging")
+        assert get_active_profile_name() == "staging"
+
+    def test_config_is_complete_loads_when_no_arg(self, config_dir, sample_profile):
+        """Passing None triggers an internal load_config() call."""
+        save_profile("prod", sample_profile)
+        assert config_is_complete() is True
+
+    def test_save_legacy_config_hits_active(self, config_dir, sample_profile):
+        """Legacy save_config() writes to the active profile."""
+        from orca_cli.core.config import save_config
+        save_profile("prod", sample_profile)
+        save_config({**sample_profile, "username": "renamed"})
+        assert get_profile("prod")["username"] == "renamed"
+
+    def test_find_clouds_yaml_none(self, monkeypatch, tmp_path):
+        """No clouds.yaml on disk → returns None."""
+        from orca_cli.core.config import _find_clouds_yaml
+        monkeypatch.setattr(
+            "orca_cli.core.config._CLOUDS_YAML_PATHS",
+            [tmp_path / "missing.yaml"],
+        )
+        assert _find_clouds_yaml() is None
+
+    def test_load_clouds_yaml_missing_file_returns_empty(self, monkeypatch, tmp_path):
+        """No clouds.yaml anywhere → empty dict, not a crash."""
+        from orca_cli.core.config import _load_clouds_yaml
+        monkeypatch.setattr(
+            "orca_cli.core.config._CLOUDS_YAML_PATHS",
+            [tmp_path / "missing.yaml"],
+        )
+        assert _load_clouds_yaml("anycloud") == {}
+
+    def test_load_clouds_yaml_unknown_cloud_returns_empty(self, monkeypatch, tmp_path):
+        """File exists but cloud name not found → empty dict."""
+        p = tmp_path / "clouds.yaml"
+        p.write_text(yaml.dump({"clouds": {"other": {"auth": {"auth_url": "x"}}}}))
+        monkeypatch.setattr("orca_cli.core.config._CLOUDS_YAML_PATHS", [p])
+        from orca_cli.core.config import _load_clouds_yaml
+        assert _load_clouds_yaml("nope") == {}
+
+
+class TestCloudsYamlNormalisation:
+    """Cover fallback branches in _normalise_clouds_yaml."""
+
+    def test_user_domain_id_only(self):
+        cfg = _normalise_clouds_yaml({"auth": {
+            "auth_url": "x", "username": "u", "password": "p",
+            "user_domain_id": "did",
+            "project_name": "proj",
+        }})
+        assert cfg["user_domain_id"] == "did"
+
+    def test_domain_name_falls_back_to_user_domain_name(self):
+        """domain_name (no user_ prefix) is mapped to user_domain_name."""
+        cfg = _normalise_clouds_yaml({"auth": {
+            "auth_url": "x", "username": "u", "password": "p",
+            "domain_name": "Default",
+            "project_name": "proj",
+        }})
+        assert cfg["user_domain_name"] == "Default"
+
+    def test_domain_id_falls_back_to_user_domain_id(self):
+        cfg = _normalise_clouds_yaml({"auth": {
+            "auth_url": "x", "username": "u", "password": "p",
+            "domain_id": "did",
+            "project_name": "proj",
+        }})
+        assert cfg["user_domain_id"] == "did"
+
+    def test_project_domain_id_explicit(self):
+        cfg = _normalise_clouds_yaml({"auth": {
+            "auth_url": "x", "username": "u", "password": "p",
+            "user_domain_name": "Default",
+            "project_domain_id": "pdid",
+            "project_name": "proj",
+        }})
+        assert cfg["project_domain_id"] == "pdid"
+
+    def test_project_domain_falls_back_to_user_domain_id(self):
+        """When only user_domain_id is set, project domain inherits by id."""
+        cfg = _normalise_clouds_yaml({"auth": {
+            "auth_url": "x", "username": "u", "password": "p",
+            "user_domain_id": "did",
+            "project_name": "proj",
+        }})
+        assert cfg["project_domain_id"] == "did"

@@ -31,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
       - uses: actions/checkout@v4
@@ -46,4 +46,6 @@ jobs:
           poetry install --with dev
 
       - name: Run tests
-        run: poetry run pytest tests/ -v --tb=short
+        run: >
+          poetry run pytest tests/ -v --tb=short
+          --cov=orca_cli --cov-report=term --cov-fail-under=85

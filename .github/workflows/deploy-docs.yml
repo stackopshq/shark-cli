@@ -23,11 +23,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install mkdocs-material
-          pip install -r requirements.txt || true
+          pip install poetry
+          poetry install --with docs
 
       - name: Build documentation
-        run: mkdocs build
+        run: poetry run mkdocs build
 
       - name: Deploy to GitHub Pages (gh-pages branch)
         uses: peaceiris/actions-gh-pages@v3

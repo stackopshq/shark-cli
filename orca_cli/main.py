@@ -1,8 +1,22 @@
-"""Entry point for orca — initialises the Click group and registers sub-commands."""
+"""Entry point for orca — initialises the Click group and auto-registers sub-commands.
+
+Commands are discovered by scanning ``orca_cli.commands``: every
+``click.Command`` defined at module level is registered on the root group,
+except for objects that are subcommands of another group in the same module.
+A module may therefore expose multiple top-level groups (e.g. ``federation.py``
+exports identity-provider, federation-protocol, mapping, service-provider)
+without any bookkeeping in this file.
+
+Adding a new command group: drop a file into ``orca_cli/commands/`` with a
+``@click.group()`` (or ``@click.command()``) at module level. That's it.
+"""
 
 from __future__ import annotations
 
+import importlib
+import pkgutil
 import sys
+from pathlib import Path
 
 import click
 
@@ -11,8 +25,12 @@ from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
 
 
-def _complete_regions(ctx: click.Context, param: click.Parameter, incomplete: str) -> list:
-    """Shell completion for the global --region flag."""
+def _complete_regions(ctx: click.Context, param: click.Parameter, incomplete: str) -> list:  # pragma: no cover
+    """Shell completion for the global --region flag.
+
+    Invoked by the shell, not exercised in pytest. Best-effort: all exceptions
+    swallow to empty — never crash the user's tab key.
+    """
     try:
         from orca_cli.core.client import OrcaClient
         from orca_cli.core.config import config_is_complete, load_config
@@ -48,140 +66,55 @@ def cli(ctx: click.Context, profile: str | None, region: str | None) -> None:
     orca_ctx.region = region
 
 
-# ── Register sub-commands / groups ────────────────────────────────────────
+# ── Auto-registration of sub-commands ─────────────────────────────────────
 
-from orca_cli.commands.access_rule import access_rule  # noqa: E402
-from orca_cli.commands.aggregate import aggregate  # noqa: E402
-from orca_cli.commands.alarm import alarm  # noqa: E402
-from orca_cli.commands.application_credential import application_credential  # noqa: E402
-from orca_cli.commands.audit import audit  # noqa: E402
-from orca_cli.commands.auth import auth  # noqa: E402
-from orca_cli.commands.availability_zone import availability_zone  # noqa: E402
-from orca_cli.commands.backup import backup  # noqa: E402
-from orca_cli.commands.catalog import catalog  # noqa: E402
-from orca_cli.commands.cleanup import cleanup  # noqa: E402
-from orca_cli.commands.cluster import cluster  # noqa: E402
-from orca_cli.commands.completion import completion  # noqa: E402
-from orca_cli.commands.compute_service import compute_service  # noqa: E402
-from orca_cli.commands.container import container  # noqa: E402
-from orca_cli.commands.credential import credential  # noqa: E402
-from orca_cli.commands.doctor import doctor  # noqa: E402
-from orca_cli.commands.domain import domain  # noqa: E402
-from orca_cli.commands.endpoint import endpoint  # noqa: E402
-from orca_cli.commands.endpoint_group import endpoint_group  # noqa: E402
-from orca_cli.commands.event import event  # noqa: E402
-from orca_cli.commands.export import export  # noqa: E402
-from orca_cli.commands.federation import (  # noqa: E402
-    federation_protocol,
-    identity_provider,
-    mapping,
-    service_provider,
-)
-from orca_cli.commands.flavor import flavor  # noqa: E402
-from orca_cli.commands.floating_ip import floating_ip  # noqa: E402
-from orca_cli.commands.group import group  # noqa: E402
-from orca_cli.commands.hypervisor import hypervisor  # noqa: E402
-from orca_cli.commands.image import image  # noqa: E402
-from orca_cli.commands.ip_whois import ip_cmd  # noqa: E402
-from orca_cli.commands.keypair import keypair  # noqa: E402
-from orca_cli.commands.limit import limit, registered_limit  # noqa: E402
-from orca_cli.commands.limits import limits  # noqa: E402
-from orca_cli.commands.loadbalancer import loadbalancer  # noqa: E402
-from orca_cli.commands.metric import metric  # noqa: E402
-from orca_cli.commands.network import network  # noqa: E402
-from orca_cli.commands.object_store import object_store  # noqa: E402
-from orca_cli.commands.overview import overview  # noqa: E402
-from orca_cli.commands.placement import placement  # noqa: E402
-from orca_cli.commands.policy import policy  # noqa: E402
-from orca_cli.commands.profile import profile  # noqa: E402
-from orca_cli.commands.project import project  # noqa: E402
-from orca_cli.commands.qos_policy import qos_policy  # noqa: E402
-from orca_cli.commands.quota import quota  # noqa: E402
-from orca_cli.commands.recordset import recordset  # noqa: E402
-from orca_cli.commands.region import region  # noqa: E402
-from orca_cli.commands.role import role  # noqa: E402
-from orca_cli.commands.secret import secret  # noqa: E402
-from orca_cli.commands.security_group import security_group  # noqa: E402
-from orca_cli.commands.server import server  # noqa: E402
-from orca_cli.commands.server_group import server_group  # noqa: E402
-from orca_cli.commands.service import service  # noqa: E402
-from orca_cli.commands.setup import setup  # noqa: E402
-from orca_cli.commands.stack import stack  # noqa: E402
-from orca_cli.commands.subnet_pool import subnet_pool  # noqa: E402
-from orca_cli.commands.token import token  # noqa: E402
-from orca_cli.commands.trunk import trunk  # noqa: E402
-from orca_cli.commands.trust import trust  # noqa: E402
-from orca_cli.commands.usage import usage  # noqa: E402
-from orca_cli.commands.user import user  # noqa: E402
-from orca_cli.commands.volume import volume  # noqa: E402
-from orca_cli.commands.watch import watch  # noqa: E402
-from orca_cli.commands.zone import zone  # noqa: E402
+def _module_top_level_commands(mod) -> list[click.Command]:
+    """Return every click command/group *defined* in ``mod`` that is not a
+    subcommand of another group in the same module."""
+    candidates: list[click.Command] = []
+    for attr_name in dir(mod):
+        if attr_name.startswith("_"):
+            continue
+        obj = getattr(mod, attr_name)
+        if not isinstance(obj, click.Command):
+            continue
+        # Only keep objects whose callback was actually defined in this module —
+        # filters out click commands re-imported from elsewhere.
+        callback = getattr(obj, "callback", None)
+        if callback is None or getattr(callback, "__module__", None) != mod.__name__:
+            continue
+        candidates.append(obj)
 
-cli.add_command(setup)
-cli.add_command(server)
-cli.add_command(flavor)
-cli.add_command(image)
-cli.add_command(network)
-cli.add_command(keypair)
-cli.add_command(volume)
-cli.add_command(security_group)
-cli.add_command(floating_ip)
-cli.add_command(cluster)
-cli.add_command(metric)
-cli.add_command(secret)
-cli.add_command(loadbalancer)
-cli.add_command(catalog)
-cli.add_command(overview)
-cli.add_command(quota)
-cli.add_command(backup)
-cli.add_command(cleanup)
-cli.add_command(ip_cmd)
-cli.add_command(audit)
-cli.add_command(usage)
-cli.add_command(profile)
-cli.add_command(object_store)
-cli.add_command(stack)
-cli.add_command(auth)
-cli.add_command(event)
-cli.add_command(watch)
-cli.add_command(export)
-cli.add_command(user)
-cli.add_command(project)
-cli.add_command(group)
-cli.add_command(role)
-cli.add_command(domain)
-cli.add_command(application_credential)
-cli.add_command(aggregate)
-cli.add_command(hypervisor)
-cli.add_command(availability_zone)
-cli.add_command(server_group)
-cli.add_command(limits)
-cli.add_command(zone)
-cli.add_command(placement)
-cli.add_command(alarm)
-cli.add_command(policy)
-cli.add_command(identity_provider)
-cli.add_command(federation_protocol)
-cli.add_command(mapping)
-cli.add_command(service_provider)
-cli.add_command(limit)
-cli.add_command(registered_limit)
-cli.add_command(access_rule)
-cli.add_command(token)
-cli.add_command(endpoint_group)
-cli.add_command(recordset)
-cli.add_command(container)
-cli.add_command(doctor)
-cli.add_command(endpoint)
-cli.add_command(service)
-cli.add_command(credential)
-cli.add_command(region)
-cli.add_command(trust)
-cli.add_command(compute_service)
-cli.add_command(subnet_pool)
-cli.add_command(qos_policy)
-cli.add_command(trunk)
-cli.add_command(completion)
+    # Drop anything that is attached as a subcommand of a group we found.
+    subcommand_ids: set[int] = set()
+    stack = [c for c in candidates if isinstance(c, click.Group)]
+    while stack:
+        grp = stack.pop()
+        for sub in grp.commands.values():
+            if id(sub) in subcommand_ids:
+                continue
+            subcommand_ids.add(id(sub))
+            if isinstance(sub, click.Group):
+                stack.append(sub)
+
+    return [c for c in candidates if id(c) not in subcommand_ids]
+
+
+def _register_all_commands() -> None:
+    """Import every module under ``orca_cli.commands`` and register its
+    top-level click commands on the root ``cli`` group."""
+    pkg = importlib.import_module("orca_cli.commands")
+    pkg_path = Path(pkg.__file__).parent
+
+    for mod_info in sorted(pkgutil.iter_modules([str(pkg_path)]), key=lambda m: m.name):
+        if mod_info.ispkg or mod_info.name.startswith("_"):
+            continue
+        mod = importlib.import_module(f"orca_cli.commands.{mod_info.name}")
+        for cmd in _module_top_level_commands(mod):
+            cli.add_command(cmd)
+
+
+_register_all_commands()
 
 
 def main() -> None:

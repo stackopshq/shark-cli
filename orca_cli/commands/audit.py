@@ -53,9 +53,19 @@ def audit(ctx: click.Context) -> None:
 
                 # Fully open (all ports)
                 if port_min is None and port_max is None:
-                    findings.append(("CRITICAL", f"SG: {sg_name}",
-                                     sg["id"],
-                                     f"All {proto or 'any'} ports open to {remote}"))
+                    # ICMPv6 is required for IPv6 Neighbor Discovery (RFC 4861)
+                    # and ICMPv4 for path-MTU / basic reachability — don't flag
+                    # these as CRITICAL; surface as MEDIUM so users see the
+                    # rule but aren't alarmed by an expected baseline.
+                    if proto in ("icmp", "ipv6-icmp", "icmpv6"):
+                        findings.append(("MEDIUM", f"SG: {sg_name}",
+                                         sg["id"],
+                                         f"All {proto} types open to {remote} "
+                                         f"(expected for ND/ping — consider restricting)"))
+                    else:
+                        findings.append(("CRITICAL", f"SG: {sg_name}",
+                                         sg["id"],
+                                         f"All {proto or 'any'} ports open to {remote}"))
                     continue
 
                 # Check for dangerous ports

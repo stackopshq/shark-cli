@@ -17,14 +17,42 @@ def flavor(ctx: click.Context) -> None:
 
 
 @flavor.command("list")
+@click.option("--limit", type=int, default=None,
+              help="Max flavors to return. Omit for all (auto-paginates).")
 @output_options
 @click.pass_context
-def flavor_list(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
-    """List available flavors."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{client.compute_url}/flavors/detail")
+def flavor_list(ctx: click.Context, limit: int | None,
+                output_format: str, columns: tuple[str, ...],
+                fit_width: bool, max_width: int | None, noindent: bool) -> None:
+    """List available flavors.
 
-    flavors = sorted(data.get("flavors", []), key=lambda x: (x.get("vcpus", 0), x.get("ram", 0)))
+    With no ``--limit`` the command auto-paginates through all flavors using
+    the Nova ``marker`` cursor (useful on clouds exposing hundreds of flavors).
+    """
+    client = ctx.find_object(OrcaContext).ensure_client()
+    flavors: list[dict] = []
+    # Nova caps a single page at 1000; walk until we've seen them all.
+    page_size = min(limit, 1000) if limit else 1000
+    marker: str | None = None
+    while True:
+        params: dict = {"limit": page_size}
+        if marker:
+            params["marker"] = marker
+        page = client.get(f"{client.compute_url}/flavors/detail", params=params)
+        batch = page.get("flavors", [])
+        if not batch:
+            break
+        flavors.extend(batch)
+        if limit is not None and len(flavors) >= limit:
+            flavors = flavors[:limit]
+            break
+        if len(batch) < page_size:
+            break
+        marker = batch[-1].get("id")
+        if not marker:
+            break
+
+    flavors = sorted(flavors, key=lambda x: (x.get("vcpus", 0), x.get("ram", 0)))
 
     print_list(
         flavors,

@@ -59,6 +59,22 @@ def _colored_action(action: str) -> str:
     return f"[{color}]{action}[/{color}]"
 
 
+def _drop_empty_columns(items: list[dict], column_defs: list[tuple]) -> list[tuple]:
+    """Return only columns that have at least one non-empty value across all rows."""
+    keep: list[tuple] = []
+    for cd in column_defs:
+        key = cd[1]
+        has_value = False
+        for item in items:
+            val = key(item) if callable(key) else item.get(key, "")
+            if val not in (None, "", "—"):
+                has_value = True
+                break
+        if has_value:
+            keep.append(cd)
+    return keep or column_defs  # never strip everything — at least show headers
+
+
 def _colored_result(result: str | None) -> str:
     if not result:
         return ""
@@ -109,13 +125,17 @@ def event_list(
     def _action_styled(item: dict) -> str:
         return _colored_action(item.get("action", ""))
 
-    column_defs = [
+    column_defs: list[tuple] = [
         ("Action", _action_styled),
-        ("Request ID", "request_id", {"no_wrap": True}),
+        ("Request ID", "request_id", {"overflow": "fold"}),
         ("Start Time", lambda i: _format_ts(i.get("start_time"))),
-        ("User ID", "user_id", {"no_wrap": True}),
+        ("User ID", "user_id", {"overflow": "fold"}),
         ("Message", lambda i: i.get("message") or ""),
     ]
+    # Drop columns where every value is empty — avoids the "empty column at
+    # start/end" rendering artifact Rich produces when wide no-wrap columns
+    # force siblings to zero width on a narrow terminal.
+    column_defs = _drop_empty_columns(actions, column_defs)
 
     print_list(
         actions,

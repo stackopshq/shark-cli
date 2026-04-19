@@ -268,7 +268,7 @@ def _build_dashboard(client: Any, interval: int) -> Group:
     help="Refresh interval in seconds.",
 )
 @click.pass_context
-def watch(ctx: click.Context, interval: int) -> None:
+def watch(ctx: click.Context, interval: int) -> None:  # pragma: no cover
     """Live dashboard — auto-refreshing project overview."""
     client = ctx.find_object(OrcaContext).ensure_client()
 

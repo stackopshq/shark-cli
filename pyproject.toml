@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "orca-openstackclient"
-version = "0.1.0"
+version = "1.0.1"
 description = "orca — OpenStack Rich Command-line Alternative"
 authors = ["Kevin Allioli"]
 license = "Apache-2.0"
@@ -37,7 +37,15 @@ rich = "^13.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0"
+pytest-cov = "^5.0"
 ruff = "^0.4"
+
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+mkdocs-material = "^9.5"
+mkdocs-click = "^0.9"
 
 [tool.poetry.scripts]
 orca = "orca_cli.main:cli"
@@ -52,3 +60,17 @@ ignore = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["orca_cli"]
+branch = false
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+show_missing = true
+skip_covered = false

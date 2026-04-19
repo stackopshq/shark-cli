@@ -5,13 +5,15 @@ from __future__ import annotations
 import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, patch
 
+import httpx
 import pytest
 import yaml
 
-from orca_cli.core.client import TOKEN_EXPIRY_BUFFER, OrcaClient
-from orca_cli.core.exceptions import APIError, AuthenticationError
+from orca_cli.core.client import MAX_RETRIES, TOKEN_EXPIRY_BUFFER, OrcaClient
+from orca_cli.core.exceptions import APIError, AuthenticationError, PermissionDeniedError
 
 
 @pytest.fixture(autouse=True)
@@ -547,3 +549,469 @@ class TestRequestRetryOn401:
 
         new_data = yaml.safe_load(self._cache_path.read_text())
         assert new_data["token"] == "new-token"
+
+
+# ── Transient-error retry ─────────────────────────────────────────────────────
+
+def _resp(status_code: int, body: Any = None) -> MagicMock:
+    """Build a mock httpx.Response with the given status code."""
+    r = MagicMock()
+    r.status_code = status_code
+    r.is_success = 200 <= status_code < 300
+    r.content = b"" if body is None else str(body).encode()
+    r.json.return_value = body if body is not None else {}
+    r.text = "" if body is None else str(body)
+    return r
+
+
+class TestRequestRetryOnTransient:
+    """_request() retries idempotent methods on 5xx and network errors."""
+
+    @pytest.fixture(autouse=True)
+    def _no_sleep(self):
+        """Don't actually sleep during retry backoff."""
+        with patch("orca_cli.core.client.time.sleep") as sleep_mock:
+            yield sleep_mock
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_get_retries_on_503_then_succeeds(self, mock_httpx_cls, _no_sleep):
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        http.get.side_effect = [_resp(503), _resp(503), _resp(200, {"ok": True})]
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        result = client.get("https://nova.example.com/servers")
+
+        assert result == {"ok": True}
+        assert http.get.call_count == 3  # initial + 2 retries
+        assert _no_sleep.call_count == 2
+        # Exponential backoff: 0.5, 1.0
+        assert _no_sleep.call_args_list[0].args[0] == 0.5
+        assert _no_sleep.call_args_list[1].args[0] == 1.0
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_retries_exhausted_raises_apierror(self, mock_httpx_cls, _no_sleep):
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        # All three attempts return 502.
+        err_body = {"error": "bad gateway"}
+        http.get.side_effect = [_resp(502, err_body)] * (MAX_RETRIES + 1)
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        with pytest.raises(APIError) as exc_info:
+            client.get("https://nova.example.com/servers")
+
+        assert exc_info.value.status_code == 502
+        assert http.get.call_count == MAX_RETRIES + 1
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_post_does_not_retry_on_503(self, mock_httpx_cls, _no_sleep):
+        """POST is not idempotent — must fail fast without retry."""
+        http = MagicMock()
+        http.post.side_effect = [_make_auth_response(), _resp(503, {"error": "x"})]
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        with pytest.raises(APIError) as exc_info:
+            client.post("https://nova.example.com/servers", json={"x": 1})
+
+        assert exc_info.value.status_code == 503
+        # Only the auth POST and the one user POST — no retry
+        assert http.post.call_count == 2
+        _no_sleep.assert_not_called()
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_patch_does_not_retry_on_503(self, mock_httpx_cls, _no_sleep):
+        """PATCH is not idempotent by convention — no retry."""
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        http.patch.return_value = _resp(503, {"error": "x"})
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        with pytest.raises(APIError):
+            client.patch("https://nova.example.com/servers/1", json={"x": 1})
+
+        assert http.patch.call_count == 1
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_delete_retries_on_503(self, mock_httpx_cls, _no_sleep):
+        """DELETE is idempotent — retried."""
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        http.delete.side_effect = [_resp(503), _resp(204)]
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        result = client.delete("https://nova.example.com/servers/1")
+
+        assert result is None
+        assert http.delete.call_count == 2
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_4xx_not_retried(self, mock_httpx_cls, _no_sleep):
+        """404 / 400 / 409 are client errors — never retried."""
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        http.get.return_value = _resp(404, {"error": "not found"})
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        with pytest.raises(APIError) as exc_info:
+            client.get("https://nova.example.com/servers/missing")
+
+        assert exc_info.value.status_code == 404
+        assert http.get.call_count == 1
+        _no_sleep.assert_not_called()
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_connect_error_retries_then_succeeds(self, mock_httpx_cls, _no_sleep):
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        http.get.side_effect = [
+            httpx.ConnectError("boom"),
+            _resp(200, {"ok": True}),
+        ]
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        result = client.get("https://nova.example.com/servers")
+
+        assert result == {"ok": True}
+        assert http.get.call_count == 2
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_connect_error_exhausted_raises_apierror_zero(self, mock_httpx_cls, _no_sleep):
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        http.get.side_effect = httpx.ReadTimeout("too slow")
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        with pytest.raises(APIError) as exc_info:
+            client.get("https://nova.example.com/servers")
+
+        # status_code 0 = sentinel for network-level error
+        assert exc_info.value.status_code == 0
+        assert "Network error" in str(exc_info.value)
+        assert http.get.call_count == MAX_RETRIES + 1
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_post_network_error_not_retried(self, mock_httpx_cls, _no_sleep):
+        """Network errors on POST must fail fast (no retry)."""
+        http = MagicMock()
+        http.post.side_effect = [
+            _make_auth_response(),
+            httpx.ConnectError("boom"),
+        ]
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        with pytest.raises(APIError) as exc_info:
+            client.post("https://nova.example.com/servers", json={"x": 1})
+
+        assert exc_info.value.status_code == 0
+        # Auth POST + one user POST, no retry
+        assert http.post.call_count == 2
+        _no_sleep.assert_not_called()
+
+
+# ── Nova microversion header scoping ─────────────────────────────────────────
+
+class TestNovaMicroversionHeader:
+    """The X-OpenStack-Nova-API-Version header must ONLY be sent to Nova."""
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_header_present_on_compute_call(self, mock_httpx_cls):
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        http.get.return_value = _resp(200, {"servers": []})
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        client.get(f"{client.compute_url}/servers")
+
+        headers = http.get.call_args.kwargs["headers"]
+        assert headers.get("X-OpenStack-Nova-API-Version") == "2.79"
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_header_absent_on_neutron_call(self, mock_httpx_cls):
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        http.get.return_value = _resp(200, {"networks": []})
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        client.get(f"{client.network_url}/v2.0/networks")
+
+        headers = http.get.call_args.kwargs["headers"]
+        assert "X-OpenStack-Nova-API-Version" not in headers
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_header_absent_on_stream(self, mock_httpx_cls):
+        """get_stream() also respects the scoping."""
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        client.get_stream(f"{client.network_url}/v2.0/networks")
+
+        headers = http.stream.call_args.kwargs["headers"]
+        assert "X-OpenStack-Nova-API-Version" not in headers
+
+
+# ── Typed endpoint URL properties ─────────────────────────────────────────────
+
+RICH_CATALOG = [
+    {"type": t, "name": t, "endpoints": [
+        {"interface": "public", "url": f"https://{t.replace('-', '')}.example.com", "region_id": "RegionOne"},
+    ]}
+    for t in (
+        "compute", "network", "identity", "image", "volumev3",
+        "container-infra", "metric", "key-manager", "load-balancer",
+        "backup", "object-store", "orchestration", "dns",
+        "placement", "alarming",
+    )
+]
+
+RICH_TOKEN_RESPONSE = {
+    "token": {
+        "methods": ["password"],
+        "user": {"id": "u", "name": "u", "domain": {"id": "d", "name": "d"}},
+        "project": {"id": "p", "name": "p", "domain": {"id": "d", "name": "d"}},
+        "roles": [{"id": "r", "name": "r"}],
+        "catalog": RICH_CATALOG,
+        "expires_at": "2099-12-31T23:59:59Z",
+        "issued_at": "2099-12-31T22:00:00Z",
+    }
+}
+
+
+def _rich_auth_response():
+    resp = MagicMock()
+    resp.status_code = 201
+    resp.is_success = True
+    resp.headers = {"X-Subject-Token": "tok"}
+    resp.json.return_value = RICH_TOKEN_RESPONSE
+    resp.text = ""
+    return resp
+
+
+class TestTypedEndpointURLs:
+    """Every typed URL property must resolve via _endpoint_for against the catalogue."""
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_all_service_urls(self, mock_httpx_cls):
+        http = MagicMock()
+        http.post.return_value = _rich_auth_response()
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+
+        assert client.compute_url == "https://compute.example.com"
+        assert client.network_url == "https://network.example.com"
+        assert client.identity_url == "https://identity.example.com"
+        assert client.image_url == "https://image.example.com"
+        assert client.volume_url == "https://volumev3.example.com"
+        assert client.container_infra_url == "https://containerinfra.example.com"
+        assert client.metric_url == "https://metric.example.com"
+        assert client.key_manager_url == "https://keymanager.example.com"
+        assert client.load_balancer_url == "https://loadbalancer.example.com"
+        assert client.backup_url == "https://backup.example.com"
+        assert client.object_store_url == "https://objectstore.example.com"
+        assert client.orchestration_url == "https://orchestration.example.com"
+        assert client.dns_url == "https://dns.example.com"
+        assert client.placement_url == "https://placement.example.com"
+        assert client.alarming_url == "https://alarming.example.com"
+
+
+class TestIsComputeUrlHandlesMissingNova:
+    """_is_compute_url() must return False when Nova isn't in the catalog."""
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_returns_false_without_nova(self, mock_httpx_cls):
+        # Catalog without compute service
+        catalog_no_nova = [c for c in RICH_CATALOG if c["type"] != "compute"]
+        resp = MagicMock()
+        resp.status_code = 201
+        resp.is_success = True
+        resp.headers = {"X-Subject-Token": "tok"}
+        resp.json.return_value = {
+            "token": {**RICH_TOKEN_RESPONSE["token"], "catalog": catalog_no_nova}
+        }
+        resp.text = ""
+        http = MagicMock()
+        http.post.return_value = resp
+        http.get.return_value = _resp(200, {"x": 1})
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        client.get("https://network.example.com/v2.0/x")
+
+        headers = http.get.call_args.kwargs["headers"]
+        assert "X-OpenStack-Nova-API-Version" not in headers
+
+
+class TestExtractErrorMessage:
+    """_extract_error_message unwraps OpenStack's inconsistent error shapes."""
+
+    def test_top_level_message(self):
+        assert OrcaClient._extract_error_message({"message": "bad"}) == "bad"
+
+    def test_top_level_error_string(self):
+        assert OrcaClient._extract_error_message({"error": "boom"}) == "boom"
+
+    def test_top_level_error_dict_with_message(self):
+        body = {"error": {"message": "wrong", "code": 400}}
+        assert OrcaClient._extract_error_message(body) == "wrong"
+
+    def test_top_level_error_dict_without_message(self):
+        body = {"error": {"code": 400}}
+        result = OrcaClient._extract_error_message(body)
+        assert "400" in result
+
+    def test_nested_resource_error(self):
+        body = {"badRequest": {"message": "invalid param"}}
+        assert OrcaClient._extract_error_message(body) == "invalid param"
+
+    def test_unknown_shape_stringified(self):
+        body = {"random": "data"}
+        result = OrcaClient._extract_error_message(body)
+        assert "random" in result
+
+
+class TestForbiddenAndHtmlResponses:
+    """403 must surface as PermissionDeniedError (not AuthenticationError) so users
+    aren't told to re-run `orca setup` for a permissions issue. HTML error bodies
+    (load-balancer 404 pages) must be replaced by a readable message."""
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_403_raises_permission_denied_not_auth(self, mock_httpx_cls):
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        forbidden = MagicMock()
+        forbidden.status_code = 403
+        forbidden.is_success = False
+        forbidden.json.return_value = {"forbidden": {"message": "admin role required"}}
+        forbidden.headers = {"content-type": "application/json"}
+        forbidden.text = ""
+        forbidden.content = b"{}"
+        http.get.return_value = forbidden
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        with pytest.raises(PermissionDeniedError) as exc_info:
+            client.get("https://nova.example.com/os-hypervisors")
+        assert "Permission denied" in str(exc_info.value)
+        assert "admin role required" in str(exc_info.value)
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_html_error_body_shows_clean_message(self, mock_httpx_cls):
+        """Regression: endpoint advertised in catalogue but not exposed returns HTML."""
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        bad = MagicMock()
+        bad.status_code = 404
+        bad.is_success = False
+        bad.headers = {"content-type": "text/html; charset=utf-8"}
+        bad.text = "<!DOCTYPE HTML PUBLIC ...><html>404 Not Found</html>"
+        bad.content = bad.text.encode()
+        bad.json.side_effect = ValueError("not json")
+        http.get.side_effect = [bad] * 3
+        mock_httpx_cls.return_value = http
+
+        with patch("orca_cli.core.client.time.sleep"):
+            client = OrcaClient(BASE_CFG)
+            with pytest.raises(APIError) as exc_info:
+                client.get("https://nova.example.com/servers")
+        msg = str(exc_info.value)
+        assert "HTML" in msg
+        assert "not actually exposed" in msg
+        assert "<!DOCTYPE" not in msg  # raw HTML should NOT leak through
+
+    def test_html_sniffed_without_content_type(self):
+        """Even without a Content-Type header, HTML body is detected from prefix."""
+        resp = MagicMock()
+        resp.headers = {}
+        resp.text = "<!doctype html><html>boom</html>"
+        assert OrcaClient._is_html_response(resp) is True
+
+
+class TestHandleResponseNonJson:
+    """When the error body isn't JSON, fall back to raw text (truncated)."""
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_non_json_error_body_uses_text(self, mock_httpx_cls):
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        bad = MagicMock()
+        bad.status_code = 500
+        bad.is_success = False
+        bad.json.side_effect = ValueError("not json")
+        bad.text = "Internal Server Error: details here"
+        bad.content = b"Internal Server Error: details here"
+        http.get.side_effect = [bad] * 3  # exhaust retries
+        mock_httpx_cls.return_value = http
+
+        with patch("orca_cli.core.client.time.sleep"):
+            client = OrcaClient(BASE_CFG)
+            with pytest.raises(APIError) as exc_info:
+                client.get("https://nova.example.com/servers")
+
+        assert "Internal" in str(exc_info.value) or "Internal" in exc_info.value.message
+
+
+class TestPatchWithContent:
+    """PATCH with content + content_type takes the content branch."""
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_patch_with_raw_content(self, mock_httpx_cls):
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        http.patch.return_value = _resp(200, {"ok": True})
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        client.patch(
+            "https://nova.example.com/servers/1",
+            content=b"binary",
+            content_type="application/octet-stream",
+        )
+        kwargs = http.patch.call_args.kwargs
+        assert kwargs["content"] == b"binary"
+        assert kwargs["headers"]["Content-Type"] == "application/octet-stream"
+
+
+class TestPutStream:
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_put_stream_sets_content_type(self, mock_httpx_cls):
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        http.put.return_value = _resp(204)
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        client.put_stream(
+            "https://glance.example.com/v2/images/x/file",
+            stream=iter([b"a", b"b"]),
+            content_type="application/octet-stream",
+        )
+        kwargs = http.put.call_args.kwargs
+        assert kwargs["headers"]["Content-Type"] == "application/octet-stream"
+
+
+class TestClose:
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_close_delegates_to_http(self, mock_httpx_cls):
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        client.close()
+        http.close.assert_called_once()

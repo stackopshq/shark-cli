@@ -27,9 +27,12 @@ def _human_size(num_bytes: int | float | str | None) -> str:
 def _head(client, url: str) -> dict[str, str]:
     """Perform a HEAD request and return the response headers as a dict."""
     resp = client._http.head(url, headers=client._headers())
-    if resp.status_code in (401, 403):
+    if resp.status_code == 401:
         from orca_cli.core.exceptions import AuthenticationError
         raise AuthenticationError()
+    if resp.status_code == 403:
+        from orca_cli.core.exceptions import PermissionDeniedError
+        raise PermissionDeniedError()
     if not resp.is_success:
         from orca_cli.core.exceptions import APIError
         raise APIError(resp.status_code, resp.text[:300])
@@ -42,9 +45,12 @@ def _post_no_body(client, url: str, extra_headers: dict[str, str] | None = None)
     if extra_headers:
         headers.update(extra_headers)
     resp = client._http.post(url, headers=headers)
-    if resp.status_code in (401, 403):
+    if resp.status_code == 401:
         from orca_cli.core.exceptions import AuthenticationError
         raise AuthenticationError()
+    if resp.status_code == 403:
+        from orca_cli.core.exceptions import PermissionDeniedError
+        raise PermissionDeniedError()
     if not resp.is_success:
         from orca_cli.core.exceptions import APIError
         raise APIError(resp.status_code, resp.text[:300])
@@ -129,9 +135,12 @@ def container_create(ctx: click.Context, container_name: str) -> None:
     url = f"{base}/{container_name}"
     headers = client._headers()
     resp = client._http.put(url, headers=headers)
-    if resp.status_code in (401, 403):
+    if resp.status_code == 401:
         from orca_cli.core.exceptions import AuthenticationError
         raise AuthenticationError()
+    if resp.status_code == 403:
+        from orca_cli.core.exceptions import PermissionDeniedError
+        raise PermissionDeniedError()
     if not resp.is_success:
         from orca_cli.core.exceptions import APIError
         raise APIError(resp.status_code, resp.text[:300])

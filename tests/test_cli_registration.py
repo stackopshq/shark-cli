@@ -9,7 +9,7 @@ from orca_cli.main import cli
 EXPECTED_COMMANDS = [
     "aggregate", "application-credential", "audit", "auth", "availability-zone",
     "backup", "catalog", "cleanup", "cluster", "completion", "compute-service", "credential",
-    "container", "doctor", "domain", "endpoint", "event", "export", "flavor", "floating-ip",
+    "container", "doctor", "domain", "endpoint", "event", "export", "find", "flavor", "floating-ip",
     "group", "hypervisor",
     "image", "ip", "keypair", "limits", "loadbalancer", "metric", "network", "object",
     "overview", "profile", "project", "qos", "quota", "recordset", "region", "role", "secret",

@@ -43,24 +43,6 @@ def output_options(f: Any) -> Any:
     return f
 
 
-def _collect_output_kwargs(
-    output_format: str = "table",
-    columns: tuple[str, ...] = (),
-    fit_width: bool = False,
-    max_width: int | None = None,
-    noindent: bool = False,
-    **_ignored: Any,
-) -> dict:
-    """Collect all output-related kwargs into a dict for print_list/print_detail."""
-    return {
-        "output_format": output_format,
-        "columns": columns,
-        "fit_width": fit_width,
-        "max_width": max_width,
-        "noindent": noindent,
-    }
-
-
 def _table_kwargs(fit_width: bool = False, max_width: int | None = None) -> dict:
     kw: dict = {}
     if max_width is not None:

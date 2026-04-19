@@ -62,13 +62,26 @@ def recordset_list(ctx: click.Context, zone: str, record_type: str | None,
 
     data = client.get(f"{_dns(client)}/v2/zones/{zone_id}/recordsets", params=params)
 
+    def _format_records(r: dict) -> str:
+        records = r.get("records", []) or []
+        if not records:
+            return "—"
+        rtype = (r.get("type") or "").upper()
+        # SOA records are a single whitespace-separated tuple — split on
+        # whitespace and line-break for readability. NS/MX/TXT with multiple
+        # values also render better one-per-line than comma-joined.
+        if rtype == "SOA" and len(records) == 1:
+            parts = records[0].split()
+            return "\n".join(parts) if len(parts) > 1 else records[0]
+        return "\n".join(records)
+
     print_list(
         data.get("recordsets", []),
         [
-            ("ID", "id", {"style": "cyan", "no_wrap": True}),
+            ("ID", "id", {"style": "cyan", "overflow": "fold"}),
             ("Name", "name", {"style": "bold"}),
             ("Type", "type"),
-            ("Records", lambda r: ", ".join(r.get("records", []) or []) or "—"),
+            ("Records", _format_records),
             ("Status", lambda r: r.get("status", ""), {"style": "green"}),
             ("TTL", lambda r: str(r.get("ttl", "")) if r.get("ttl") is not None else "—", {"justify": "right"}),
         ],
