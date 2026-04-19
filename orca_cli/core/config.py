@@ -48,6 +48,10 @@ _ORCA_ENV_MAP = {
     "ORCA_DOMAIN_ID": "domain_id",
     "ORCA_PROJECT_ID": "project_id",
     "ORCA_INSECURE": "insecure",
+    "ORCA_AUTH_TYPE": "auth_type",
+    "ORCA_APPLICATION_CREDENTIAL_ID": "application_credential_id",
+    "ORCA_APPLICATION_CREDENTIAL_SECRET": "application_credential_secret",
+    "ORCA_APPLICATION_CREDENTIAL_NAME": "application_credential_name",
 }
 
 # Mapping: OS_* env-var name → config key (standard OpenStack env vars)
@@ -65,6 +69,10 @@ _OS_ENV_MAP = {
     "OS_INTERFACE": "interface",
     "OS_CACERT": "cacert",
     "OS_INSECURE": "insecure",
+    "OS_AUTH_TYPE": "auth_type",
+    "OS_APPLICATION_CREDENTIAL_ID": "application_credential_id",
+    "OS_APPLICATION_CREDENTIAL_SECRET": "application_credential_secret",
+    "OS_APPLICATION_CREDENTIAL_NAME": "application_credential_name",
 }
 
 # clouds.yaml search paths (standard OpenStack order)
@@ -230,6 +238,16 @@ def _normalise_clouds_yaml(cloud: Dict[str, Any]) -> Dict[str, Any]:
     cfg["username"] = auth.get("username", "")
     cfg["password"] = auth.get("password", "")
 
+    # Application credentials (auth_type lives at the top level in clouds.yaml,
+    # while the credential id/secret live under the auth: block).
+    if cloud.get("auth_type"):
+        cfg["auth_type"] = cloud["auth_type"]
+    for k in ("application_credential_id",
+              "application_credential_secret",
+              "application_credential_name"):
+        if auth.get(k):
+            cfg[k] = auth[k]
+
     # Domain: user_domain_name / user_domain_id / domain_name
     if auth.get("user_domain_name"):
         cfg["user_domain_name"] = auth["user_domain_name"]
@@ -285,6 +303,15 @@ def _load_os_env() -> Dict[str, Any]:
 def _has_os_env() -> bool:
     """Return True if any ``OS_*`` auth env vars are set."""
     return bool(os.environ.get("OS_AUTH_URL"))
+
+
+def _is_app_cred(config: Dict[str, Any]) -> bool:
+    """True when *config* describes an application-credential auth flow."""
+    auth_type = str(config.get("auth_type", "")).lower()
+    if auth_type in ("v3applicationcredential", "application_credential"):
+        return True
+    return bool(config.get("application_credential_id")
+                or config.get("application_credential_secret"))
 
 
 # ── Public API (used by context.py / commands) ───────────────────────────
@@ -369,9 +396,23 @@ def _normalise_legacy_keys(config: Dict[str, Any]) -> None:
 
 
 def config_is_complete(config: Optional[Dict[str, Any]] = None) -> bool:
-    """Return ``True`` if all required credentials are present."""
+    """Return ``True`` if all required credentials are present.
+
+    Application credentials need only ``auth_url`` plus a credential secret
+    (and either an id or a name+username pair) — they are pre-scoped at
+    creation time, so no project/domain is required.
+    """
     if config is None:
         config = load_config()
+    if not config.get("auth_url"):
+        return False
+    if _is_app_cred(config):
+        if not config.get("application_credential_secret"):
+            return False
+        if config.get("application_credential_id"):
+            return True
+        return bool(config.get("application_credential_name") and config.get("username"))
+    # Password flow
     if not all(config.get(k) for k in REQUIRED_KEYS):
         return False
     has_domain = any(config.get(k) for k in _DOMAIN_KEYS)

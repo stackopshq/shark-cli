@@ -4,12 +4,28 @@ from __future__ import annotations
 
 import click
 
+from orca_cli.core.config import save_profile
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 
 
 def _iam(client) -> str:
     return client.identity_url
+
+
+def _current_user_id(client) -> str:
+    """Resolve the user id from the current token.
+
+    ``client._token_data`` already holds the inner ``token`` object returned by
+    Keystone, so ``user`` is at the top level — no extra ``token`` wrapping.
+    """
+    user_id = client._token_data.get("user", {}).get("id")
+    if not user_id:
+        raise click.ClickException(
+            "Cannot determine current user id from token. "
+            "Pass --user explicitly."
+        )
+    return user_id
 
 
 @click.group(name="application-credential")
@@ -26,7 +42,7 @@ def application_credential(ctx: click.Context) -> None:
 def app_credential_list(ctx, user_id, output_format, columns, fit_width, max_width, noindent):
     """List application credentials."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    uid = user_id or client._token_data.get("token", {}).get("user", {}).get("id", "me")
+    uid = user_id or _current_user_id(client)
     data = client.get(f"{_iam(client)}/v3/users/{uid}/application_credentials")
     print_list(
         data.get("application_credentials", []),
@@ -53,7 +69,7 @@ def app_credential_show(ctx, credential_id, user_id,
                         output_format, columns, fit_width, max_width, noindent):
     """Show application credential details."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    uid = user_id or client._token_data.get("token", {}).get("user", {}).get("id", "me")
+    uid = user_id or _current_user_id(client)
     data = client.get(f"{_iam(client)}/v3/users/{uid}/application_credentials/{credential_id}")
     a = data.get("application_credential", data)
     print_detail(
@@ -77,11 +93,15 @@ def app_credential_show(ctx, credential_id, user_id,
 @click.option("--expires", "expires_at", default=None, help="Expiry (ISO 8601, e.g. 2026-12-31T00:00:00).")
 @click.option("--unrestricted", is_flag=True, help="Allow creation of other credentials (dangerous).")
 @click.option("--user", "user_id", default=None)
+@click.option("--save-profile", "save_profile_name", default=None,
+              metavar="PROFILE",
+              help="Save the new credential as an orca profile of this name.")
 @click.pass_context
-def app_credential_create(ctx, name, description, secret, expires_at, unrestricted, user_id):
+def app_credential_create(ctx, name, description, secret, expires_at,
+                          unrestricted, user_id, save_profile_name):
     """Create an application credential."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    uid = user_id or client._token_data.get("token", {}).get("user", {}).get("id", "me")
+    uid = user_id or _current_user_id(client)
     body: dict = {"name": name, "unrestricted": unrestricted}
     if description:
         body["description"] = description
@@ -100,6 +120,27 @@ def app_credential_create(ctx, name, description, secret, expires_at, unrestrict
         console.print(f"  [cyan]Secret:[/cyan] {a['secret']}")
         console.print("  [bold yellow]This secret will NOT be shown again.[/bold yellow]")
 
+    if save_profile_name:
+        if not a.get("secret"):
+            raise click.ClickException(
+                "Cannot save profile: Keystone did not return the credential secret."
+            )
+        profile_cfg = {
+            "auth_url": client._auth_url,
+            "auth_type": "v3applicationcredential",
+            "application_credential_id": a["id"],
+            "application_credential_secret": a["secret"],
+        }
+        if client._region_name:
+            profile_cfg["region_name"] = client._region_name
+        path = save_profile(save_profile_name, profile_cfg)
+        console.print(
+            f"[green]Saved as orca profile '{save_profile_name}' → {path}[/green]"
+        )
+        console.print(
+            f"[dim]Activate with:[/dim] orca profile switch {save_profile_name}"
+        )
+
 
 @application_credential.command("delete")
 @click.argument("credential_id")
@@ -111,6 +152,6 @@ def app_credential_delete(ctx, credential_id, user_id, yes):
     if not yes:
         click.confirm(f"Delete application credential {credential_id}?", abort=True)
     client = ctx.find_object(OrcaContext).ensure_client()
-    uid = user_id or client._token_data.get("token", {}).get("user", {}).get("id", "me")
+    uid = user_id or _current_user_id(client)
     client.delete(f"{_iam(client)}/v3/users/{uid}/application_credentials/{credential_id}")
     console.print(f"[green]Application credential {credential_id} deleted.[/green]")

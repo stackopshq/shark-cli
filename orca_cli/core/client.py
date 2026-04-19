@@ -62,8 +62,21 @@ class OrcaClient:
 
     def __init__(self, config: dict) -> None:
         self._auth_url = config["auth_url"].rstrip("/")
-        self._username = config["username"]
-        self._password = config["password"]
+
+        # ── Auth method (password or v3applicationcredential) ─────────────
+        # Auto-detected from presence of application_credential_* fields
+        # unless an explicit auth_type is provided.
+        self._auth_type = self._detect_auth_type(config)
+
+        # Password-flow credentials (also reused as the "user" reference when
+        # an application credential is identified by name rather than by id).
+        self._username = config.get("username", "")
+        self._password = config.get("password", "")
+
+        # Application-credential fields
+        self._app_cred_id = config.get("application_credential_id")
+        self._app_cred_secret = config.get("application_credential_secret")
+        self._app_cred_name = config.get("application_credential_name")
 
         # User domain — name or ID
         self._user_domain_name = config.get("user_domain_name")
@@ -73,7 +86,8 @@ class OrcaClient:
         self._project_domain_name = config.get("project_domain_name") or self._user_domain_name
         self._project_domain_id = config.get("project_domain_id") or self._user_domain_id
 
-        # Project — name or ID
+        # Project — name or ID. Application credentials are pre-scoped at
+        # creation time, so these fields are ignored for that auth method.
         self._project_name = config.get("project_name")
         self._project_id = config.get("project_id")
 
@@ -101,17 +115,50 @@ class OrcaClient:
         if not self._load_token_cache():
             self._authenticate()
 
+    # ── Auth-type detection ──────────────────────────────────────────────────
+
+    @staticmethod
+    def _detect_auth_type(config: dict) -> str:
+        """Return ``"application_credential"`` or ``"password"``.
+
+        Honours an explicit ``auth_type`` setting (``v3applicationcredential``
+        / ``application_credential`` / ``password``); otherwise auto-detects
+        based on the presence of any ``application_credential_*`` field.
+        """
+        explicit = str(config.get("auth_type", "")).lower()
+        if explicit in ("v3applicationcredential", "application_credential"):
+            return "application_credential"
+        if explicit == "password":
+            return "password"
+        if config.get("application_credential_id") or config.get("application_credential_secret"):
+            return "application_credential"
+        return "password"
+
     # ── Cache key ─────────────────────────────────────────────────────────────
 
     def _build_cache_key(self) -> str:
-        """SHA-256 of the fields that uniquely identify a cluster+user+project."""
-        parts = "|".join([
-            self._auth_url,
-            self._username,
-            self._user_domain_name or self._user_domain_id or "",
-            self._project_name or self._project_id or "",
-            self._region_name or "",
-        ])
+        """SHA-256 of the fields that uniquely identify this token's scope.
+
+        Application credentials are pre-scoped at creation time, so the cache
+        key keys on the credential identity (id, or name@user) rather than on
+        username+project.
+        """
+        if self._auth_type == "application_credential":
+            identity = self._app_cred_id or f"{self._app_cred_name}@{self._username}"
+            parts = "|".join([
+                self._auth_url,
+                "appcred",
+                identity,
+                self._region_name or "",
+            ])
+        else:
+            parts = "|".join([
+                self._auth_url,
+                self._username,
+                self._user_domain_name or self._user_domain_id or "",
+                self._project_name or self._project_id or "",
+                self._region_name or "",
+            ])
         return hashlib.sha256(parts.encode()).hexdigest()
 
     # ── Token cache (disk) ────────────────────────────────────────────────────
@@ -187,21 +234,59 @@ class OrcaClient:
             return {"id": id_}
         return {"name": name or "Default"}
 
-    def _authenticate(self) -> None:
-        """POST to Keystone ``/v3/auth/tokens`` and store the token +
-        service catalogue.  Saves the result to the disk cache."""
-        url = f"{self._auth_url}/v3/auth/tokens"
+    def _build_auth_payload(self) -> dict:
+        """Construct the Keystone v3 ``/auth/tokens`` request body for the
+        configured auth type.
 
+        Application credentials are pre-scoped at creation time, so no
+        ``scope`` block is sent for that flow.
+        """
+        if self._auth_type == "application_credential":
+            if not self._app_cred_secret:
+                raise AuthenticationError(
+                    "Application credential secret is missing. Set "
+                    "'application_credential_secret' in your profile or "
+                    "OS_APPLICATION_CREDENTIAL_SECRET in your environment."
+                )
+            if self._app_cred_id:
+                ac: dict = {"id": self._app_cred_id, "secret": self._app_cred_secret}
+            elif self._app_cred_name and self._username:
+                ac = {
+                    "name": self._app_cred_name,
+                    "secret": self._app_cred_secret,
+                    "user": {
+                        "name": self._username,
+                        "domain": self._domain_ref(self._user_domain_name, self._user_domain_id),
+                    },
+                }
+            else:
+                raise AuthenticationError(
+                    "Application credential needs either "
+                    "'application_credential_id' or "
+                    "('application_credential_name' + 'username')."
+                )
+            return {
+                "auth": {
+                    "identity": {
+                        "methods": ["application_credential"],
+                        "application_credential": ac,
+                    }
+                }
+            }
+
+        # Password flow
+        if not self._password:
+            raise AuthenticationError(
+                "Password is missing. Set 'password' in your profile or "
+                "OS_PASSWORD in your environment."
+            )
         user_domain = self._domain_ref(self._user_domain_name, self._user_domain_id)
         project_domain = self._domain_ref(self._project_domain_name, self._project_domain_id)
-
-        # Project scope — by name or by ID
         if self._project_id:
             project_scope: dict = {"id": self._project_id}
         else:
             project_scope = {"name": self._project_name, "domain": project_domain}
-
-        payload = {
+        return {
             "auth": {
                 "identity": {
                     "methods": ["password"],
@@ -216,6 +301,12 @@ class OrcaClient:
                 "scope": {"project": project_scope},
             }
         }
+
+    def _authenticate(self) -> None:
+        """POST to Keystone ``/v3/auth/tokens`` and store the token +
+        service catalogue.  Saves the result to the disk cache."""
+        url = f"{self._auth_url}/v3/auth/tokens"
+        payload = self._build_auth_payload()
         resp = self._http.post(url, json=payload)
         if resp.status_code in (401, 403):
             raise AuthenticationError(

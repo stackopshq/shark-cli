@@ -46,7 +46,9 @@ def _appcred(cid=CRED_ID):
 
 def _setup_mock(mock_client):
     mock_client.identity_url = "https://keystone.example.com"
-    mock_client._token_data = {"token": {"user": {"id": USER_ID}}}
+    # _token_data IS the inner token object (no wrapper) — matches OrcaClient
+    # behavior in core/client.py (`self._token_data = body.get("token", {})`).
+    mock_client._token_data = {"user": {"id": USER_ID}}
 
     posted = {}
     patched = {}

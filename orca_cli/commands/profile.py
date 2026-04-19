@@ -20,7 +20,7 @@ from orca_cli.core.config import (
 )
 from orca_cli.core.output import console
 
-_FIELDS = [
+_PASSWORD_FIELDS = [
     ("auth_url", "Auth URL (Keystone)", "https://keystone.example.com:5000"),
     ("username", "Username", ""),
     ("password", "Password", ""),
@@ -29,6 +29,31 @@ _FIELDS = [
     ("region_name", "Region Name (leave empty to skip)", ""),
     ("insecure", "Skip SSL verification (true/false)", "true"),
 ]
+
+_APP_CRED_FIELDS = [
+    ("auth_url", "Auth URL (Keystone)", "https://keystone.example.com:5000"),
+    ("application_credential_id", "Application Credential ID", ""),
+    ("application_credential_secret", "Application Credential Secret", ""),
+    ("region_name", "Region Name (leave empty to skip)", ""),
+    ("insecure", "Skip SSL verification (true/false)", "true"),
+]
+
+
+def _existing_uses_app_cred(cfg: dict) -> bool:
+    auth_type = str(cfg.get("auth_type", "")).lower()
+    if auth_type in ("v3applicationcredential", "application_credential"):
+        return True
+    return bool(cfg.get("application_credential_id")
+                or cfg.get("application_credential_secret"))
+
+
+def _prompt_auth_method(default: str = "1") -> bool:
+    """Prompt the user to pick an auth method. Returns True for app credential."""
+    console.print("[bold]Auth method:[/bold]")
+    console.print("  [cyan]1[/cyan]) password (username + password + project)")
+    console.print("  [cyan]2[/cyan]) application credential (id + secret, pre-scoped)")
+    choice = click.prompt("  Choose", type=click.Choice(["1", "2"]), default=default, show_choices=False)
+    return choice == "2"
 
 _VALID_COLORS = [
     "red", "green", "blue", "yellow", "magenta", "cyan", "white",
@@ -121,17 +146,23 @@ def profile_show(name: str | None) -> None:
     table.add_column("Value")
 
     _show_keys = [
-        "auth_url", "username",
+        "auth_url", "auth_type", "username",
         "user_domain_name", "user_domain_id", "domain_id",
         "project_domain_name", "project_domain_id",
         "project_name", "project_id",
+        "application_credential_id", "application_credential_name",
         "region_name", "interface", "insecure", "cacert",
     ]
     for key in _show_keys:
         val = cfg.get(key)
         if val:
             table.add_row(key, str(val))
-    table.add_row("password", "●●●●●●●●" if cfg.get("password") else "—")
+    if cfg.get("application_credential_secret"):
+        table.add_row("application_credential_secret", "●●●●●●●●")
+    if cfg.get("password"):
+        table.add_row("password", "●●●●●●●●")
+    elif not cfg.get("application_credential_secret"):
+        table.add_row("password", "—")
     color_display = f"[{color}]● {color}[/{color}]" if color else "—"
     table.add_row("color", color_display)
 
@@ -159,18 +190,26 @@ def profile_add(name: str, copy_from: str | None, profile_color: str | None) -> 
     console.print(f"\n[bold cyan]New profile: {name}[/bold cyan]\n")
 
     defaults = get_profile(copy_from) if copy_from else {}
-    config_data = {}
+    # Default auth method follows the source profile when copying.
+    default_choice = "2" if _existing_uses_app_cred(defaults) else "1"
+    use_app_cred = _prompt_auth_method(default=default_choice)
 
-    for key, label, placeholder in _FIELDS:
+    fields = _APP_CRED_FIELDS if use_app_cred else _PASSWORD_FIELDS
+    config_data: dict = {}
+    if use_app_cred:
+        config_data["auth_type"] = "v3applicationcredential"
+
+    for key, label, placeholder in fields:
         default = defaults.get(key, placeholder)
-        hide = key == "password"
+        hide = key in ("password", "application_credential_secret")
         value = click.prompt(
             f"  {label}",
             default=default if not hide else (default or None),
             hide_input=hide,
             confirmation_prompt=hide,
         )
-        config_data[key] = value
+        if value:
+            config_data[key] = value
 
     if profile_color:
         config_data["color"] = profile_color
@@ -201,17 +240,26 @@ def profile_edit(name: str | None) -> None:
     console.print(f"\n[bold cyan]Editing profile: {name}[/bold cyan]")
     console.print("[dim]Press Enter to keep current value.[/dim]\n")
 
-    config_data = {}
-    for key, label, placeholder in _FIELDS:
+    use_app_cred = _existing_uses_app_cred(existing)
+    method_label = "application credential" if use_app_cred else "password"
+    console.print(f"[dim]Auth method: {method_label} (use 'orca profile add' to switch).[/dim]\n")
+
+    fields = _APP_CRED_FIELDS if use_app_cred else _PASSWORD_FIELDS
+    config_data: dict = {}
+    if use_app_cred:
+        config_data["auth_type"] = "v3applicationcredential"
+
+    for key, label, placeholder in fields:
         default = existing.get(key, placeholder)
-        hide = key == "password"
+        hide = key in ("password", "application_credential_secret")
         value = click.prompt(
             f"  {label}",
             default=default if not hide else (default or None),
             hide_input=hide,
             confirmation_prompt=hide,
         )
-        config_data[key] = value
+        if value:
+            config_data[key] = value
 
     # Preserve color if set
     if existing.get("color"):
@@ -455,25 +503,48 @@ def _resolve_config(name: str | None) -> tuple[str, dict]:
 
 def _cfg_to_os_env(cfg: dict) -> dict[str, str]:
     """Map a resolved config dict to OS_* env var names."""
+    from orca_cli.core.config import _is_app_cred
+
     m: dict[str, str] = {}
     if cfg.get("auth_url"):
         m["OS_AUTH_URL"] = cfg["auth_url"]
-    if cfg.get("username"):
-        m["OS_USERNAME"] = cfg["username"]
-    if cfg.get("password"):
-        m["OS_PASSWORD"] = cfg["password"]
-    if cfg.get("user_domain_name"):
-        m["OS_USER_DOMAIN_NAME"] = cfg["user_domain_name"]
-    elif cfg.get("user_domain_id"):
-        m["OS_USER_DOMAIN_ID"] = cfg["user_domain_id"]
-    if cfg.get("project_domain_name"):
-        m["OS_PROJECT_DOMAIN_NAME"] = cfg["project_domain_name"]
-    elif cfg.get("project_domain_id"):
-        m["OS_PROJECT_DOMAIN_ID"] = cfg["project_domain_id"]
-    if cfg.get("project_name"):
-        m["OS_PROJECT_NAME"] = cfg["project_name"]
-    elif cfg.get("project_id"):
-        m["OS_PROJECT_ID"] = cfg["project_id"]
+
+    if _is_app_cred(cfg):
+        # Application credentials are pre-scoped — emit the AC fields and skip
+        # password/project/domain.
+        m["OS_AUTH_TYPE"] = "v3applicationcredential"
+        if cfg.get("application_credential_id"):
+            m["OS_APPLICATION_CREDENTIAL_ID"] = cfg["application_credential_id"]
+        if cfg.get("application_credential_secret"):
+            m["OS_APPLICATION_CREDENTIAL_SECRET"] = cfg["application_credential_secret"]
+        if cfg.get("application_credential_name"):
+            m["OS_APPLICATION_CREDENTIAL_NAME"] = cfg["application_credential_name"]
+        # Username + user domain are only needed when AC is referenced by name.
+        if cfg.get("application_credential_name"):
+            if cfg.get("username"):
+                m["OS_USERNAME"] = cfg["username"]
+            if cfg.get("user_domain_name"):
+                m["OS_USER_DOMAIN_NAME"] = cfg["user_domain_name"]
+            elif cfg.get("user_domain_id"):
+                m["OS_USER_DOMAIN_ID"] = cfg["user_domain_id"]
+    else:
+        if cfg.get("username"):
+            m["OS_USERNAME"] = cfg["username"]
+        if cfg.get("password"):
+            m["OS_PASSWORD"] = cfg["password"]
+        if cfg.get("user_domain_name"):
+            m["OS_USER_DOMAIN_NAME"] = cfg["user_domain_name"]
+        elif cfg.get("user_domain_id"):
+            m["OS_USER_DOMAIN_ID"] = cfg["user_domain_id"]
+        if cfg.get("project_domain_name"):
+            m["OS_PROJECT_DOMAIN_NAME"] = cfg["project_domain_name"]
+        elif cfg.get("project_domain_id"):
+            m["OS_PROJECT_DOMAIN_ID"] = cfg["project_domain_id"]
+        if cfg.get("project_name"):
+            m["OS_PROJECT_NAME"] = cfg["project_name"]
+        elif cfg.get("project_id"):
+            m["OS_PROJECT_ID"] = cfg["project_id"]
+
     if cfg.get("region_name"):
         m["OS_REGION_NAME"] = cfg["region_name"]
     if cfg.get("interface"):
@@ -531,30 +602,49 @@ def profile_to_clouds(name: str | None, output_file: str | None, cloud_name: str
     """
     import yaml
 
+    from orca_cli.core.config import _is_app_cred
+
     name, cfg = _resolve_config(name)
     cname = cloud_name or name
 
     auth: dict[str, str] = {}
     if cfg.get("auth_url"):
         auth["auth_url"] = cfg["auth_url"]
-    if cfg.get("username"):
-        auth["username"] = cfg["username"]
-    if cfg.get("password"):
-        auth["password"] = cfg["password"]
-    if cfg.get("user_domain_name"):
-        auth["user_domain_name"] = cfg["user_domain_name"]
-    elif cfg.get("user_domain_id"):
-        auth["user_domain_id"] = cfg["user_domain_id"]
-    if cfg.get("project_domain_name"):
-        auth["project_domain_name"] = cfg["project_domain_name"]
-    elif cfg.get("project_domain_id"):
-        auth["project_domain_id"] = cfg["project_domain_id"]
-    if cfg.get("project_name"):
-        auth["project_name"] = cfg["project_name"]
-    elif cfg.get("project_id"):
-        auth["project_id"] = cfg["project_id"]
 
     cloud: dict[str, any] = {"auth": auth}
+
+    if _is_app_cred(cfg):
+        cloud["auth_type"] = "v3applicationcredential"
+        if cfg.get("application_credential_id"):
+            auth["application_credential_id"] = cfg["application_credential_id"]
+        if cfg.get("application_credential_secret"):
+            auth["application_credential_secret"] = cfg["application_credential_secret"]
+        if cfg.get("application_credential_name"):
+            auth["application_credential_name"] = cfg["application_credential_name"]
+        if cfg.get("application_credential_name") and cfg.get("username"):
+            auth["username"] = cfg["username"]
+            if cfg.get("user_domain_name"):
+                auth["user_domain_name"] = cfg["user_domain_name"]
+            elif cfg.get("user_domain_id"):
+                auth["user_domain_id"] = cfg["user_domain_id"]
+    else:
+        if cfg.get("username"):
+            auth["username"] = cfg["username"]
+        if cfg.get("password"):
+            auth["password"] = cfg["password"]
+        if cfg.get("user_domain_name"):
+            auth["user_domain_name"] = cfg["user_domain_name"]
+        elif cfg.get("user_domain_id"):
+            auth["user_domain_id"] = cfg["user_domain_id"]
+        if cfg.get("project_domain_name"):
+            auth["project_domain_name"] = cfg["project_domain_name"]
+        elif cfg.get("project_domain_id"):
+            auth["project_domain_id"] = cfg["project_domain_id"]
+        if cfg.get("project_name"):
+            auth["project_name"] = cfg["project_name"]
+        elif cfg.get("project_id"):
+            auth["project_id"] = cfg["project_id"]
+
     if cfg.get("region_name"):
         cloud["region_name"] = cfg["region_name"]
     if cfg.get("interface"):
@@ -695,6 +785,14 @@ def _os_env_to_cfg(env: dict[str, str]) -> dict[str, str]:
     cfg: dict[str, str] = {}
     if env.get("OS_AUTH_URL"):
         cfg["auth_url"] = env["OS_AUTH_URL"]
+    if env.get("OS_AUTH_TYPE"):
+        cfg["auth_type"] = env["OS_AUTH_TYPE"]
+    if env.get("OS_APPLICATION_CREDENTIAL_ID"):
+        cfg["application_credential_id"] = env["OS_APPLICATION_CREDENTIAL_ID"]
+    if env.get("OS_APPLICATION_CREDENTIAL_SECRET"):
+        cfg["application_credential_secret"] = env["OS_APPLICATION_CREDENTIAL_SECRET"]
+    if env.get("OS_APPLICATION_CREDENTIAL_NAME"):
+        cfg["application_credential_name"] = env["OS_APPLICATION_CREDENTIAL_NAME"]
     if env.get("OS_USERNAME"):
         cfg["username"] = env["OS_USERNAME"]
     if env.get("OS_PASSWORD"):

@@ -51,7 +51,8 @@ class TestSetupNewProfileNoExisting:
     """First-time setup: no profiles on disk → new profile becomes active."""
 
     def test_creates_and_auto_activates(self, invoke, config_dir):
-        stdin = _full_answers(username="alice", password="s3cret", project_name="proj")
+        # New profile prompts auth method first; "1" = password.
+        stdin = "1\n" + _full_answers(username="alice", password="s3cret", project_name="proj")
         result = invoke(["setup", "--profile", "first"], input=stdin)
 
         assert result.exit_code == 0, result.output
@@ -81,8 +82,8 @@ class TestSetupNewProfileWithOthers:
             "active_profile": "existing",
             "profiles": {"existing": sample_profile},
         })
-        # Full answers + "y" for switch prompt
-        stdin = _full_answers(username="bob", password="p", project_name="p2") + "y\n"
+        # New-profile path prompts auth method ("1"=password) before fields.
+        stdin = "1\n" + _full_answers(username="bob", password="p", project_name="p2") + "y\n"
         result = invoke(["setup", "--profile", "newprof"], input=stdin)
         assert result.exit_code == 0, result.output
         assert "Switched to 'newprof'" in result.output
@@ -92,7 +93,7 @@ class TestSetupNewProfileWithOthers:
             "active_profile": "existing",
             "profiles": {"existing": sample_profile},
         })
-        stdin = _full_answers(username="bob", password="p", project_name="p2") + "n\n"
+        stdin = "1\n" + _full_answers(username="bob", password="p", project_name="p2") + "n\n"
         result = invoke(["setup", "--profile", "newprof"], input=stdin)
         assert result.exit_code == 0, result.output
         # Profile saved, but not active
@@ -164,6 +165,32 @@ class TestSetupEditExisting:
 # ══════════════════════════════════════════════════════════════════════════
 #  Default profile resolution — when --profile is omitted, uses active
 # ══════════════════════════════════════════════════════════════════════════
+
+
+class TestSetupAppCredential:
+    """New profile via the application-credential branch."""
+
+    def test_creates_app_cred_profile(self, invoke, config_dir):
+        # Auth method "2" → AC fields: auth_url, ac_id, ac_secret (twice), region, insecure
+        stdin = "\n".join([
+            "2",                          # auth method = application credential
+            "https://keystone.foo:5000",  # auth_url
+            "ac-1234",                    # application_credential_id
+            "topsecret", "topsecret",     # secret + confirmation
+            "",                           # region (skip)
+            "true",                       # insecure
+        ]) + "\n"
+        result = invoke(["setup", "--profile", "appcred-prof"], input=stdin)
+        assert result.exit_code == 0, result.output
+
+        with open(config_dir / "config.yaml") as fh:
+            data = yaml.safe_load(fh)
+        saved = data["profiles"]["appcred-prof"]
+        assert saved["auth_type"] == "v3applicationcredential"
+        assert saved["application_credential_id"] == "ac-1234"
+        assert saved["application_credential_secret"] == "topsecret"
+        assert "password" not in saved
+        assert "project_name" not in saved
 
 
 class TestSetupDefaultProfileResolution:
