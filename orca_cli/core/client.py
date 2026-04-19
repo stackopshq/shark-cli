@@ -331,6 +331,11 @@ class OrcaClient:
         """Aodh (alarming) public endpoint."""
         return self._endpoint_for("alarming")
 
+    @property
+    def rating_url(self) -> str:
+        """CloudKitty (rating) public endpoint."""
+        return self._endpoint_for("rating")
+
     # ── Generic HTTP helpers ──────────────────────────────────────────────────
 
     def _headers(self, extra: Optional[Dict[str, str]] = None,

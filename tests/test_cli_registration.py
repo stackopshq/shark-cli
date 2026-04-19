@@ -15,7 +15,7 @@ EXPECTED_COMMANDS = [
     "overview", "profile", "project", "qos", "quota", "recordset", "region", "role", "secret",
     "security-group", "server", "server-group", "service", "setup", "stack", "subnet-pool",
     "trust", "trunk", "usage",
-    "user", "volume", "watch", "zone", "placement", "alarm",
+    "user", "volume", "watch", "zone", "placement", "alarm", "rating",
     "policy", "identity-provider", "federation-protocol", "mapping", "service-provider",
     "limit", "registered-limit", "access-rule", "token", "endpoint-group",
 ]

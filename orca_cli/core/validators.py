@@ -13,6 +13,10 @@ def validate_id(ctx: click.Context, param: click.Parameter, value: str) -> str:
     - Bare hex UUID: 32 hex chars (e.g. Keystone project/user IDs).
     - Numeric ID (e.g. flavor IDs on older clouds, quota resources).
     """
+    # Pass through None so the callback is safe on optional parameters
+    # (Click calls callbacks even when the option was not supplied).
+    if value is None:
+        return value
     uuid_pattern = re.compile(
         r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
         re.IGNORECASE,

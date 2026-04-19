@@ -30,6 +30,10 @@ class TestValidateId:
         with pytest.raises(click.BadParameter):
             validate_id(None, None, "120b4dbd14934ba6")
 
+    def test_passes_through_none(self):
+        # Click still calls callbacks on optional params that weren't supplied.
+        assert validate_id(None, None, None) is None
+
     def test_rejects_arbitrary_string(self):
         with pytest.raises(click.BadParameter, match="not a valid resource ID"):
             validate_id(None, None, "not-a-uuid")
