@@ -24,14 +24,14 @@ EXPECTED_COMMANDS = [
 class TestCLIRegistration:
 
     def test_all_commands_registered(self):
-        """Every expected command should be in the CLI group."""
-        registered = list(cli.commands.keys())
+        """Every expected command must be discoverable through the lazy index."""
+        registered = list(cli.list_commands(None))
         for cmd in EXPECTED_COMMANDS:
             assert cmd in registered, f"Command '{cmd}' not registered in CLI"
 
     def test_no_unexpected_commands(self):
         """No stray commands should appear."""
-        registered = set(cli.commands.keys())
+        registered = set(cli.list_commands(None))
         expected = set(EXPECTED_COMMANDS)
         extra = registered - expected
         assert not extra, f"Unexpected commands registered: {extra}"

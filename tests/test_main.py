@@ -42,33 +42,38 @@ class TestMainEntrypoint:
         assert "Aborted" in err
 
     def test_cli_is_group(self):
-        """The auto-registered root must be a click.Group with sub-commands."""
+        """The lazy root group must list well-known commands without importing them."""
         assert isinstance(main_module.cli, click.Group)
-        # A handful of well-known commands must be registered
-        names = set(main_module.cli.commands.keys())
+        names = set(main_module.cli.list_commands(None))
         for expected in ("server", "volume", "network", "profile", "doctor"):
             assert expected in names, f"missing {expected} in {sorted(names)}"
 
 
-class TestModuleTopLevelCommands:
-    """Auto-discovery must return a stable list for a known module."""
+class TestLazyResolution:
+    """The LazyOrcaGroup must resolve commands on demand without bulk-importing."""
 
-    def test_server_module_exposes_server_group(self):
-        import orca_cli.commands.server as server_mod
-        cmds = main_module._module_top_level_commands(server_mod)
-        names = {c.name for c in cmds}
-        assert "server" in names
-        # Subcommands of `server` must not be returned as top-level
-        assert "list" not in names
-        assert "create" not in names
+    def test_get_command_resolves_simple_name(self):
+        cmd = main_module.cli.get_command(None, "server")
+        assert cmd is not None
+        assert cmd.name == "server"
+        assert isinstance(cmd, click.Group)
 
-    def test_federation_module_exposes_multiple_groups(self):
-        """federation.py defines 4 top-level groups that must all surface."""
-        import orca_cli.commands.federation as fed_mod
-        cmds = main_module._module_top_level_commands(fed_mod)
-        names = {c.name for c in cmds}
-        # At least the core ones should be here
-        assert len(names) >= 2
+    def test_get_command_resolves_overridden_name(self):
+        # ip_whois.py exposes a command named "ip", not "ip-whois"
+        cmd = main_module.cli.get_command(None, "ip")
+        assert cmd is not None
+        assert cmd.name == "ip"
+
+    def test_get_command_resolves_multi_command_module(self):
+        # federation.py exposes 4 distinct top-level commands
+        for name in ("federation-protocol", "identity-provider",
+                     "mapping", "service-provider"):
+            cmd = main_module.cli.get_command(None, name)
+            assert cmd is not None, f"{name} did not resolve"
+            assert cmd.name == name
+
+    def test_get_command_returns_none_for_unknown(self):
+        assert main_module.cli.get_command(None, "this-command-does-not-exist") is None
 
 
 class TestDebugFlag:

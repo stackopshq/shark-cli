@@ -1,14 +1,20 @@
-"""Entry point for orca — initialises the Click group and auto-registers sub-commands.
+"""Entry point for orca — initialises the Click group and lazy-resolves sub-commands.
 
-Commands are discovered by scanning ``orca_cli.commands``: every
-``click.Command`` defined at module level is registered on the root group,
-except for objects that are subcommands of another group in the same module.
-A module may therefore expose multiple top-level groups (e.g. ``federation.py``
-exports identity-provider, federation-protocol, mapping, service-provider)
-without any bookkeeping in this file.
+Commands live in ``orca_cli/commands/<name>.py``. The mapping
+``command_name -> module_name`` follows the convention
+``module_name.replace("_", "-")``, with a few explicit overrides for files
+that expose either a different command name or several top-level commands
+(e.g. ``federation.py`` publishes 4 groups).
 
-Adding a new command group: drop a file into ``orca_cli/commands/`` with a
-``@click.group()`` (or ``@click.command()``) at module level. That's it.
+Modules are imported lazily — only when their command is actually invoked —
+so ``orca <cmd>`` startup pays for one module's import, not all 60+. The one
+exception is ``orca --help``, which still walks every command to print its
+short description.
+
+Adding a new command: drop a file into ``orca_cli/commands/`` with a
+``@click.group()`` (or ``@click.command()``) at module level. If the
+command name doesn't match the filename or if the module exposes more than
+one top-level command, add an entry to ``_COMMAND_OVERRIDES`` below.
 """
 
 from __future__ import annotations
@@ -18,12 +24,70 @@ import logging
 import pkgutil
 import sys
 from pathlib import Path
+from typing import Any
 
 import click
 
 from orca_cli import __version__
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
+
+# Modules whose published command name(s) don't follow the filename convention.
+# Keys are module basenames (no .py); values are the list of command names the
+# module exposes at root level.
+_COMMAND_OVERRIDES: dict[str, list[str]] = {
+    "federation": ["federation-protocol", "identity-provider", "mapping", "service-provider"],
+    "limit": ["limit", "registered-limit"],
+    "ip_whois": ["ip"],
+    "object_store": ["object"],
+    "qos_policy": ["qos"],
+}
+
+
+class LazyOrcaGroup(click.Group):
+    """A click.Group that imports each command's module only on first use.
+
+    The command-name → module-name index is built once at construction time
+    by scanning ``orca_cli/commands/`` directory entries (no imports). Each
+    ``get_command`` call then imports exactly one module.
+    """
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self._cmd_to_module: dict[str, str] = self._build_index()
+
+    @staticmethod
+    def _build_index() -> dict[str, str]:
+        pkg = importlib.import_module("orca_cli.commands")
+        pkg_path = Path(pkg.__file__).parent
+        index: dict[str, str] = {}
+        for mi in pkgutil.iter_modules([str(pkg_path)]):
+            if mi.ispkg or mi.name.startswith("_"):
+                continue
+            names = _COMMAND_OVERRIDES.get(mi.name, [mi.name.replace("_", "-")])
+            for name in names:
+                index[name] = mi.name
+        return index
+
+    def list_commands(self, ctx: click.Context) -> list[str]:
+        return sorted(self._cmd_to_module)
+
+    def get_command(self, ctx: click.Context, name: str) -> click.Command | None:
+        module_name = self._cmd_to_module.get(name)
+        if module_name is None:
+            return None
+        mod = importlib.import_module(f"orca_cli.commands.{module_name}")
+        for attr in dir(mod):
+            if attr.startswith("_"):
+                continue
+            obj = getattr(mod, attr)
+            if not isinstance(obj, click.Command) or obj.name != name:
+                continue
+            cb = getattr(obj, "callback", None)
+            if cb is None or getattr(cb, "__module__", None) != mod.__name__:
+                continue
+            return obj
+        return None
 
 
 def _enable_debug_logging() -> None:
@@ -84,7 +148,7 @@ def _complete_regions(ctx: click.Context, param: click.Parameter, incomplete: st
         return []
 
 
-@click.group()
+@click.group(cls=LazyOrcaGroup)
 @click.version_option(version=__version__, prog_name="orca")
 @click.option("--profile", "-P", default=None, envvar="ORCA_PROFILE",
               help="Config profile to use (overrides active profile).")
@@ -102,57 +166,6 @@ def cli(ctx: click.Context, profile: str | None, region: str | None,
     orca_ctx = ctx.ensure_object(OrcaContext)
     orca_ctx.profile = profile
     orca_ctx.region = region
-
-
-# ── Auto-registration of sub-commands ─────────────────────────────────────
-
-def _module_top_level_commands(mod) -> list[click.Command]:
-    """Return every click command/group *defined* in ``mod`` that is not a
-    subcommand of another group in the same module."""
-    candidates: list[click.Command] = []
-    for attr_name in dir(mod):
-        if attr_name.startswith("_"):
-            continue
-        obj = getattr(mod, attr_name)
-        if not isinstance(obj, click.Command):
-            continue
-        # Only keep objects whose callback was actually defined in this module —
-        # filters out click commands re-imported from elsewhere.
-        callback = getattr(obj, "callback", None)
-        if callback is None or getattr(callback, "__module__", None) != mod.__name__:
-            continue
-        candidates.append(obj)
-
-    # Drop anything that is attached as a subcommand of a group we found.
-    subcommand_ids: set[int] = set()
-    stack = [c for c in candidates if isinstance(c, click.Group)]
-    while stack:
-        grp = stack.pop()
-        for sub in grp.commands.values():
-            if id(sub) in subcommand_ids:
-                continue
-            subcommand_ids.add(id(sub))
-            if isinstance(sub, click.Group):
-                stack.append(sub)
-
-    return [c for c in candidates if id(c) not in subcommand_ids]
-
-
-def _register_all_commands() -> None:
-    """Import every module under ``orca_cli.commands`` and register its
-    top-level click commands on the root ``cli`` group."""
-    pkg = importlib.import_module("orca_cli.commands")
-    pkg_path = Path(pkg.__file__).parent
-
-    for mod_info in sorted(pkgutil.iter_modules([str(pkg_path)]), key=lambda m: m.name):
-        if mod_info.ispkg or mod_info.name.startswith("_"):
-            continue
-        mod = importlib.import_module(f"orca_cli.commands.{mod_info.name}")
-        for cmd in _module_top_level_commands(mod):
-            cli.add_command(cmd)
-
-
-_register_all_commands()
 
 
 def main() -> None:
