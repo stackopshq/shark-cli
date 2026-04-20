@@ -9,6 +9,7 @@ import click
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
+from orca_cli.core.validators import safe_output_path
 
 _DEFAULT_KEY_DIR = Path.home() / ".ssh"
 
@@ -110,9 +111,11 @@ def keypair_create(ctx: click.Context, name: str, save_to: str | None) -> None:
     console.print(f"  [cyan]Fingerprint:[/cyan] {fingerprint}")
 
     if private_key:
-        dest = Path(save_to) if save_to else _DEFAULT_KEY_DIR / f"{name}.pem"
+        dest = safe_output_path(save_to) if save_to else _DEFAULT_KEY_DIR / f"{name}.pem"
         if dest.is_dir():
             dest = dest / f"{name}.pem"
+        # Re-check after resolving a directory destination.
+        dest = safe_output_path(dest)
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(private_key)
         dest.chmod(stat.S_IRUSR | stat.S_IWUSR)  # 600

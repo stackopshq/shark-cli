@@ -5,7 +5,12 @@ from __future__ import annotations
 import click
 import pytest
 
-from orca_cli.core.validators import validate_id, validate_ip
+from orca_cli.core.validators import (
+    safe_child_path,
+    safe_output_path,
+    validate_id,
+    validate_ip,
+)
 
 
 class TestValidateId:
@@ -81,3 +86,49 @@ class TestValidateIp:
     def test_rejects_empty(self):
         with pytest.raises(click.BadParameter):
             validate_ip(None, None, "")
+
+
+class TestSafeOutputPath:
+
+    def test_accepts_regular_path(self, tmp_path):
+        target = tmp_path / "export.yaml"
+        out = safe_output_path(target)
+        assert out == target
+
+    def test_accepts_nonexistent_path(self, tmp_path):
+        target = tmp_path / "does-not-exist.yaml"
+        assert not target.exists()
+        assert safe_output_path(target) == target
+
+    def test_expands_user_home(self, monkeypatch, tmp_path):
+        monkeypatch.setenv("HOME", str(tmp_path))
+        out = safe_output_path("~/file.txt")
+        assert str(out).startswith(str(tmp_path))
+
+    def test_rejects_existing_symlink(self, tmp_path):
+        target = tmp_path / "real.txt"
+        target.write_text("payload")
+        link = tmp_path / "link.txt"
+        link.symlink_to(target)
+        with pytest.raises(click.BadParameter, match="symlink"):
+            safe_output_path(link)
+
+
+class TestSafeChildPath:
+
+    def test_accepts_child_within_base(self, tmp_path):
+        result = safe_child_path(tmp_path, "sub/obj.bin")
+        assert str(result).startswith(str(tmp_path.resolve()))
+        assert result.name == "obj.bin"
+
+    def test_rejects_traversal(self, tmp_path):
+        with pytest.raises(click.BadParameter, match="outside"):
+            safe_child_path(tmp_path, "../escape.txt")
+
+    def test_rejects_absolute_child(self, tmp_path):
+        with pytest.raises(click.BadParameter, match="outside"):
+            safe_child_path(tmp_path, "/etc/passwd")
+
+    def test_rejects_deep_traversal(self, tmp_path):
+        with pytest.raises(click.BadParameter, match="outside"):
+            safe_child_path(tmp_path, "legit/../../escape.txt")

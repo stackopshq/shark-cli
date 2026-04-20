@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import click
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
+from orca_cli.core.validators import safe_child_path, safe_output_path
 
 
 def _human_size(num_bytes: int | float | str | None) -> str:
@@ -209,14 +208,18 @@ def container_save(ctx: click.Context, container_name: str, output_dir: str) -> 
         console.print("[yellow]Container is empty — nothing to download.[/yellow]")
         return
 
-    out_path = Path(output_dir)
+    out_path = safe_output_path(output_dir)
     out_path.mkdir(parents=True, exist_ok=True)
 
     for obj in objects:
         obj_name = obj.get("name", "")
         if not obj_name:
             continue
-        dest = out_path / obj_name
+        try:
+            dest = safe_child_path(out_path, obj_name)
+        except click.BadParameter as exc:
+            console.print(f"[red]Skipping '{obj_name}': {exc.message}[/red]")
+            continue
         dest.parent.mkdir(parents=True, exist_ok=True)
 
         url = f"{base}/{container_name}/{obj_name}"

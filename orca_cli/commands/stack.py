@@ -11,6 +11,7 @@ import yaml
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
+from orca_cli.core.validators import safe_output_path
 
 # ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -732,8 +733,9 @@ def stack_abandon(ctx: click.Context, stack_name_or_id: str, yes: bool,
     s_id = stk["id"]
     data = client.delete(f"{_heat(client)}/stacks/{s_name}/{s_id}/abandon")
     if out_file:
-        Path(out_file).write_text(json.dumps(data, indent=2))
-        console.print(f"[green]Stack abandoned. Data written to {out_file}[/green]")
+        out = safe_output_path(out_file)
+        out.write_text(json.dumps(data, indent=2))
+        console.print(f"[green]Stack abandoned. Data written to {out}[/green]")
     else:
         console.print(json.dumps(data, indent=2))
         console.print(f"[green]Stack {stack_name_or_id} abandoned.[/green]")

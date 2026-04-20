@@ -8,6 +8,7 @@ import click
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
+from orca_cli.core.validators import safe_output_path
 
 
 def _dns(client) -> str:
@@ -315,9 +316,9 @@ def zone_export(ctx: click.Context, zone: str, output_file: str | None) -> None:
 
     zone_content = resp.text
     if output_file:
-        with open(output_file, "w") as fh:
-            fh.write(zone_content)
-        console.print(f"[green]Zone exported to {output_file}.[/green]")
+        out = safe_output_path(output_file)
+        out.write_text(zone_content)
+        console.print(f"[green]Zone exported to {out}.[/green]")
     else:
         console.print(zone_content)
 

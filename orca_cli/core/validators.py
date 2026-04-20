@@ -1,6 +1,8 @@
 """Input validators for CLI options and arguments."""
 
 import re
+from pathlib import Path
+from typing import Union
 
 import click
 
@@ -26,6 +28,45 @@ def validate_id(ctx: click.Context, param: click.Parameter, value: str) -> str:
     if not (uuid_pattern.match(value) or hex_pattern.match(value) or numeric_pattern.match(value)):
         raise click.BadParameter(f"'{value}' is not a valid resource ID (expected UUID or numeric).")
     return value
+
+
+def safe_output_path(user_path: Union[str, Path]) -> Path:
+    """Resolve a user-supplied output path, refusing symlink overwrites.
+
+    Accepts any path (absolute or relative); users are root of their own
+    machine and a CLI must not second-guess where they want to save a file.
+    What it **does** reject is overwriting an *existing symlink*: an
+    attacker who can pre-create ``~/orca-export.yaml -> /etc/shadow`` in
+    a shared temp dir would otherwise get the CLI to clobber the link
+    target. Delete the link and re-run if this is intentional.
+    """
+    p = Path(user_path).expanduser()
+    if p.is_symlink():
+        raise click.BadParameter(
+            f"Refusing to write to {p}: path exists as a symlink. "
+            "Remove or rename it before re-running (symlink-race guard)."
+        )
+    return p
+
+
+def safe_child_path(base: Union[str, Path], child: str) -> Path:
+    """Join an API-derived name onto a base directory without escaping it.
+
+    Used for bulk downloads where the child name (object key, file name,
+    attachment path) comes from a remote response and could contain ``..``
+    segments or an absolute prefix. The resolved path must live under the
+    resolved ``base``; anything else raises ``click.BadParameter``.
+    """
+    base_path = Path(base).expanduser().resolve()
+    candidate = (base_path / child).resolve()
+    try:
+        candidate.relative_to(base_path)
+    except ValueError as exc:
+        raise click.BadParameter(
+            f"Refusing to write {candidate}: resolves outside {base_path} "
+            f"(suspicious path segment in {child!r})."
+        ) from exc
+    return candidate
 
 
 def validate_ip(ctx: click.Context, param: click.Parameter, value: str) -> str:

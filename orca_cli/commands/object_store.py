@@ -12,6 +12,7 @@ from rich.tree import Tree
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
+from orca_cli.core.validators import safe_child_path, safe_output_path
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -268,14 +269,18 @@ def container_save(ctx: click.Context, container: str, output_dir: str) -> None:
         console.print("[yellow]Container is empty — nothing to download.[/yellow]")
         return
 
-    out_path = Path(output_dir)
+    out_path = safe_output_path(output_dir)
     out_path.mkdir(parents=True, exist_ok=True)
 
     for obj in objects:
         obj_name = obj.get("name", "")
         if not obj_name:
             continue
-        dest = out_path / obj_name
+        try:
+            dest = safe_child_path(out_path, obj_name)
+        except click.BadParameter as exc:
+            console.print(f"[red]Skipping '{obj_name}': {exc.message}[/red]")
+            continue
         dest.parent.mkdir(parents=True, exist_ok=True)
 
         url = f"{base}/{container}/{obj_name}"
@@ -574,7 +579,7 @@ def object_download(ctx: click.Context, container: str, object_name: str, output
     client = ctx.find_object(OrcaContext).ensure_client()
     base = client.object_store_url
     url = f"{base}/{container}/{object_name}"
-    dest = Path(output_file if output_file else object_name.split("/")[-1])
+    dest = safe_output_path(output_file if output_file else object_name.split("/")[-1])
     dest.parent.mkdir(parents=True, exist_ok=True)
 
     with client._http.stream("GET", url, headers=client._headers()) as resp:

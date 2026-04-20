@@ -19,6 +19,7 @@ from orca_cli.core.config import (
     set_active_profile,
 )
 from orca_cli.core.output import console
+from orca_cli.core.validators import safe_output_path
 
 _PASSWORD_FIELDS = [
     ("auth_url", "Auth URL (Keystone)", "https://keystone.example.com:5000"),
@@ -597,8 +598,9 @@ def profile_to_openrc(name: str | None, output_file: str | None) -> None:
     output = "\n".join(lines) + "\n"
 
     if output_file:
-        Path(output_file).write_text(output)
-        console.print(f"[green]OpenRC written to {output_file}[/green]")
+        out = safe_output_path(output_file)
+        out.write_text(output)
+        console.print(f"[green]OpenRC written to {out}[/green]")
     else:
         click.echo(output, nl=False)
 
@@ -676,8 +678,9 @@ def profile_to_clouds(name: str | None, output_file: str | None, cloud_name: str
     output = yaml.dump(data, default_flow_style=False, sort_keys=False)
 
     if output_file:
-        Path(output_file).write_text(output)
-        console.print(f"[green]clouds.yaml written to {output_file}[/green]")
+        out = safe_output_path(output_file)
+        out.write_text(output)
+        console.print(f"[green]clouds.yaml written to {out}[/green]")
     else:
         click.echo(output, nl=False)
 

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any
 
 import click
@@ -12,6 +11,7 @@ import yaml
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console
+from orca_cli.core.validators import safe_output_path
 
 VALID_RESOURCE_TYPES = (
     "servers",
@@ -426,7 +426,7 @@ def export(ctx: click.Context, output: str | None, resources: str | None, fmt: s
         payload = header + yaml.dump(result, default_flow_style=False, sort_keys=False)
 
     if output:
-        out_path = Path(output)
+        out_path = safe_output_path(output)
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(payload)
         console.print(f"[green]Infrastructure exported to {out_path}[/green]")

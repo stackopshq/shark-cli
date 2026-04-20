@@ -11,6 +11,7 @@ from orca_cli.core.client import APIError, AuthenticationError
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import PermissionDeniedError
 from orca_cli.core.output import console, output_options, print_detail, print_list
+from orca_cli.core.validators import safe_output_path
 
 CHUNK_SIZE = 64 * 1024  # 64 KB
 
@@ -299,7 +300,7 @@ def image_download(ctx: click.Context, image_id: str, output_path: str) -> None:
     console.print(f"Downloading '{name}' ({total / 1024 / 1024:.1f} MB) ...")
 
     url = f"{client.image_url}/v2/images/{image_id}/file"
-    out = Path(output_path)
+    out = safe_output_path(output_path)
 
     with client.get_stream(url) as resp:
         if resp.status_code == 204:
