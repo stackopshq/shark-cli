@@ -54,9 +54,16 @@ def _complete_regions(ctx: click.Context, param: click.Parameter, incomplete: st
     """Shell completion for the global --region flag.
 
     Invoked by the shell, not exercised in pytest. Best-effort: all exceptions
-    swallow to empty — never crash the user's tab key.
+    swallow to empty — never crash the user's tab key. Results are cached for
+    30 seconds to avoid a Keystone round-trip on every Tab press.
     """
     try:
+        from orca_cli.core import cache
+
+        cached = cache.load(None, "regions")
+        if cached is not None:
+            return sorted(r["id"] for r in cached if r["id"].startswith(incomplete))
+
         from orca_cli.core.client import OrcaClient
         from orca_cli.core.config import config_is_complete, load_config
 
@@ -71,6 +78,7 @@ def _complete_regions(ctx: click.Context, param: click.Parameter, incomplete: st
                 if region:
                     regions.add(region)
         client.close()
+        cache.save(None, "regions", [{"id": r} for r in sorted(regions)])
         return sorted(r for r in regions if r.startswith(incomplete))
     except Exception:
         return []
