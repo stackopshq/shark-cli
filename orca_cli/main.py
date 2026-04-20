@@ -14,6 +14,7 @@ Adding a new command group: drop a file into ``orca_cli/commands/`` with a
 from __future__ import annotations
 
 import importlib
+import logging
 import pkgutil
 import sys
 from pathlib import Path
@@ -23,6 +24,30 @@ import click
 from orca_cli import __version__
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
+
+
+def _enable_debug_logging() -> None:
+    """Configure root logger for --debug output on stderr.
+
+    Keeps the format short so debug lines don't wreck terminal formatting
+    when interleaved with rich table output. Level is applied to the
+    ``orca_cli`` tree only — third-party libraries (httpx, urllib3) stay
+    quiet unless the user explicitly wants them.
+    """
+    handler = logging.StreamHandler(stream=sys.stderr)
+    handler.setFormatter(logging.Formatter("[%(asctime)s %(levelname)s %(name)s] %(message)s",
+                                           datefmt="%H:%M:%S"))
+    orca_logger = logging.getLogger("orca_cli")
+    orca_logger.setLevel(logging.DEBUG)
+    orca_logger.addHandler(handler)
+    # Don't propagate to the root logger; avoids duplicate lines if the
+    # user has pre-configured logging in a wrapping script.
+    orca_logger.propagate = False
+    click.secho(
+        "DEBUG mode enabled — request URLs and retry decisions will be logged to stderr. "
+        "Credentials are redacted, but response bodies may contain sensitive data.",
+        fg="yellow", err=True,
+    )
 
 
 def _complete_regions(ctx: click.Context, param: click.Parameter, incomplete: str) -> list:  # pragma: no cover
@@ -58,9 +83,14 @@ def _complete_regions(ctx: click.Context, param: click.Parameter, incomplete: st
 @click.option("--region", "-R", default=None, envvar="ORCA_REGION",
               shell_complete=_complete_regions,
               help="Region to use (overrides profile region_name).")
+@click.option("--debug", is_flag=True, envvar="ORCA_DEBUG",
+              help="Log HTTP requests, retries, and auth decisions to stderr.")
 @click.pass_context
-def cli(ctx: click.Context, profile: str | None, region: str | None) -> None:
+def cli(ctx: click.Context, profile: str | None, region: str | None,
+        debug: bool) -> None:
     """orca — OpenStack Rich Command-line Alternative."""
+    if debug:
+        _enable_debug_logging()
     orca_ctx = ctx.ensure_object(OrcaContext)
     orca_ctx.profile = profile
     orca_ctx.region = region

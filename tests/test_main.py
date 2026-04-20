@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import logging
 from unittest.mock import patch
 
 import click
 import pytest
+from click.testing import CliRunner
 
 from orca_cli import main as main_module
 from orca_cli.core.exceptions import OrcaCLIError
@@ -67,3 +69,43 @@ class TestModuleTopLevelCommands:
         names = {c.name for c in cmds}
         # At least the core ones should be here
         assert len(names) >= 2
+
+
+class TestDebugFlag:
+    """--debug attaches a stderr handler to the orca_cli logger."""
+
+    @pytest.fixture(autouse=True)
+    def _reset_logger(self):
+        """Strip handlers before and after to keep tests isolated."""
+        orca_logger = logging.getLogger("orca_cli")
+        saved = (orca_logger.handlers[:], orca_logger.level, orca_logger.propagate)
+        orca_logger.handlers = []
+        orca_logger.setLevel(logging.WARNING)
+        yield
+        orca_logger.handlers, orca_logger.level, orca_logger.propagate = saved
+
+    def test_enable_debug_logging_configures_logger(self, capsys):
+        main_module._enable_debug_logging()
+        orca_logger = logging.getLogger("orca_cli")
+        assert orca_logger.level == logging.DEBUG
+        assert len(orca_logger.handlers) == 1
+        # Handler writes to stderr, not stdout.
+        handler = orca_logger.handlers[0]
+        assert isinstance(handler, logging.StreamHandler)
+        # User is warned about the implications on stderr.
+        err = capsys.readouterr().err
+        assert "DEBUG mode enabled" in err
+
+    def test_debug_option_is_registered_on_root(self):
+        names = [p.name for p in main_module.cli.params]
+        assert "debug" in names
+
+    def test_debug_flag_triggers_enable(self):
+        """Invoking the root with --debug must call _enable_debug_logging."""
+        runner = CliRunner()
+        with patch.object(main_module, "_enable_debug_logging") as mock_enable:
+            # catalog is a lightweight subcommand that needs config; it will
+            # fail on missing creds, but the callback (and our flag handling)
+            # runs before that.
+            runner.invoke(main_module.cli, ["--debug", "catalog"])
+        mock_enable.assert_called_once()

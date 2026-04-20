@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import email.utils
 import hashlib
+import logging
 import random
 import stat
 import time
@@ -30,6 +31,20 @@ import httpx
 import yaml
 
 from orca_cli.core.exceptions import APIError, AuthenticationError, PermissionDeniedError
+
+# Module logger — silent by default (no handlers attached). The root CLI
+# wires handlers when --debug is passed. Auth payloads are never logged,
+# and HTTP headers are filtered to strip `X-Auth-Token` before emission.
+logger = logging.getLogger(__name__)
+
+# Header names (lowercased) whose values must never appear in debug logs.
+_REDACTED_HEADERS = frozenset({"x-auth-token", "x-subject-token", "authorization"})
+
+
+def _redact_headers(headers: Dict[str, str]) -> Dict[str, str]:
+    """Return a copy of ``headers`` with sensitive values replaced by ``***``."""
+    return {k: ("***" if k.lower() in _REDACTED_HEADERS else v)
+            for k, v in headers.items()}
 
 # Seconds before actual expiry to treat the token as expired (5 min buffer)
 TOKEN_EXPIRY_BUFFER = 300
@@ -247,6 +262,8 @@ class OrcaClient:
         self._catalog = data.get("catalog", [])
         self._token_data = data.get("token_data", {})
         self._token_from_cache = True
+        if self._token:
+            logger.debug("Loaded token from cache, %.0fs remaining", remaining)
         return bool(self._token)
 
     def _save_token_cache(self) -> None:
@@ -351,6 +368,15 @@ class OrcaClient:
         """POST to Keystone ``/v3/auth/tokens`` and store the token +
         service catalogue.  Saves the result to the disk cache."""
         url = f"{self._auth_url}/v3/auth/tokens"
+        # Log auth intent without the payload — it contains the password
+        # or application-credential secret.
+        logger.debug(
+            "Authenticating to %s (auth_type=%s, user=%s, project=%s, region=%s)",
+            url, self._auth_type,
+            self._username or self._app_cred_name or self._app_cred_id or "?",
+            self._project_name or self._project_id or "?",
+            self._region_name or "any",
+        )
         payload = self._build_auth_payload()
         resp = self._http.post(url, json=payload)
         if resp.status_code in (401, 403):
@@ -369,6 +395,8 @@ class OrcaClient:
         self._token_data = body.get("token", {})
         self._catalog = self._token_data.get("catalog", [])
         self._token_from_cache = False
+        logger.debug("Authentication successful, %d service(s) in catalogue",
+                     len(self._catalog))
 
         # Persist to disk so the next CLI invocation can reuse it
         self._save_token_cache()
@@ -574,12 +602,24 @@ class OrcaClient:
               extra_headers: Optional[Dict[str, str]] = None,
               **kwargs: Any) -> httpx.Response:
         """Single HTTP send with inline 401→re-auth retry (once, cached token only)."""
-        resp = getattr(self._http, method)(url, headers=self._headers(extra_headers, url=url), **kwargs)
+        started = time.monotonic()
+        headers = self._headers(extra_headers, url=url)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("HTTP %s %s headers=%s params=%s",
+                         method.upper(), url,
+                         _redact_headers(headers), kwargs.get("params"))
+        resp = getattr(self._http, method)(url, headers=headers, **kwargs)
         if resp.status_code == 401 and self._token_from_cache:
             # Cached token was rejected — clear cache, re-auth, retry once.
+            logger.debug("HTTP %s %s → 401 with cached token, re-authenticating",
+                         method.upper(), url)
             self._clear_token_cache()
             self._authenticate()
-            resp = getattr(self._http, method)(url, headers=self._headers(extra_headers, url=url), **kwargs)
+            headers = self._headers(extra_headers, url=url)
+            resp = getattr(self._http, method)(url, headers=headers, **kwargs)
+        logger.debug("HTTP %s %s → %d in %.2fs",
+                     method.upper(), url, resp.status_code,
+                     time.monotonic() - started)
         return resp
 
     def _request(self, method: str, url: str,
@@ -604,7 +644,11 @@ class OrcaClient:
                 resp = self._send(method, url, extra_headers=extra_headers, **kwargs)
             except _TRANSIENT_EXCEPTIONS as exc:
                 if is_idempotent and attempt < MAX_RETRIES:
-                    time.sleep(_backoff_with_jitter(attempt))
+                    wait = _backoff_with_jitter(attempt)
+                    logger.debug("Transient %s on %s %s, retrying in %.2fs (attempt %d/%d)",
+                                 type(exc).__name__, method.upper(), url,
+                                 wait, attempt + 1, MAX_RETRIES)
+                    time.sleep(wait)
                     continue
                 raise APIError(0, f"Network error: {exc}")
 
@@ -616,18 +660,27 @@ class OrcaClient:
                 elif hint > MAX_RATE_LIMIT_WAIT:
                     # Server asked us to wait too long — surface the 429 to the
                     # caller instead of hanging the CLI.
+                    logger.debug("429 with Retry-After=%.0fs exceeds cap %.0fs, surfacing error",
+                                 hint, MAX_RATE_LIMIT_WAIT)
                     return self._handle_response(resp)
                 else:
                     # Add a small jitter on top of the hint so concurrent
                     # clients don't all retry at the same instant.
                     wait = hint + random.uniform(0.0, min(1.0, hint * 0.1))
+                logger.debug("Rate-limited on %s %s, waiting %.2fs (hint=%s)",
+                             method.upper(), url, wait,
+                             "server" if hint is not None else "backoff")
                 time.sleep(wait)
                 continue
 
             if (resp.status_code in RETRY_STATUSES
                     and is_idempotent
                     and attempt < MAX_RETRIES):
-                time.sleep(_backoff_with_jitter(attempt))
+                wait = _backoff_with_jitter(attempt)
+                logger.debug("HTTP %d on %s %s, retrying in %.2fs (attempt %d/%d)",
+                             resp.status_code, method.upper(), url,
+                             wait, attempt + 1, MAX_RETRIES)
+                time.sleep(wait)
                 continue
 
             return self._handle_response(resp)
