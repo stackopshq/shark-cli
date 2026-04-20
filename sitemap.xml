@@ -13,6 +13,34 @@
          <lastmod>2026-04-20</lastmod>
     </url>
     <url>
+         <loc>https://stackopshq.github.io/orca-cli/adr/</loc>
+         <lastmod>2026-04-20</lastmod>
+    </url>
+    <url>
+         <loc>https://stackopshq.github.io/orca-cli/adr/0001-lazy-command-registration/</loc>
+         <lastmod>2026-04-20</lastmod>
+    </url>
+    <url>
+         <loc>https://stackopshq.github.io/orca-cli/adr/0002-dual-format-config-file/</loc>
+         <lastmod>2026-04-20</lastmod>
+    </url>
+    <url>
+         <loc>https://stackopshq.github.io/orca-cli/adr/0003-auth-type-auto-detection/</loc>
+         <lastmod>2026-04-20</lastmod>
+    </url>
+    <url>
+         <loc>https://stackopshq.github.io/orca-cli/adr/0004-no-services-layer/</loc>
+         <lastmod>2026-04-20</lastmod>
+    </url>
+    <url>
+         <loc>https://stackopshq.github.io/orca-cli/adr/0005-durable-token-cache/</loc>
+         <lastmod>2026-04-20</lastmod>
+    </url>
+    <url>
+         <loc>https://stackopshq.github.io/orca-cli/adr/0006-idempotent-only-retries/</loc>
+         <lastmod>2026-04-20</lastmod>
+    </url>
+    <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/</loc>
          <lastmod>2026-04-20</lastmod>
     </url>
