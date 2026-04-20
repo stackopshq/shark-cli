@@ -91,6 +91,13 @@ class VolumeService:
                                  json={"metadata": kv})
         return data.get("metadata", {}) if data else {}
 
+    def delete_metadata_key(self, volume_id: str, key: str) -> None:
+        self._client.delete(f"{self._base}/volumes/{volume_id}/metadata/{key}")
+
+    def get_summary(self) -> dict:
+        data = self._client.get(f"{self._base}/volumes/summary")
+        return data.get("volume-summary", data) if data else {}
+
     # ── snapshots ──────────────────────────────────────────────────────
 
     def find_snapshots(self, *,
@@ -109,6 +116,11 @@ class VolumeService:
 
     def delete_snapshot(self, snapshot_id: str) -> None:
         self._client.delete(f"{self._base}/snapshots/{snapshot_id}")
+
+    def update_snapshot(self, snapshot_id: str, body: dict[str, Any]) -> VolumeSnapshot:
+        data = self._client.put(f"{self._base}/snapshots/{snapshot_id}",
+                                json={"snapshot": body})
+        return data.get("snapshot", data) if data else {}
 
     def update_snapshot_metadata(self, snapshot_id: str, kv: dict[str, str]) -> dict:
         # Cinder uses POST for metadata merge (matches the volume metadata API).
@@ -252,8 +264,10 @@ class VolumeService:
 
     # ── transfers ──────────────────────────────────────────────────────
 
-    def find_transfers(self) -> list[dict]:
-        data = self._client.get(f"{self._base}/volume-transfers/detail")
+    def find_transfers(self, *,
+                       params: dict[str, Any] | None = None) -> list[dict]:
+        data = self._client.get(f"{self._base}/volume-transfers/detail",
+                                params=params)
         return data.get("transfers", [])
 
     def get_transfer(self, transfer_id: str) -> dict:
@@ -345,6 +359,11 @@ class VolumeService:
                                  json={"group_type": body})
         return data.get("group_type", data) if data else {}
 
+    def update_group_type(self, gt_id: str, body: dict[str, Any]) -> dict:
+        data = self._client.put(f"{self._base}/group_types/{gt_id}",
+                                json={"group_type": body})
+        return data.get("group_type", data) if data else {}
+
     def delete_group_type(self, gt_id: str) -> None:
         self._client.delete(f"{self._base}/group_types/{gt_id}")
 
@@ -362,8 +381,9 @@ class VolumeService:
 
     # ── services (admin) ───────────────────────────────────────────────
 
-    def find_services(self) -> list[dict]:
-        data = self._client.get(f"{self._base}/os-services")
+    def find_services(self, *,
+                      params: dict[str, Any] | None = None) -> list[dict]:
+        data = self._client.get(f"{self._base}/os-services", params=params)
         return data.get("services", [])
 
     def update_service(self, action: str, body: dict[str, Any]) -> dict | None:

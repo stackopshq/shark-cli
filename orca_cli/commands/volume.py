@@ -871,9 +871,9 @@ def volume_unset(ctx: click.Context, volume_id: str, properties: tuple[str, ...]
     if not properties:
         console.print("[yellow]No properties specified.[/yellow]")
         return
-    client = ctx.find_object(OrcaContext).ensure_client()
+    service = VolumeService(ctx.find_object(OrcaContext).ensure_client())
     for key in properties:
-        client.delete(f"{client.volume_url}/volumes/{volume_id}/metadata/{key}")  # one-off; service has no per-key helper yet
+        service.delete_metadata_key(volume_id, key)
     console.print(f"[green]Metadata removed from volume {volume_id}.[/green]")
 
 
@@ -891,15 +891,14 @@ def volume_unset(ctx: click.Context, volume_id: str, properties: tuple[str, ...]
 def snapshot_set(ctx: click.Context, snapshot_id: str, name: str | None,
                  description: str | None, properties: tuple[str, ...]) -> None:
     """Update a snapshot's name, description, or metadata."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    service = VolumeService(client)
+    service = VolumeService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {}
     if name is not None:
         body["name"] = name
     if description is not None:
         body["description"] = description
     if body:
-        client.put(f"{client.volume_url}/snapshots/{snapshot_id}", json={"snapshot": body})  # snapshot PUT not yet in service
+        service.update_snapshot(snapshot_id, body)
     if properties:
         meta: dict = {}
         for prop in properties:
@@ -1089,12 +1088,11 @@ def volume_type_access_remove(ctx: click.Context, type_id: str, project_id: str,
 @click.pass_context
 def volume_transfer_create(ctx: click.Context, volume_id: str, name: str | None) -> None:
     """Create a volume transfer request."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    service = VolumeService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {"volume_id": volume_id}
     if name:
         body["name"] = name
-    t = client.post(f"{client.volume_url}/volume-transfers",
-                    json={"transfer": body}).get("transfer", {})
+    t = service.create_transfer(body)
     console.print(f"[green]Transfer created: {t.get('id', '?')}[/green]")
     console.print(f"  Auth key: [bold cyan]{t.get('auth_key', '?')}[/bold cyan]")
     console.print("  [yellow]Save the auth key — it will not be shown again.[/yellow]")
@@ -1108,10 +1106,8 @@ def volume_transfer_list(ctx: click.Context, all_projects: bool,
                          output_format: str, columns: tuple[str, ...],
                          fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List volume transfer requests."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    params = {"all_tenants": 1} if all_projects else {}
-    transfers = client.get(f"{client.volume_url}/volume-transfers/detail",
-                           params=params).get("transfers", [])
+    params = {"all_tenants": 1} if all_projects else None
+    transfers = VolumeService(ctx.find_object(OrcaContext).ensure_client()).find_transfers(params=params)
     print_list(
         transfers,
         [
@@ -1135,8 +1131,7 @@ def volume_transfer_show(ctx: click.Context, transfer_id: str,
                          output_format: str, columns: tuple[str, ...],
                          fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show a volume transfer request."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    t = client.get(f"{client.volume_url}/volume-transfers/{transfer_id}").get("transfer", {})
+    t = VolumeService(ctx.find_object(OrcaContext).ensure_client()).get_transfer(transfer_id)
     print_detail(
         [(k, str(t.get(k, "") or "")) for k in
          ["id", "name", "volume_id", "created_at"]],
@@ -1151,9 +1146,7 @@ def volume_transfer_show(ctx: click.Context, transfer_id: str,
 @click.pass_context
 def volume_transfer_accept(ctx: click.Context, transfer_id: str, auth_key: str) -> None:
     """Accept a volume transfer request."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.post(f"{client.volume_url}/volume-transfers/{transfer_id}/accept",
-                json={"accept": {"auth_key": auth_key}})
+    VolumeService(ctx.find_object(OrcaContext).ensure_client()).accept_transfer(transfer_id, auth_key)
     console.print(f"[green]Transfer {transfer_id} accepted.[/green]")
 
 
@@ -1165,8 +1158,7 @@ def volume_transfer_delete(ctx: click.Context, transfer_id: str, yes: bool) -> N
     """Delete a volume transfer request."""
     if not yes:
         click.confirm(f"Delete transfer {transfer_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{client.volume_url}/volume-transfers/{transfer_id}")
+    VolumeService(ctx.find_object(OrcaContext).ensure_client()).delete_transfer(transfer_id)
     console.print(f"[green]Transfer {transfer_id} deleted.[/green]")
 
 
@@ -1180,8 +1172,7 @@ def volume_transfer_delete(ctx: click.Context, transfer_id: str, yes: bool) -> N
 def volume_qos_list(ctx: click.Context, output_format: str, columns: tuple[str, ...],
                     fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List volume QoS specs."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    specs = client.get(f"{client.volume_url}/qos-specs").get("qos_specs", [])
+    specs = VolumeService(ctx.find_object(OrcaContext).ensure_client()).find_qos()
     print_list(
         specs,
         [
@@ -1205,8 +1196,7 @@ def volume_qos_show(ctx: click.Context, qos_id: str,
                     output_format: str, columns: tuple[str, ...],
                     fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show volume QoS spec details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    s = client.get(f"{client.volume_url}/qos-specs/{qos_id}").get("qos_specs", {})
+    s = VolumeService(ctx.find_object(OrcaContext).ensure_client()).get_qos(qos_id)
     fields = [
         ("ID", str(s.get("id", ""))),
         ("Name", str(s.get("name", ""))),
@@ -1234,7 +1224,7 @@ def volume_qos_create(ctx: click.Context, name: str, consumer: str,
       orca volume qos-create my-qos --consumer back-end \\
         --property total_iops_sec=1000
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
+    service = VolumeService(ctx.find_object(OrcaContext).ensure_client())
     specs: dict = {}
     for prop in properties:
         if "=" not in prop:
@@ -1244,8 +1234,7 @@ def volume_qos_create(ctx: click.Context, name: str, consumer: str,
     body: dict = {"name": name, "consumer": consumer}
     if specs:
         body["specs"] = specs
-    s = client.post(f"{client.volume_url}/qos-specs",
-                    json={"qos_specs": body}).get("qos_specs", {})
+    s = service.create_qos(body)
     console.print(f"[green]QoS spec '{name}' created: {s.get('id', '?')}[/green]")
 
 
@@ -1259,14 +1248,14 @@ def volume_qos_set(ctx: click.Context, qos_id: str, properties: tuple[str, ...])
     if not properties:
         console.print("[yellow]No properties specified.[/yellow]")
         return
-    client = ctx.find_object(OrcaContext).ensure_client()
+    service = VolumeService(ctx.find_object(OrcaContext).ensure_client())
     specs: dict = {}
     for prop in properties:
         if "=" not in prop:
             raise click.UsageError(f"Invalid format '{prop}', expected KEY=VALUE.")
         k, v = prop.split("=", 1)
         specs[k] = v
-    client.put(f"{client.volume_url}/qos-specs/{qos_id}", json={"qos_specs": {"specs": specs}})
+    service.update_qos(qos_id, {"specs": specs})
     console.print(f"[green]QoS spec {qos_id} updated.[/green]")
 
 
@@ -1279,10 +1268,7 @@ def volume_qos_delete(ctx: click.Context, qos_id: str, yes: bool, force: bool) -
     """Delete a volume QoS spec."""
     if not yes:
         click.confirm(f"Delete QoS spec {qos_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    params = {"force": True} if force else {}
-    client.delete(f"{client.volume_url}/qos-specs/{qos_id}",
-                  params=params if params else None)
+    VolumeService(ctx.find_object(OrcaContext).ensure_client()).delete_qos(qos_id, force=force)
     console.print(f"[green]QoS spec {qos_id} deleted.[/green]")
 
 
@@ -1292,9 +1278,7 @@ def volume_qos_delete(ctx: click.Context, qos_id: str, yes: bool, force: bool) -
 @click.pass_context
 def volume_qos_associate(ctx: click.Context, qos_id: str, type_id: str) -> None:
     """Associate a QoS spec with a volume type."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.get(f"{client.volume_url}/qos-specs/{qos_id}/associate",
-               params={"vol_type_id": type_id})
+    VolumeService(ctx.find_object(OrcaContext).ensure_client()).associate_qos(qos_id, type_id)
     console.print(f"[green]QoS spec {qos_id} associated with type {type_id}.[/green]")
 
 
@@ -1307,12 +1291,8 @@ def volume_qos_associate(ctx: click.Context, qos_id: str, type_id: str) -> None:
 def volume_qos_disassociate(ctx: click.Context, qos_id: str, type_id: str,
                              disassociate_all: bool) -> None:
     """Disassociate a QoS spec from a volume type."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    if disassociate_all:
-        client.get(f"{client.volume_url}/qos-specs/{qos_id}/disassociate_all")
-    else:
-        client.get(f"{client.volume_url}/qos-specs/{qos_id}/disassociate",
-                   params={"vol_type_id": type_id})
+    service = VolumeService(ctx.find_object(OrcaContext).ensure_client())
+    service.disassociate_qos(qos_id, None if disassociate_all else type_id)
     console.print(f"[green]QoS spec {qos_id} disassociated.[/green]")
 
 
@@ -1329,14 +1309,14 @@ def volume_service_list(ctx: click.Context, host: str | None, binary: str | None
                         output_format: str, columns: tuple[str, ...],
                         fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List Cinder services."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     params: dict = {}
     if host:
         params["host"] = host
     if binary:
         params["binary"] = binary
-    services = client.get(f"{client.volume_url}/os-services",
-                          params=params).get("services", [])
+    services = VolumeService(ctx.find_object(OrcaContext).ensure_client()).find_services(
+        params=params or None,
+    )
     print_list(
         services,
         [
@@ -1367,16 +1347,16 @@ def volume_service_set(ctx: click.Context, host: str, binary: str,
     """Enable or disable a Cinder service."""
     if not action:
         raise click.UsageError("Specify --enable or --disable.")
-    client = ctx.find_object(OrcaContext).ensure_client()
+    service = VolumeService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {"host": host, "binary": binary}
     if action == "disable":
-        url = f"{client.volume_url}/os-services/disable"
+        verb = "disable"
         if disabled_reason:
             body["disabled_reason"] = disabled_reason
-            url = f"{client.volume_url}/os-services/disable-log-reason"
+            verb = "disable-log-reason"
     else:
-        url = f"{client.volume_url}/os-services/enable"
-    client.put(url, json=body)
+        verb = "enable"
+    service.update_service(verb, body)
     console.print(f"[green]Service {binary} on {host} {action}d.[/green]")
 
 
@@ -1435,9 +1415,7 @@ def volume_revert_to_snapshot(ctx: click.Context, volume_id: str, snapshot_id: s
 def volume_summary(ctx: click.Context, output_format: str, columns: tuple[str, ...],
                    fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show aggregated volume count and total size for the project."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{client.volume_url}/volumes/summary")
-    s = data.get("volume-summary", data)
+    s = VolumeService(ctx.find_object(OrcaContext).ensure_client()).get_summary()
     fields = [
         ("Total Count", str(s.get("total_count", 0))),
         ("Total Size (GB)", str(s.get("total_size", 0))),
@@ -1465,14 +1443,13 @@ def volume_message_list(ctx: click.Context, resource_id: str | None,
                         output_format: str, columns: tuple[str, ...],
                         fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List Cinder error messages."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    params: dict = {}
+    # find_messages has no built-in filters; apply client-side.
+    messages = VolumeService(ctx.find_object(OrcaContext).ensure_client()).find_messages()
     if resource_id:
-        params["resource_uuid"] = resource_id
+        messages = [m for m in messages if m.get("resource_uuid") == resource_id]
     if resource_type:
-        params["resource_type"] = resource_type.upper()
-    data = client.get(f"{client.volume_url}/messages", params=params or None)
-    messages = data.get("messages", [])
+        rt = resource_type.upper()
+        messages = [m for m in messages if m.get("resource_type") == rt]
     print_list(
         messages,
         [
@@ -1498,8 +1475,7 @@ def volume_message_show(ctx: click.Context, message_id: str,
                         output_format: str, columns: tuple[str, ...],
                         fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show a Cinder error message."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    m = client.get(f"{client.volume_url}/messages/{message_id}").get("message", {})
+    m = VolumeService(ctx.find_object(OrcaContext).ensure_client()).get_message(message_id)
     fields = [(k, str(m.get(k, "") or "")) for k in
               ["id", "resource_type", "resource_uuid", "event_id",
                "user_message", "message_level", "created_at", "expires_at"]]
@@ -1515,8 +1491,7 @@ def volume_message_delete(ctx: click.Context, message_id: str, yes: bool) -> Non
     """Delete a Cinder error message."""
     if not yes:
         click.confirm(f"Delete message {message_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{client.volume_url}/messages/{message_id}")
+    VolumeService(ctx.find_object(OrcaContext).ensure_client()).delete_message(message_id)
     console.print(f"[green]Message {message_id} deleted.[/green]")
 
 
@@ -1534,10 +1509,8 @@ def volume_attachment_list(ctx: click.Context, vol_filter: str | None,
                            output_format: str, columns: tuple[str, ...],
                            fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List volume attachments (Cinder v3 attachment API)."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     params = {"volume_id": vol_filter} if vol_filter else None
-    data = client.get(f"{client.volume_url}/attachments", params=params)
-    attachments = data.get("attachments", [])
+    attachments = VolumeService(ctx.find_object(OrcaContext).ensure_client()).find_attachments(params=params)
     print_list(
         attachments,
         [
@@ -1563,8 +1536,7 @@ def volume_attachment_show(ctx: click.Context, attachment_id: str,
                            output_format: str, columns: tuple[str, ...],
                            fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show a volume attachment."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    a = client.get(f"{client.volume_url}/attachments/{attachment_id}").get("attachment", {})
+    a = VolumeService(ctx.find_object(OrcaContext).ensure_client()).get_attachment(attachment_id)
     fields = [(k, str(a.get(k, "") or "")) for k in
               ["id", "volume_id", "instance_uuid", "status",
                "attach_mode", "attached_at", "detached_at"]]
@@ -1582,8 +1554,7 @@ def volume_attachment_delete(ctx: click.Context, attachment_id: str, yes: bool) 
     """Delete a volume attachment."""
     if not yes:
         click.confirm(f"Delete attachment {attachment_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{client.volume_url}/attachments/{attachment_id}")
+    VolumeService(ctx.find_object(OrcaContext).ensure_client()).delete_attachment(attachment_id)
     console.print(f"[green]Attachment {attachment_id} deleted.[/green]")
 
 
@@ -1610,7 +1581,7 @@ def volume_attachment_create(ctx: click.Context, volume_id: str, instance_id: st
       orca volume attachment-create <vol-id> <instance-id> --connector '{"host": "myhost"}'
     """
     import json as _json
-    client = ctx.find_object(OrcaContext).ensure_client()
+    service = VolumeService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {
         "volume_id": volume_id,
         "instance_uuid": instance_id,
@@ -1621,8 +1592,7 @@ def volume_attachment_create(ctx: click.Context, volume_id: str, instance_id: st
             body["connector"] = _json.loads(connector_json)
         except _json.JSONDecodeError as exc:
             raise click.BadParameter(f"Invalid JSON: {exc}", param_hint="--connector") from exc
-    data = client.post(f"{client.volume_url}/attachments", json={"attachment": body})
-    a = data.get("attachment", data)
+    a = service.create_attachment(body)
     print_detail(
         [(k, str(a.get(k, "") or "")) for k in
          ("id", "volume_id", "instance_uuid", "status", "attach_mode", "attached_at")],
@@ -1642,16 +1612,12 @@ def volume_attachment_set(ctx: click.Context, attachment_id: str, connector_json
                           fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Update (finalize) a volume attachment with connector info."""
     import json as _json
-    client = ctx.find_object(OrcaContext).ensure_client()
+    service = VolumeService(ctx.find_object(OrcaContext).ensure_client())
     try:
         connector = _json.loads(connector_json)
     except _json.JSONDecodeError as exc:
         raise click.BadParameter(f"Invalid JSON: {exc}", param_hint="--connector") from exc
-    data = client.put(
-        f"{client.volume_url}/attachments/{attachment_id}",
-        json={"attachment": {"connector": connector}},
-    )
-    a = data.get("attachment", data) if data else {}
+    a = service.update_attachment(attachment_id, {"connector": connector})
     if a:
         print_detail(
             [(k, str(a.get(k, "") or "")) for k in
@@ -1668,11 +1634,7 @@ def volume_attachment_set(ctx: click.Context, attachment_id: str, connector_json
 @click.pass_context
 def volume_attachment_complete(ctx: click.Context, attachment_id: str) -> None:
     """Mark a volume attachment as complete (os-complete action)."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.post(
-        f"{client.volume_url}/attachments/{attachment_id}/action",
-        json={"os-complete": None},
-    )
+    VolumeService(ctx.find_object(OrcaContext).ensure_client()).complete_attachment(attachment_id)
     console.print(f"[green]Attachment {attachment_id} marked as complete.[/green]")
 
 
@@ -1687,9 +1649,7 @@ def volume_attachment_complete(ctx: click.Context, attachment_id: str) -> None:
 def volume_group_list(ctx: click.Context, output_format: str, columns: tuple[str, ...],
                       fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List volume groups."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{client.volume_url}/groups/detail")
-    groups = data.get("groups", [])
+    groups = VolumeService(ctx.find_object(OrcaContext).ensure_client()).find_groups()
     print_list(
         groups,
         [
@@ -1715,8 +1675,7 @@ def volume_group_show(ctx: click.Context, group_id: str,
                       output_format: str, columns: tuple[str, ...],
                       fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show a volume group."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    g = client.get(f"{client.volume_url}/groups/{group_id}").get("group", {})
+    g = VolumeService(ctx.find_object(OrcaContext).ensure_client()).get_group(group_id)
     fields = [(k, str(g.get(k, "") or "")) for k in
               ["id", "name", "status", "group_type",
                "volume_types", "availability_zone",
@@ -1744,7 +1703,7 @@ def volume_group_create(ctx: click.Context, name: str | None,
         --group-type <group-type-id> \\
         --volume-type <vol-type-id>
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
+    service = VolumeService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {
         "group_type": group_type,
         "volume_types": list(volume_types),
@@ -1755,7 +1714,7 @@ def volume_group_create(ctx: click.Context, name: str | None,
         body["description"] = description
     if availability_zone:
         body["availability_zone"] = availability_zone
-    g = client.post(f"{client.volume_url}/groups", json={"group": body}).get("group", {})
+    g = service.create_group(body)
     console.print(f"[green]Group '{g.get('name', name)}' ({g.get('id')}) created.[/green]")
 
 
@@ -1780,7 +1739,7 @@ def volume_group_update(ctx: click.Context, group_id: str, name: str | None,
       orca volume group-update <id> --add-volume <vol-id>
       orca volume group-update <id> --remove-volume <vol-id>
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
+    service = VolumeService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {}
     if name is not None:
         body["name"] = name
@@ -1793,7 +1752,7 @@ def volume_group_update(ctx: click.Context, group_id: str, name: str | None,
     if not body:
         console.print("[yellow]Nothing to update.[/yellow]")
         return
-    client.put(f"{client.volume_url}/groups/{group_id}", json={"group": body})
+    service.update_group(group_id, body)
     console.print(f"[green]Group {group_id} updated.[/green]")
 
 
@@ -1814,11 +1773,7 @@ def volume_group_delete(ctx: click.Context, group_id: str,
     """
     if not yes:
         click.confirm(f"Delete group {group_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.post(
-        f"{client.volume_url}/groups/{group_id}/action",
-        json={"delete": {"delete-volumes": delete_volumes}},
-    )
+    VolumeService(ctx.find_object(OrcaContext).ensure_client()).delete_group(group_id, delete_volumes=delete_volumes)
     console.print(f"[green]Group {group_id} deletion started.[/green]")
 
 
@@ -1833,10 +1788,9 @@ def volume_group_snapshot_list(ctx: click.Context, output_format: str,
                                columns: tuple[str, ...], fit_width: bool,
                                max_width: int | None, noindent: bool) -> None:
     """List volume group snapshots."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{client.volume_url}/group_snapshots/detail")
+    gs = VolumeService(ctx.find_object(OrcaContext).ensure_client()).find_group_snapshots()
     print_list(
-        data.get("group_snapshots", []),
+        gs,
         [
             ("ID", "id", {"style": "cyan", "no_wrap": True}),
             ("Name", "name", {"style": "bold"}),
@@ -1859,10 +1813,7 @@ def volume_group_snapshot_show(ctx: click.Context, group_snapshot_id: str,
                                output_format: str, columns: tuple[str, ...],
                                fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show a volume group snapshot."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    gs = client.get(
-        f"{client.volume_url}/group_snapshots/{group_snapshot_id}"
-    ).get("group_snapshot", {})
+    gs = VolumeService(ctx.find_object(OrcaContext).ensure_client()).get_group_snapshot(group_snapshot_id)
     print_detail(
         [(k, str(gs.get(k, "") or "")) for k in
          ("id", "name", "status", "group_id", "group_type_id",
@@ -1880,15 +1831,13 @@ def volume_group_snapshot_show(ctx: click.Context, group_snapshot_id: str,
 def volume_group_snapshot_create(ctx: click.Context, group_id: str,
                                  name: str | None, description: str | None) -> None:
     """Create a snapshot of a volume group."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    service = VolumeService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {"group_id": group_id}
     if name:
         body["name"] = name
     if description:
         body["description"] = description
-    data = client.post(f"{client.volume_url}/group_snapshots",
-                       json={"group_snapshot": body})
-    gs = data.get("group_snapshot", data)
+    gs = service.create_group_snapshot(body)
     console.print(
         f"[green]Group snapshot '{gs.get('name', '')}' ({gs.get('id')}) created.[/green]"
     )
@@ -1903,8 +1852,7 @@ def volume_group_snapshot_delete(ctx: click.Context, group_snapshot_id: str,
     """Delete a volume group snapshot."""
     if not yes:
         click.confirm(f"Delete group snapshot {group_snapshot_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{client.volume_url}/group_snapshots/{group_snapshot_id}")
+    VolumeService(ctx.find_object(OrcaContext).ensure_client()).delete_group_snapshot(group_snapshot_id)
     console.print(f"[green]Group snapshot {group_snapshot_id} deleted.[/green]")
 
 
@@ -1919,10 +1867,9 @@ def volume_group_type_list(ctx: click.Context, output_format: str,
                            columns: tuple[str, ...], fit_width: bool,
                            max_width: int | None, noindent: bool) -> None:
     """List volume group types."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{client.volume_url}/group_types")
+    gt = VolumeService(ctx.find_object(OrcaContext).ensure_client()).find_group_types()
     print_list(
-        data.get("group_types", []),
+        gt,
         [
             ("ID", "id", {"style": "cyan", "no_wrap": True}),
             ("Name", "name", {"style": "bold"}),
@@ -1944,10 +1891,7 @@ def volume_group_type_show(ctx: click.Context, group_type_id: str,
                            output_format: str, columns: tuple[str, ...],
                            fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show a volume group type."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    gt = client.get(
-        f"{client.volume_url}/group_types/{group_type_id}"
-    ).get("group_type", {})
+    gt = VolumeService(ctx.find_object(OrcaContext).ensure_client()).get_group_type(group_type_id)
     print_detail(
         [(k, str(gt.get(k, "") or "")) for k in
          ("id", "name", "is_public", "description")],
@@ -1964,13 +1908,11 @@ def volume_group_type_show(ctx: click.Context, group_type_id: str,
 def volume_group_type_create(ctx: click.Context, name: str,
                              description: str | None, public: bool) -> None:
     """Create a volume group type."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    service = VolumeService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {"name": name, "is_public": public}
     if description:
         body["description"] = description
-    data = client.post(f"{client.volume_url}/group_types",
-                       json={"group_type": body})
-    gt = data.get("group_type", data)
+    gt = service.create_group_type(body)
     console.print(f"[green]Group type '{gt.get('name')}' ({gt.get('id')}) created.[/green]")
 
 
@@ -1987,6 +1929,7 @@ def volume_group_type_set(ctx: click.Context, group_type_id: str,
                           public: bool | None, properties: tuple[str, ...]) -> None:
     """Update a volume group type."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    service = VolumeService(client)
     body: dict = {}
     if name is not None:
         body["name"] = name
@@ -1995,8 +1938,7 @@ def volume_group_type_set(ctx: click.Context, group_type_id: str,
     if public is not None:
         body["is_public"] = public
     if body:
-        client.put(f"{client.volume_url}/group_types/{group_type_id}",
-                   json={"group_type": body})
+        service.update_group_type(group_type_id, body)
     if properties:
         specs: dict = {}
         for p in properties:
@@ -2004,8 +1946,7 @@ def volume_group_type_set(ctx: click.Context, group_type_id: str,
                 raise click.UsageError(f"Invalid format '{p}', expected KEY=VALUE.")
             k, v = p.split("=", 1)
             specs[k] = v
-        client.post(f"{client.volume_url}/group_types/{group_type_id}/group_specs",
-                    json={"group_specs": specs})
+        service.set_group_specs(group_type_id, specs)
     if not body and not properties:
         console.print("[yellow]Nothing to update.[/yellow]")
         return
@@ -2023,11 +1964,9 @@ def volume_group_type_unset(ctx: click.Context, group_type_id: str,
     if not properties:
         console.print("[yellow]Nothing to unset.[/yellow]")
         return
-    client = ctx.find_object(OrcaContext).ensure_client()
+    service = VolumeService(ctx.find_object(OrcaContext).ensure_client())
     for key in properties:
-        client.delete(
-            f"{client.volume_url}/group_types/{group_type_id}/group_specs/{key}"
-        )
+        service.unset_group_spec(group_type_id, key)
     console.print(f"[green]Group type {group_type_id} properties removed.[/green]")
 
 
@@ -2039,8 +1978,7 @@ def volume_group_type_delete(ctx: click.Context, group_type_id: str, yes: bool) 
     """Delete a volume group type."""
     if not yes:
         click.confirm(f"Delete group type {group_type_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{client.volume_url}/group_types/{group_type_id}")
+    VolumeService(ctx.find_object(OrcaContext).ensure_client()).delete_group_type(group_type_id)
     console.print(f"[green]Group type {group_type_id} deleted.[/green]")
 
 

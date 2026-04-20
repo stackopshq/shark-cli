@@ -13,8 +13,10 @@ class VolumeAttachment(TypedDict, total=False):
     device: str
     host_name: str
     attached_at: str
+    detached_at: str
     attach_mode: str
     status: str
+    connection_info: dict
 
 
 # Cinder uses a few colon-prefixed keys (os-vol-host-attr:host etc.); the
