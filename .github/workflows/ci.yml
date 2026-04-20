@@ -17,6 +17,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: pip
 
       - name: Install ruff
         run: pip install ruff
@@ -39,13 +40,81 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install poetry
+        run: pip install poetry
+
+      - name: Cache virtualenv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
 
       - name: Install dependencies
         run: |
-          pip install poetry
+          poetry config virtualenvs.in-project true
           poetry install --with dev
 
       - name: Run tests
         run: >
           poetry run pytest tests/ -v --tb=short
           --cov=orca_cli --cov-report=term --cov-fail-under=85
+
+  build:
+    name: Build distribution
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install poetry
+        run: pip install poetry
+
+      - name: Build sdist + wheel
+        run: poetry build
+
+      - name: Sanity-check artifacts
+        run: |
+          ls -la dist/
+          python -m zipfile -l dist/*.whl | head -20
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  security:
+    name: Security scan
+    runs-on: ubuntu-latest
+    # Security advisories change daily — don't block lint on them, but do
+    # fail the job so regressions surface in the PR view.
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan for leaked secrets (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install project + pip-audit
+        run: |
+          pip install -e .
+          pip install pip-audit
+
+      - name: Audit runtime dependencies
+        run: pip-audit --strict --disable-pip
