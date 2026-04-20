@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from typing import Any
 
@@ -25,18 +26,33 @@ VALID_RESOURCE_TYPES = (
 )
 
 
+# Each export type's transitive fetch dependencies. Lookup maps are
+# built from these raw fetches; nothing is fetched twice.
+_DEPS: dict[str, set[str]] = {
+    "servers":         {"servers", "images", "networks", "ports", "floatingips"},
+    "volumes":         {"volumes", "servers"},
+    "networks":        {"networks", "subnets"},
+    "routers":         {"routers", "ports", "subnets", "networks"},
+    "floating_ips":    {"floatingips", "servers", "ports"},
+    "security_groups": {"security_groups"},
+    "keypairs":        {"keypairs"},
+    "images":          {"images"},
+}
+
+
 # ── Collector helpers ────────────────────────────────────────────────────
+#
+# All collectors take pre-fetched data (no HTTP calls). The export
+# command fans out the fetches once at the top and then assembles the
+# output in-memory.
 
 
 def _collect_servers(
-    client: Any,
+    servers: list[dict],
     image_map: dict[str, str],
-    network_map: dict[str, str],
     fip_by_port: dict[str, dict],
 ) -> list[dict]:
-    """Fetch servers and enrich with resolved names."""
-    servers = client.paginate(f"{client.compute_url}/servers/detail", "servers")
-
+    """Enrich servers with resolved names."""
     results: list[dict] = []
     for srv in servers:
         # Resolve image name
@@ -85,10 +101,8 @@ def _collect_servers(
     return results
 
 
-def _collect_volumes(client: Any, server_map: dict[str, str]) -> list[dict]:
-    """Fetch volumes and resolve attached server names."""
-    volumes = client.paginate(f"{client.volume_url}/volumes/detail", "volumes")
-
+def _collect_volumes(volumes: list[dict], server_map: dict[str, str]) -> list[dict]:
+    """Resolve attached server names on volumes."""
     results: list[dict] = []
     for vol in volumes:
         attachments = vol.get("attachments", [])
@@ -108,10 +122,8 @@ def _collect_volumes(client: Any, server_map: dict[str, str]) -> list[dict]:
     return results
 
 
-def _collect_networks(client: Any, subnet_map: dict[str, dict]) -> list[dict]:
-    """Fetch networks with their subnets inlined."""
-    networks = client.paginate(f"{client.network_url}/v2.0/networks", "networks")
-
+def _collect_networks(networks: list[dict], subnet_map: dict[str, dict]) -> list[dict]:
+    """Inline subnets into networks."""
     results: list[dict] = []
     for net in networks:
         subnets_out: list[dict] = []
@@ -139,20 +151,18 @@ def _collect_networks(client: Any, subnet_map: dict[str, dict]) -> list[dict]:
     return results
 
 
-def _collect_routers(client: Any, subnet_map: dict[str, dict], network_map: dict[str, str]) -> list[dict]:
-    """Fetch routers with their interfaces."""
-    routers = client.paginate(f"{client.network_url}/v2.0/routers", "routers")
-
-    # Get router interface ports
-    router_ports = client.paginate(
-        f"{client.network_url}/v2.0/ports",
-        "ports",
-        params={"device_owner": "network:router_interface"},
-    )
-
-    # Group ports by router (device_id)
+def _collect_routers(
+    routers: list[dict],
+    ports: list[dict],
+    subnet_map: dict[str, dict],
+    network_map: dict[str, str],
+) -> list[dict]:
+    """Routers with their interfaces (router-ports filtered client-side)."""
+    # Group router-interface ports by their router id
     ports_by_router: dict[str, list[dict]] = {}
-    for port in router_ports:
+    for port in ports:
+        if port.get("device_owner") != "network:router_interface":
+            continue
         rid = port.get("device_id", "")
         ports_by_router.setdefault(rid, []).append(port)
 
@@ -183,13 +193,11 @@ def _collect_routers(client: Any, subnet_map: dict[str, dict], network_map: dict
 
 
 def _collect_floating_ips(
-    client: Any,
+    fips: list[dict],
     server_map: dict[str, str],
     port_device_map: dict[str, str],
 ) -> list[dict]:
-    """Fetch floating IPs and resolve attached server names."""
-    fips = client.paginate(f"{client.network_url}/v2.0/floatingips", "floatingips")
-
+    """Resolve attached server names on floating IPs."""
     results: list[dict] = []
     for fip in fips:
         port_id = fip.get("port_id", "")
@@ -207,10 +215,8 @@ def _collect_floating_ips(
     return results
 
 
-def _collect_security_groups(client: Any) -> list[dict]:
-    """Fetch security groups with their rules."""
-    sgs = client.paginate(f"{client.network_url}/v2.0/security-groups", "security_groups")
-
+def _collect_security_groups(sgs: list[dict]) -> list[dict]:
+    """Reformat security groups + rules."""
     results: list[dict] = []
     for sg in sgs:
         rules_out: list[dict] = []
@@ -238,11 +244,8 @@ def _collect_security_groups(client: Any) -> list[dict]:
     return results
 
 
-def _collect_keypairs(client: Any) -> list[dict]:
-    """Fetch keypairs."""
-    data = client.get(f"{client.compute_url}/os-keypairs")
-    keypairs = data.get("keypairs", [])
-
+def _collect_keypairs(keypairs: list[dict]) -> list[dict]:
+    """Flatten keypair wrappers."""
     results: list[dict] = []
     for kp_wrapper in keypairs:
         kp = kp_wrapper.get("keypair", kp_wrapper)
@@ -255,10 +258,8 @@ def _collect_keypairs(client: Any) -> list[dict]:
     return results
 
 
-def _collect_images(client: Any) -> list[dict]:
-    """Fetch images."""
-    images = client.paginate(f"{client.image_url}/v2/images", "images")
-
+def _collect_images(images: list[dict]) -> list[dict]:
+    """Pretty-print image sizes."""
     results: list[dict] = []
     for img in images:
         size_bytes = img.get("size") or 0
@@ -274,6 +275,34 @@ def _collect_images(client: Any) -> list[dict]:
         })
 
     return results
+
+
+# ── Fetchers (one per resource type, all independent) ─────────────────────
+
+
+def _fetchers(client: Any) -> dict[str, Any]:
+    return {
+        "servers": lambda: client.paginate(
+            f"{client.compute_url}/servers/detail", "servers"),
+        "volumes": lambda: client.paginate(
+            f"{client.volume_url}/volumes/detail", "volumes"),
+        "networks": lambda: client.paginate(
+            f"{client.network_url}/v2.0/networks", "networks"),
+        "subnets": lambda: client.paginate(
+            f"{client.network_url}/v2.0/subnets", "subnets"),
+        "routers": lambda: client.paginate(
+            f"{client.network_url}/v2.0/routers", "routers"),
+        "ports": lambda: client.paginate(
+            f"{client.network_url}/v2.0/ports", "ports"),
+        "floatingips": lambda: client.paginate(
+            f"{client.network_url}/v2.0/floatingips", "floatingips"),
+        "security_groups": lambda: client.paginate(
+            f"{client.network_url}/v2.0/security-groups", "security_groups"),
+        "keypairs": lambda: client.get(
+            f"{client.compute_url}/os-keypairs").get("keypairs", []),
+        "images": lambda: client.paginate(
+            f"{client.image_url}/v2/images", "images"),
+    }
 
 
 # ── Main command ─────────────────────────────────────────────────────────
@@ -305,110 +334,68 @@ def export(ctx: click.Context, output: str | None, resources: str | None, fmt: s
     else:
         export_types = set(VALID_RESOURCE_TYPES)
 
+    # Compute the union of raw fetches needed by the chosen export types.
+    # A user asking only for "keypairs" pays for one HTTP call, not nine.
+    needed_fetches: set[str] = set()
+    for et in export_types:
+        needed_fetches.update(_DEPS[et])
+
+    fetchers = _fetchers(client)
+
     with console.status("[bold cyan]Exporting infrastructure...[/bold cyan]"):
-        # ── Build lookup maps ────────────────────────────────────────
+        # ── Phase 1: parallel fan-out (one HTTP call per resource type) ──
+        raw: dict[str, list] = {}
+        with ThreadPoolExecutor(max_workers=len(needed_fetches)) as pool:
+            futures = {
+                pool.submit(fetchers[name]): name for name in needed_fetches
+            }
+            for fut in as_completed(futures):
+                name = futures[fut]
+                try:
+                    raw[name] = fut.result()
+                except Exception as exc:
+                    console.print(
+                        f"[yellow]Warning: could not fetch {name}: {exc}[/yellow]"
+                    )
+                    raw[name] = []
 
-        # Image map (id -> name)
-        image_map: dict[str, str] = {}
-        try:
-            for img in client.paginate(f"{client.image_url}/v2/images", "images"):
-                image_map[img["id"]] = img.get("name", img["id"])
-        except Exception:
-            pass
+        # ── Phase 2: build lookup maps from in-memory data ───────────────
+        image_map = {img["id"]: img.get("name", img["id"])
+                     for img in raw.get("images", [])}
+        server_map = {srv["id"]: srv.get("name", srv["id"])
+                      for srv in raw.get("servers", [])}
+        network_map = {net["id"]: net.get("name", net["id"])
+                       for net in raw.get("networks", [])}
+        subnet_map = {sub["id"]: sub for sub in raw.get("subnets", [])}
+        port_device_map = {p["id"]: p.get("device_id", "")
+                           for p in raw.get("ports", [])}
+        fip_by_port = {fip["port_id"]: fip
+                       for fip in raw.get("floatingips", [])
+                       if fip.get("port_id")}
 
-        # Server map (id -> name) — needed by volumes, floating_ips
-        server_map: dict[str, str] = {}
-        try:
-            for srv in client.paginate(f"{client.compute_url}/servers/detail", "servers"):
-                server_map[srv["id"]] = srv.get("name", srv["id"])
-        except Exception:
-            pass
-
-        # Network map (id -> name)
-        network_map: dict[str, str] = {}
-        try:
-            for net in client.paginate(f"{client.network_url}/v2.0/networks", "networks"):
-                network_map[net["id"]] = net.get("name", net["id"])
-        except Exception:
-            pass
-
-        # Subnet map (id -> full subnet dict)
-        subnet_map: dict[str, dict] = {}
-        try:
-            for sub in client.paginate(f"{client.network_url}/v2.0/subnets", "subnets"):
-                subnet_map[sub["id"]] = sub
-        except Exception:
-            pass
-
-        # Port device map (port_id -> device_id) — for floating IP resolution
-        port_device_map: dict[str, str] = {}
-        fip_by_port: dict[str, dict] = {}
-        try:
-            for port in client.paginate(f"{client.network_url}/v2.0/ports", "ports"):
-                port_device_map[port["id"]] = port.get("device_id", "")
-        except Exception:
-            pass
-
-        # Floating IP by port (for server network enrichment)
-        try:
-            for fip in client.paginate(f"{client.network_url}/v2.0/floatingips", "floatingips"):
-                pid = fip.get("port_id")
-                if pid:
-                    fip_by_port[pid] = fip
-        except Exception:
-            pass
-
-        # ── Collect each resource type ───────────────────────────────
-
+        # ── Phase 3: assemble the output payload (no HTTP) ───────────────
         result: dict[str, Any] = {}
 
         if "servers" in export_types:
-            try:
-                result["servers"] = _collect_servers(client, image_map, network_map, fip_by_port)
-            except Exception as exc:
-                console.print(f"[yellow]Warning: could not export servers: {exc}[/yellow]")
-
+            result["servers"] = _collect_servers(
+                raw["servers"], image_map, fip_by_port)
         if "volumes" in export_types:
-            try:
-                result["volumes"] = _collect_volumes(client, server_map)
-            except Exception as exc:
-                console.print(f"[yellow]Warning: could not export volumes: {exc}[/yellow]")
-
+            result["volumes"] = _collect_volumes(raw["volumes"], server_map)
         if "networks" in export_types:
-            try:
-                result["networks"] = _collect_networks(client, subnet_map)
-            except Exception as exc:
-                console.print(f"[yellow]Warning: could not export networks: {exc}[/yellow]")
-
+            result["networks"] = _collect_networks(raw["networks"], subnet_map)
         if "routers" in export_types:
-            try:
-                result["routers"] = _collect_routers(client, subnet_map, network_map)
-            except Exception as exc:
-                console.print(f"[yellow]Warning: could not export routers: {exc}[/yellow]")
-
+            result["routers"] = _collect_routers(
+                raw["routers"], raw["ports"], subnet_map, network_map)
         if "floating_ips" in export_types:
-            try:
-                result["floating_ips"] = _collect_floating_ips(client, server_map, port_device_map)
-            except Exception as exc:
-                console.print(f"[yellow]Warning: could not export floating_ips: {exc}[/yellow]")
-
+            result["floating_ips"] = _collect_floating_ips(
+                raw["floatingips"], server_map, port_device_map)
         if "security_groups" in export_types:
-            try:
-                result["security_groups"] = _collect_security_groups(client)
-            except Exception as exc:
-                console.print(f"[yellow]Warning: could not export security_groups: {exc}[/yellow]")
-
+            result["security_groups"] = _collect_security_groups(
+                raw["security_groups"])
         if "keypairs" in export_types:
-            try:
-                result["keypairs"] = _collect_keypairs(client)
-            except Exception as exc:
-                console.print(f"[yellow]Warning: could not export keypairs: {exc}[/yellow]")
-
+            result["keypairs"] = _collect_keypairs(raw["keypairs"])
         if "images" in export_types:
-            try:
-                result["images"] = _collect_images(client)
-            except Exception as exc:
-                console.print(f"[yellow]Warning: could not export images: {exc}[/yellow]")
+            result["images"] = _collect_images(raw["images"])
 
     # ── Build header comment ─────────────────────────────────────────
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
