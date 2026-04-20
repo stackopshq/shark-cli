@@ -44060,7 +44060,7 @@ a crash dump. The server must be ACTIVE.</p>
 </tbody>
 </table>
 <h4 id="orca-server-live-migrate">orca server live-migrate<a class="headerlink" href="#orca-server-live-migrate" title="Permanent link">&para;</a></h4>
-<p>Live-migrate a server without downtime.</p>
+<p>Live-migrate a server (deprecated — use 'server migrate --live').</p>
 <p><strong>Usage:</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-546-1" name="__codelineno-546-1" href="#__codelineno-546-1"></a>orca server live-migrate [OPTIONS] SERVER_ID
 </code></pre></div>
@@ -44084,7 +44084,7 @@ a crash dump. The server must be ACTIVE.</p>
 <tr>
 <td><code>--block-migration</code> / <code>--no-block-migration</code></td>
 <td>boolean</td>
-<td>Use block migration (copies disk, slower but no shared storage needed).</td>
+<td>Copy disk over the network (no shared storage needed).</td>
 <td><code>False</code></td>
 </tr>
 <tr>
@@ -44192,7 +44192,12 @@ a crash dump. The server must be ACTIVE.</p>
 </tbody>
 </table>
 <h4 id="orca-server-migrate">orca server migrate<a class="headerlink" href="#orca-server-migrate" title="Permanent link">&para;</a></h4>
-<p>Cold-migrate a server to another host.</p>
+<p>Migrate a server to another host (cold by default).</p>
+<p>Examples:
+  orca server migrate <id>                       # cold migration
+  orca server migrate <id> --host compute02      # cold, target host
+  orca server migrate <id> --live                # live migration
+  orca server migrate <id> --live --block-migration</p>
 <p><strong>Usage:</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-551-1" name="__codelineno-551-1" href="#__codelineno-551-1"></a>orca server migrate [OPTIONS] SERVER_ID
 </code></pre></div>
@@ -44212,6 +44217,18 @@ a crash dump. The server must be ACTIVE.</p>
 <td>text</td>
 <td>Target host (admin only, optional).</td>
 <td>None</td>
+</tr>
+<tr>
+<td><code>--live</code></td>
+<td>boolean</td>
+<td>Live-migrate (no downtime) instead of cold migration.</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--block-migration</code> / <code>--no-block-migration</code></td>
+<td>boolean</td>
+<td>Live mode only: copy disk over the network (slower but no shared storage needed).</td>
+<td><code>False</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
