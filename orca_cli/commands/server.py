@@ -24,6 +24,7 @@ from orca_cli.core.output import console, output_options, print_detail, print_li
 from orca_cli.core.validators import validate_id
 from orca_cli.core.waiter import wait_for_resource
 from orca_cli.services.server import ServerService
+from orca_cli.services.volume import VolumeService
 
 
 @click.group()
@@ -1079,8 +1080,8 @@ def _detect_ssh_user(client, srv: Mapping[str, Any]) -> str | None:
             vol_id = volumes[0].get("id")
             if vol_id:
                 try:
-                    vol = client.get(f"{client.volume_url}/volumes/{vol_id}")
-                    vmeta = vol.get("volume", {}).get("volume_image_metadata") or {}
+                    vol = VolumeService(client).get(vol_id)
+                    vmeta = vol.get("volume_image_metadata") or {}
                     distro = (vmeta.get("os_distro") or "").lower()
                 except Exception:
                     distro = ""
@@ -1240,13 +1241,13 @@ def server_snapshot(ctx: click.Context, server_id: str, name: str | None) -> Non
     if not attachments:
         console.print("  [dim]No attached volumes to snapshot.[/dim]")
     else:
+        vol_service = VolumeService(client)
         for att in attachments:
             vol_id = att.get("volumeId", "")
             device = att.get("device", "?")
             snap_name = f"{prefix}-vol-{device.split('/')[-1]}"
             console.print(f"[bold]Snapshotting volume {vol_id}[/bold] ({device}): {snap_name}")
-            client.post(f"{client.volume_url}/snapshots",
-                        json={"snapshot": {"volume_id": vol_id, "name": snap_name, "force": True}})
+            vol_service.create_snapshot({"volume_id": vol_id, "name": snap_name, "force": True})
             console.print(f"  [green]✓[/green] Snapshot '{snap_name}' creation started.")
 
     console.print(f"\n[bold green]Snapshot complete for '{srv_name}'.[/bold green]")
@@ -1427,7 +1428,7 @@ def server_clone(ctx: click.Context, server_id: str, name: str, disk_size: int |
         if boot_att:
             vol_id = boot_att.get("volumeId", "")
             if vol_id:
-                vol = client.get(f"{client.volume_url}/volumes/{vol_id}").get("volume", {})
+                vol = VolumeService(client).get(vol_id)
                 if not src_disk:
                     src_disk = vol.get("size", 20)
                 if not image_id:
