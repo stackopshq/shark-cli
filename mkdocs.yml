@@ -123,3 +123,11 @@ nav:
           - quota: commands/quota.md
           - catalog: commands/catalog.md
           - completion: commands/completion.md
+  - Architecture Decisions:
+      - Index: adr/README.md
+      - 0001 — Lazy command registration: adr/0001-lazy-command-registration.md
+      - 0002 — Dual-format config file: adr/0002-dual-format-config-file.md
+      - 0003 — Auth-type auto-detection: adr/0003-auth-type-auto-detection.md
+      - 0004 — No services layer (yet): adr/0004-no-services-layer.md
+      - 0005 — Durable token cache: adr/0005-durable-token-cache.md
+      - 0006 — Idempotent-only retries: adr/0006-idempotent-only-retries.md
