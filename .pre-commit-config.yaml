@@ -30,3 +30,11 @@ repos:
       - id: check-merge-conflict
       - id: check-added-large-files
         args: [--maxkb=500]
+
+  - repo: local
+    hooks:
+      - id: no-ai-attribution
+        name: Reject AI authorship attribution in commit messages
+        entry: scripts/check-no-ai-attribution.sh
+        language: script
+        stages: [commit-msg]
