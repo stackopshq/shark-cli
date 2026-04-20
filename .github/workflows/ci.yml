@@ -128,4 +128,8 @@ jobs:
           pip install pip-audit
 
       - name: Audit runtime dependencies
-        run: pip-audit --strict
+        # --skip-editable excludes our own package (installed via -e .) —
+        # pip-audit would otherwise try to resolve it against PyPI and fail
+        # on pre-release or unpublished versions. We're scanning third-party
+        # deps here, not ourselves.
+        run: pip-audit --strict --skip-editable
