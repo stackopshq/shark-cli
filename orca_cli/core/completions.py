@@ -75,12 +75,16 @@ def _matches(item: dict, low: str) -> bool:
 
 # ── public completion functions ───────────────────────────────────────────
 
+_COMPLETION_MAX = 2000  # Cap pagination to keep tab-completion responsive on huge tenants
+
+
 def complete_servers(ctx: click.Context, param: click.Parameter, incomplete: str) -> list[CompletionItem]:
     """Complete server IDs/names."""
     return _complete(
         ctx, incomplete, "servers",
         lambda c: [{"id": s["id"], "name": s.get("name", "")}
-                   for s in c.get(f"{c.compute_url}/servers/detail", params={"limit": 500}).get("servers", [])],
+                   for s in c.paginate(f"{c.compute_url}/servers/detail", "servers",
+                                       max_items=_COMPLETION_MAX)],
         lambda i: CompletionItem(i["id"], help=i["name"]),
     )
 
@@ -90,7 +94,8 @@ def complete_volumes(ctx: click.Context, param: click.Parameter, incomplete: str
     return _complete(
         ctx, incomplete, "volumes",
         lambda c: [{"id": v["id"], "name": v.get("name", "")}
-                   for v in c.get(f"{c.volume_url}/volumes/detail", params={"limit": 500}).get("volumes", [])],
+                   for v in c.paginate(f"{c.volume_url}/volumes/detail", "volumes",
+                                       max_items=_COMPLETION_MAX)],
         lambda i: CompletionItem(i["id"], help=i["name"]),
     )
 
@@ -100,7 +105,8 @@ def complete_images(ctx: click.Context, param: click.Parameter, incomplete: str)
     return _complete(
         ctx, incomplete, "images",
         lambda c: [{"id": img["id"], "name": img.get("name", "")}
-                   for img in c.get(f"{c.image_url}/v2/images", params={"limit": 500}).get("images", [])],
+                   for img in c.paginate(f"{c.image_url}/v2/images", "images",
+                                         max_items=_COMPLETION_MAX)],
         lambda i: CompletionItem(i["id"], help=i["name"]),
     )
 

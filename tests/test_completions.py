@@ -111,9 +111,9 @@ class TestCompleteFromCache:
         """Cache miss → fetch → save → return filtered."""
         client = MagicMock()
         client.compute_url = "https://nova.example.com"
-        client.get.return_value = {
-            "servers": [{"id": "s1", "name": "web-1"}, {"id": "s2", "name": "db-1"}],
-        }
+        client.paginate.return_value = [
+            {"id": "s1", "name": "web-1"}, {"id": "s2", "name": "db-1"},
+        ]
         with patch("orca_cli.core.cache.load", return_value=None), \
              patch("orca_cli.core.cache.save") as save, \
              patch.object(completions, "_build_client", return_value=(client, "prod")):
@@ -124,7 +124,7 @@ class TestCompleteFromCache:
 
     def test_fetch_failure_returns_empty(self, fake_ctx):
         client = MagicMock()
-        client.get.side_effect = RuntimeError("api down")
+        client.paginate.side_effect = RuntimeError("api down")
         client.compute_url = "https://nova.example.com"
         with patch("orca_cli.core.cache.load", return_value=None), \
              patch.object(completions, "_build_client", return_value=(client, "p")):
@@ -162,7 +162,7 @@ class TestFetchPathsPerFunction:
 
     def test_volumes_fetch(self, fake_ctx):
         client = self._client()
-        client.get.return_value = {"volumes": [{"id": "v1", "name": "disk"}]}
+        client.paginate.return_value = [{"id": "v1", "name": "disk"}]
         with patch("orca_cli.core.cache.load", return_value=None), \
              patch("orca_cli.core.cache.save"), \
              patch.object(completions, "_build_client", return_value=(client, "p")):
@@ -171,7 +171,7 @@ class TestFetchPathsPerFunction:
 
     def test_images_fetch(self, fake_ctx):
         client = self._client()
-        client.get.return_value = {"images": [{"id": "i1", "name": "ubuntu"}]}
+        client.paginate.return_value = [{"id": "i1", "name": "ubuntu"}]
         with patch("orca_cli.core.cache.load", return_value=None), \
              patch("orca_cli.core.cache.save"), \
              patch.object(completions, "_build_client", return_value=(client, "p")):
@@ -223,7 +223,7 @@ class TestClientCloseFailureSwallowed:
     def test_close_failure_swallowed(self, fake_ctx):
         client = MagicMock()
         client.compute_url = "https://nova"
-        client.get.return_value = {"servers": [{"id": "s1", "name": "x"}]}
+        client.paginate.return_value = [{"id": "s1", "name": "x"}]
         client.close.side_effect = RuntimeError("close boom")
         with patch("orca_cli.core.cache.load", return_value=None), \
              patch("orca_cli.core.cache.save"), \
