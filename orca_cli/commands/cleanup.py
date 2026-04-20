@@ -171,15 +171,18 @@ def cleanup(ctx: click.Context, do_delete: bool, older_than: int | None,
 
         # ── Routers with no gateway and no interfaces ────────────────────────
         if "router" not in skip:
+            # One query for ALL router-interface ports, then group by device_id
+            # — replaces a 1+N pattern (one ports query per router).
+            router_iface_ports: dict[str, list] = {}
+            for p in _collect(
+                client, f"{client.network_url}/v2.0/ports", "ports",
+                params={"device_owner": "network:router_interface"},
+            ):
+                router_iface_ports.setdefault(p.get("device_id", ""), []).append(p)
             for r in _collect(client, f"{client.network_url}/v2.0/routers", "routers"):
                 if r.get("external_gateway_info"):
                     continue
-                ports = _collect(
-                    client, f"{client.network_url}/v2.0/ports", "ports",
-                    params={"device_id": r["id"],
-                            "device_owner": "network:router_interface"},
-                )
-                if not ports:
+                if not router_iface_ports.get(r["id"]):
                     issues.append((
                         "router", r["id"], r.get("name", ""),
                         "no external gateway and no attached interfaces",
