@@ -163,11 +163,11 @@ def _parse_cutoff(created_before: str | None) -> datetime | None:
         return None
     try:
         return datetime.fromisoformat(created_before.replace("Z", "+00:00"))
-    except ValueError:
+    except ValueError as exc:
         raise click.BadParameter(
             f"Invalid datetime '{created_before}'. Expected YYYY-MM-DDTHH:MM:SS.",
             param_hint="--created-before",
-        )
+        ) from exc
 
 
 def _before_cutoff(resource: dict, cutoff: datetime | None) -> bool:
@@ -276,7 +276,7 @@ def _delete_one(client, rtype: str, rid: str, rname: str) -> bool:
               type=click.Choice(CLEANUP_RESOURCE_TYPES),
               help="Resource type to skip (repeatable).")
 @click.pass_context
-def project_cleanup(ctx, target_project, dry_run, yes, created_before, skip_types):
+def project_cleanup(ctx, target_project, dry_run, yes, created_before, skip_types):  # noqa: C901
     """Delete ALL resources in a project in dependency order.
 
     Requires admin credentials when targeting a project other than the one
@@ -310,8 +310,8 @@ def project_cleanup(ctx, target_project, dry_run, yes, created_before, skip_type
             try:
                 data = client.get(f"{_iam(client)}/v3/projects/{target_project}")
                 proj_id = data.get("project", {}).get("id", target_project)
-            except Exception:
-                raise click.ClickException(f"Project '{target_project}' not found.")
+            except Exception as exc:
+                raise click.ClickException(f"Project '{target_project}' not found.") from exc
     else:
         proj_id = client._token_data.get("project", {}).get("id")
         if not proj_id:

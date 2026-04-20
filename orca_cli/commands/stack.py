@@ -63,8 +63,8 @@ def _resolve_stack(client, stack: str) -> dict:
     try:
         detail = client.get(f"{base}/stacks/{stack}")
         return detail.get("stack", detail)
-    except Exception:
-        raise click.ClickException(f"Stack not found: {stack}")
+    except Exception as exc:
+        raise click.ClickException(f"Stack not found: {stack}") from exc
 
 
 def _parse_params(params: tuple[str, ...]) -> dict:

@@ -446,10 +446,15 @@ def _upload_slo(client, base, container, obj_name, path, content_type, file_size
             seg_name = f"{obj_name}/slo/{seg_num:08d}"
             seg_size = min(SLO_SEGMENT_SIZE, file_size - uploaded)
 
-            seg_hash = hashlib.md5()
+            # Swift Static Large Object spec mandates an MD5 ETag per segment;
+            # this is a content checksum, not a security primitive.
+            seg_hash = hashlib.md5()  # noqa: S324
             seg_uploaded = 0
 
-            def _seg_iter():
+            # Default args bind the loop-iteration values into the closure so
+            # the generator captures *this* segment's size/hash rather than
+            # whatever the loop variables hold when the iterator runs.
+            def _seg_iter(seg_size=seg_size, seg_hash=seg_hash):
                 nonlocal seg_uploaded
                 while seg_uploaded < seg_size:
                     to_read = min(chunk_size, seg_size - seg_uploaded)

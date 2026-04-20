@@ -119,7 +119,7 @@ def lb_delete(ctx: click.Context, lb_id: str, cascade: bool, yes: bool) -> None:
             raise click.ClickException(
                 f"Load balancer {lb_id} is busy (provisioning in progress). "
                 "Wait for it to reach ACTIVE or ERROR state before deleting."
-            )
+            ) from exc
         raise
     console.print(f"[green]Load balancer {lb_id} deletion started.[/green]")
 

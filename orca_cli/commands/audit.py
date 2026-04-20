@@ -16,7 +16,7 @@ _DANGEROUS_LABELS = {
 
 @click.command()
 @click.pass_context
-def audit(ctx: click.Context) -> None:
+def audit(ctx: click.Context) -> None:  # noqa: C901
     """Run a security audit on the project.
 
     Checks for common misconfigurations:

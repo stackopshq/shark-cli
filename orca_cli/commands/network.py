@@ -569,11 +569,11 @@ def net_trace(ctx: click.Context, server_id: str) -> None:
                           params={"name": server_id})
         matches = data.get("servers", [])
         if not matches:
-            raise click.ClickException(f"Server '{server_id}' not found.")
+            raise click.ClickException(f"Server '{server_id}' not found.") from None
         if len(matches) > 1:
             for m in matches:
                 console.print(f"  {m['id']}  {m.get('name', '')}")
-            raise click.ClickException("Multiple matches — use the server ID.")
+            raise click.ClickException("Multiple matches — use the server ID.") from None
         srv = matches[0]
 
     srv_name = srv.get("name", server_id)

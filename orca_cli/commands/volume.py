@@ -418,7 +418,7 @@ def snapshot_delete(ctx: click.Context, snapshot_id: str, yes: bool) -> None:
 @volume.command("tree")
 @click.option("--volume-id", "filter_vol", default=None, help="Show only this volume and its snapshots.")
 @click.pass_context
-def volume_tree(ctx: click.Context, filter_vol: str | None) -> None:
+def volume_tree(ctx: click.Context, filter_vol: str | None) -> None:  # noqa: C901
     """Display a volume / snapshot dependency tree.
 
     Shows every volume with its snapshots, child volumes (clones),
@@ -1580,7 +1580,7 @@ def volume_attachment_create(ctx: click.Context, volume_id: str, instance_id: st
         try:
             body["connector"] = _json.loads(connector_json)
         except _json.JSONDecodeError as exc:
-            raise click.BadParameter(f"Invalid JSON: {exc}", param_hint="--connector")
+            raise click.BadParameter(f"Invalid JSON: {exc}", param_hint="--connector") from exc
     data = client.post(f"{client.volume_url}/attachments", json={"attachment": body})
     a = data.get("attachment", data)
     print_detail(
@@ -1606,7 +1606,7 @@ def volume_attachment_set(ctx: click.Context, attachment_id: str, connector_json
     try:
         connector = _json.loads(connector_json)
     except _json.JSONDecodeError as exc:
-        raise click.BadParameter(f"Invalid JSON: {exc}", param_hint="--connector")
+        raise click.BadParameter(f"Invalid JSON: {exc}", param_hint="--connector") from exc
     data = client.put(
         f"{client.volume_url}/attachments/{attachment_id}",
         json={"attachment": {"connector": connector}},

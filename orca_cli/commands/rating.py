@@ -203,7 +203,7 @@ def rating_quote(ctx, resources):
         try:
             body_items.append(json.loads(raw))
         except json.JSONDecodeError as exc:
-            raise click.BadParameter(f"Invalid JSON: {exc}", param_hint="--resource")
+            raise click.BadParameter(f"Invalid JSON: {exc}", param_hint="--resource") from exc
     payload = {"resources": body_items}
     data = client.post(f"{_url(client)}/v1/rating/quote", json=payload)
     if isinstance(data, (int, float, str)):

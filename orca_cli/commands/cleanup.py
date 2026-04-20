@@ -55,7 +55,7 @@ def _age_days(resource: dict, key: str = "created_at") -> int | None:
               help="Resource type to skip (repeatable).")
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation when deleting.")
 @click.pass_context
-def cleanup(ctx: click.Context, do_delete: bool, older_than: int | None,
+def cleanup(ctx: click.Context, do_delete: bool, older_than: int | None,  # noqa: C901
             skip_types: tuple, yes: bool) -> None:
     """Find orphaned resources — unused IPs, detached volumes, broken stacks, etc.
 
@@ -236,7 +236,7 @@ def cleanup(ctx: click.Context, do_delete: bool, older_than: int | None,
         click.confirm(f"Delete {len(issues)} orphaned resource(s)?", abort=True)
 
     success = 0
-    for rtype, rid, rname, reason in issues:
+    for rtype, rid, rname, _reason in issues:
         label = f"{rtype} {rname} ({rid})"
         try:
             if rtype == "floating-ip":

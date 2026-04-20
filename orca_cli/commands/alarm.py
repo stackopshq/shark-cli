@@ -147,7 +147,7 @@ def alarm_create(ctx, name, alarm_type, rule_json, description, severity, enable
     try:
         rule = json.loads(rule_json)
     except json.JSONDecodeError as exc:
-        raise click.BadParameter(f"Invalid JSON: {exc}", param_hint="--rule")
+        raise click.BadParameter(f"Invalid JSON: {exc}", param_hint="--rule") from exc
     rule_key = "composite_rule" if alarm_type == "composite" else f"{alarm_type}_rule"
     body = {
         "name": name,
@@ -216,7 +216,7 @@ def alarm_set(ctx, alarm_id, name, description, severity, enabled, repeat_action
         try:
             rule_update = json.loads(rule_json)
         except json.JSONDecodeError as exc:
-            raise click.BadParameter(f"Invalid JSON: {exc}", param_hint="--rule")
+            raise click.BadParameter(f"Invalid JSON: {exc}", param_hint="--rule") from exc
     if not updates and rule_update is None:
         console.print("Nothing to update.")
         return

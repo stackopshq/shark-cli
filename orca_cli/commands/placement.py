@@ -483,8 +483,10 @@ def allocation_set(ctx, consumer_uuid, rp_uuid, resources, project_id, user_id):
         rc, _, amount = item.partition("=")
         try:
             parsed[rc.strip()] = int(amount.strip())
-        except ValueError:
-            raise click.BadParameter(f"Amount must be an integer, got '{amount}'.", param_hint="--resource")
+        except ValueError as exc:
+            raise click.BadParameter(
+                f"Amount must be an integer, got '{amount}'.", param_hint="--resource"
+            ) from exc
     body = {
         "allocations": {rp_uuid: {"resources": parsed}},
         "project_id": project_id,

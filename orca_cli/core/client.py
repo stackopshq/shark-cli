@@ -709,7 +709,7 @@ class OrcaClient:
                                  wait, attempt + 1, MAX_RETRIES)
                     time.sleep(wait)
                     continue
-                raise APIError(0, f"Network error: {exc}")
+                raise APIError(0, f"Network error: {exc}") from exc
 
             if (resp.status_code in RATE_LIMIT_STATUSES
                     and attempt < MAX_RETRIES):

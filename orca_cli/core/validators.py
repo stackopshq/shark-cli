@@ -77,8 +77,8 @@ def validate_ip(ctx: click.Context, param: click.Parameter, value: str) -> str:
     for part in parts:
         try:
             num = int(part)
-        except ValueError:
-            raise click.BadParameter(f"'{value}' is not a valid IPv4 address.")
+        except ValueError as exc:
+            raise click.BadParameter(f"'{value}' is not a valid IPv4 address.") from exc
         if not 0 <= num <= 255:
             raise click.BadParameter(f"'{value}' is not a valid IPv4 address.")
     return value

@@ -273,7 +273,7 @@ def mapping_create(ctx, mapping_id, rules):
     try:
         rules_obj = json.loads(rules)
     except json.JSONDecodeError as exc:
-        raise click.BadParameter(f"Invalid JSON: {exc}", param_hint="--rules")
+        raise click.BadParameter(f"Invalid JSON: {exc}", param_hint="--rules") from exc
     data = client.put(f"{_iam(client)}/v3/mappings/{mapping_id}",
                       json={"mapping": {"rules": rules_obj}})
     m = data.get("mapping", data)
@@ -290,7 +290,7 @@ def mapping_set(ctx, mapping_id, rules):
     try:
         rules_obj = json.loads(rules)
     except json.JSONDecodeError as exc:
-        raise click.BadParameter(f"Invalid JSON: {exc}", param_hint="--rules")
+        raise click.BadParameter(f"Invalid JSON: {exc}", param_hint="--rules") from exc
     client.patch(f"{_iam(client)}/v3/mappings/{mapping_id}",
                  json={"mapping": {"rules": rules_obj}})
     console.print(f"Mapping [bold]{mapping_id}[/bold] updated.")

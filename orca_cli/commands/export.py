@@ -286,7 +286,7 @@ def _collect_images(client: Any) -> list[dict]:
 @click.option("--format", "-f", "fmt", type=click.Choice(["yaml", "json"]),
               default="yaml", help="Output format.")
 @click.pass_context
-def export(ctx: click.Context, output: str | None, resources: str | None, fmt: str) -> None:
+def export(ctx: click.Context, output: str | None, resources: str | None, fmt: str) -> None:  # noqa: C901
     """Export project infrastructure as YAML/JSON."""
     client = ctx.find_object(OrcaContext).ensure_client()
     orca_ctx = ctx.find_object(OrcaContext)

@@ -14,7 +14,7 @@ from orca_cli.core.output import console
               help="CIDR for auto-created security group rules (--fix). "
                    "Defaults to interactive prompt when a TTY is detected, otherwise 0.0.0.0/0.")
 @click.pass_context
-def doctor(ctx: click.Context, fix: bool, cidr: str | None) -> None:
+def doctor(ctx: click.Context, fix: bool, cidr: str | None) -> None:  # noqa: C901
     """Run a pre-deployment health check on your OpenStack environment.
 
     Verifies authentication, quota headroom, default security group rules,

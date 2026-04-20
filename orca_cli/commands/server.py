@@ -897,8 +897,8 @@ def server_password(ctx: click.Context, server_id: str, private_key_path: str | 
     # Decode the base64 encrypted password
     try:
         encrypted_bytes = base64.b64decode(encrypted_b64)
-    except Exception:
-        raise click.ClickException("Failed to decode encrypted password (invalid base64).")
+    except Exception as exc:
+        raise click.ClickException("Failed to decode encrypted password (invalid base64).") from exc
 
     # Decrypt with openssl, feeding ciphertext via stdin to avoid leaving
     # an RSA-encrypted blob on disk (even briefly).
@@ -1168,12 +1168,12 @@ def server_ssh(ctx: click.Context, server_id: str, remote_args: tuple,
         data = client.get(f"{client.compute_url}/servers/detail", params={"name": server_id})
         matches = data.get("servers", [])
         if not matches:
-            raise click.ClickException(f"Server '{server_id}' not found.")
+            raise click.ClickException(f"Server '{server_id}' not found.") from None
         if len(matches) > 1:
             console.print(f"[yellow]Multiple servers match '{server_id}':[/yellow]")
             for m in matches:
                 console.print(f"  {m['id']}  {m.get('name', '')}")
-            raise click.ClickException("Be more specific or use the server ID.")
+            raise click.ClickException("Be more specific or use the server ID.") from None
         srv = matches[0]
 
     name = srv.get("name") or server_id
@@ -1456,11 +1456,8 @@ def server_clone(ctx: click.Context, server_id: str, name: str, disk_size: int |
     if not src_disk:
         src_disk = 20
 
-    # Network
-    networks = []
-    for net_name, addrs in src.get("addresses", {}).items():
-        # We need network IDs, not names — fetch from ports
-        break
+    # Network — IDs come from the interface API; addresses dict only has names
+    networks: list = []
 
     # Get ports to find network IDs
     ifaces = client.get(f"{client.compute_url}/servers/{server_id}/os-interface")
@@ -1653,12 +1650,12 @@ def server_port_forward(
                           params={"name": server_id})
         matches = data.get("servers", [])
         if not matches:
-            raise click.ClickException(f"Server '{server_id}' not found.")
+            raise click.ClickException(f"Server '{server_id}' not found.") from None
         if len(matches) > 1:
             console.print(f"[yellow]Multiple servers match '{server_id}':[/yellow]")
             for m in matches:
                 console.print(f"  {m['id']}  {m.get('name', '')}")
-            raise click.ClickException("Be more specific or use the server ID.")
+            raise click.ClickException("Be more specific or use the server ID.") from None
         srv = matches[0]
 
     ip = _pick_ssh_ip(srv)
