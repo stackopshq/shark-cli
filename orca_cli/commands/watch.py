@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from typing import Any
 
@@ -96,9 +97,12 @@ def _fetch_networks(client: Any) -> list[dict]:
 
 
 def _fetch_recent_events(client: Any, servers: list[dict], limit: int = 5) -> list[dict]:
-    """Fetch the most recent instance actions across the first N servers."""
-    events: list[dict] = []
-    for srv in servers[:10]:
+    """Fetch the most recent instance actions across the first N servers in parallel."""
+    target = servers[:10]
+    if not target:
+        return []
+
+    def _one(srv: dict) -> list[dict]:
         try:
             data = client.get(
                 f"{client.compute_url}/servers/{srv['id']}/os-instance-actions"
@@ -106,9 +110,14 @@ def _fetch_recent_events(client: Any, servers: list[dict], limit: int = 5) -> li
             actions = data.get("instanceActions", [])
             for action in actions:
                 action["_server_name"] = srv.get("name", srv["id"][:8])
-            events.extend(actions)
+            return actions
         except Exception:
-            continue
+            return []
+
+    events: list[dict] = []
+    with ThreadPoolExecutor(max_workers=len(target)) as pool:
+        for actions in pool.map(_one, target):
+            events.extend(actions)
 
     # Sort by start_time descending, take the most recent ones
     events.sort(key=lambda e: e.get("start_time", ""), reverse=True)
@@ -121,11 +130,17 @@ def _build_dashboard(client: Any, interval: int) -> Group:
     """Assemble the full dashboard renderable."""
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # Fetch data
-    servers = _fetch_servers(client)
-    volumes = _fetch_volumes(client)
-    fips = _fetch_floating_ips(client)
-    networks = _fetch_networks(client)
+    # Fetch top-level resources in parallel — events depend on servers, so they
+    # come after this fan-out (and parallelise internally).
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        f_servers = pool.submit(_fetch_servers, client)
+        f_volumes = pool.submit(_fetch_volumes, client)
+        f_fips = pool.submit(_fetch_floating_ips, client)
+        f_networks = pool.submit(_fetch_networks, client)
+        servers = f_servers.result()
+        volumes = f_volumes.result()
+        fips = f_fips.result()
+        networks = f_networks.result()
     events = _fetch_recent_events(client, servers)
 
     # ── Header ────────────────────────────────────────────────────────

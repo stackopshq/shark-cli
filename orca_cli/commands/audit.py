@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 import click
 
 from orca_cli.core.context import OrcaContext
@@ -35,9 +37,32 @@ def audit(ctx: click.Context) -> None:  # noqa: C901
     client = ctx.find_object(OrcaContext).ensure_client()
     findings: list[tuple[str, str, str, str]] = []  # (severity, resource, id/name, detail)
 
+    fetchers = {
+        "sgs": lambda: client.paginate(
+            f"{client.network_url}/v2.0/security-groups", "security_groups"
+        ),
+        "servers": lambda: client.paginate(f"{client.compute_url}/servers/detail", "servers"),
+        "vols": lambda: client.paginate(f"{client.volume_url}/volumes/detail", "volumes"),
+        "fips": lambda: client.paginate(f"{client.network_url}/v2.0/floatingips", "floatingips"),
+    }
+
     with console.status("[bold cyan]Running security audit…[/bold cyan]"):
+        results: dict[str, list] = {}
+        with ThreadPoolExecutor(max_workers=len(fetchers)) as pool:
+            future_map = {pool.submit(fn): name for name, fn in fetchers.items()}
+            for fut in as_completed(future_map):
+                name = future_map[fut]
+                try:
+                    results[name] = fut.result()
+                except Exception:
+                    results[name] = []
+
+        sgs = results["sgs"]
+        servers = results["servers"]
+        vols = results["vols"]
+        fips = results["fips"]
+
         # ── Security Group Rules ─────────────────────────────────────
-        sgs = client.paginate(f"{client.network_url}/v2.0/security-groups", "security_groups")
         for sg in sgs:
             sg_name = sg.get("name", sg["id"])
             for rule in sg.get("security_group_rules", []):
@@ -84,7 +109,6 @@ def audit(ctx: click.Context) -> None:  # noqa: C901
                                      f"Wide port range {port_min}-{port_max} open to {remote}"))
 
         # ── Servers ──────────────────────────────────────────────────
-        servers = client.paginate(f"{client.compute_url}/servers/detail", "servers")
         for srv in servers:
             srv_name = srv.get("name", srv["id"])
             srv_id = srv["id"]
@@ -111,7 +135,6 @@ def audit(ctx: click.Context) -> None:  # noqa: C901
                                  "Publicly reachable (floating IP) with no SSH key"))
 
         # ── Volumes ──────────────────────────────────────────────────
-        vols = client.paginate(f"{client.volume_url}/volumes/detail", "volumes")
         unencrypted = 0
         for v in vols:
             if not v.get("encrypted"):
@@ -121,7 +144,6 @@ def audit(ctx: click.Context) -> None:  # noqa: C901
                              f"{unencrypted} unencrypted volume(s)"))
 
         # ── Floating IPs unused ──────────────────────────────────────
-        fips = client.paginate(f"{client.network_url}/v2.0/floatingips", "floatingips")
         unused_fips = [f for f in fips if not f.get("port_id")]
         if unused_fips:
             findings.append(("LOW", "Floating IPs", f"{len(unused_fips)} IP(s)",

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 import click
 from rich.table import Table
 
@@ -15,46 +17,54 @@ def overview(ctx: click.Context) -> None:
     """Show a project dashboard — servers, quotas, volumes, IPs at a glance."""
     client = ctx.find_object(OrcaContext).ensure_client()
 
+    fetchers = {
+        "servers": lambda: client.paginate(f"{client.compute_url}/servers/detail", "servers"),
+        "volumes": lambda: client.paginate(f"{client.volume_url}/volumes/detail", "volumes"),
+        "fips": lambda: client.paginate(f"{client.network_url}/v2.0/floatingips", "floatingips"),
+        "nets": lambda: client.paginate(f"{client.network_url}/v2.0/networks", "networks"),
+        "subnets": lambda: client.paginate(f"{client.network_url}/v2.0/subnets", "subnets"),
+        "routers": lambda: client.paginate(f"{client.network_url}/v2.0/routers", "routers"),
+        "sgs": lambda: client.paginate(
+            f"{client.network_url}/v2.0/security-groups", "security_groups"
+        ),
+        "kps": lambda: client.get(f"{client.compute_url}/os-keypairs").get("keypairs", []),
+        "images": lambda: client.paginate(f"{client.image_url}/v2/images", "images"),
+    }
+
     with console.status("[bold cyan]Gathering project overview…[/bold cyan]"):
-        # ── Servers (Nova) ───────────────────────────────────────────
-        servers = client.paginate(f"{client.compute_url}/servers/detail", "servers")
+        results: dict[str, list] = {}
+        with ThreadPoolExecutor(max_workers=len(fetchers)) as pool:
+            future_map = {pool.submit(fn): name for name, fn in fetchers.items()}
+            for fut in as_completed(future_map):
+                name = future_map[fut]
+                try:
+                    results[name] = fut.result()
+                except Exception:
+                    results[name] = []
 
-        status_counts: dict[str, int] = {}
-        total_vcpus = 0
-        total_ram = 0
-        for s in servers:
-            st = s.get("status", "UNKNOWN")
-            status_counts[st] = status_counts.get(st, 0) + 1
-            flv = s.get("flavor", {})
-            total_vcpus += flv.get("vcpus", 0)
-            total_ram += flv.get("ram", 0)
+    servers = results["servers"]
+    volumes = results["volumes"]
+    fips = results["fips"]
+    nets = results["nets"]
+    subnets = results["subnets"]
+    routers = results["routers"]
+    sgs = results["sgs"]
+    kps = results["kps"]
+    images = results["images"]
 
-        # ── Volumes (Cinder) ─────────────────────────────────────────
-        volumes = client.paginate(f"{client.volume_url}/volumes/detail", "volumes")
-        total_vol_gb = sum(v.get("size", 0) for v in volumes)
-        vol_status: dict[str, int] = {}
-        for v in volumes:
-            st = v.get("status", "unknown")
-            vol_status[st] = vol_status.get(st, 0) + 1
+    status_counts: dict[str, int] = {}
+    total_vcpus = 0
+    total_ram = 0
+    for s in servers:
+        st = s.get("status", "UNKNOWN")
+        status_counts[st] = status_counts.get(st, 0) + 1
+        flv = s.get("flavor", {})
+        total_vcpus += flv.get("vcpus", 0)
+        total_ram += flv.get("ram", 0)
 
-        # ── Floating IPs (Neutron) ───────────────────────────────────
-        fips = client.paginate(f"{client.network_url}/v2.0/floatingips", "floatingips")
-        fips_in_use = sum(1 for f in fips if f.get("port_id"))
-        fips_free = len(fips) - fips_in_use
-
-        # ── Networks / Subnets / Routers (Neutron) ───────────────────
-        nets = client.paginate(f"{client.network_url}/v2.0/networks", "networks")
-        subnets = client.paginate(f"{client.network_url}/v2.0/subnets", "subnets")
-        routers = client.paginate(f"{client.network_url}/v2.0/routers", "routers")
-
-        # ── Security Groups (Neutron) ────────────────────────────────
-        sgs = client.paginate(f"{client.network_url}/v2.0/security-groups", "security_groups")
-
-        # ── Key Pairs (Nova) ─────────────────────────────────────────
-        kps = client.get(f"{client.compute_url}/os-keypairs").get("keypairs", [])
-
-        # ── Images (Glance) ──────────────────────────────────────────
-        images = client.paginate(f"{client.image_url}/v2/images", "images")
+    total_vol_gb = sum(v.get("size", 0) for v in volumes)
+    fips_in_use = sum(1 for f in fips if f.get("port_id"))
+    fips_free = len(fips) - fips_in_use
 
     # ── Render ────────────────────────────────────────────────────────
     console.print()
