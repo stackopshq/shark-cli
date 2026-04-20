@@ -3349,6 +3349,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#permanent-exceptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Permanent exceptions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#migration-tracking" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3467,6 +3478,17 @@
     <span class="md-ellipsis">
       
         Consequences
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#permanent-exceptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Permanent exceptions
       
     </span>
   </a>
@@ -3696,11 +3718,34 @@
 <li><strong>Negative / trade-off</strong>: the migration is multi-week and won't be
   finished in one session. Tracked here as it progresses.</li>
 </ul>
+<h2 id="permanent-exceptions">Permanent exceptions<a class="headerlink" href="#permanent-exceptions" title="Permanent link">&para;</a></h2>
+<p>Some hyphenated names are kept on purpose because the convention
+either does not fit them or would force gymnastics that hurt
+ergonomics more than they help. Each one is documented inline in
+<code>tests/test_naming_convention.py</code> so the choice survives a future
+re-read.</p>
+<ul>
+<li><code>server confirm-resize</code>, <code>server revert-resize</code> — <code>resize</code> is both
+  an action (<code>server resize &lt;id&gt; --flavor ...</code>) and would need to be
+  a sub-group to host <code>confirm</code>/<code>revert</code>. Click can do this with
+  <code>invoke_without_command=True</code> but the resulting <code>--help</code> mixes
+  arguments and sub-commands awkwardly. The hyphenated form is clear
+  enough; not worth the acrobatics.</li>
+<li><code>server port-forward</code> — orca-exclusive (no openstack equivalent).
+  Compound verb that reads naturally; nesting it under a sub-group
+  (<code>server tunnel forward</code>) would gain nothing since there are no
+  sibling commands.</li>
+</ul>
+<p>Adding to this list requires a deliberate choice and an inline
+comment in the test whitelist explaining why.</p>
 <h2 id="migration-tracking">Migration tracking<a class="headerlink" href="#migration-tracking" title="Permanent link">&para;</a></h2>
 <p>Update this list when a module's hyphenated commands are migrated.</p>
 <ul>
-<li><em>(none yet — <code>server</code> migration started below ADR-0007 will be the
-  first to apply this convention as part of its remaining work)</em></li>
+<li>2026-04-20 — <code>server</code>: 23 commands moved to nested sub-groups
+  (<code>add</code>, <code>remove</code>, <code>console</code>, <code>dump</code>, <code>image</code>, <code>interface</code>,
+  <code>metadata</code>, <code>migration</code>, <code>tag</code>, <code>volume</code>); <code>attach-interface</code> and
+  <code>live-migrate</code> reduced to deprecated façades that warn and
+  forward. Three permanent exceptions remain (see above).</li>
 </ul>
 
 
