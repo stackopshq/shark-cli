@@ -1,6 +1,6 @@
 # ADR-0004: No services layer (yet)
 
-**Status**: Accepted
+**Status**: Superseded by [ADR-0007](0007-incremental-services-layer.md)
 **Date**: 2026-04-20
 
 ## Context

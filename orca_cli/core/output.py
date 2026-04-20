@@ -57,7 +57,7 @@ def _json_indent(noindent: bool) -> int | None:
 
 
 def print_list(
-    items: list[dict],
+    items: list,
     column_defs: list[tuple],
     *,
     title: str = "",

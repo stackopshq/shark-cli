@@ -22,6 +22,7 @@ from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
 from orca_cli.core.waiter import wait_for_resource
+from orca_cli.services.server import ServerService
 
 
 @click.group()
@@ -39,11 +40,8 @@ def server(ctx: click.Context) -> None:
 @click.pass_context
 def server_list(ctx: click.Context, limit: int, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List servers."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.compute_url}/servers/detail"
-    data = client.get(url, params={"limit": limit})
-
-    servers = data.get("servers", [])
+    service = ServerService(ctx.find_object(OrcaContext).ensure_client())
+    servers = service.find(limit=limit)
 
     def _addresses(srv: dict) -> str:
         parts = []
@@ -82,11 +80,8 @@ def server_list(ctx: click.Context, limit: int, output_format: str, columns: tup
 @click.pass_context
 def server_show(ctx: click.Context, server_id: str, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show server details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.compute_url}/servers/{server_id}"
-    data = client.get(url)
-
-    srv = data.get("server", data)
+    service = ServerService(ctx.find_object(OrcaContext).ensure_client())
+    srv = service.get(server_id)
 
     # Power state mapping (Nova integer → label)
     power_states = {
@@ -98,7 +93,7 @@ def server_show(ctx: click.Context, server_id: str, output_format: str, columns:
         7: "Suspended",
     }
 
-    fields: list[tuple[str, str]] = []
+    fields: list[tuple[str, Any]] = []
 
     fields.append(("ID", srv.get("id", "")))
     fields.append(("Name", srv.get("name", "")))
@@ -396,27 +391,29 @@ def server_delete(ctx: click.Context, server_id: str, yes: bool, dry_run: bool, 
     """Delete a server."""
     orca_ctx = ctx.find_object(OrcaContext)
     client = orca_ctx.ensure_client()
-    url = f"{client.compute_url}/servers/{server_id}"
+    service = ServerService(client)
 
     if dry_run:
-        data = client.get(url)
-        srv = data.get("server", data)
+        srv = service.get(server_id)
         console.print("[yellow]Would delete server:[/yellow]")
         console.print(f"  ID:     {srv.get('id', server_id)}")
         console.print(f"  Name:   {srv.get('name', '—')}")
         console.print(f"  Status: {srv.get('status', '—')}")
-        console.print(f"  Image:  {srv.get('image', {}).get('id', '—') if isinstance(srv.get('image'), dict) else '—'}")
+        image = srv.get("image")
+        image_id = image.get("id", "—") if isinstance(image, dict) else "—"
+        console.print(f"  Image:  {image_id}")
         return
 
     if not yes:
         click.confirm(f"Delete server {server_id}?", abort=True)
 
-    client.delete(url)
+    service.delete(server_id)
     cache.invalidate(orca_ctx.profile, "servers")
 
     if wait:
         wait_for_resource(
-            client, url, "server", "DELETED",
+            client, f"{client.compute_url}/servers/{server_id}",
+            "server", "DELETED",
             label=f"Server {server_id}",
             delete_mode=True,
         )
@@ -466,10 +463,11 @@ def server_stop(ctx: click.Context, server_id: str, wait: bool) -> None:
 @click.pass_context
 def server_reboot(ctx: click.Context, server_id: str, hard: bool, wait: bool) -> None:
     """Reboot a server."""
+    client = ctx.find_object(OrcaContext).ensure_client()
+    ServerService(client).reboot(server_id, hard=hard)
     reboot_type = "HARD" if hard else "SOFT"
-    _server_action(ctx, server_id, {"reboot": {"type": reboot_type}}, f"Reboot ({reboot_type})")
+    console.print(f"[green]Reboot ({reboot_type}) request sent for {server_id}.[/green]")
     if wait:
-        client = ctx.find_object(OrcaContext).ensure_client()
         wait_for_resource(client, f"{client.compute_url}/servers/{server_id}",
                           "server", "ACTIVE", label=f"Server {server_id}")
 

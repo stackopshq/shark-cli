@@ -33,6 +33,7 @@ of the documentation.
 - [ADR-0001 — Lazy command registration](0001-lazy-command-registration.md)
 - [ADR-0002 — Dual-format configuration file](0002-dual-format-config-file.md)
 - [ADR-0003 — Auth-type auto-detection](0003-auth-type-auto-detection.md)
-- [ADR-0004 — No services layer (yet)](0004-no-services-layer.md)
+- [ADR-0004 — No services layer (yet)](0004-no-services-layer.md) *(superseded by ADR-0007)*
 - [ADR-0005 — Durable, atomic token cache](0005-durable-token-cache.md)
 - [ADR-0006 — Idempotent-only HTTP retries](0006-idempotent-only-retries.md)
+- [ADR-0007 — Incremental services layer with typed models](0007-incremental-services-layer.md)
