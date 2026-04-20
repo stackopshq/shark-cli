@@ -3754,6 +3754,13 @@ comment in the test whitelist explaining why.</p>
   into <code>volume set --bootable</code> / <code>--read-only</code> with the two old
   commands kept as deprecated façades. Whitelist for <code>volume</code> is
   empty — no permanent exceptions.</li>
+<li>2026-04-20 — <code>network</code>: 38 commands moved into 7 sub-groups
+  (<code>agent</code>, <code>auto-allocated-topology</code> — compound noun, <code>port</code>,
+  <code>rbac</code>, <code>segment</code>, <code>subnet</code>, <code>router</code>) and 4 sub-sub-groups under
+  <code>router</code> (<code>add</code>, <code>remove</code>, <code>set</code>, <code>unset</code>). The ratchet test now
+  excludes sub-groups whose name is itself a compound noun, in
+  line with the ADR's "compound nouns keep their hyphen" rule.
+  Whitelist for <code>network</code> is empty — no permanent exceptions.</li>
 </ul>
 
 
