@@ -128,4 +128,4 @@ jobs:
           pip install pip-audit
 
       - name: Audit runtime dependencies
-        run: pip-audit --strict --disable-pip
+        run: pip-audit --strict
