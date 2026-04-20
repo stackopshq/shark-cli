@@ -10,6 +10,7 @@ from typing import Any, Mapping
 import click
 
 from orca_cli.core import cache
+from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.completions import (
     complete_flavors,
     complete_images,
@@ -30,6 +31,59 @@ from orca_cli.services.server import ServerService
 def server(ctx: click.Context) -> None:
     """Manage compute servers."""
     pass
+
+
+# ── nested sub-groups (ADR-0008 — openstackclient-style naming) ───────────
+
+
+@server.group("add")
+def server_add() -> None:
+    """Attach a sub-resource to a server (volume, port, network, ...)."""
+
+
+@server.group("remove")
+def server_remove() -> None:
+    """Detach a sub-resource from a server."""
+
+
+@server.group("console")
+def server_console() -> None:
+    """Inspect the server console (log, URL)."""
+
+
+@server.group("dump")
+def server_dump() -> None:
+    """Manage crash dumps for a server."""
+
+
+@server.group("image")
+def server_image() -> None:
+    """Image-level operations on a server (snapshot, ...)."""
+
+
+@server.group("interface")
+def server_interface() -> None:
+    """Network interfaces attached to a server."""
+
+
+@server.group("metadata")
+def server_metadata() -> None:
+    """Read or modify server metadata."""
+
+
+@server.group("migration")
+def server_migration() -> None:
+    """Inspect or control server migrations."""
+
+
+@server.group("tag")
+def server_tag() -> None:
+    """Read or modify server tags."""
+
+
+@server.group("volume")
+def server_volume() -> None:
+    """Volumes attached to a server."""
 
 
 # ── list ──────────────────────────────────────────────────────────────────
@@ -637,7 +691,7 @@ def server_rename(ctx: click.Context, server_id: str, new_name: str) -> None:
 
 # ── create-image (snapshot) ───────────────────────────────────────────────
 
-@server.command("create-image")
+@server_image.command("create")
 @click.argument("server_id", callback=validate_id)
 @click.argument("image_name")
 @click.pass_context
@@ -650,7 +704,7 @@ def server_create_image(ctx: click.Context, server_id: str, image_name: str) -> 
 
 # ── volume attachments ────────────────────────────────────────────────────
 
-@server.command("attach-volume")
+@server_add.command("volume")
 @click.argument("server_id", callback=validate_id)
 @click.argument("volume_id", callback=validate_id)
 @click.option("--device", default=None, help="Device name (e.g. /dev/vdb). Auto-assigned if omitted.")
@@ -669,7 +723,7 @@ def server_attach_volume(ctx: click.Context, server_id: str, volume_id: str, dev
     console.print(f"[green]Volume {volume_id} attached to {server_id} as {dev}.[/green]")
 
 
-@server.command("detach-volume")
+@server_remove.command("volume")
 @click.argument("server_id", callback=validate_id)
 @click.argument("volume_id", callback=validate_id)
 @click.pass_context
@@ -679,7 +733,7 @@ def server_detach_volume(ctx: click.Context, server_id: str, volume_id: str) -> 
     console.print(f"[green]Volume {volume_id} detached from {server_id}.[/green]")
 
 
-@server.command("list-volumes")
+@server_volume.command("list")
 @click.argument("server_id", callback=validate_id)
 @output_options
 @click.pass_context
@@ -732,7 +786,7 @@ def server_attach_interface(ctx: click.Context, server_id: str, port_id: str | N
     console.print(f"[green]Interface attached to {server_id} — port {att.get('port_id', '')} ({ips}).[/green]")
 
 
-@server.command("detach-interface")
+@server_remove.command("interface")
 @click.argument("server_id", callback=validate_id)
 @click.argument("port_id", callback=validate_id)
 @click.pass_context
@@ -742,7 +796,7 @@ def server_detach_interface(ctx: click.Context, server_id: str, port_id: str) ->
     console.print(f"[green]Interface {port_id} detached from {server_id}.[/green]")
 
 
-@server.command("list-interfaces")
+@server_interface.command("list")
 @click.argument("server_id", callback=validate_id)
 @output_options
 @click.pass_context
@@ -874,7 +928,7 @@ def server_password(ctx: click.Context, server_id: str, private_key_path: str | 
 
 # ── console-log ───────────────────────────────────────────────────────────
 
-@server.command("console-log")
+@server_console.command("log")
 @click.argument("server_id", callback=validate_id)
 @click.option("--lines", "length", default=50, show_default=True, help="Number of lines to retrieve (0 = all).")
 @click.pass_context
@@ -900,7 +954,7 @@ def server_console_log(ctx: click.Context, server_id: str, length: int) -> None:
 
 # ── console-url ───────────────────────────────────────────────────────────
 
-@server.command("console-url")
+@server_console.command("url")
 @click.argument("server_id", callback=validate_id, shell_complete=complete_servers)
 @click.option(
     "--type", "console_type",
@@ -1660,7 +1714,7 @@ def server_live_migrate(ctx: click.Context, server_id: str, host: str | None,
 # ══════════════════════════════════════════════════════════════════════════
 
 
-@server.command("add-security-group")
+@server_add.command("security-group")
 @click.argument("server_id")
 @click.argument("security_group")
 @click.pass_context
@@ -1670,7 +1724,7 @@ def server_add_security_group(ctx: click.Context, server_id: str, security_group
     console.print(f"[green]Security group '{security_group}' added to server {server_id}.[/green]")
 
 
-@server.command("remove-security-group")
+@server_remove.command("security-group")
 @click.argument("server_id")
 @click.argument("security_group")
 @click.pass_context
@@ -1748,7 +1802,7 @@ def server_set(ctx: click.Context, server_id: str, name: str | None,
 # ══════════════════════════════════════════════════════════════════════════
 
 
-@server.command("metadata-list")
+@server_metadata.command("list")
 @click.argument("server_id")
 @click.pass_context
 def server_metadata_list(ctx: click.Context, server_id: str) -> None:
@@ -1768,7 +1822,7 @@ def server_metadata_list(ctx: click.Context, server_id: str) -> None:
     _console.print(table)
 
 
-@server.command("tag-list")
+@server_tag.command("list")
 @click.argument("server_id")
 @click.pass_context
 def server_tag_list(ctx: click.Context, server_id: str) -> None:
@@ -1786,7 +1840,7 @@ def server_tag_list(ctx: click.Context, server_id: str) -> None:
 
 # ── migration-list / migration-show ───────────────────────────────────────
 
-@server.command("migration-list")
+@server_migration.command("list")
 @click.argument("server_id", callback=validate_id, shell_complete=complete_servers)
 @output_options
 @click.pass_context
@@ -1814,7 +1868,7 @@ def server_migration_list(ctx: click.Context, server_id: str,
     )
 
 
-@server.command("migration-show")
+@server_migration.command("show")
 @click.argument("server_id", callback=validate_id, shell_complete=complete_servers)
 @click.argument("migration_id")
 @output_options
@@ -1838,7 +1892,7 @@ def server_migration_show(ctx: click.Context, server_id: str, migration_id: str,
     )
 
 
-@server.command("migration-abort")
+@server_migration.command("abort")
 @click.argument("server_id", callback=validate_id, shell_complete=complete_servers)
 @click.argument("migration_id")
 @click.pass_context
@@ -1848,7 +1902,7 @@ def server_migration_abort(ctx: click.Context, server_id: str, migration_id: str
     console.print(f"Migration [bold]{migration_id}[/bold] aborted.")
 
 
-@server.command("migration-force-complete")
+@server_migration.command("force-complete")
 @click.argument("server_id", callback=validate_id, shell_complete=complete_servers)
 @click.argument("migration_id")
 @click.pass_context
@@ -1890,7 +1944,7 @@ def server_evacuate(ctx: click.Context, server_id: str, host: str | None,
     console.print("[dim]Use 'orca server show' to track status.[/dim]")
 
 
-@server.command("dump-create")
+@server_dump.command("create")
 @click.argument("server_id")
 @click.pass_context
 def server_dump_create(ctx: click.Context, server_id: str) -> None:
@@ -1921,7 +1975,7 @@ def server_restore(ctx: click.Context, server_id: str) -> None:
 # ══════════════════════════════════════════════════════════════════════════
 
 
-@server.command("add-fixed-ip")
+@server_add.command("fixed-ip")
 @click.argument("server_id")
 @click.argument("network_id")
 @click.pass_context
@@ -1936,7 +1990,7 @@ def server_add_fixed_ip(ctx: click.Context, server_id: str, network_id: str) -> 
     console.print(f"[green]Fixed IP from network {network_id} added to server {server_id}.[/green]")
 
 
-@server.command("remove-fixed-ip")
+@server_remove.command("fixed-ip")
 @click.argument("server_id")
 @click.argument("ip_address")
 @click.pass_context
@@ -1956,7 +2010,7 @@ def server_remove_fixed_ip(ctx: click.Context, server_id: str, ip_address: str) 
 # ══════════════════════════════════════════════════════════════════════════
 
 
-@server.command("add-port")
+@server_add.command("port")
 @click.argument("server_id")
 @click.argument("port_id")
 @click.pass_context
@@ -1973,7 +2027,7 @@ def server_add_port(ctx: click.Context, server_id: str, port_id: str) -> None:
     console.print(f"[green]Port {port_id} attached to server {server_id} ({ips}).[/green]")
 
 
-@server.command("remove-port")
+@server_remove.command("port")
 @click.argument("server_id")
 @click.argument("port_id")
 @click.pass_context
@@ -1988,7 +2042,7 @@ def server_remove_port(ctx: click.Context, server_id: str, port_id: str) -> None
     console.print(f"[green]Port {port_id} removed from server {server_id}.[/green]")
 
 
-@server.command("add-network")
+@server_add.command("network")
 @click.argument("server_id")
 @click.argument("network_id")
 @click.pass_context
@@ -2008,7 +2062,7 @@ def server_add_network(ctx: click.Context, server_id: str, network_id: str) -> N
     )
 
 
-@server.command("remove-network")
+@server_remove.command("network")
 @click.argument("server_id")
 @click.argument("network_id")
 @click.pass_context
@@ -2077,3 +2131,40 @@ def server_unset(ctx: click.Context, server_id: str,
         console.print("[yellow]Nothing to unset — provide --property or --tag.[/yellow]")
     else:
         console.print(f"[green]Server {server_id} updated.[/green]")
+
+
+# ── Deprecated aliases (ADR-0008) ─────────────────────────────────────────
+#
+# Each former hyphenated subcommand is re-exposed under its old name so
+# existing scripts keep working. The aliases are tagged ``deprecated``
+# in --help and emit a stderr warning pointing at the new path.
+# Targeted for removal in v2.0.
+
+for _legacy, _primary, _path in [
+    ("add-fixed-ip",          server_add_fixed_ip,          "server add fixed-ip"),
+    ("remove-fixed-ip",       server_remove_fixed_ip,       "server remove fixed-ip"),
+    ("add-port",              server_add_port,              "server add port"),
+    ("remove-port",           server_remove_port,           "server remove port"),
+    ("add-network",           server_add_network,           "server add network"),
+    ("remove-network",        server_remove_network,        "server remove network"),
+    ("add-security-group",    server_add_security_group,    "server add security-group"),
+    ("remove-security-group", server_remove_security_group, "server remove security-group"),
+    ("attach-volume",         server_attach_volume,         "server add volume"),
+    ("detach-volume",         server_detach_volume,         "server remove volume"),
+    ("detach-interface",      server_detach_interface,      "server remove interface"),
+    ("list-volumes",          server_list_volumes,          "server volume list"),
+    ("list-interfaces",       server_list_interfaces,       "server interface list"),
+    ("console-log",           server_console_log,           "server console log"),
+    ("console-url",           server_console_url,           "server console url"),
+    ("create-image",          server_create_image,          "server image create"),
+    ("metadata-list",         server_metadata_list,         "server metadata list"),
+    ("tag-list",              server_tag_list,              "server tag list"),
+    ("migration-list",        server_migration_list,        "server migration list"),
+    ("migration-show",        server_migration_show,        "server migration show"),
+    ("migration-abort",       server_migration_abort,       "server migration abort"),
+    ("migration-force-complete", server_migration_force_complete,
+                              "server migration force-complete"),
+    ("dump-create",           server_dump_create,           "server dump create"),
+]:
+    add_command_with_alias(server, _primary, legacy_name=_legacy, primary_path=_path)
+del _legacy, _primary, _path

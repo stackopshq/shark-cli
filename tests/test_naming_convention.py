@@ -140,15 +140,20 @@ LEGACY_HYPHENATED_SUBCOMMANDS: dict[str, set[str]] = {
     },
     "security-group": {"rule-add", "rule-delete"},
     "server": {
-        "add-fixed-ip", "add-network", "add-port", "add-security-group",
-        "attach-interface", "attach-volume",
-        "confirm-resize", "console-log", "console-url", "create-image",
-        "detach-interface", "detach-volume", "dump-create",
-        "list-interfaces", "list-volumes", "live-migrate", "metadata-list",
-        "migration-abort", "migration-force-complete", "migration-list",
-        "migration-show", "port-forward",
-        "remove-fixed-ip", "remove-network", "remove-port",
-        "remove-security-group", "revert-resize", "tag-list",
+        # Cases pending arbitration — see ADR-0008 migration tracking:
+        # - attach-interface is polymorphic (port_id|net_id|fixed_ip),
+        #   currently overlaps with `add port`/`add network` aliases.
+        # - confirm-resize / revert-resize would clash with `resize` as
+        #   both an action (`server resize <id> --flavor ...`) and a
+        #   sub-group; needs a Click pattern decision.
+        # - live-migrate is a compound verb without a clean sub-group
+        #   shape in openstackclient either.
+        # - port-forward is orca-exclusive (no openstack equivalent).
+        "attach-interface",
+        "confirm-resize",
+        "live-migrate",
+        "port-forward",
+        "revert-resize",
     },
     "stack": {
         "event-list", "event-show", "output-list", "output-show",

@@ -49,19 +49,23 @@ def add_command_with_alias(
     legacy_name: str,
     primary_path: str,
 ) -> None:
-    """Register *primary* on *group* under its current name AND under
-    *legacy_name* (as a deprecated alias).
+    """Expose *primary* under *legacy_name* on *group* as a deprecated alias.
+
+    The primary command is **not** re-attached to *group* — the caller
+    is expected to have already registered it where it logically
+    belongs (typically a sub-group of *group*, e.g.
+    ``server.add.port`` while the alias lives directly on ``server``).
 
     Args:
-        group: the Click group both commands attach to.
-        primary: the new (convention-compliant) command object.
-        legacy_name: the old hyphenated name to keep as an alias.
-        primary_path: the new full path shown in the deprecation hint
-            (e.g. ``"server volume list"``).
+        group: the Click group that should expose the legacy alias.
+        primary: the convention-compliant command object the alias
+            forwards to.
+        legacy_name: the historical hyphenated name to keep working.
+        primary_path: the full new path shown in the deprecation hint
+            (e.g. ``"server add port"``).
     """
-    group.add_command(primary)
-    if legacy_name == primary.name:
-        return
+    if legacy_name == primary.name and group.commands.get(legacy_name) is primary:
+        return  # nothing to alias — the command is already at the canonical spot
     alias = _DeprecatedAliasCommand(primary, replacement=primary_path)
     alias.name = legacy_name
     group.add_command(alias, name=legacy_name)
