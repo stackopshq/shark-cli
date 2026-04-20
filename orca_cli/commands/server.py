@@ -760,7 +760,7 @@ def server_list_volumes(ctx: click.Context, server_id: str, output_format: str, 
 
 # ── network interface attachments ─────────────────────────────────────────
 
-@server.command("attach-interface")
+@server.command("attach-interface", deprecated=True)
 @click.argument("server_id", callback=validate_id)
 @click.option("--port-id", default=None, help="Existing port ID to attach.")
 @click.option("--net-id", default=None, help="Network ID (creates a new port automatically).")
@@ -768,15 +768,26 @@ def server_list_volumes(ctx: click.Context, server_id: str, output_format: str, 
 @click.pass_context
 def server_attach_interface(ctx: click.Context, server_id: str, port_id: str | None,
                             net_id: str | None, fixed_ip: str | None) -> None:
-    """Attach a network interface (port) to a server.
+    """Attach a network interface to a server (deprecated façade).
 
     \b
-    Examples:
-      orca server attach-interface <server-id> --port-id <port-id>
-      orca server attach-interface <server-id> --net-id <network-id>
+    Use one of these instead, depending on what you have:
+      orca server add port <server-id> <port-id>
+      orca server add network <server-id> <network-id> [--fixed-ip <ip>]
     """
     if not port_id and not net_id:
         raise click.ClickException("Provide --port-id or --net-id.")
+
+    if port_id:
+        suggestion = f"server add port {server_id} {port_id}"
+    elif fixed_ip:
+        suggestion = f"server add network {server_id} {net_id} --fixed-ip {fixed_ip}"
+    else:
+        suggestion = f"server add network {server_id} {net_id}"
+    click.secho(
+        f"warning: 'server attach-interface' is deprecated; use 'orca {suggestion}' instead.",
+        fg="yellow", err=True,
+    )
 
     service = ServerService(ctx.find_object(OrcaContext).ensure_client())
     fixed_ips = [{"ip_address": fixed_ip}] if (net_id and fixed_ip) else None
@@ -2045,16 +2056,21 @@ def server_remove_port(ctx: click.Context, server_id: str, port_id: str) -> None
 @server_add.command("network")
 @click.argument("server_id")
 @click.argument("network_id")
+@click.option("--fixed-ip", "fixed_ip", default=None,
+              help="Pin the new port to a specific fixed IP on the network.")
 @click.pass_context
-def server_add_network(ctx: click.Context, server_id: str, network_id: str) -> None:
+def server_add_network(ctx: click.Context, server_id: str, network_id: str,
+                       fixed_ip: str | None) -> None:
     """Attach a network to a server (creates a new port automatically).
 
     \b
-    Example:
-      orca server add-network <server-id> <network-id>
+    Examples:
+      orca server add network <server-id> <network-id>
+      orca server add network <server-id> <network-id> --fixed-ip 10.0.0.5
     """
     service = ServerService(ctx.find_object(OrcaContext).ensure_client())
-    att = service.attach_interface(server_id, net_id=network_id)
+    fixed_ips = [{"ip_address": fixed_ip}] if fixed_ip else None
+    att = service.attach_interface(server_id, net_id=network_id, fixed_ips=fixed_ips)
     ips = ", ".join(ip.get("ip_address", "") for ip in att.get("fixed_ips", []))
     console.print(
         f"[green]Network {network_id} attached to server {server_id} "
