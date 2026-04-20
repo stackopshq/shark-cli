@@ -141,3 +141,10 @@ Update this list when a module's hyphenated commands are migrated.
   into `volume set --bootable` / `--read-only` with the two old
   commands kept as deprecated façades. Whitelist for `volume` is
   empty — no permanent exceptions.
+- 2026-04-20 — `network`: 38 commands moved into 7 sub-groups
+  (`agent`, `auto-allocated-topology` — compound noun, `port`,
+  `rbac`, `segment`, `subnet`, `router`) and 4 sub-sub-groups under
+  `router` (`add`, `remove`, `set`, `unset`). The ratchet test now
+  excludes sub-groups whose name is itself a compound noun, in
+  line with the ADR's "compound nouns keep their hyphen" rule.
+  Whitelist for `network` is empty — no permanent exceptions.
