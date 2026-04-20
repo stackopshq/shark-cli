@@ -129,7 +129,8 @@ jobs:
 
       - name: Audit runtime dependencies
         # --skip-editable excludes our own package (installed via -e .) —
-        # pip-audit would otherwise try to resolve it against PyPI and fail
-        # on pre-release or unpublished versions. We're scanning third-party
-        # deps here, not ourselves.
-        run: pip-audit --strict --skip-editable
+        # pip-audit would otherwise try to resolve it against PyPI. We drop
+        # --strict because it would turn that skip into a fatal error;
+        # pip-audit still exits non-zero on actual CVE findings, which is
+        # what we want to fail the build on.
+        run: pip-audit --skip-editable
