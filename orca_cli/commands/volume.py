@@ -11,12 +11,12 @@ from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
 from orca_cli.core.waiter import wait_for_resource
+from orca_cli.services.volume import VolumeService
 
 
 def _vol_action(ctx: click.Context, volume_id: str, action: dict, label: str) -> None:
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.volume_url}/volumes/{volume_id}/action"
-    client.post(url, json=action)
+    service = VolumeService(ctx.find_object(OrcaContext).ensure_client())
+    service.action(volume_id, action)
     console.print(f"[green]{label} request sent for {volume_id}.[/green]")
 
 
@@ -97,11 +97,8 @@ def volume_type_access() -> None:
 @click.pass_context
 def volume_list(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List volumes."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.volume_url}/volumes/detail"
-    data = client.get(url)
-
-    volumes = data.get("volumes", [])
+    service = VolumeService(ctx.find_object(OrcaContext).ensure_client())
+    volumes = service.find()
 
     print_list(
         volumes,
@@ -131,11 +128,7 @@ def volume_list(ctx: click.Context, output_format: str, columns: tuple[str, ...]
 @click.pass_context
 def volume_show(ctx: click.Context, volume_id: str, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show volume details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.volume_url}/volumes/{volume_id}"
-    data = client.get(url)
-
-    vol = data.get("volume", data)
+    vol = VolumeService(ctx.find_object(OrcaContext).ensure_client()).get(volume_id)
 
     display_keys = [
         "id", "name", "status", "size", "volume_type", "bootable",
@@ -237,10 +230,7 @@ def volume_create(ctx: click.Context, name: str | None, size: int | None,
     if image_id:
         body["imageRef"] = image_id
 
-    url = f"{client.volume_url}/volumes"
-    data = client.post(url, json={"volume": body})
-
-    vol = data.get("volume", data)
+    vol = VolumeService(client).create(body)
     vol_id = vol.get("id", "?")
     cache.invalidate(orca_ctx.profile, "volumes")
     console.print(f"[green]Volume '{vol.get('name')}' ({vol_id}) created — {size} GB.[/green]")
@@ -274,9 +264,8 @@ def volume_update(ctx: click.Context, volume_id: str, name: str | None, descript
         console.print("[yellow]Nothing to update. Use --name or --description.[/yellow]")
         return
 
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.volume_url}/volumes/{volume_id}"
-    client.put(url, json={"volume": body})
+    service = VolumeService(ctx.find_object(OrcaContext).ensure_client())
+    service.update(volume_id, body)
     console.print(f"[green]Volume {volume_id} updated.[/green]")
 
 
@@ -353,11 +342,10 @@ def volume_delete(ctx: click.Context, volume_id: str, yes: bool, dry_run: bool, 
     """Delete a volume."""
     orca_ctx = ctx.find_object(OrcaContext)
     client = orca_ctx.ensure_client()
-    url = f"{client.volume_url}/volumes/{volume_id}"
+    service = VolumeService(client)
 
     if dry_run:
-        data = client.get(url)
-        vol = data.get("volume", data)
+        vol = service.get(volume_id)
         console.print("[yellow]Would delete volume:[/yellow]")
         console.print(f"  ID:     {vol.get('id', volume_id)}")
         console.print(f"  Name:   {vol.get('name', '—')}")
@@ -371,12 +359,12 @@ def volume_delete(ctx: click.Context, volume_id: str, yes: bool, dry_run: bool, 
     if not yes:
         click.confirm(f"Delete volume {volume_id}?", abort=True)
 
-    client.delete(url)
+    service.delete(volume_id)
     cache.invalidate(orca_ctx.profile, "volumes")
 
     if wait:
         wait_for_resource(
-            client, url, "volume", "deleted",
+            client, f"{client.volume_url}/volumes/{volume_id}", "volume", "deleted",
             label=f"Volume {volume_id}",
             delete_mode=True,
             error_status="error",
@@ -394,11 +382,7 @@ def volume_delete(ctx: click.Context, volume_id: str, yes: bool, dry_run: bool, 
 @click.pass_context
 def snapshot_list(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List volume snapshots."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.volume_url}/snapshots/detail"
-    data = client.get(url)
-
-    snaps = data.get("snapshots", [])
+    snaps = VolumeService(ctx.find_object(OrcaContext).ensure_client()).find_snapshots()
 
     print_list(
         snaps,
@@ -423,11 +407,7 @@ def snapshot_list(ctx: click.Context, output_format: str, columns: tuple[str, ..
 @click.pass_context
 def snapshot_show(ctx: click.Context, snapshot_id: str, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show snapshot details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.volume_url}/snapshots/{snapshot_id}"
-    data = client.get(url)
-
-    snap = data.get("snapshot", data)
+    snap = VolumeService(ctx.find_object(OrcaContext).ensure_client()).get_snapshot(snapshot_id)
 
     fields: list[tuple[str, str]] = []
     for key in ["id", "name", "description", "volume_id", "size", "status", "created_at"]:
@@ -447,7 +427,7 @@ def snapshot_show(ctx: click.Context, snapshot_id: str, output_format: str, colu
 @click.pass_context
 def snapshot_create(ctx: click.Context, volume_id_or_name: str, name: str, description: str | None, force: bool) -> None:
     """Create a snapshot of a volume (accepts UUID or name)."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    service = VolumeService(ctx.find_object(OrcaContext).ensure_client())
 
     # Resolve name → UUID if needed
     import re
@@ -455,8 +435,7 @@ def snapshot_create(ctx: click.Context, volume_id_or_name: str, name: str, descr
     if _UUID_RE.match(volume_id_or_name):
         volume_id = volume_id_or_name
     else:
-        data = client.get(f"{client.volume_url}/volumes", params={"name": volume_id_or_name})
-        vols = data.get("volumes", [])
+        vols = service.find(params={"name": volume_id_or_name})
         if not vols:
             raise click.ClickException(f"No volume found with name '{volume_id_or_name}'")
         if len(vols) > 1:
@@ -467,10 +446,7 @@ def snapshot_create(ctx: click.Context, volume_id_or_name: str, name: str, descr
     if description:
         body["description"] = description
 
-    url = f"{client.volume_url}/snapshots"
-    data = client.post(url, json={"snapshot": body})
-
-    snap = data.get("snapshot", data)
+    snap = service.create_snapshot(body)
     console.print(f"[green]Snapshot '{snap.get('name')}' ({snap.get('id')}) created from {volume_id}.[/green]")
 
 
@@ -483,9 +459,7 @@ def snapshot_delete(ctx: click.Context, snapshot_id: str, yes: bool) -> None:
     if not yes:
         click.confirm(f"Delete snapshot {snapshot_id}?", abort=True)
 
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.volume_url}/snapshots/{snapshot_id}"
-    client.delete(url)
+    VolumeService(ctx.find_object(OrcaContext).ensure_client()).delete_snapshot(snapshot_id)
     console.print(f"[green]Snapshot {snapshot_id} deleted.[/green]")
 
 
@@ -511,11 +485,12 @@ def volume_tree(ctx: click.Context, filter_vol: str | None) -> None:  # noqa: C9
     from rich.tree import Tree
 
     client = ctx.find_object(OrcaContext).ensure_client()
+    service = VolumeService(client)
 
     with console.status("[bold cyan]Building volume tree…[/bold cyan]"):
         # Fetch volumes & snapshots
-        vols = client.get(f"{client.volume_url}/volumes/detail").get("volumes", [])
-        snaps = client.get(f"{client.volume_url}/snapshots/detail").get("snapshots", [])
+        vols = service.find()
+        snaps = service.find_snapshots()
 
         # Fetch servers for name resolution
         try:
@@ -526,19 +501,19 @@ def volume_tree(ctx: click.Context, filter_vol: str | None) -> None:  # noqa: C9
 
     # Index
     vol_map = {v["id"]: v for v in vols}
-    snaps_by_vol: dict[str, list[dict]] = {}
+    snaps_by_vol: dict[str, list] = {}
     for s in snaps:
         snaps_by_vol.setdefault(s.get("volume_id", ""), []).append(s)
 
     # Volumes created from a snapshot → track parent
-    children_of_snap: dict[str, list[dict]] = {}
+    children_of_snap: dict[str, list] = {}
     for v in vols:
         sid = v.get("snapshot_id")
         if sid:
             children_of_snap.setdefault(sid, []).append(v)
 
     # Volumes cloned from another volume
-    children_of_vol: dict[str, list[dict]] = {}
+    children_of_vol: dict[str, list] = {}
     for v in vols:
         src = v.get("source_volid")
         if src:
@@ -611,7 +586,7 @@ def volume_tree(ctx: click.Context, filter_vol: str | None) -> None:  # noqa: C9
             f"{size} GB  [{sc}]{status}[/{sc}]  [dim]{created}[/dim]"
         )
 
-    def _add_volume(parent_node, v: dict, seen: set) -> None:
+    def _add_volume(parent_node, v, seen: set) -> None:
         vid = v["id"]
         if vid in seen:
             parent_node.add(f"[dim](cycle → {vid})[/dim]")
