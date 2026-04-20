@@ -1,9 +1,14 @@
 name: Deploy Documentation to GitHub Pages
 
+# Gate the deploy on CI passing on main so we never publish docs that
+# reference a broken build. The `workflow_run` trigger fires only after
+# the named workflow completes, regardless of its conclusion — we then
+# filter on `workflow_run.conclusion == 'success'` below.
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: [CI]
+    branches: [main]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -11,6 +16,7 @@ permissions:
 
 jobs:
   deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -20,6 +26,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: pip
 
       - name: Install dependencies
         run: |
