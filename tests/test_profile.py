@@ -28,6 +28,43 @@ class TestProfileList:
         assert result.exit_code == 0
         assert "No profiles" in result.output
 
+    def test_list_auth_column_password(self, invoke, config_dir, sample_profile):
+        save_profile("pwd", sample_profile)
+        result = invoke(["profile", "list"])
+        assert result.exit_code == 0
+        assert "password" in result.output
+        assert sample_profile["username"] in result.output
+
+    def test_list_auth_column_app_cred(self, invoke, config_dir):
+        save_profile("ac", {
+            "auth_url": "https://keystone.foo:5000",
+            "auth_type": "v3applicationcredential",
+            "application_credential_id": "ac-abcdef",
+            "application_credential_secret": "topsecret",
+        })
+        result = invoke(["profile", "list"])
+        assert result.exit_code == 0
+        assert "app-cred" in result.output
+        # Secret must never appear in the list
+        assert "topsecret" not in result.output
+        # Pre-scoped note present
+        assert "pre-scoped" in result.output
+        # AC id (or name) shown in user/credential column
+        assert "ac-abcdef" in result.output
+
+    def test_list_mixed_password_and_ac(self, invoke, config_dir, sample_profile):
+        save_profile("pwd", sample_profile)
+        save_profile("ac", {
+            "auth_url": "https://keystone.foo:5000",
+            "auth_type": "v3applicationcredential",
+            "application_credential_id": "ac-xyz",
+            "application_credential_secret": "s",
+        })
+        result = invoke(["profile", "list"])
+        assert result.exit_code == 0
+        assert "password" in result.output
+        assert "app-cred" in result.output
+
 
 # ══════════════════════════════════════════════════════════════════════════
 #  show

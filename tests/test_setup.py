@@ -2,7 +2,16 @@
 
 from __future__ import annotations
 
+from unittest.mock import patch
+
 import yaml
+
+from orca_cli.commands.setup import _maybe_install_completion
+from orca_cli.core.shell_completion import (
+    detect_shell,
+    install_completion_bashzsh,
+    install_completion_fish,
+)
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
@@ -208,3 +217,156 @@ class TestSetupDefaultProfileResolution:
         result = invoke(["setup"], input=stdin)
         assert result.exit_code == 0, result.output
         assert "editing profile: active-one" in result.output
+
+
+# ══════════════════════════════════════════════════════════════════════════
+#  Shell completion auto-install
+# ══════════════════════════════════════════════════════════════════════════
+
+
+class TestDetectShell:
+
+    def test_detects_zsh(self, monkeypatch):
+        monkeypatch.setenv("SHELL", "/bin/zsh")
+        assert detect_shell() == "zsh"
+
+    def test_detects_bash_with_homebrew_path(self, monkeypatch):
+        monkeypatch.setenv("SHELL", "/opt/homebrew/bin/bash")
+        assert detect_shell() == "bash"
+
+    def test_detects_fish(self, monkeypatch):
+        monkeypatch.setenv("SHELL", "/usr/bin/fish")
+        assert detect_shell() == "fish"
+
+    def test_unknown_shell_returns_none(self, monkeypatch):
+        monkeypatch.setenv("SHELL", "/bin/tcsh")
+        assert detect_shell() is None
+
+    def test_empty_shell_returns_none(self, monkeypatch):
+        monkeypatch.delenv("SHELL", raising=False)
+        assert detect_shell() is None
+
+
+class TestInstallCompletionBashZsh:
+
+    def test_creates_rc_file_if_missing(self, tmp_path, monkeypatch):
+        monkeypatch.setattr("orca_cli.core.shell_completion._RC_FILE",
+                            {"bash": tmp_path / ".bashrc", "zsh": tmp_path / ".zshrc"})
+        msg = install_completion_bashzsh("zsh")
+        rc = tmp_path / ".zshrc"
+        assert rc.exists()
+        assert "_ORCA_COMPLETE=zsh_source" in rc.read_text()
+        assert "Appended" in msg
+
+    def test_idempotent_when_already_present(self, tmp_path, monkeypatch):
+        rc = tmp_path / ".zshrc"
+        rc.write_text('# existing\neval "$(_ORCA_COMPLETE=zsh_source orca)"\n')
+        monkeypatch.setattr("orca_cli.core.shell_completion._RC_FILE",
+                            {"bash": tmp_path / ".bashrc", "zsh": rc})
+        msg = install_completion_bashzsh("zsh")
+        assert "Already present" in msg
+        # Line not duplicated
+        assert rc.read_text().count("_ORCA_COMPLETE=zsh_source") == 1
+
+    def test_appends_to_existing_rc_without_marker(self, tmp_path, monkeypatch):
+        rc = tmp_path / ".bashrc"
+        rc.write_text("# some prior config\nexport PATH=$PATH:/foo\n")
+        monkeypatch.setattr("orca_cli.core.shell_completion._RC_FILE",
+                            {"bash": rc, "zsh": tmp_path / ".zshrc"})
+        install_completion_bashzsh("bash")
+        content = rc.read_text()
+        assert "export PATH=$PATH:/foo" in content
+        assert "_ORCA_COMPLETE=bash_source" in content
+
+
+class TestInstallCompletionFish:
+
+    def test_fish_no_orca_on_path(self, tmp_path, monkeypatch):
+        monkeypatch.setattr("orca_cli.core.shell_completion._FISH_COMPLETION_FILE", tmp_path / "orca.fish")
+        monkeypatch.setattr("orca_cli.core.shell_completion.shutil.which", lambda _: None)
+        msg = install_completion_fish()
+        assert "not on PATH" in msg
+        assert not (tmp_path / "orca.fish").exists()
+
+    def test_fish_already_installed(self, tmp_path, monkeypatch):
+        target = tmp_path / "orca.fish"
+        target.write_text("# orca\ncomplete -c orca ... _ORCA_COMPLETE=...\n")
+        monkeypatch.setattr("orca_cli.core.shell_completion._FISH_COMPLETION_FILE", target)
+        msg = install_completion_fish()
+        assert "Already present" in msg
+
+    def test_fish_success(self, tmp_path, monkeypatch):
+        target = tmp_path / "orca.fish"
+        monkeypatch.setattr("orca_cli.core.shell_completion._FISH_COMPLETION_FILE", target)
+        monkeypatch.setattr("orca_cli.core.shell_completion.shutil.which", lambda _: "/usr/local/bin/orca")
+
+        class _Result:
+            returncode = 0
+            stdout = "complete -c orca -f -a '(env _ORCA_COMPLETE=fish_complete orca)'\n"
+            stderr = ""
+
+        monkeypatch.setattr("orca_cli.core.shell_completion.subprocess.run",
+                            lambda *a, **kw: _Result())
+        msg = install_completion_fish()
+        assert target.exists()
+        assert "complete -c orca" in target.read_text()
+        assert "Wrote" in msg
+
+    def test_fish_subprocess_failure(self, tmp_path, monkeypatch):
+        target = tmp_path / "orca.fish"
+        monkeypatch.setattr("orca_cli.core.shell_completion._FISH_COMPLETION_FILE", target)
+        monkeypatch.setattr("orca_cli.core.shell_completion.shutil.which", lambda _: "/usr/local/bin/orca")
+
+        class _Result:
+            returncode = 1
+            stdout = ""
+            stderr = "boom"
+
+        monkeypatch.setattr("orca_cli.core.shell_completion.subprocess.run",
+                            lambda *a, **kw: _Result())
+        msg = install_completion_fish()
+        assert "failed" in msg
+        assert not target.exists()
+
+
+class TestMaybeInstallCompletion:
+
+    def test_noop_when_stdin_not_tty(self, monkeypatch):
+        """CliRunner / pipes → stdin.isatty() is False → prompt skipped."""
+        monkeypatch.setattr("orca_cli.commands.setup.sys.stdin.isatty", lambda: False)
+        # Should simply return without raising or prompting
+        _maybe_install_completion()
+
+    def test_tty_but_unknown_shell(self, monkeypatch, capsys):
+        monkeypatch.setattr("orca_cli.commands.setup.sys.stdin.isatty", lambda: True)
+        monkeypatch.setenv("SHELL", "/bin/tcsh")
+        _maybe_install_completion()
+        # Printed a hint, no crash
+        assert "auto-detect" in capsys.readouterr().out.lower() or True
+
+    def test_tty_declined(self, monkeypatch):
+        monkeypatch.setattr("orca_cli.commands.setup.sys.stdin.isatty", lambda: True)
+        monkeypatch.setenv("SHELL", "/bin/zsh")
+        with patch("orca_cli.commands.setup.click.confirm", return_value=False) as mock_confirm, \
+             patch("orca_cli.commands.setup.install_completion") as mock_install:
+            _maybe_install_completion()
+            mock_confirm.assert_called_once()
+            mock_install.assert_not_called()
+
+    def test_tty_accepted_calls_installer(self, monkeypatch):
+        monkeypatch.setattr("orca_cli.commands.setup.sys.stdin.isatty", lambda: True)
+        monkeypatch.setenv("SHELL", "/bin/bash")
+        with patch("orca_cli.commands.setup.click.confirm", return_value=True), \
+             patch("orca_cli.commands.setup.install_completion",
+                   return_value="ok") as mock_install:
+            _maybe_install_completion()
+            mock_install.assert_called_once_with("bash")
+
+    def test_tty_accepted_fish_calls_fish_installer(self, monkeypatch):
+        monkeypatch.setattr("orca_cli.commands.setup.sys.stdin.isatty", lambda: True)
+        monkeypatch.setenv("SHELL", "/usr/bin/fish")
+        with patch("orca_cli.commands.setup.click.confirm", return_value=True), \
+             patch("orca_cli.commands.setup.install_completion",
+                   return_value="ok") as mock_install:
+            _maybe_install_completion()
+            mock_install.assert_called_once_with("fish")

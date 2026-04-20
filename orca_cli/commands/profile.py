@@ -87,6 +87,8 @@ def profile_list() -> None:
     """List all profiles."""
     from rich.table import Table
 
+    from orca_cli.core.config import _is_app_cred
+
     profiles = list_profiles()
     active = get_active_profile_name()
 
@@ -97,8 +99,9 @@ def profile_list() -> None:
     table = Table(title="Profiles", show_lines=False)
     table.add_column("", no_wrap=True)
     table.add_column("Name", style="bold")
+    table.add_column("Auth")
     table.add_column("Auth URL")
-    table.add_column("Username")
+    table.add_column("User / Credential")
     table.add_column("Project")
     table.add_column("Color")
 
@@ -107,12 +110,27 @@ def profile_list() -> None:
         marker = "[green bold]●[/green bold]" if name == active else " "
         display_name = f"[{color}]{name}[/{color}]" if color else name
         color_preview = f"[{color}]●[/{color}] {color}" if color else "—"
-        project = cfg.get("project_name") or cfg.get("project_id") or "—"
+
+        if _is_app_cred(cfg):
+            auth_label = "[magenta]app-cred[/magenta]"
+            user_cell = (
+                cfg.get("application_credential_id")
+                or cfg.get("application_credential_name")
+                or "—"
+            )
+            # AC is pre-scoped — project lives in the token, not the config.
+            project = "[dim](pre-scoped)[/dim]"
+        else:
+            auth_label = "[cyan]password[/cyan]"
+            user_cell = cfg.get("username") or "—"
+            project = cfg.get("project_name") or cfg.get("project_id") or "—"
+
         table.add_row(
             marker,
             display_name,
+            auth_label,
             cfg.get("auth_url", "—"),
-            cfg.get("username", "—"),
+            user_cell,
             project,
             color_preview,
         )

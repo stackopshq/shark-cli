@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import sys
+
 import click
 from rich.console import Console
 
@@ -13,8 +15,73 @@ from orca_cli.core.config import (
     set_active_profile,
 )
 from orca_cli.core.context import OrcaContext
+from orca_cli.core.shell_completion import detect_shell, install_completion
 
 console = Console()
+
+
+def _maybe_install_completion() -> None:
+    """Offer to install shell completion for the detected shell.
+
+    Skipped when stdin isn't a TTY (CI, piped input, test harness) so the
+    wizard stays non-destructive outside interactive sessions.
+    """
+    if not sys.stdin.isatty():
+        return
+    shell = detect_shell()
+    if not shell:
+        console.print(
+            "[dim]Could not auto-detect your shell. "
+            "Run 'orca completion install <bash|zsh|fish>' if you want completion.[/dim]"
+        )
+        return
+    console.print(
+        f"\n[bold]Shell completion[/bold] (detected: [cyan]{shell}[/cyan])"
+    )
+    if not click.confirm("  Install orca completion now?", default=True):
+        console.print(
+            f"[dim]Skipped. Run 'orca completion install {shell}' later if you change your mind.[/dim]"
+        )
+        return
+    msg = install_completion(shell)
+    console.print(f"[green]✓ {msg}[/green]")
+
+
+def _maybe_validate_credentials(name: str) -> None:
+    """Attempt a fresh Keystone authentication with the just-saved profile.
+
+    Skipped when stdin isn't a TTY (test harness, piped input). This is a
+    read-only check: it authenticates, prints success/failure, then closes.
+    """
+    if not sys.stdin.isatty():
+        return
+    console.print(f"\n[bold]Validating credentials for '{name}'...[/bold]")
+    from orca_cli.core.client import OrcaClient
+    from orca_cli.core.exceptions import APIError, AuthenticationError, OrcaCLIError
+    cfg = load_config(profile_name=name)
+    client = None
+    try:
+        client = OrcaClient(cfg)
+        # Force a fresh auth to actually hit Keystone (bypasses any cached
+        # token that might belong to a prior profile with the same key).
+        client._authenticate()
+        console.print(f"[green]✓ Authentication successful[/green] "
+                      f"(catalog: {len(client._catalog)} services)")
+    except AuthenticationError as exc:
+        console.print(f"[red]✗ Authentication failed:[/red] {exc.message}")
+        console.print("[dim]Re-run 'orca setup' to fix the credentials.[/dim]")
+    except APIError as exc:
+        console.print(f"[red]✗ Keystone error ({exc.status_code}):[/red] {exc.message}")
+    except OrcaCLIError as exc:
+        console.print(f"[yellow]⚠ {exc.message}[/yellow]")
+    except Exception as exc:  # pragma: no cover — safety net
+        console.print(f"[yellow]⚠ Could not validate: {exc}[/yellow]")
+    finally:
+        if client is not None:
+            try:
+                client.close()
+            except Exception:
+                pass
 
 _PASSWORD_FIELDS = [
     ("auth_url", "Auth URL (Keystone)", "https://keystone.example.com:5000"),
@@ -125,3 +192,6 @@ def setup(ctx: click.Context, profile_name: str | None) -> None:
             console.print(f"[green]Switched to '{name}'.[/green]\n")
     else:
         console.print()
+
+    _maybe_install_completion()
+    _maybe_validate_credentials(name)
