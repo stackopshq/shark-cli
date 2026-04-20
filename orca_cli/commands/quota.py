@@ -93,7 +93,7 @@ def _row(service: str, resource: str, used: object, limit: object) -> dict:
     limit_s = "unlimited" if limit == -1 else str(limit)
     if used_s != "—" and limit_s != "unlimited" and limit_s != "—":
         try:
-            pct = int(used) / int(limit) * 100  # type: ignore[arg-type]
+            pct = int(used) / int(limit) * 100  # type: ignore[call-overload]
             color = "green" if pct < 70 else "yellow" if pct < 90 else "red"
             usage = f"[{color}]{pct:.0f}%[/{color}]"
         except (ValueError, ZeroDivisionError):

@@ -5,6 +5,7 @@ from __future__ import annotations
 import fnmatch
 import os
 import time
+from typing import Any
 
 import click
 
@@ -1364,7 +1365,7 @@ def server_bulk(ctx: click.Context, action: str, name_pattern: str | None,
     if not yes:
         click.confirm(f"Proceed with {action.upper()} on {len(matched)} server(s)?", abort=True)
 
-    action_map = {
+    action_map: dict[str, dict[str, Any]] = {
         "start": {"os-start": None},
         "stop": {"os-stop": None},
         "reboot": {"reboot": {"type": "SOFT"}},

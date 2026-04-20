@@ -117,8 +117,8 @@ def print_list(
         table.add_column(header, **col_kw)
 
     for item in items:
-        row = [str(_extract(item, cd[1])) for cd in column_defs]
-        table.add_row(*row)
+        tbl_row = [str(_extract(item, cd[1])) for cd in column_defs]
+        table.add_row(*tbl_row)
 
     console.print(table, **width_kw)
 

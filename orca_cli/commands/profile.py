@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from typing import Any
 
 import click
 
@@ -620,7 +621,7 @@ def profile_to_clouds(name: str | None, output_file: str | None, cloud_name: str
     if cfg.get("auth_url"):
         auth["auth_url"] = cfg["auth_url"]
 
-    cloud: dict[str, any] = {"auth": auth}
+    cloud: dict[str, Any] = {"auth": auth}
 
     if _is_app_cred(cfg):
         cloud["auth_type"] = "v3applicationcredential"

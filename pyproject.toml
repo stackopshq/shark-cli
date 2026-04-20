@@ -39,6 +39,8 @@ rich = "^13.0"
 pytest = "^8.0"
 pytest-cov = "^5.0"
 ruff = "^0.4"
+mypy = "^1.10"
+types-PyYAML = "^6.0"
 
 [tool.poetry.group.docs]
 optional = true
@@ -73,6 +75,14 @@ max-complexity = 25
 # Tests: pytest assert; dummy creds in fixtures; intentional broad raises;
 # bind-all addresses in IP-validator inputs; complex setup helpers.
 "tests/*" = ["S101", "S105", "S106", "S107", "S104", "B017", "B018", "C901"]
+
+[tool.mypy]
+python_version = "3.9"
+files = ["orca_cli"]
+ignore_missing_imports = true
+no_strict_optional = true
+warn_unused_ignores = true
+warn_redundant_casts = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

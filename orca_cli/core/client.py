@@ -28,7 +28,7 @@ import tempfile
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 import httpx
 import yaml
@@ -750,15 +750,15 @@ class OrcaClient:
             headers: Optional[Dict[str, str]] = None) -> Any:
         return self._request("get", url, extra_headers=headers, params=params)
 
-    def post(self, url: str, json: Optional[Dict[str, Any]] = None,
+    def post(self, url: str, json: Optional[Union[Dict[str, Any], list]] = None,
              headers: Optional[Dict[str, str]] = None) -> Any:
         return self._request("post", url, extra_headers=headers, json=json)
 
-    def put(self, url: str, json: Optional[Dict[str, Any]] = None,
+    def put(self, url: str, json: Optional[Union[Dict[str, Any], list]] = None,
             headers: Optional[Dict[str, str]] = None) -> Any:
         return self._request("put", url, extra_headers=headers, json=json)
 
-    def patch(self, url: str, json: Optional[Dict[str, Any]] = None,
+    def patch(self, url: str, json: Optional[Union[Dict[str, Any], list]] = None,
               content: Optional[bytes] = None,
               content_type: Optional[str] = None) -> Any:
         extra: Dict[str, str] = {}

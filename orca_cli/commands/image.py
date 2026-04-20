@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import click
 from rich.progress import BarColumn, DownloadColumn, Progress, TimeRemainingColumn, TransferSpeedColumn
@@ -137,7 +138,7 @@ def image_update(ctx: click.Context, image_id: str, name: str | None,
     """
     import json as json_mod
 
-    ops = []
+    ops: list[dict[str, Any]] = []
     if name is not None:
         ops.append({"op": "replace", "path": "/name", "value": name})
     if min_disk is not None:
@@ -397,11 +398,12 @@ def _human_size(size: int | None) -> str:
     """Format bytes as human-readable."""
     if not size:
         return "—"
+    n: float = float(size)
     for unit in ("B", "KB", "MB", "GB", "TB"):
-        if abs(size) < 1024:
-            return f"{size:.1f} {unit}"
-        size /= 1024  # type: ignore[assignment]
-    return f"{size:.1f} PB"
+        if abs(n) < 1024:
+            return f"{n:.1f} {unit}"
+        n /= 1024
+    return f"{n:.1f} PB"
 
 
 @image.command("shrink")

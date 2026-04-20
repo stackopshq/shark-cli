@@ -97,13 +97,19 @@ def _stringify_dates(obj: object) -> object:
 def _load_template(path: str) -> dict:
     """Read a local YAML/JSON template file and return it as a dict."""
     content = Path(path).read_text()
-    return _stringify_dates(yaml.safe_load(content))
+    parsed: dict = yaml.safe_load(content) or {}
+    result = _stringify_dates(parsed)
+    assert isinstance(result, dict)  # noqa: S101 — invariant: dict in -> dict out
+    return result
 
 
 def _load_environment(path: str) -> dict:
     """Read a local environment file and return it as a dict."""
     content = Path(path).read_text()
-    return _stringify_dates(yaml.safe_load(content))
+    parsed: dict = yaml.safe_load(content) or {}
+    result = _stringify_dates(parsed)
+    assert isinstance(result, dict)  # noqa: S101 — invariant: dict in -> dict out
+    return result
 
 
 def _wait_for_stack(client, stack_name: str, stack_id: str, action: str) -> dict:

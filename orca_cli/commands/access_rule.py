@@ -31,7 +31,7 @@ def ar_list(ctx, user_id, service, method, path,
             output_format, columns, fit_width, max_width, noindent):
     """List access rules."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    uid = user_id or client._token_data.get("user", {}).get("id", "")  # type: ignore[attr-defined]
+    uid = user_id or client._token_data.get("user", {}).get("id", "")
     params = {}
     if service:
         params["service"] = service
@@ -65,7 +65,7 @@ def ar_show(ctx, access_rule_id, user_id,
             output_format, columns, fit_width, max_width, noindent):
     """Show an access rule."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    uid = user_id or client._token_data.get("user", {}).get("id", "")  # type: ignore[attr-defined]
+    uid = user_id or client._token_data.get("user", {}).get("id", "")
     data = client.get(f"{_iam(client)}/v3/users/{uid}/access_rules/{access_rule_id}")
     ar = data.get("access_rule", data)
     fields = [
@@ -88,7 +88,7 @@ def ar_show(ctx, access_rule_id, user_id,
 def ar_delete(ctx, access_rule_id, user_id, yes):
     """Delete an access rule."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    uid = user_id or client._token_data.get("user", {}).get("id", "")  # type: ignore[attr-defined]
+    uid = user_id or client._token_data.get("user", {}).get("id", "")
     if not yes:
         click.confirm(f"Delete access rule {access_rule_id}?", abort=True)
     client.delete(f"{_iam(client)}/v3/users/{uid}/access_rules/{access_rule_id}")
