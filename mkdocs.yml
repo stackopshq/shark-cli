@@ -132,3 +132,4 @@ nav:
       - 0005 — Durable token cache: adr/0005-durable-token-cache.md
       - 0006 — Idempotent-only retries: adr/0006-idempotent-only-retries.md
       - 0007 — Incremental services layer: adr/0007-incremental-services-layer.md
+      - 0008 — Command naming convention: adr/0008-command-naming-convention.md

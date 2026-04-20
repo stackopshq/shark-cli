@@ -37,3 +37,4 @@ of the documentation.
 - [ADR-0005 — Durable, atomic token cache](0005-durable-token-cache.md)
 - [ADR-0006 — Idempotent-only HTTP retries](0006-idempotent-only-retries.md)
 - [ADR-0007 — Incremental services layer with typed models](0007-incremental-services-layer.md)
+- [ADR-0008 — Command naming follows openstackclient convention](0008-command-naming-convention.md)
