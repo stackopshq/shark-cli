@@ -17,7 +17,9 @@ the cached token directly — no Keystone round-trip — unless:
 
 from __future__ import annotations
 
+import email.utils
 import hashlib
+import random
 import stat
 import time
 from datetime import datetime, timezone
@@ -37,14 +39,23 @@ TOKEN_CACHE_PATH = Path.home() / ".orca" / "token_cache.yaml"
 # ── Transient-error retry policy ─────────────────────────────────────────────
 # HTTP statuses that indicate a transient server/infra problem.
 RETRY_STATUSES = frozenset({500, 502, 503, 504})
-# Idempotent methods — only these are retried. POST/PATCH can create duplicates
-# and are never retried, even on transient failures.
+# HTTP statuses handled with a dedicated rate-limit wait (honours Retry-After)
+# instead of the exponential-backoff path. Retried on any method — 429 means
+# "try again later", not "the request was rejected", so it's safe even for
+# POST/PATCH which would otherwise bypass the transient-retry loop.
+RATE_LIMIT_STATUSES = frozenset({429})
+# Idempotent methods — only these are retried on 5xx/network errors. POST/PATCH
+# can create duplicates and are never retried in that path.
 RETRY_METHODS = frozenset({"get", "delete", "put", "head", "options"})
 # Total retries on transient failures (initial attempt + MAX_RETRIES retries).
 MAX_RETRIES = 2
 # Exponential backoff base: sleeps are RETRY_BACKOFF_BASE * 2**attempt
 # → with MAX_RETRIES=2 and base=0.5: 0.5s, 1.0s between attempts.
 RETRY_BACKOFF_BASE = 0.5
+# Upper bound on a Retry-After hint we'll honour — a buggy server advertising
+# "wait an hour" mustn't freeze the CLI. Beyond this we surface the 429 as an
+# APIError so the user can decide.
+MAX_RATE_LIMIT_WAIT = 60.0
 # httpx transport exceptions that we treat as retryable network blips.
 _TRANSIENT_EXCEPTIONS = (
     httpx.ConnectError,
@@ -54,6 +65,40 @@ _TRANSIENT_EXCEPTIONS = (
     httpx.PoolTimeout,
     httpx.RemoteProtocolError,
 )
+
+
+def _parse_retry_after(value: str) -> Optional[float]:
+    """Interpret a ``Retry-After`` header per RFC 7231 §7.1.3.
+
+    Accepts either delta-seconds (``"5"``) or an HTTP-date (``"Wed, 21 Oct 2015
+    07:28:00 GMT"``). Returns seconds to wait, or ``None`` if the header is
+    absent/unparseable — callers fall back to exponential backoff in that case.
+    """
+    if not value:
+        return None
+    value = value.strip()
+    try:
+        return max(0.0, float(value))
+    except ValueError:
+        pass
+    parsed = email.utils.parsedate_to_datetime(value)
+    if parsed is None:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    delta = (parsed - datetime.now(timezone.utc)).total_seconds()
+    return max(0.0, delta)
+
+
+def _backoff_with_jitter(attempt: int) -> float:
+    """Exponential backoff with full jitter (AWS architecture blog pattern).
+
+    Jitter matters even for a single client: a user who scripts ``orca`` in a
+    CI runner across many parallel jobs will otherwise spike Keystone every
+    ``RETRY_BACKOFF_BASE * 2**attempt`` seconds in lockstep.
+    """
+    ceiling = RETRY_BACKOFF_BASE * (2 ** attempt)
+    return random.uniform(0.0, ceiling)
 
 
 class OrcaClient:
@@ -524,12 +569,17 @@ class OrcaClient:
     def _request(self, method: str, url: str,
                  extra_headers: Optional[Dict[str, str]] = None,
                  **kwargs: Any) -> Any:
-        """Execute an HTTP request with two independent recovery mechanisms:
+        """Execute an HTTP request with three independent recovery mechanisms:
 
         1. 401 with cached token → clear cache, re-authenticate, retry once.
         2. Transient failure (5xx or network error) on an idempotent method →
-           exponential-backoff retry up to MAX_RETRIES times. POST/PATCH are
-           never retried here because they are not guaranteed idempotent.
+           jittered exponential-backoff retry up to MAX_RETRIES times.
+           POST/PATCH are never retried here because they are not guaranteed
+           idempotent.
+        3. 429 rate-limited → honour the ``Retry-After`` header (capped at
+           MAX_RATE_LIMIT_WAIT) or fall back to jittered backoff. Applied to
+           any method: 429 means "request not processed, retry later", which
+           is safe even for POST/PATCH.
         """
         is_idempotent = method.lower() in RETRY_METHODS
 
@@ -538,14 +588,30 @@ class OrcaClient:
                 resp = self._send(method, url, extra_headers=extra_headers, **kwargs)
             except _TRANSIENT_EXCEPTIONS as exc:
                 if is_idempotent and attempt < MAX_RETRIES:
-                    time.sleep(RETRY_BACKOFF_BASE * (2 ** attempt))
+                    time.sleep(_backoff_with_jitter(attempt))
                     continue
                 raise APIError(0, f"Network error: {exc}")
+
+            if (resp.status_code in RATE_LIMIT_STATUSES
+                    and attempt < MAX_RETRIES):
+                hint = _parse_retry_after(resp.headers.get("Retry-After", ""))
+                if hint is None:
+                    wait = _backoff_with_jitter(attempt)
+                elif hint > MAX_RATE_LIMIT_WAIT:
+                    # Server asked us to wait too long — surface the 429 to the
+                    # caller instead of hanging the CLI.
+                    return self._handle_response(resp)
+                else:
+                    # Add a small jitter on top of the hint so concurrent
+                    # clients don't all retry at the same instant.
+                    wait = hint + random.uniform(0.0, min(1.0, hint * 0.1))
+                time.sleep(wait)
+                continue
 
             if (resp.status_code in RETRY_STATUSES
                     and is_idempotent
                     and attempt < MAX_RETRIES):
-                time.sleep(RETRY_BACKOFF_BASE * (2 ** attempt))
+                time.sleep(_backoff_with_jitter(attempt))
                 continue
 
             return self._handle_response(resp)

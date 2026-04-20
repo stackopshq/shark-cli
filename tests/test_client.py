@@ -553,7 +553,7 @@ class TestRequestRetryOn401:
 
 # ── Transient-error retry ─────────────────────────────────────────────────────
 
-def _resp(status_code: int, body: Any = None) -> MagicMock:
+def _resp(status_code: int, body: Any = None, headers: dict | None = None) -> MagicMock:
     """Build a mock httpx.Response with the given status code."""
     r = MagicMock()
     r.status_code = status_code
@@ -561,6 +561,7 @@ def _resp(status_code: int, body: Any = None) -> MagicMock:
     r.content = b"" if body is None else str(body).encode()
     r.json.return_value = body if body is not None else {}
     r.text = "" if body is None else str(body)
+    r.headers = headers or {}
     return r
 
 
@@ -586,9 +587,9 @@ class TestRequestRetryOnTransient:
         assert result == {"ok": True}
         assert http.get.call_count == 3  # initial + 2 retries
         assert _no_sleep.call_count == 2
-        # Exponential backoff: 0.5, 1.0
-        assert _no_sleep.call_args_list[0].args[0] == 0.5
-        assert _no_sleep.call_args_list[1].args[0] == 1.0
+        # Jittered exponential backoff: attempt 0 ∈ [0, 0.5], attempt 1 ∈ [0, 1.0]
+        assert 0.0 <= _no_sleep.call_args_list[0].args[0] <= 0.5
+        assert 0.0 <= _no_sleep.call_args_list[1].args[0] <= 1.0
 
     @patch("orca_cli.core.client.httpx.Client")
     def test_retries_exhausted_raises_apierror(self, mock_httpx_cls, _no_sleep):
@@ -716,6 +717,105 @@ class TestRequestRetryOnTransient:
         # Auth POST + one user POST, no retry
         assert http.post.call_count == 2
         _no_sleep.assert_not_called()
+
+
+# ── 429 rate-limit retry ────────────────────────────────────────────────────
+
+class TestRateLimitRetry:
+    """429 responses retry on any method, honouring Retry-After when reasonable."""
+
+    @pytest.fixture(autouse=True)
+    def _no_sleep(self):
+        with patch("orca_cli.core.client.time.sleep") as sleep_mock:
+            yield sleep_mock
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_429_retries_get_with_retry_after_seconds(self, mock_httpx_cls, _no_sleep):
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        http.get.side_effect = [
+            _resp(429, headers={"Retry-After": "2"}),
+            _resp(200, {"ok": True}),
+        ]
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        assert client.get("https://nova.example.com/servers") == {"ok": True}
+        assert http.get.call_count == 2
+        # Sleep honoured the 2-second hint (plus optional ≤10% jitter).
+        waited = _no_sleep.call_args_list[0].args[0]
+        assert 2.0 <= waited <= 2.2
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_429_retries_post(self, mock_httpx_cls, _no_sleep):
+        """429 retries POST too — the request was not processed, so it's safe."""
+        http = MagicMock()
+        http.post.side_effect = [
+            _make_auth_response(),
+            _resp(429, headers={"Retry-After": "1"}),
+            _resp(201, {"created": True}),
+        ]
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        assert client.post("https://nova.example.com/servers", json={"x": 1}) == {"created": True}
+        # Auth + failed attempt + retry.
+        assert http.post.call_count == 3
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_429_without_retry_after_uses_jittered_backoff(self, mock_httpx_cls, _no_sleep):
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        http.get.side_effect = [
+            _resp(429, headers={}),
+            _resp(200, {"ok": True}),
+        ]
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        assert client.get("https://nova.example.com/servers") == {"ok": True}
+        # Without a hint the code falls back to backoff on attempt 0 ∈ [0, 0.5].
+        waited = _no_sleep.call_args_list[0].args[0]
+        assert 0.0 <= waited <= 0.5
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_429_with_excessive_retry_after_surfaces_as_api_error(self, mock_httpx_cls, _no_sleep):
+        """Don't hang the CLI if the server asks us to wait minutes."""
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        http.get.return_value = _resp(
+            429,
+            body={"error": "slow down"},
+            headers={"Retry-After": "3600"},
+        )
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        with pytest.raises(APIError) as exc_info:
+            client.get("https://nova.example.com/servers")
+        assert exc_info.value.status_code == 429
+        _no_sleep.assert_not_called()
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_429_http_date_retry_after_parsed(self, mock_httpx_cls, _no_sleep):
+        """Retry-After may be an HTTP-date per RFC 7231."""
+        from datetime import datetime, timedelta, timezone
+        future = datetime.now(timezone.utc) + timedelta(seconds=2)
+        http_date = future.strftime("%a, %d %b %Y %H:%M:%S GMT")
+
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        http.get.side_effect = [
+            _resp(429, headers={"Retry-After": http_date}),
+            _resp(200, {"ok": True}),
+        ]
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        assert client.get("https://nova.example.com/servers") == {"ok": True}
+        waited = _no_sleep.call_args_list[0].args[0]
+        # Parsed delta is ~2s; allow for sub-second parsing drift and jitter.
+        assert 0.0 <= waited <= 3.0
 
 
 # ── paginate() helper ────────────────────────────────────────────────────────
