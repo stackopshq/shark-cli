@@ -13,6 +13,9 @@ from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import PermissionDeniedError
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import safe_output_path
+from orca_cli.models.image import Image
+from orca_cli.services.image import ImageService
+from orca_cli.services.server import ServerService
 
 CHUNK_SIZE = 64 * 1024  # 64 KB
 
@@ -29,11 +32,8 @@ def image(ctx: click.Context) -> None:
 @click.pass_context
 def image_list(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List available images."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.image_url}/v2/images"
-    data = client.get(url)
-
-    images = sorted(data.get("images", []), key=lambda x: x.get("name", ""))
+    service = ImageService(ctx.find_object(OrcaContext).ensure_client())
+    images = sorted(service.find(), key=lambda x: x.get("name", ""))
 
     column_defs = [
         ("ID", "id", {"style": "cyan", "no_wrap": True}),
@@ -60,18 +60,17 @@ def image_list(ctx: click.Context, output_format: str, columns: tuple[str, ...],
 @click.pass_context
 def image_show(ctx: click.Context, image_id: str, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show image details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.image_url}/v2/images/{image_id}"
-    img = client.get(url)
+    img = ImageService(ctx.find_object(OrcaContext).ensure_client()).get(image_id)
 
     fields = []
     for key in ["id", "name", "status", "visibility", "os_distro", "os_version",
                 "min_disk", "min_ram", "size", "disk_format", "container_format",
                 "created_at", "updated_at"]:
-        val = img.get(key, "")
-        if key == "size" and val:
-            val = f"{round(int(val) / 1024 / 1024)} MB"
-        fields.append((key, str(val)))
+        raw: Any = img.get(key, "")
+        if key == "size" and raw:
+            fields.append((key, f"{round(int(raw) / 1024 / 1024)} MB"))
+        else:
+            fields.append((key, str(raw)))
 
     print_detail(fields, output_format=output_format, fit_width=fit_width, max_width=max_width, noindent=noindent, columns=columns)
 
@@ -95,17 +94,15 @@ def image_create(ctx: click.Context, name: str, disk_format: str, container_form
       orca image create my-image --file ubuntu.qcow2
       orca image create my-image --disk-format raw --file disk.img
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.image_url}/v2/images"
-    body = {
+    service = ImageService(ctx.find_object(OrcaContext).ensure_client())
+    img = service.create({
         "name": name,
         "disk_format": disk_format,
         "container_format": container_format,
         "min_disk": min_disk,
         "min_ram": min_ram,
         "visibility": visibility,
-    }
-    img = client.post(url, json=body)
+    })
     image_id = img.get("id", "")
     console.print(f"[green]Image '{name}' created: {image_id}[/green]")
     console.print(f"  Status: {img.get('status', '')}")
@@ -114,9 +111,8 @@ def image_create(ctx: click.Context, name: str, disk_format: str, container_form
         p = Path(file_path)
         total = p.stat().st_size
         console.print(f"  Uploading {file_path} ({total / 1024 / 1024:.1f} MB) ...")
-        upload_url = f"{client.image_url}/v2/images/{image_id}/file"
         with open(p, "rb") as f:
-            client.put_stream(upload_url, stream=f)
+            service.upload(image_id, stream=f)
         console.print("  [green]Upload complete.[/green]")
 
 
@@ -136,8 +132,6 @@ def image_update(ctx: click.Context, image_id: str, name: str | None,
       orca image update <id> --name new-name
       orca image update <id> --visibility shared
     """
-    import json as json_mod
-
     ops: list[dict[str, Any]] = []
     if name is not None:
         ops.append({"op": "replace", "path": "/name", "value": name})
@@ -152,17 +146,52 @@ def image_update(ctx: click.Context, image_id: str, name: str | None,
         console.print("[yellow]No properties to update. Use --name, --min-disk, --min-ram, or --visibility.[/yellow]")
         return
 
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.image_url}/v2/images/{image_id}"
-    data = client.patch(
-        url,
-        content=json_mod.dumps(ops).encode(),
-        content_type="application/openstack-images-v2.1-json-patch",
-    )
+    data = ImageService(ctx.find_object(OrcaContext).ensure_client()).update(image_id, ops)
     console.print(f"[green]Image {image_id} updated.[/green]")
     if data:
         console.print(f"  Name: {data.get('name', '')}")
         console.print(f"  Status: {data.get('status', '')}")
+
+
+def _stream_with_progress(client, *, url: str, path: Path, description: str) -> None:
+    """Stream ``path`` to ``url`` via PUT with a progress bar and error mapping.
+
+    Uses the raw httpx client because the Glance upload/stage endpoints
+    need a live generator for the progress bar — ``put_stream`` consumes
+    the file object straight-through without yielding progress events.
+    """
+    total = path.stat().st_size
+    headers = client._headers()
+    headers["Content-Type"] = "application/octet-stream"
+    headers["Content-Length"] = str(total)
+
+    with Progress(
+        "[cyan]{task.description}",
+        BarColumn(),
+        DownloadColumn(),
+        TransferSpeedColumn(),
+        TimeRemainingColumn(),
+        console=console,
+    ) as progress:
+        task = progress.add_task(description, total=total)
+
+        def _iter(f, chunk_size=256 * 1024):
+            while True:
+                chunk = f.read(chunk_size)
+                if not chunk:
+                    break
+                progress.advance(task, len(chunk))
+                yield chunk
+
+        with open(path, "rb") as f:
+            resp = client._http.put(url, headers=headers, content=_iter(f))
+
+    if resp.status_code == 401:
+        raise AuthenticationError()
+    if resp.status_code == 403:
+        raise PermissionDeniedError()
+    if not resp.is_success:
+        raise APIError(resp.status_code, resp.text[:300])
 
 
 @image.command("upload")
@@ -179,42 +208,10 @@ def image_upload(ctx: click.Context, image_id: str, file_path: str) -> None:
       orca image upload <id> /path/to/ubuntu.qcow2
     """
     client = ctx.find_object(OrcaContext).ensure_client()
+    service = ImageService(client)
     p = Path(file_path)
-    total = p.stat().st_size
-    url = f"{client.image_url}/v2/images/{image_id}/file"
-
-    headers = client._headers()
-    headers["Content-Type"] = "application/octet-stream"
-    headers["Content-Length"] = str(total)
-
-    with Progress(
-        "[cyan]{task.description}",
-        BarColumn(),
-        DownloadColumn(),
-        TransferSpeedColumn(),
-        TimeRemainingColumn(),
-        console=console,
-    ) as progress:
-        task = progress.add_task(f"Uploading {p.name}", total=total)
-
-        def _iter(f, chunk_size=256 * 1024):
-            while True:
-                chunk = f.read(chunk_size)
-                if not chunk:
-                    break
-                progress.advance(task, len(chunk))
-                yield chunk
-
-        with open(p, "rb") as f:
-            resp = client._http.put(url, headers=headers, content=_iter(f))
-
-    if resp.status_code == 401:
-        raise AuthenticationError()
-    if resp.status_code == 403:
-        raise PermissionDeniedError()
-    if not resp.is_success:
-        raise APIError(resp.status_code, resp.text[:300])
-
+    _stream_with_progress(client, url=service.upload_url(image_id), path=p,
+                          description=f"Uploading {p.name}")
     console.print("[green]Upload complete.[/green]")
 
 
@@ -239,42 +236,10 @@ def image_stage(ctx: click.Context, image_id: str, file_path: str) -> None:
       orca image import <id> --method glance-direct
     """
     client = ctx.find_object(OrcaContext).ensure_client()
+    service = ImageService(client)
     p = Path(file_path)
-    total = p.stat().st_size
-    url = f"{client.image_url}/v2/images/{image_id}/stage"
-
-    headers = client._headers()
-    headers["Content-Type"] = "application/octet-stream"
-    headers["Content-Length"] = str(total)
-
-    with Progress(
-        "[cyan]{task.description}",
-        BarColumn(),
-        DownloadColumn(),
-        TransferSpeedColumn(),
-        TimeRemainingColumn(),
-        console=console,
-    ) as progress:
-        task = progress.add_task(f"Staging {p.name}", total=total)
-
-        def _iter(f, chunk_size=256 * 1024):
-            while True:
-                chunk = f.read(chunk_size)
-                if not chunk:
-                    break
-                progress.advance(task, len(chunk))
-                yield chunk
-
-        with open(p, "rb") as f:
-            resp = client._http.put(url, headers=headers, content=_iter(f))
-
-    if resp.status_code == 401:
-        raise AuthenticationError()
-    if resp.status_code == 403:
-        raise PermissionDeniedError()
-    if not resp.is_success:
-        raise APIError(resp.status_code, resp.text[:300])
-
+    _stream_with_progress(client, url=service.stage_url(image_id), path=p,
+                          description=f"Staging {p.name}")
     console.print(f"[green]Staging complete for image {image_id}.[/green]")
     console.print(f"[dim]Run: orca image import {image_id} --method glance-direct[/dim]")
 
@@ -291,19 +256,16 @@ def image_download(ctx: click.Context, image_id: str, output_path: str) -> None:
     Examples:
       orca image download <id> -o /tmp/my-image.qcow2
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
+    service = ImageService(ctx.find_object(OrcaContext).ensure_client())
 
-    # Get image metadata first for size info
-    meta_url = f"{client.image_url}/v2/images/{image_id}"
-    meta = client.get(meta_url)
+    meta = service.get(image_id)
     total = meta.get("size") or 0
     name = meta.get("name", image_id)
     console.print(f"Downloading '{name}' ({total / 1024 / 1024:.1f} MB) ...")
 
-    url = f"{client.image_url}/v2/images/{image_id}/file"
     out = safe_output_path(output_path)
 
-    with client.get_stream(url) as resp:
+    with service.stream_download(image_id) as resp:
         if resp.status_code == 204:
             console.print("[yellow]No image data available.[/yellow]")
             return
@@ -335,9 +297,7 @@ def image_download(ctx: click.Context, image_id: str, output_path: str) -> None:
 @click.pass_context
 def image_deactivate(ctx: click.Context, image_id: str) -> None:
     """Deactivate an image (make data unavailable)."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.image_url}/v2/images/{image_id}/actions/deactivate"
-    client.post(url)
+    ImageService(ctx.find_object(OrcaContext).ensure_client()).deactivate(image_id)
     console.print(f"[green]Image {image_id} deactivated.[/green]")
 
 
@@ -346,9 +306,7 @@ def image_deactivate(ctx: click.Context, image_id: str) -> None:
 @click.pass_context
 def image_reactivate(ctx: click.Context, image_id: str) -> None:
     """Reactivate a deactivated image."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.image_url}/v2/images/{image_id}/actions/reactivate"
-    client.post(url)
+    ImageService(ctx.find_object(OrcaContext).ensure_client()).reactivate(image_id)
     console.print(f"[green]Image {image_id} reactivated.[/green]")
 
 
@@ -358,9 +316,7 @@ def image_reactivate(ctx: click.Context, image_id: str) -> None:
 @click.pass_context
 def image_tag_add(ctx: click.Context, image_id: str, tag: str) -> None:
     """Add a tag to an image."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.image_url}/v2/images/{image_id}/tags/{tag}"
-    client.put(url)
+    ImageService(ctx.find_object(OrcaContext).ensure_client()).add_tag(image_id, tag)
     console.print(f"[green]Tag '{tag}' added to image {image_id}.[/green]")
 
 
@@ -370,9 +326,7 @@ def image_tag_add(ctx: click.Context, image_id: str, tag: str) -> None:
 @click.pass_context
 def image_tag_delete(ctx: click.Context, image_id: str, tag: str) -> None:
     """Remove a tag from an image."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.image_url}/v2/images/{image_id}/tags/{tag}"
-    client.delete(url)
+    ImageService(ctx.find_object(OrcaContext).ensure_client()).delete_tag(image_id, tag)
     console.print(f"[green]Tag '{tag}' removed from image {image_id}.[/green]")
 
 
@@ -385,9 +339,7 @@ def image_delete(ctx: click.Context, image_id: str, yes: bool) -> None:
     if not yes:
         click.confirm(f"Delete image {image_id}?", abort=True)
 
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.image_url}/v2/images/{image_id}"
-    client.delete(url)
+    ImageService(ctx.find_object(OrcaContext).ensure_client()).delete(image_id)
     console.print(f"[green]Image {image_id} deleted.[/green]")
 
 
@@ -434,10 +386,9 @@ def image_shrink(ctx: click.Context, image_id: str, yes: bool) -> None:
         raise SystemExit(1)
 
     client = ctx.find_object(OrcaContext).ensure_client()
-    base_url = f"{client.image_url}/v2/images"
+    service = ImageService(client)
 
-    # Fetch image metadata
-    meta = client.get(f"{base_url}/{image_id}")
+    meta = service.get(image_id)
     name = meta.get("name", image_id)
     fmt = meta.get("disk_format", "")
     status = meta.get("status", "")
@@ -464,8 +415,7 @@ def image_shrink(ctx: click.Context, image_id: str, yes: bool) -> None:
 
         # Download
         console.print("\n[bold]1/3[/bold] Downloading image...")
-        download_url = f"{base_url}/{image_id}/file"
-        with client.get_stream(download_url) as resp:
+        with service.stream_download(image_id) as resp:
             if not resp.is_success:
                 raise APIError(resp.status_code, "Download failed")
             with open(raw_path, "wb") as f, Progress(
@@ -493,7 +443,7 @@ def image_shrink(ctx: click.Context, image_id: str, yes: bool) -> None:
 
         # Upload as new image
         console.print("[bold]3/3[/bold] Uploading compressed image...")
-        new_meta = client.post(base_url, json={
+        new_meta = service.create({
             "name": f"{name} (shrunk)",
             "disk_format": "qcow2",
             "container_format": meta.get("container_format", "bare"),
@@ -504,10 +454,9 @@ def image_shrink(ctx: click.Context, image_id: str, yes: bool) -> None:
         new_id = new_meta.get("id", "")
 
         with open(qcow2_path, "rb") as f:
-            client.put_stream(f"{base_url}/{new_id}/file", stream=f)
+            service.upload(new_id, stream=f)
 
-    # Deactivate original
-    client.post(f"{base_url}/{image_id}/actions/deactivate")
+    service.deactivate(image_id)
 
     console.print("\n[green]Done![/green]")
     console.print(f"  New image: {new_id} ('{name} (shrunk)')")
@@ -537,27 +486,24 @@ def image_unused(ctx: click.Context, do_delete: bool, yes: bool, include_snapsho
       orca image unused --include-snapshots # include snapshot images
     """
     client = ctx.find_object(OrcaContext).ensure_client()
+    images_svc = ImageService(client)
+    servers_svc = ServerService(client)
 
     with console.status("[bold]Scanning images and servers..."):
-        # Fetch all images
-        images_data = client.get(f"{client.image_url}/v2/images")
-        images = images_data.get("images", [])
-
-        # Fetch all servers (with details for image info)
-        servers_data = client.get(f"{client.compute_url}/servers/detail")
-        servers = servers_data.get("servers", [])
+        images = images_svc.find()
+        servers = servers_svc.find()
 
     # Collect image IDs in use by servers
     used_image_ids: set[str] = set()
     for srv in servers:
-        img = srv.get("image")
-        if isinstance(img, dict) and img.get("id"):
-            used_image_ids.add(img["id"])
-        elif isinstance(img, str) and img:
-            used_image_ids.add(img)
+        ref = srv.get("image")
+        if isinstance(ref, dict) and ref.get("id"):
+            used_image_ids.add(ref["id"])
+        elif isinstance(ref, str) and ref:
+            used_image_ids.add(ref)
 
     # Filter unused images
-    unused = []
+    unused: list[Image] = []
     for img in images:
         if img.get("status") != "active":
             continue
@@ -613,7 +559,7 @@ def image_unused(ctx: click.Context, do_delete: bool, yes: bool, include_snapsho
         img_id = img["id"]
         img_name = img.get("name", "")
         try:
-            client.delete(f"{client.image_url}/v2/images/{img_id}")
+            images_svc.delete(img_id)
             console.print(f"  [green]Deleted[/green] {img_name} ({img_id})")
             deleted += 1
         except Exception as exc:
@@ -643,9 +589,7 @@ def image_member_list(ctx: click.Context, image_id: str, output_format: str,
 
     The image must have visibility=shared.
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{client.image_url}/v2/images/{image_id}/members")
-    members = data.get("members", [])
+    members = ImageService(ctx.find_object(OrcaContext).ensure_client()).list_members(image_id)
     print_list(
         members,
         [
@@ -671,8 +615,7 @@ def image_member_show(ctx: click.Context, image_id: str, member_id: str,
                       output_format: str, columns: tuple[str, ...],
                       fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show a specific project's membership status for a shared image."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    m = client.get(f"{client.image_url}/v2/images/{image_id}/members/{member_id}")
+    m = ImageService(ctx.find_object(OrcaContext).ensure_client()).get_member(image_id, member_id)
     fields = [
         ("Image ID", m.get("image_id", image_id)),
         ("Member ID (Project)", m.get("member_id", member_id)),
@@ -699,14 +642,8 @@ def image_member_create(ctx: click.Context, image_id: str, member_id: str) -> No
     Example:
       orca image member-create <image-id> <project-id>
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
-    # Glance requires image to be shared visibility first
-    data = client.post(
-        f"{client.image_url}/v2/images/{image_id}/members",
-        json={"member": member_id},
-    )
-    m = data if isinstance(data, dict) else {}
-    status = m.get("status", "pending")
+    m = ImageService(ctx.find_object(OrcaContext).ensure_client()).add_member(image_id, member_id)
+    status = m.get("status", "pending") if isinstance(m, dict) else "pending"
     console.print(
         f"[green]Image {image_id} shared with project {member_id} (status: {status}).[/green]"
     )
@@ -724,8 +661,7 @@ def image_member_delete(ctx: click.Context, image_id: str, member_id: str, yes: 
     """Revoke a project's access to a shared image."""
     if not yes:
         click.confirm(f"Revoke access of project {member_id} to image {image_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{client.image_url}/v2/images/{image_id}/members/{member_id}")
+    ImageService(ctx.find_object(OrcaContext).ensure_client()).delete_member(image_id, member_id)
     console.print(f"[green]Project {member_id} access to image {image_id} revoked.[/green]")
 
 
@@ -748,10 +684,8 @@ def image_member_set(ctx: click.Context, image_id: str, member_id: str, status: 
       orca image member-set <image-id> <project-id> --status accepted
       orca image member-set <image-id> <project-id> --status rejected
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.put(
-        f"{client.image_url}/v2/images/{image_id}/members/{member_id}",
-        json={"status": status},
+    ImageService(ctx.find_object(OrcaContext).ensure_client()).set_member_status(
+        image_id, member_id, status,
     )
     labels = {"accepted": "green", "rejected": "red", "pending": "yellow"}
     color = labels.get(status, "white")
@@ -778,20 +712,12 @@ def image_share_and_accept(ctx: click.Context, image_id: str, member_id: str, ye
             f"Share image {image_id} with project {member_id} and auto-accept?",
             abort=True,
         )
-    client = ctx.find_object(OrcaContext).ensure_client()
+    service = ImageService(ctx.find_object(OrcaContext).ensure_client())
 
-    # Step 1: create membership (status → pending)
-    client.post(
-        f"{client.image_url}/v2/images/{image_id}/members",
-        json={"member": member_id},
-    )
+    service.add_member(image_id, member_id)
     console.print(f"[cyan]Step 1/2[/cyan] Image {image_id} shared with project {member_id}.")
 
-    # Step 2: accept on behalf of the target project
-    client.put(
-        f"{client.image_url}/v2/images/{image_id}/members/{member_id}",
-        json={"status": "accepted"},
-    )
+    service.set_member_status(image_id, member_id, "accepted")
     console.print(
         f"[cyan]Step 2/2[/cyan] Membership accepted.\n"
         f"[bold green]Image {image_id} is now visible to project {member_id}.[/bold green]"
@@ -829,22 +755,11 @@ def image_import(ctx: click.Context, image_id: str, import_method: str,
       orca image import <id> --method glance-direct
       orca image import <id> --method copy-image --store ceph1 --store ceph2
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
-
     if import_method == "web-download" and not uri:
         raise click.UsageError("--uri is required for web-download.")
 
-    method_body: dict = {"name": import_method}
-    if uri:
-        method_body["uri"] = uri
-
-    body: dict = {"method": method_body}
-    if stores:
-        body["stores"] = list(stores)
-
-    client.post(
-        f"{client.image_url}/v2/images/{image_id}/import",
-        json=body,
+    ImageService(ctx.find_object(OrcaContext).ensure_client()).import_(
+        image_id, import_method, uri=uri, stores=list(stores) if stores else None,
     )
     console.print(f"[green]Import triggered for image {image_id} (method: {import_method}).[/green]")
     if import_method == "web-download":
@@ -862,11 +777,10 @@ def image_import(ctx: click.Context, image_id: str, import_method: str,
 def image_cache_list(ctx: click.Context, output_format: str, columns: tuple[str, ...],
                      fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List cached and queued images (admin)."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{client.image_url}/v2/cache")
+    data = ImageService(ctx.find_object(OrcaContext).ensure_client()).list_cache()
 
-    cached  = [dict(id=i, state="cached")  for i in data.get("cached_images", [])]
-    queued  = [dict(id=i, state="queued")  for i in data.get("queued_images", [])]
+    cached = [dict(id=i, state="cached") for i in data.get("cached_images", [])]
+    queued = [dict(id=i, state="queued") for i in data.get("queued_images", [])]
     items = cached + queued
 
     print_list(
@@ -887,8 +801,7 @@ def image_cache_list(ctx: click.Context, output_format: str, columns: tuple[str,
 @click.pass_context
 def image_cache_queue(ctx: click.Context, image_id: str) -> None:
     """Queue an image for pre-caching (admin)."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.put(f"{client.image_url}/v2/cache/{image_id}")
+    ImageService(ctx.find_object(OrcaContext).ensure_client()).cache_queue(image_id)
     console.print(f"[green]Image {image_id} queued for caching.[/green]")
 
 
@@ -898,10 +811,9 @@ def image_cache_queue(ctx: click.Context, image_id: str) -> None:
 @click.pass_context
 def image_cache_delete(ctx: click.Context, image_id: str, yes: bool) -> None:
     """Remove a specific image from the cache (admin)."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     if not yes:
         click.confirm(f"Remove image {image_id} from cache?", abort=True)
-    client.delete(f"{client.image_url}/v2/cache/{image_id}")
+    ImageService(ctx.find_object(OrcaContext).ensure_client()).cache_delete(image_id)
     console.print(f"[green]Image {image_id} removed from cache.[/green]")
 
 
@@ -910,10 +822,9 @@ def image_cache_delete(ctx: click.Context, image_id: str, yes: bool) -> None:
 @click.pass_context
 def image_cache_clear(ctx: click.Context, yes: bool) -> None:
     """Clear the entire image cache (admin)."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     if not yes:
         click.confirm("Clear entire image cache?", abort=True)
-    client.delete(f"{client.image_url}/v2/cache")
+    ImageService(ctx.find_object(OrcaContext).ensure_client()).cache_clear()
     console.print("[green]Image cache cleared.[/green]")
 
 
@@ -937,12 +848,7 @@ def image_stores_info(ctx: click.Context, detail: bool, output_format: str,
       orca image stores-info
       orca image stores-info --detail
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.image_url}/v2/info/stores"
-    if detail:
-        url += "/detail"
-    data = client.get(url)
-    stores = data.get("stores", [])
+    stores = ImageService(ctx.find_object(OrcaContext).ensure_client()).list_stores(detail=detail)
 
     column_defs = [
         ("ID", "id", {"style": "cyan"}),
@@ -980,14 +886,9 @@ def image_task_list(ctx: click.Context, task_type: str | None, task_status: str 
                     output_format: str, columns: tuple[str, ...], fit_width: bool,
                     max_width: int | None, noindent: bool) -> None:
     """List Glance async tasks."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    params: dict = {}
-    if task_type:
-        params["type"] = task_type
-    if task_status:
-        params["status"] = task_status
-    data = client.get(f"{client.image_url}/v2/tasks", params=params or None)
-    tasks = data.get("tasks", []) if isinstance(data, dict) else []
+    tasks = ImageService(ctx.find_object(OrcaContext).ensure_client()).list_tasks(
+        task_type=task_type, status=task_status,
+    )
 
     print_list(
         tasks,
@@ -1014,8 +915,7 @@ def image_task_show(ctx: click.Context, task_id: str, output_format: str,
                     columns: tuple[str, ...], fit_width: bool,
                     max_width: int | None, noindent: bool) -> None:
     """Show details of a Glance async task."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    t = client.get(f"{client.image_url}/v2/tasks/{task_id}")
+    t = ImageService(ctx.find_object(OrcaContext).ensure_client()).get_task(task_id)
     fields = [
         ("ID", t.get("id", task_id)),
         ("Type", t.get("type", "—")),
