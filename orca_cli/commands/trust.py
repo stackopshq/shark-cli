@@ -7,8 +7,7 @@ import click
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
-
-_TRUST_URL = "/OS-TRUST/trusts"
+from orca_cli.services.identity import IdentityService
 
 
 @click.group()
@@ -24,15 +23,14 @@ def trust() -> None:
 @click.pass_context
 def trust_list(ctx, trustor, trustee, output_format, columns, fit_width, max_width, noindent):
     """List trusts."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     params = {}
     if trustor:
         params["trustor_user_id"] = trustor
     if trustee:
         params["trustee_user_id"] = trustee
 
-    trusts = client.get(f"{client.identity_url}{_TRUST_URL}",
-                        params=params).get("trusts", [])
+    trusts = svc.find_trusts(params=params or None)
 
     print_list(
         trusts,
@@ -57,8 +55,8 @@ def trust_list(ctx, trustor, trustee, output_format, columns, fit_width, max_wid
 @click.pass_context
 def trust_show(ctx, trust_id, output_format, columns, fit_width, max_width, noindent):
     """Show trust details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    t = client.get(f"{client.identity_url}{_TRUST_URL}/{trust_id}").get("trust", {})
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    t = svc.get_trust(trust_id)
 
     fields = [(k, str(t.get(k, "") or "")) for k in
               ["id", "trustor_user_id", "trustee_user_id", "project_id",
@@ -98,7 +96,7 @@ def trust_create(ctx, trustor, trustee, project, roles, impersonate, expires_at,
         --role member \\
         --impersonate
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {
         "trustor_user_id": trustor,
         "trustee_user_id": trustee,
@@ -114,8 +112,7 @@ def trust_create(ctx, trustor, trustee, project, roles, impersonate, expires_at,
         body["allow_redelegation"] = False
         body["remaining_uses"] = uses
 
-    t = client.post(f"{client.identity_url}{_TRUST_URL}",
-                    json={"trust": body}).get("trust", {})
+    t = svc.create_trust(body)
     console.print(f"[green]Trust created: {t.get('id', '?')}[/green]")
     console.print(f"  Trustor: {trustor}  →  Trustee: {trustee}")
     if expires_at:
@@ -128,8 +125,8 @@ def trust_create(ctx, trustor, trustee, project, roles, impersonate, expires_at,
 @click.pass_context
 def trust_delete(ctx, trust_id, yes):
     """Delete a trust."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     if not yes:
         click.confirm(f"Delete trust {trust_id}?", abort=True)
-    client.delete(f"{client.identity_url}{_TRUST_URL}/{trust_id}")
+    svc.delete_trust(trust_id)
     console.print(f"[green]Trust {trust_id} deleted.[/green]")

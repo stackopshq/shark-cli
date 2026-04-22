@@ -6,6 +6,7 @@ import click
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
+from orca_cli.services.identity import IdentityService
 
 
 @click.group()
@@ -20,13 +21,12 @@ def region() -> None:
 @click.pass_context
 def region_list(ctx, parent, output_format, columns, fit_width, max_width, noindent):
     """List regions."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     params = {}
     if parent:
         params["parent_region_id"] = parent
 
-    regions = client.get(f"{client.identity_url}/regions",
-                         params=params).get("regions", [])
+    regions = svc.find_regions(params=params or None)
 
     print_list(
         regions,
@@ -48,8 +48,8 @@ def region_list(ctx, parent, output_format, columns, fit_width, max_width, noind
 @click.pass_context
 def region_show(ctx, region_id, output_format, columns, fit_width, max_width, noindent):
     """Show region details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    reg = client.get(f"{client.identity_url}/regions/{region_id}").get("region", {})
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    reg = svc.get_region(region_id)
 
     print_detail(
         [(k, str(reg.get(k, "") or "")) for k in
@@ -70,14 +70,14 @@ def region_create(ctx, region_id, description, parent):
     \b
     The ID is the region name (e.g. RegionOne, dc3-a).
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {"id": region_id}
     if description:
         body["description"] = description
     if parent:
         body["parent_region_id"] = parent
 
-    client.post(f"{client.identity_url}/regions", json={"region": body})
+    svc.create_region(body)
     console.print(f"[green]Region '{region_id}' created.[/green]")
 
 
@@ -87,12 +87,11 @@ def region_create(ctx, region_id, description, parent):
 @click.pass_context
 def region_set(ctx, region_id, description):
     """Update a region's description."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     if description is None:
         console.print("[yellow]Nothing to update. Use --description.[/yellow]")
         return
-    client.patch(f"{client.identity_url}/regions/{region_id}",
-                 json={"region": {"description": description}})
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_region(region_id, {"description": description})
     console.print(f"[green]Region '{region_id}' updated.[/green]")
 
 
@@ -102,8 +101,8 @@ def region_set(ctx, region_id, description):
 @click.pass_context
 def region_delete(ctx, region_id, yes):
     """Delete a region."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     if not yes:
         click.confirm(f"Delete region '{region_id}'?", abort=True)
-    client.delete(f"{client.identity_url}/regions/{region_id}")
+    svc.delete_region(region_id)
     console.print(f"[green]Region '{region_id}' deleted.[/green]")

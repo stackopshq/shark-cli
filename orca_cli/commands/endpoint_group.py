@@ -7,10 +7,7 @@ import click
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
-
-
-def _iam(client) -> str:
-    return client.identity_url
+from orca_cli.services.identity import IdentityService
 
 
 @click.group("endpoint-group")
@@ -24,9 +21,8 @@ def endpoint_group(ctx: click.Context) -> None:
 @click.pass_context
 def eg_list(ctx, output_format, columns, fit_width, max_width, noindent):
     """List endpoint groups."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_iam(client)}/v3/endpoint_groups")
-    items = data.get("endpoint_groups", [])
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    items = svc.find_endpoint_groups()
     if not items:
         console.print("No endpoint groups found.")
         return
@@ -47,9 +43,8 @@ def eg_list(ctx, output_format, columns, fit_width, max_width, noindent):
 @click.pass_context
 def eg_show(ctx, endpoint_group_id, output_format, columns, fit_width, max_width, noindent):
     """Show an endpoint group."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_iam(client)}/v3/endpoint_groups/{endpoint_group_id}")
-    eg = data.get("endpoint_group", data)
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    eg = svc.get_endpoint_group(endpoint_group_id)
     fields = [
         ("ID", eg.get("id", "")),
         ("Name", eg.get("name", "")),
@@ -71,7 +66,7 @@ def eg_show(ctx, endpoint_group_id, output_format, columns, fit_width, max_width
 def eg_create(ctx, name, filters, description,
               output_format, columns, fit_width, max_width, noindent):
     """Create an endpoint group."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     filter_dict: dict = {}
     for f in filters:
         if "=" not in f:
@@ -79,9 +74,7 @@ def eg_create(ctx, name, filters, description,
         k, _, v = f.partition("=")
         filter_dict[k.strip()] = v.strip()
     body = {"name": name, "description": description, "filters": filter_dict}
-    data = client.post(f"{_iam(client)}/v3/endpoint_groups",
-                       json={"endpoint_group": body})
-    eg = data.get("endpoint_group", data)
+    eg = svc.create_endpoint_group(body)
     fields = [
         ("ID", eg.get("id", "")),
         ("Name", eg.get("name", "")),
@@ -100,7 +93,6 @@ def eg_create(ctx, name, filters, description,
 @click.pass_context
 def eg_set(ctx, endpoint_group_id, name, description, filters):
     """Update an endpoint group."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     body: dict = {}
     if name is not None:
         body["name"] = name
@@ -117,8 +109,8 @@ def eg_set(ctx, endpoint_group_id, name, description, filters):
     if not body:
         console.print("Nothing to update.")
         return
-    client.patch(f"{_iam(client)}/v3/endpoint_groups/{endpoint_group_id}",
-                 json={"endpoint_group": body})
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_endpoint_group(endpoint_group_id, body)
     console.print(f"Endpoint group [bold]{endpoint_group_id}[/bold] updated.")
 
 
@@ -128,10 +120,10 @@ def eg_set(ctx, endpoint_group_id, name, description, filters):
 @click.pass_context
 def eg_delete(ctx, endpoint_group_id, yes):
     """Delete an endpoint group."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     if not yes:
         click.confirm(f"Delete endpoint group {endpoint_group_id}?", abort=True)
-    client.delete(f"{_iam(client)}/v3/endpoint_groups/{endpoint_group_id}")
+    svc.delete_endpoint_group(endpoint_group_id)
     console.print(f"Endpoint group [bold]{endpoint_group_id}[/bold] deleted.")
 
 
@@ -141,11 +133,8 @@ def eg_delete(ctx, endpoint_group_id, yes):
 @click.pass_context
 def eg_add_project(ctx, endpoint_group_id, project_id):
     """Associate a project with an endpoint group."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.put(
-        f"{_iam(client)}/v3/endpoint_groups/{endpoint_group_id}/projects/{project_id}",
-        json={},
-    )
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.add_endpoint_group_project(endpoint_group_id, project_id)
     console.print(
         f"Project [bold]{project_id}[/bold] added to endpoint group [bold]{endpoint_group_id}[/bold]."
     )
@@ -158,14 +147,12 @@ def eg_add_project(ctx, endpoint_group_id, project_id):
 @click.pass_context
 def eg_remove_project(ctx, endpoint_group_id, project_id, yes):
     """Remove a project from an endpoint group."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     if not yes:
         click.confirm(
             f"Remove project {project_id} from endpoint group {endpoint_group_id}?", abort=True
         )
-    client.delete(
-        f"{_iam(client)}/v3/endpoint_groups/{endpoint_group_id}/projects/{project_id}"
-    )
+    svc.remove_endpoint_group_project(endpoint_group_id, project_id)
     console.print(
         f"Project [bold]{project_id}[/bold] removed from endpoint group [bold]{endpoint_group_id}[/bold]."
     )

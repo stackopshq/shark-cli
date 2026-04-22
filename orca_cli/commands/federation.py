@@ -8,11 +8,7 @@ import click
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
-
-
-def _iam(client) -> str:
-    return client.identity_url
-
+from orca_cli.services.identity import IdentityService
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  Identity Providers
@@ -29,9 +25,8 @@ def identity_provider(ctx: click.Context) -> None:
 @click.pass_context
 def idp_list(ctx, output_format, columns, fit_width, max_width, noindent):
     """List identity providers."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_iam(client)}/v3/identity_providers")
-    items = data.get("identity_providers", [])
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    items = svc.find_identity_providers()
     if not items:
         console.print("No identity providers found.")
         return
@@ -52,9 +47,8 @@ def idp_list(ctx, output_format, columns, fit_width, max_width, noindent):
 @click.pass_context
 def idp_show(ctx, idp_id, output_format, columns, fit_width, max_width, noindent):
     """Show an identity provider."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_iam(client)}/v3/identity_providers/{idp_id}")
-    idp = data.get("identity_provider", data)
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    idp = svc.get_identity_provider(idp_id)
     fields = [
         ("ID", idp.get("id", "")),
         ("Enabled", idp.get("enabled", "")),
@@ -79,14 +73,12 @@ def idp_show(ctx, idp_id, output_format, columns, fit_width, max_width, noindent
 def idp_create(ctx, idp_id, remote_ids, description, domain_id, enable,
                output_format, columns, fit_width, max_width, noindent):
     """Create an identity provider."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {"enabled": enable, "description": description,
                   "remote_ids": list(remote_ids)}
     if domain_id:
         body["domain_id"] = domain_id
-    data = client.put(f"{_iam(client)}/v3/identity_providers/{idp_id}",
-                      json={"identity_provider": body})
-    idp = data.get("identity_provider", data)
+    idp = svc.create_identity_provider(idp_id, body)
     fields = [("ID", idp.get("id", "")), ("Enabled", idp.get("enabled", ""))]
     print_detail(fields,
                  output_format=output_format, columns=columns,
@@ -101,7 +93,6 @@ def idp_create(ctx, idp_id, remote_ids, description, domain_id, enable,
 @click.pass_context
 def idp_set(ctx, idp_id, description, enable, remote_ids):
     """Update an identity provider."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     body: dict = {}
     if description is not None:
         body["description"] = description
@@ -112,8 +103,8 @@ def idp_set(ctx, idp_id, description, enable, remote_ids):
     if not body:
         console.print("Nothing to update.")
         return
-    client.patch(f"{_iam(client)}/v3/identity_providers/{idp_id}",
-                 json={"identity_provider": body})
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_identity_provider(idp_id, body)
     console.print(f"Identity provider [bold]{idp_id}[/bold] updated.")
 
 
@@ -123,10 +114,10 @@ def idp_set(ctx, idp_id, description, enable, remote_ids):
 @click.pass_context
 def idp_delete(ctx, idp_id, yes):
     """Delete an identity provider."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     if not yes:
         click.confirm(f"Delete identity provider {idp_id}?", abort=True)
-    client.delete(f"{_iam(client)}/v3/identity_providers/{idp_id}")
+    svc.delete_identity_provider(idp_id)
     console.print(f"Identity provider [bold]{idp_id}[/bold] deleted.")
 
 
@@ -146,9 +137,8 @@ def federation_protocol(ctx: click.Context) -> None:
 @click.pass_context
 def fp_list(ctx, idp_id, output_format, columns, fit_width, max_width, noindent):
     """List federation protocols for an identity provider."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_iam(client)}/v3/identity_providers/{idp_id}/protocols")
-    items = data.get("protocols", [])
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    items = svc.find_federation_protocols(idp_id)
     if not items:
         console.print("No protocols found.")
         return
@@ -165,10 +155,8 @@ def fp_list(ctx, idp_id, output_format, columns, fit_width, max_width, noindent)
 @click.pass_context
 def fp_show(ctx, idp_id, protocol_id, output_format, columns, fit_width, max_width, noindent):
     """Show a federation protocol."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(
-        f"{_iam(client)}/v3/identity_providers/{idp_id}/protocols/{protocol_id}")
-    p = data.get("protocol", data)
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    p = svc.get_federation_protocol(idp_id, protocol_id)
     fields = [("ID", p.get("id", "")), ("Mapping ID", p.get("mapping_id", ""))]
     print_detail(fields,
                  output_format=output_format, columns=columns,
@@ -184,11 +172,8 @@ def fp_show(ctx, idp_id, protocol_id, output_format, columns, fit_width, max_wid
 def fp_create(ctx, idp_id, protocol_id, mapping_id,
               output_format, columns, fit_width, max_width, noindent):
     """Create a federation protocol."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.put(
-        f"{_iam(client)}/v3/identity_providers/{idp_id}/protocols/{protocol_id}",
-        json={"protocol": {"mapping_id": mapping_id}})
-    p = data.get("protocol", data)
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    p = svc.create_federation_protocol(idp_id, protocol_id, {"mapping_id": mapping_id})
     fields = [("ID", p.get("id", "")), ("Mapping ID", p.get("mapping_id", ""))]
     print_detail(fields,
                  output_format=output_format, columns=columns,
@@ -202,10 +187,8 @@ def fp_create(ctx, idp_id, protocol_id, mapping_id,
 @click.pass_context
 def fp_set(ctx, idp_id, protocol_id, mapping_id):
     """Update a federation protocol."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.patch(
-        f"{_iam(client)}/v3/identity_providers/{idp_id}/protocols/{protocol_id}",
-        json={"protocol": {"mapping_id": mapping_id}})
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_federation_protocol(idp_id, protocol_id, {"mapping_id": mapping_id})
     console.print(f"Protocol [bold]{protocol_id}[/bold] updated.")
 
 
@@ -216,11 +199,10 @@ def fp_set(ctx, idp_id, protocol_id, mapping_id):
 @click.pass_context
 def fp_delete(ctx, idp_id, protocol_id, yes):
     """Delete a federation protocol."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     if not yes:
         click.confirm(f"Delete protocol {protocol_id}?", abort=True)
-    client.delete(
-        f"{_iam(client)}/v3/identity_providers/{idp_id}/protocols/{protocol_id}")
+    svc.delete_federation_protocol(idp_id, protocol_id)
     console.print(f"Protocol [bold]{protocol_id}[/bold] deleted.")
 
 
@@ -239,9 +221,8 @@ def mapping(ctx: click.Context) -> None:
 @click.pass_context
 def mapping_list(ctx, output_format, columns, fit_width, max_width, noindent):
     """List mappings."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_iam(client)}/v3/mappings")
-    items = data.get("mappings", [])
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    items = svc.find_mappings()
     if not items:
         console.print("No mappings found.")
         return
@@ -256,9 +237,8 @@ def mapping_list(ctx, output_format, columns, fit_width, max_width, noindent):
 @click.pass_context
 def mapping_show(ctx, mapping_id):
     """Show a mapping (prints JSON rules)."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_iam(client)}/v3/mappings/{mapping_id}")
-    m = data.get("mapping", data)
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    m = svc.get_mapping(mapping_id)
     console.print_json(json.dumps(m, indent=2))
 
 
@@ -269,14 +249,12 @@ def mapping_show(ctx, mapping_id):
 @click.pass_context
 def mapping_create(ctx, mapping_id, rules):
     """Create a mapping."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     try:
         rules_obj = json.loads(rules)
     except json.JSONDecodeError as exc:
         raise click.BadParameter(f"Invalid JSON: {exc}", param_hint="--rules") from exc
-    data = client.put(f"{_iam(client)}/v3/mappings/{mapping_id}",
-                      json={"mapping": {"rules": rules_obj}})
-    m = data.get("mapping", data)
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    m = svc.create_mapping(mapping_id, {"rules": rules_obj})
     console.print(f"Mapping [bold]{m.get('id', mapping_id)}[/bold] created.")
 
 
@@ -286,13 +264,12 @@ def mapping_create(ctx, mapping_id, rules):
 @click.pass_context
 def mapping_set(ctx, mapping_id, rules):
     """Update a mapping."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     try:
         rules_obj = json.loads(rules)
     except json.JSONDecodeError as exc:
         raise click.BadParameter(f"Invalid JSON: {exc}", param_hint="--rules") from exc
-    client.patch(f"{_iam(client)}/v3/mappings/{mapping_id}",
-                 json={"mapping": {"rules": rules_obj}})
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_mapping(mapping_id, {"rules": rules_obj})
     console.print(f"Mapping [bold]{mapping_id}[/bold] updated.")
 
 
@@ -302,10 +279,10 @@ def mapping_set(ctx, mapping_id, rules):
 @click.pass_context
 def mapping_delete(ctx, mapping_id, yes):
     """Delete a mapping."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     if not yes:
         click.confirm(f"Delete mapping {mapping_id}?", abort=True)
-    client.delete(f"{_iam(client)}/v3/mappings/{mapping_id}")
+    svc.delete_mapping(mapping_id)
     console.print(f"Mapping [bold]{mapping_id}[/bold] deleted.")
 
 
@@ -324,9 +301,8 @@ def service_provider(ctx: click.Context) -> None:
 @click.pass_context
 def sp_list(ctx, output_format, columns, fit_width, max_width, noindent):
     """List service providers."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_iam(client)}/v3/service_providers")
-    items = data.get("service_providers", [])
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    items = svc.find_service_providers()
     if not items:
         console.print("No service providers found.")
         return
@@ -348,9 +324,8 @@ def sp_list(ctx, output_format, columns, fit_width, max_width, noindent):
 @click.pass_context
 def sp_show(ctx, sp_id, output_format, columns, fit_width, max_width, noindent):
     """Show a service provider."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_iam(client)}/v3/service_providers/{sp_id}")
-    sp = data.get("service_provider", data)
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    sp = svc.get_service_provider(sp_id)
     fields = [
         ("ID", sp.get("id", "")),
         ("Enabled", sp.get("enabled", "")),
@@ -375,12 +350,10 @@ def sp_show(ctx, sp_id, output_format, columns, fit_width, max_width, noindent):
 def sp_create(ctx, sp_id, auth_url, sp_url, description, enable,
               output_format, columns, fit_width, max_width, noindent):
     """Create a service provider."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     body = {"auth_url": auth_url, "sp_url": sp_url,
             "description": description, "enabled": enable}
-    data = client.put(f"{_iam(client)}/v3/service_providers/{sp_id}",
-                      json={"service_provider": body})
-    sp = data.get("service_provider", data)
+    sp = svc.create_service_provider(sp_id, body)
     fields = [("ID", sp.get("id", "")), ("Auth URL", sp.get("auth_url", ""))]
     print_detail(fields,
                  output_format=output_format, columns=columns,
@@ -396,7 +369,6 @@ def sp_create(ctx, sp_id, auth_url, sp_url, description, enable,
 @click.pass_context
 def sp_set(ctx, sp_id, auth_url, sp_url, description, enable):
     """Update a service provider."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     body: dict = {}
     if auth_url is not None:
         body["auth_url"] = auth_url
@@ -409,8 +381,8 @@ def sp_set(ctx, sp_id, auth_url, sp_url, description, enable):
     if not body:
         console.print("Nothing to update.")
         return
-    client.patch(f"{_iam(client)}/v3/service_providers/{sp_id}",
-                 json={"service_provider": body})
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_service_provider(sp_id, body)
     console.print(f"Service provider [bold]{sp_id}[/bold] updated.")
 
 
@@ -420,8 +392,8 @@ def sp_set(ctx, sp_id, auth_url, sp_url, description, enable):
 @click.pass_context
 def sp_delete(ctx, sp_id, yes):
     """Delete a service provider."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     if not yes:
         click.confirm(f"Delete service provider {sp_id}?", abort=True)
-    client.delete(f"{_iam(client)}/v3/service_providers/{sp_id}")
+    svc.delete_service_provider(sp_id)
     console.print(f"Service provider [bold]{sp_id}[/bold] deleted.")

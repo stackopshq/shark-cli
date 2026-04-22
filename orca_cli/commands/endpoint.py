@@ -7,6 +7,7 @@ import click
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
+from orca_cli.services.identity import IdentityService
 
 
 @click.group()
@@ -27,19 +28,19 @@ def endpoint_list(ctx, service, interface, region,
                   output_format, columns, fit_width, max_width, noindent):
     """List endpoints."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(client)
     params = {}
     if interface:
         params["interface"] = interface
     if region:
         params["region_id"] = region
 
-    endpoints = client.get(f"{client.identity_url}/endpoints",
-                           params=params).get("endpoints", [])
+    endpoints = svc.find_endpoints(params=params or None)
 
     # Resolve service_id → name using the in-memory catalog
     svc_names = {
-        svc["id"]: svc.get("name", svc["id"])
-        for svc in client._catalog
+        svc_entry["id"]: svc_entry.get("name", svc_entry["id"])
+        for svc_entry in client._catalog
     } if hasattr(client, "_catalog") else {}
 
     if service:
@@ -74,8 +75,8 @@ def endpoint_list(ctx, service, interface, region,
 @click.pass_context
 def endpoint_show(ctx, endpoint_id, output_format, columns, fit_width, max_width, noindent):
     """Show endpoint details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    ep = client.get(f"{client.identity_url}/endpoints/{endpoint_id}").get("endpoint", {})
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    ep = svc.get_endpoint(endpoint_id)
 
     print_detail(
         [(k, str(ep.get(k, "") or "")) for k in
@@ -96,7 +97,7 @@ def endpoint_show(ctx, endpoint_id, output_format, columns, fit_width, max_width
 @click.pass_context
 def endpoint_create(ctx, service, interface, url, region, enable):
     """Create an endpoint."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {
         "service_id": service,
         "interface": interface,
@@ -106,8 +107,7 @@ def endpoint_create(ctx, service, interface, url, region, enable):
     if region:
         body["region_id"] = region
 
-    ep = client.post(f"{client.identity_url}/endpoints",
-                     json={"endpoint": body}).get("endpoint", {})
+    ep = svc.create_endpoint(body)
     console.print(f"[green]Endpoint created: {ep.get('id', '?')} ({interface} {url})[/green]")
 
 
@@ -122,7 +122,6 @@ def endpoint_create(ctx, service, interface, url, region, enable):
 @click.pass_context
 def endpoint_set(ctx, endpoint_id, url, interface, region, enable):
     """Update an endpoint."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     body: dict = {}
     if url is not None:
         body["url"] = url
@@ -135,8 +134,8 @@ def endpoint_set(ctx, endpoint_id, url, interface, region, enable):
     if not body:
         console.print("[yellow]Nothing to update.[/yellow]")
         return
-    client.patch(f"{client.identity_url}/endpoints/{endpoint_id}",
-                 json={"endpoint": body})
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_endpoint(endpoint_id, body)
     console.print(f"[green]Endpoint {endpoint_id} updated.[/green]")
 
 
@@ -146,8 +145,8 @@ def endpoint_set(ctx, endpoint_id, url, interface, region, enable):
 @click.pass_context
 def endpoint_delete(ctx, endpoint_id, yes):
     """Delete an endpoint."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     if not yes:
         click.confirm(f"Delete endpoint {endpoint_id}?", abort=True)
-    client.delete(f"{client.identity_url}/endpoints/{endpoint_id}")
+    svc.delete_endpoint(endpoint_id)
     console.print(f"[green]Endpoint {endpoint_id} deleted.[/green]")

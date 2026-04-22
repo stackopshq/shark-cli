@@ -7,10 +7,7 @@ import click
 from orca_cli.core.config import save_profile
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
-
-
-def _iam(client) -> str:
-    return client.identity_url
+from orca_cli.services.identity import IdentityService
 
 
 def _current_user_id(client) -> str:
@@ -42,10 +39,10 @@ def application_credential(ctx: click.Context) -> None:
 def app_credential_list(ctx, user_id, output_format, columns, fit_width, max_width, noindent):
     """List application credentials."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(client)
     uid = user_id or _current_user_id(client)
-    data = client.get(f"{_iam(client)}/v3/users/{uid}/application_credentials")
     print_list(
-        data.get("application_credentials", []),
+        svc.find_application_credentials(uid),
         [
             ("ID", "id", {"style": "cyan", "no_wrap": True}),
             ("Name", "name", {"style": "bold"}),
@@ -69,9 +66,9 @@ def app_credential_show(ctx, credential_id, user_id,
                         output_format, columns, fit_width, max_width, noindent):
     """Show application credential details."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(client)
     uid = user_id or _current_user_id(client)
-    data = client.get(f"{_iam(client)}/v3/users/{uid}/application_credentials/{credential_id}")
-    a = data.get("application_credential", data)
+    a = svc.get_application_credential(uid, credential_id)
     print_detail(
         [
             ("ID", a.get("id", "")),
@@ -101,6 +98,7 @@ def app_credential_create(ctx, name, description, secret, expires_at,
                           unrestricted, user_id, save_profile_name):
     """Create an application credential."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(client)
     uid = user_id or _current_user_id(client)
     body: dict = {"name": name, "unrestricted": unrestricted}
     if description:
@@ -110,11 +108,7 @@ def app_credential_create(ctx, name, description, secret, expires_at,
     if expires_at:
         body["expires_at"] = expires_at
 
-    data = client.post(
-        f"{_iam(client)}/v3/users/{uid}/application_credentials",
-        json={"application_credential": body},
-    )
-    a = data.get("application_credential", data)
+    a = svc.create_application_credential(uid, body)
     console.print(f"[green]Application credential '{a.get('name')}' ({a.get('id')}) created.[/green]")
     if a.get("secret"):
         console.print(f"  [cyan]Secret:[/cyan] {a['secret']}")
@@ -152,6 +146,7 @@ def app_credential_delete(ctx, credential_id, user_id, yes):
     if not yes:
         click.confirm(f"Delete application credential {credential_id}?", abort=True)
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(client)
     uid = user_id or _current_user_id(client)
-    client.delete(f"{_iam(client)}/v3/users/{uid}/application_credentials/{credential_id}")
+    svc.delete_application_credential(uid, credential_id)
     console.print(f"[green]Application credential {credential_id} deleted.[/green]")

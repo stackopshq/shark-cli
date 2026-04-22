@@ -7,6 +7,7 @@ import click
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
+from orca_cli.services.identity import IdentityService
 
 
 @click.group()
@@ -22,15 +23,14 @@ def credential() -> None:
 @click.pass_context
 def credential_list(ctx, user, cred_type, output_format, columns, fit_width, max_width, noindent):
     """List credentials."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     params = {}
     if user:
         params["user_id"] = user
     if cred_type:
         params["type"] = cred_type
 
-    creds = client.get(f"{client.identity_url}/credentials",
-                       params=params).get("credentials", [])
+    creds = svc.find_credentials(params=params or None)
 
     print_list(
         creds,
@@ -54,8 +54,8 @@ def credential_list(ctx, user, cred_type, output_format, columns, fit_width, max
 @click.pass_context
 def credential_show(ctx, credential_id, output_format, columns, fit_width, max_width, noindent):
     """Show credential details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    cred = client.get(f"{client.identity_url}/credentials/{credential_id}").get("credential", {})
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    cred = svc.get_credential(credential_id)
 
     print_detail(
         [(k, str(cred.get(k, "") or "")) for k in
@@ -74,13 +74,12 @@ def credential_show(ctx, credential_id, output_format, columns, fit_width, max_w
 @click.pass_context
 def credential_create(ctx, user, cred_type, blob, project):
     """Create a credential."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {"user_id": user, "type": cred_type, "blob": blob}
     if project:
         body["project_id"] = project
 
-    cred = client.post(f"{client.identity_url}/credentials",
-                       json={"credential": body}).get("credential", {})
+    cred = svc.create_credential(body)
     console.print(f"[green]Credential created: {cred.get('id', '?')} (type: {cred_type})[/green]")
 
 
@@ -91,7 +90,6 @@ def credential_create(ctx, user, cred_type, blob, project):
 @click.pass_context
 def credential_set(ctx, credential_id, blob, project):
     """Update a credential."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     body: dict = {}
     if blob is not None:
         body["blob"] = blob
@@ -100,8 +98,8 @@ def credential_set(ctx, credential_id, blob, project):
     if not body:
         console.print("[yellow]Nothing to update.[/yellow]")
         return
-    client.patch(f"{client.identity_url}/credentials/{credential_id}",
-                 json={"credential": body})
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_credential(credential_id, body)
     console.print(f"[green]Credential {credential_id} updated.[/green]")
 
 
@@ -111,8 +109,8 @@ def credential_set(ctx, credential_id, blob, project):
 @click.pass_context
 def credential_delete(ctx, credential_id, yes):
     """Delete a credential."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     if not yes:
         click.confirm(f"Delete credential {credential_id}?", abort=True)
-    client.delete(f"{client.identity_url}/credentials/{credential_id}")
+    svc.delete_credential(credential_id)
     console.print(f"[green]Credential {credential_id} deleted.[/green]")

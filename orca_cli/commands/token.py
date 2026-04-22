@@ -6,10 +6,7 @@ import click
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail
-
-
-def _iam(client) -> str:
-    return client.identity_url
+from orca_cli.services.identity import IdentityService
 
 
 @click.group("token")
@@ -53,9 +50,8 @@ def token_issue(ctx, output_format, columns, fit_width, max_width, noindent):
 @click.pass_context
 def token_revoke(ctx, token_id, yes):
     """Revoke a token."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     if not yes:
         click.confirm(f"Revoke token {token_id[:16]}…?", abort=True)
-    client.delete(f"{_iam(client)}/v3/auth/tokens",
-                  headers={"X-Subject-Token": token_id})
+    svc.revoke_token(token_id)
     console.print("Token revoked.")

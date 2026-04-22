@@ -7,6 +7,7 @@ import click
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
+from orca_cli.services.identity import IdentityService
 
 
 @click.group()
@@ -21,13 +22,12 @@ def service() -> None:
 @click.pass_context
 def service_list(ctx, service_type, output_format, columns, fit_width, max_width, noindent):
     """List Keystone services."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     params = {}
     if service_type:
         params["type"] = service_type
 
-    services = client.get(f"{client.identity_url}/services",
-                          params=params).get("services", [])
+    services = svc.find_services(params=params or None)
 
     print_list(
         services,
@@ -51,8 +51,8 @@ def service_list(ctx, service_type, output_format, columns, fit_width, max_width
 @click.pass_context
 def service_show(ctx, service_id, output_format, columns, fit_width, max_width, noindent):
     """Show service details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    svc = client.get(f"{client.identity_url}/services/{service_id}").get("service", {})
+    ident = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc = ident.get_service(service_id)
 
     print_detail(
         [(k, str(svc.get(k, "") or "")) for k in
@@ -70,13 +70,12 @@ def service_show(ctx, service_id, output_format, columns, fit_width, max_width, 
 @click.pass_context
 def service_create(ctx, name, service_type, description, enable):
     """Create a Keystone service."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    ident = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {"name": name, "type": service_type, "enabled": enable}
     if description:
         body["description"] = description
 
-    svc = client.post(f"{client.identity_url}/services",
-                      json={"service": body}).get("service", {})
+    svc = ident.create_service(body)
     console.print(f"[green]Service '{name}' created: {svc.get('id', '?')}[/green]")
 
 
@@ -89,7 +88,6 @@ def service_create(ctx, name, service_type, description, enable):
 @click.pass_context
 def service_set(ctx, service_id, name, service_type, description, enable):
     """Update a Keystone service."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     body: dict = {}
     if name is not None:
         body["name"] = name
@@ -102,8 +100,8 @@ def service_set(ctx, service_id, name, service_type, description, enable):
     if not body:
         console.print("[yellow]Nothing to update.[/yellow]")
         return
-    client.patch(f"{client.identity_url}/services/{service_id}",
-                 json={"service": body})
+    ident = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    ident.update_service(service_id, body)
     console.print(f"[green]Service {service_id} updated.[/green]")
 
 
@@ -113,8 +111,8 @@ def service_set(ctx, service_id, name, service_type, description, enable):
 @click.pass_context
 def service_delete(ctx, service_id, yes):
     """Delete a Keystone service."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    ident = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     if not yes:
         click.confirm(f"Delete service {service_id}?", abort=True)
-    client.delete(f"{client.identity_url}/services/{service_id}")
+    ident.delete_service(service_id)
     console.print(f"[green]Service {service_id} deleted.[/green]")

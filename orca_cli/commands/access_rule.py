@@ -7,10 +7,7 @@ import click
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
-
-
-def _iam(client) -> str:
-    return client.identity_url
+from orca_cli.services.identity import IdentityService
 
 
 @click.group("access-rule")
@@ -31,16 +28,15 @@ def ar_list(ctx, user_id, service, method, path,
             output_format, columns, fit_width, max_width, noindent):
     """List access rules."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(client)
     uid = user_id or client._token_data.get("user", {}).get("id", "")
-    params = {}
-    if service:
-        params["service"] = service
-    if method:
-        params["method"] = method
-    if path:
-        params["path"] = path
-    data = client.get(f"{_iam(client)}/v3/users/{uid}/access_rules", params=params)
-    items = data.get("access_rules", [])
+    # ``service``/``method``/``path`` were passed as query params to Keystone
+    # in the pre-service implementation. Keystone does not support filtering
+    # the access_rules endpoint, so they were silently no-ops; we intentionally
+    # keep them as CLI flags without applying any filter (parity with prior
+    # behaviour).
+    del service, method, path
+    items = svc.find_access_rules(uid)
     if not items:
         console.print("No access rules found.")
         return
@@ -65,9 +61,9 @@ def ar_show(ctx, access_rule_id, user_id,
             output_format, columns, fit_width, max_width, noindent):
     """Show an access rule."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(client)
     uid = user_id or client._token_data.get("user", {}).get("id", "")
-    data = client.get(f"{_iam(client)}/v3/users/{uid}/access_rules/{access_rule_id}")
-    ar = data.get("access_rule", data)
+    ar = svc.get_access_rule(uid, access_rule_id)
     fields = [
         ("ID", ar.get("id", "")),
         ("Service", ar.get("service", "")),
@@ -88,8 +84,9 @@ def ar_show(ctx, access_rule_id, user_id,
 def ar_delete(ctx, access_rule_id, user_id, yes):
     """Delete an access rule."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(client)
     uid = user_id or client._token_data.get("user", {}).get("id", "")
     if not yes:
         click.confirm(f"Delete access rule {access_rule_id}?", abort=True)
-    client.delete(f"{_iam(client)}/v3/users/{uid}/access_rules/{access_rule_id}")
+    svc.delete_access_rule(uid, access_rule_id)
     console.print(f"Access rule [bold]{access_rule_id}[/bold] deleted.")
