@@ -6,51 +6,66 @@ OpenStack Rich Command-line Alternative — a unified CLI for managing OpenStack
 
 ## Highlights
 
-- **60+ command groups** covering all major OpenStack services
-- **Rich terminal output** — coloured tables powered by [Rich](https://github.com/Textualize/rich)
-- **Multi-account profiles** — named profiles, `clouds.yaml` and `OS_*` env var support
-- **Shell auto-completion** — Bash, Zsh, and Fish
-- **Orca-exclusive** — `overview`, `watch`, `doctor`, `audit`, `cleanup`, `export`
+- **60+ command groups** covering every major OpenStack service (Keystone, Nova, Neutron, Cinder, Glance, Swift, Heat, Octavia, Designate, Barbican, Magnum, Gnocchi, Aodh, CloudKitty, Placement, Freezer)
+- **Typed service layer** — every resource flows through a typed `*Service` class with TypedDict models, catching field-name typos at mypy time
+- **Rich terminal output** — coloured tables, trees and progress bars powered by [Rich](https://github.com/Textualize/rich)
+- **Multi-account profiles** — named profiles, `clouds.yaml` and `OS_*` env var support, transparent token caching
+- **Shell auto-completion** — Bash, Zsh, and Fish, with per-profile resource caching
+- **Orca-exclusive commands** — `overview`, `watch`, `doctor`, `audit`, `cleanup`, `export`, `find`, `ip-whois`
 
 ## Quick Start
 
 ```bash
-pip install .        # or: poetry install
+pip install orca-openstackclient
 orca setup           # interactive credential setup
 orca server list     # list your VMs
 ```
 
-## Supported Services
+From source (development):
 
-| Command | Service | Backend |
-|---|---|---|
-| `orca server` | Compute | Nova |
-| `orca flavor` | Flavors | Nova |
-| `orca image` | Images | Glance |
-| `orca network` | Networks, Subnets, Ports, Routers | Neutron |
-| `orca keypair` | SSH Key Pairs | Nova |
-| `orca volume` | Block Storage & Snapshots | Cinder |
-| `orca security-group` | Security Groups & Rules | Neutron |
-| `orca floating-ip` | Floating IPs | Neutron |
-| `orca loadbalancer` | Load Balancers, Listeners, Pools, Members | Octavia |
-| `orca secret` | Secrets & Containers | Barbican |
-| `orca cluster` | Kubernetes Clusters & Templates | Magnum |
-| `orca metric` | Metrics, Measures & Resources | Gnocchi |
-| `orca placement` | Placement API | Placement |
-| `orca stack` | Orchestration | Heat |
-| `orca backup` | Backups | Freezer |
-| `orca zone` / `orca recordset` | DNS | Designate |
-| `orca alarm` | Alarms | Aodh |
-| `orca catalog` | Service Endpoint Discovery | Keystone |
+```bash
+git clone https://github.com/stackopshq/orca-cli.git
+cd orca-cli
+poetry install --with dev
+poetry run orca --help
+```
+
+Requires Python **3.9 – 3.14**.
+
+## Commands at a glance
+
+### Compute (Nova)
+`server` · `server bulk` · `flavor` · `keypair` · `aggregate` · `hypervisor` · `availability-zone` · `compute-service` · `server-group` · `usage` · `limits` · `event`
+
+### Networking (Neutron)
+`network` · `floating-ip` · `security-group` · `subnet-pool` · `trunk` · `qos`
+
+### Storage
+`volume` · `image` (Glance) · `object` / `container` (Swift) · `backup` (Freezer)
+
+### Identity (Keystone)
+`project` · `user` · `role` · `domain` · `group` · `credential` · `application-credential` · `endpoint` · `endpoint-group` · `service` · `region` · `policy` · `trust` · `token` · `access-rule` · `limit` · `registered-limit` · `identity-provider` · `federation-protocol` · `mapping` · `service-provider` · `catalog`
+
+### Platform services
+`stack` (Heat) · `loadbalancer` (Octavia) · `zone` / `recordset` (Designate) · `secret` (Barbican) · `cluster` (Magnum) · `metric` (Gnocchi) · `alarm` (Aodh) · `rating` (CloudKitty) · `placement`
+
+### Orca-exclusive
+`overview` · `watch` · `doctor` · `audit` · `cleanup` · `export` · `find` · `ip-whois` · `quota` · `profile` · `setup`
 
 ## Documentation
 
 Full documentation: **[stackopshq.github.io/orca-cli](https://stackopshq.github.io/orca-cli/)**
 
+Local preview:
+
 ```bash
-pip install mkdocs-material
+poetry install --with docs
 mkdocs serve
 ```
+
+Release notes: see [CHANGELOG.md](CHANGELOG.md).
+
+Architectural decisions: [docs/adr/](docs/adr/).
 
 ## License
 
