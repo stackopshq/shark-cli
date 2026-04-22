@@ -105,6 +105,19 @@ readers can see how far along the work is.
   direct ``client.put`` in ``commands/server.py``), and routed the
   ``volume tree`` server-name lookup through ``ServerService.find``
   instead of a direct ``/servers/detail`` call.
+- 2026-04-22 — ``compute`` (Nova, non-server): ComputeService + Flavor
+  (+ FlavorAccess) / Keypair / Aggregate / Hypervisor (+ statistics) /
+  AvailabilityZone / ComputeService / ServerGroup / TenantUsage /
+  AbsoluteLimits TypedDicts. Eight command modules migrated:
+  ``commands/flavor.py`` (incl. extra-specs + tenant-access actions),
+  ``commands/keypair.py``, ``commands/aggregate.py`` (incl. add/remove
+  host, set/unset metadata, cache-image), ``commands/hypervisor.py``
+  (list/show/statistics/usage ranking), ``commands/availability_zone.py``,
+  ``commands/compute_service.py``, ``commands/server_group.py``,
+  ``commands/usage.py``, ``commands/limits.py`` (absolute),
+  ``commands/quota.py`` (Nova portion). Cross-service ``os-keypairs``
+  callers in ``overview.py``, ``export.py``, ``find.py`` route through
+  ComputeService. ServerService stays the owner of ``/servers``.
 - 2026-04-22 — ``network``: NetworkService + Network / Subnet / Port /
   Router / FloatingIp / SecurityGroup (+ SecurityGroupRule) /
   SubnetPool / Trunk (+ TrunkSubPort) / QosPolicy (+ QosRule) / Agent
