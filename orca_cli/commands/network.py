@@ -8,11 +8,7 @@ from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
-
-
-def _net_base(client) -> str:
-    return f"{client.network_url}/v2.0"
-
+from orca_cli.services.network import NetworkService
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Networks
@@ -88,9 +84,8 @@ def network_subnet() -> None:
 @click.pass_context
 def network_list(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List networks."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_net_base(client)}/networks")
-    networks = data.get("networks", [])
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    networks = svc.find()
 
     print_list(
         networks,
@@ -115,9 +110,8 @@ def network_list(ctx: click.Context, output_format: str, columns: tuple[str, ...
 @click.pass_context
 def network_show(ctx: click.Context, network_id: str, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show network details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_net_base(client)}/networks/{network_id}")
-    net = data.get("network", data)
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    net = svc.get(network_id)
 
     fields = []
     for key in ["id", "name", "status", "admin_state_up", "shared",
@@ -136,10 +130,8 @@ def network_show(ctx: click.Context, network_id: str, output_format: str, column
 @click.pass_context
 def network_create(ctx: click.Context, name: str, admin_state: bool, shared: bool) -> None:
     """Create a network."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    body = {"name": name, "admin_state_up": admin_state, "shared": shared}
-    data = client.post(f"{_net_base(client)}/networks", json={"network": body})
-    net = data.get("network", data)
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    net = svc.create({"name": name, "admin_state_up": admin_state, "shared": shared})
     console.print(f"[green]Network '{net.get('name')}' ({net.get('id')}) created.[/green]")
 
 
@@ -158,8 +150,8 @@ def network_update(ctx: click.Context, network_id: str, name: str | None, admin_
     if not body:
         console.print("[yellow]Nothing to update.[/yellow]")
         return
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.put(f"{_net_base(client)}/networks/{network_id}", json={"network": body})
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update(network_id, body)
     console.print(f"[green]Network {network_id} updated.[/green]")
 
 
@@ -171,8 +163,8 @@ def network_delete(ctx: click.Context, network_id: str, yes: bool) -> None:
     """Delete a network."""
     if not yes:
         click.confirm(f"Delete network {network_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{_net_base(client)}/networks/{network_id}")
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete(network_id)
     console.print(f"[green]Network {network_id} deleted.[/green]")
 
 
@@ -185,9 +177,8 @@ def network_delete(ctx: click.Context, network_id: str, yes: bool) -> None:
 @click.pass_context
 def subnet_list(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List subnets."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_net_base(client)}/subnets")
-    subnets = data.get("subnets", [])
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    subnets = svc.find_subnets()
 
     print_list(
         subnets,
@@ -212,9 +203,8 @@ def subnet_list(ctx: click.Context, output_format: str, columns: tuple[str, ...]
 @click.pass_context
 def subnet_show(ctx: click.Context, subnet_id: str, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show subnet details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_net_base(client)}/subnets/{subnet_id}")
-    sub = data.get("subnet", data)
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    sub = svc.get_subnet(subnet_id)
 
     fields = []
     for key in ["id", "name", "cidr", "ip_version", "gateway_ip", "enable_dhcp",
@@ -236,7 +226,7 @@ def subnet_show(ctx: click.Context, subnet_id: str, output_format: str, columns:
 def subnet_create(ctx: click.Context, name: str, network_id: str, cidr: str,
                   ip_version: str, gateway: str | None, dhcp: bool, dns: tuple) -> None:
     """Create a subnet."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {
         "name": name,
         "network_id": network_id,
@@ -249,8 +239,7 @@ def subnet_create(ctx: click.Context, name: str, network_id: str, cidr: str,
     if dns:
         body["dns_nameservers"] = list(dns)
 
-    data = client.post(f"{_net_base(client)}/subnets", json={"subnet": body})
-    sub = data.get("subnet", data)
+    sub = svc.create_subnet(body)
     console.print(f"[green]Subnet '{sub.get('name')}' ({sub.get('id')}) created — {cidr}.[/green]")
 
 
@@ -262,8 +251,8 @@ def subnet_delete(ctx: click.Context, subnet_id: str, yes: bool) -> None:
     """Delete a subnet."""
     if not yes:
         click.confirm(f"Delete subnet {subnet_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{_net_base(client)}/subnets/{subnet_id}")
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_subnet(subnet_id)
     console.print(f"[green]Subnet {subnet_id} deleted.[/green]")
 
 
@@ -277,12 +266,9 @@ def subnet_delete(ctx: click.Context, subnet_id: str, yes: bool) -> None:
 @click.pass_context
 def port_list(ctx: click.Context, network_id: str | None, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List ports."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    params = {}
-    if network_id:
-        params["network_id"] = network_id
-    data = client.get(f"{_net_base(client)}/ports", params=params)
-    ports = data.get("ports", [])
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    params = {"network_id": network_id} if network_id else None
+    ports = svc.find_ports(params=params)
 
     print_list(
         ports,
@@ -309,9 +295,8 @@ def port_list(ctx: click.Context, network_id: str | None, output_format: str, co
 @click.pass_context
 def port_show(ctx: click.Context, port_id: str, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show port details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_net_base(client)}/ports/{port_id}")
-    port = data.get("port", data)
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    port = svc.get_port(port_id)
 
     fields = []
     for key in ["id", "name", "mac_address", "fixed_ips", "status",
@@ -329,15 +314,14 @@ def port_show(ctx: click.Context, port_id: str, output_format: str, columns: tup
 @click.pass_context
 def port_create(ctx: click.Context, network_id: str, name: str | None, fixed_ip: str | None) -> None:
     """Create a port."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {"network_id": network_id}
     if name:
         body["name"] = name
     if fixed_ip:
         body["fixed_ips"] = [{"ip_address": fixed_ip}]
 
-    data = client.post(f"{_net_base(client)}/ports", json={"port": body})
-    port = data.get("port", data)
+    port = svc.create_port(body)
     ips = ", ".join(ip.get("ip_address", "") for ip in port.get("fixed_ips", []))
     console.print(f"[green]Port {port.get('id')} created — {ips}.[/green]")
 
@@ -357,8 +341,8 @@ def port_update(ctx: click.Context, port_id: str, name: str | None, admin_state:
     if not body:
         console.print("[yellow]Nothing to update.[/yellow]")
         return
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.put(f"{_net_base(client)}/ports/{port_id}", json={"port": body})
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_port(port_id, body)
     console.print(f"[green]Port {port_id} updated.[/green]")
 
 
@@ -370,8 +354,8 @@ def port_delete(ctx: click.Context, port_id: str, yes: bool) -> None:
     """Delete a port."""
     if not yes:
         click.confirm(f"Delete port {port_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{_net_base(client)}/ports/{port_id}")
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_port(port_id)
     console.print(f"[green]Port {port_id} deleted.[/green]")
 
 
@@ -384,9 +368,8 @@ def port_delete(ctx: click.Context, port_id: str, yes: bool) -> None:
 @click.pass_context
 def router_list(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List routers."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_net_base(client)}/routers")
-    routers = data.get("routers", [])
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    routers = svc.find_routers()
 
     print_list(
         routers,
@@ -411,9 +394,8 @@ def router_list(ctx: click.Context, output_format: str, columns: tuple[str, ...]
 @click.pass_context
 def router_show(ctx: click.Context, router_id: str, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show router details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_net_base(client)}/routers/{router_id}")
-    r = data.get("router", data)
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    r = svc.get_router(router_id)
 
     fields = []
     for key in ["id", "name", "status", "admin_state_up",
@@ -429,13 +411,12 @@ def router_show(ctx: click.Context, router_id: str, output_format: str, columns:
 @click.pass_context
 def router_create(ctx: click.Context, name: str, external_network: str | None) -> None:
     """Create a router."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {"name": name, "admin_state_up": True}
     if external_network:
         body["external_gateway_info"] = {"network_id": external_network}
 
-    data = client.post(f"{_net_base(client)}/routers", json={"router": body})
-    r = data.get("router", data)
+    r = svc.create_router(body)
     console.print(f"[green]Router '{r.get('name')}' ({r.get('id')}) created.[/green]")
 
 
@@ -454,8 +435,8 @@ def router_update(ctx: click.Context, router_id: str, name: str | None, external
     if not body:
         console.print("[yellow]Nothing to update.[/yellow]")
         return
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.put(f"{_net_base(client)}/routers/{router_id}", json={"router": body})
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_router(router_id, body)
     console.print(f"[green]Router {router_id} updated.[/green]")
 
 
@@ -467,8 +448,8 @@ def router_delete(ctx: click.Context, router_id: str, yes: bool) -> None:
     """Delete a router."""
     if not yes:
         click.confirm(f"Delete router {router_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{_net_base(client)}/routers/{router_id}")
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_router(router_id)
     console.print(f"[green]Router {router_id} deleted.[/green]")
 
 
@@ -478,9 +459,8 @@ def router_delete(ctx: click.Context, router_id: str, yes: bool) -> None:
 @click.pass_context
 def router_add_interface(ctx: click.Context, router_id: str, subnet_id: str) -> None:
     """Add a subnet interface to a router."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{_net_base(client)}/routers/{router_id}/add_router_interface"
-    client.put(url, json={"subnet_id": subnet_id})
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    svc.add_router_interface(router_id, {"subnet_id": subnet_id})
     console.print(f"[green]Subnet {subnet_id} added to router {router_id}.[/green]")
 
 
@@ -490,9 +470,8 @@ def router_add_interface(ctx: click.Context, router_id: str, subnet_id: str) -> 
 @click.pass_context
 def router_remove_interface(ctx: click.Context, router_id: str, subnet_id: str) -> None:
     """Remove a subnet interface from a router."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{_net_base(client)}/routers/{router_id}/remove_router_interface"
-    client.put(url, json={"subnet_id": subnet_id})
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    svc.remove_router_interface(router_id, {"subnet_id": subnet_id})
     console.print(f"[green]Subnet {subnet_id} removed from router {router_id}.[/green]")
 
 
@@ -517,18 +496,18 @@ def network_topology(ctx: click.Context, filter_net: str | None) -> None:
     from rich.tree import Tree
 
     client = ctx.find_object(OrcaContext).ensure_client()
-    base = _net_base(client)
+    svc = NetworkService(client)
 
     with console.status("[bold cyan]Building topology…[/bold cyan]"):
         # Fetch all resources
         if filter_net:
-            nets = [client.get(f"{base}/networks/{filter_net}").get("network", {})]
+            nets = [svc.get(filter_net)]
         else:
-            nets = client.get(f"{base}/networks").get("networks", [])
+            nets = svc.find()
 
-        subnets = client.get(f"{base}/subnets").get("subnets", [])
-        ports = client.get(f"{base}/ports").get("ports", [])
-        routers = client.get(f"{base}/routers").get("routers", [])
+        subnets = svc.find_subnets()
+        ports = svc.find_ports()
+        routers = svc.find_routers()
 
         # Fetch servers for name resolution
         try:
@@ -541,10 +520,10 @@ def network_topology(ctx: click.Context, filter_net: str | None) -> None:
         router_map = {r["id"]: r.get("name", r["id"]) for r in routers}
 
         # Ports indexed by network
-        ports_by_net: dict[str, list[dict]] = {}
-        for p in ports:
-            net_id = p.get("network_id", "")
-            ports_by_net.setdefault(net_id, []).append(p)
+        ports_by_net: dict[str, list] = {}
+        for port in ports:
+            net_id = port.get("network_id", "")
+            ports_by_net.setdefault(net_id, []).append(port)
 
     # Build tree
     root = Tree("[bold]Network Topology[/bold]")
@@ -617,7 +596,7 @@ def net_trace(ctx: click.Context, server_id: str) -> None:
     from rich.tree import Tree
 
     client = ctx.find_object(OrcaContext).ensure_client()
-    base = _net_base(client)
+    svc = NetworkService(client)
 
     # ── Resolve server ──
     try:
@@ -647,8 +626,7 @@ def net_trace(ctx: click.Context, server_id: str) -> None:
     )
 
     # ── Fetch all ports for this server ──
-    ports_data = client.get(f"{base}/ports", params={"device_id": srv_id})
-    ports = ports_data.get("ports", [])
+    ports = svc.find_ports(params={"device_id": srv_id})
 
     if not ports:
         tree.add("[yellow]No ports attached[/yellow]")
@@ -658,21 +636,16 @@ def net_trace(ctx: click.Context, server_id: str) -> None:
 
     # ── Fetch floating IPs, security groups, routers, subnets ──
     with console.status("[bold]Tracing network path..."):
-        fips_data = client.get(f"{base}/floatingips")
-        fips = fips_data.get("floatingips", [])
+        fips = svc.find_floating_ips()
         fip_by_port = {f["port_id"]: f for f in fips if f.get("port_id")}
 
-        sg_data = client.get(f"{base}/security-groups")
-        sg_map = {sg["id"]: sg for sg in sg_data.get("security_groups", [])}
+        sg_map = {sg["id"]: sg for sg in svc.find_security_groups()}
 
-        routers_data = client.get(f"{base}/routers")
-        routers = routers_data.get("routers", [])
+        routers = svc.find_routers()
 
-        subnets_data = client.get(f"{base}/subnets")
-        subnet_map = {s["id"]: s for s in subnets_data.get("subnets", [])}
+        subnet_map = {s["id"]: s for s in svc.find_subnets()}
 
-        networks_data = client.get(f"{base}/networks")
-        network_map = {n["id"]: n for n in networks_data.get("networks", [])}
+        network_map = {n["id"]: n for n in svc.find()}
 
     # ── Build trace for each port ──
     for port in ports:
@@ -749,9 +722,9 @@ def net_trace(ctx: click.Context, server_id: str) -> None:
             r_id = router.get("id", "")
             # Check if this router has an interface on any of this port's subnets
             try:
-                r_ports = client.get(f"{base}/ports", params={
+                r_ports = svc.find_ports(params={
                     "device_id": r_id, "device_owner": "network:router_interface"
-                }).get("ports", [])
+                })
             except Exception:
                 r_ports = []
             r_subnets = set()
@@ -820,7 +793,6 @@ def network_subnet_update(ctx: click.Context, subnet_id: str, name: str | None,
                           description: str | None, dns_nameservers: tuple[str, ...],
                           enable_dhcp: bool | None) -> None:
     """Update a subnet."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     body: dict = {}
     if name is not None:
         body["name"] = name
@@ -833,7 +805,8 @@ def network_subnet_update(ctx: click.Context, subnet_id: str, name: str | None,
     if not body:
         console.print("[yellow]Nothing to update.[/yellow]")
         return
-    client.put(f"{client.network_url}/v2.0/subnets/{subnet_id}", json={"subnet": body})
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_subnet(subnet_id, body)
     console.print(f"[green]Subnet {subnet_id} updated.[/green]")
 
 
@@ -850,13 +823,13 @@ def network_agent_list(ctx: click.Context, host: str | None, agent_type: str | N
                        output_format: str, columns: tuple[str, ...],
                        fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List Neutron agents."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    params = {}
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    params: dict = {}
     if host:
         params["host"] = host
     if agent_type:
         params["agent_type"] = agent_type
-    agents = client.get(f"{client.network_url}/v2.0/agents", params=params).get("agents", [])
+    agents = svc.find_agents(params=params or None)
     print_list(
         agents,
         [
@@ -884,8 +857,8 @@ def network_agent_show(ctx: click.Context, agent_id: str,
                        output_format: str, columns: tuple[str, ...],
                        fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show a Neutron agent's details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    agent = client.get(f"{client.network_url}/v2.0/agents/{agent_id}").get("agent", {})
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    agent = svc.get_agent(agent_id)
     print_detail(
         [(k, str(agent.get(k, "") or "")) for k in
          ["id", "agent_type", "binary", "host", "availability_zone",
@@ -903,7 +876,6 @@ def network_agent_show(ctx: click.Context, agent_id: str,
 def network_agent_set(ctx: click.Context, agent_id: str, enable: bool | None,
                       description: str | None) -> None:
     """Update a Neutron agent."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     body: dict = {}
     if enable is not None:
         body["admin_state_up"] = enable
@@ -912,7 +884,8 @@ def network_agent_set(ctx: click.Context, agent_id: str, enable: bool | None,
     if not body:
         console.print("[yellow]Nothing to update.[/yellow]")
         return
-    client.put(f"{client.network_url}/v2.0/agents/{agent_id}", json={"agent": body})
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_agent(agent_id, body)
     console.print(f"[green]Agent {agent_id} updated.[/green]")
 
 
@@ -922,10 +895,10 @@ def network_agent_set(ctx: click.Context, agent_id: str, enable: bool | None,
 @click.pass_context
 def network_agent_delete(ctx: click.Context, agent_id: str, yes: bool) -> None:
     """Delete a Neutron agent record."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     if not yes:
         click.confirm(f"Delete agent {agent_id}?", abort=True)
-    client.delete(f"{client.network_url}/v2.0/agents/{agent_id}")
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_agent(agent_id)
     console.print(f"[green]Agent {agent_id} deleted.[/green]")
 
 
@@ -944,12 +917,9 @@ def network_rbac_list(ctx: click.Context, object_type: str | None,
                       output_format: str, columns: tuple[str, ...],
                       fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List RBAC policies."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    params = {}
-    if object_type:
-        params["object_type"] = object_type
-    policies = client.get(f"{client.network_url}/v2.0/rbac-policies",
-                          params=params).get("rbac_policies", [])
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    params = {"object_type": object_type} if object_type else None
+    policies = svc.find_rbac_policies(params=params)
     print_list(
         policies,
         [
@@ -974,8 +944,8 @@ def network_rbac_show(ctx: click.Context, rbac_id: str,
                       output_format: str, columns: tuple[str, ...],
                       fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show an RBAC policy."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    p = client.get(f"{client.network_url}/v2.0/rbac-policies/{rbac_id}").get("rbac_policy", {})
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    p = svc.get_rbac_policy(rbac_id)
     print_detail(
         [(k, str(p.get(k, "") or "")) for k in
          ["id", "object_type", "object_id", "action", "target_tenant", "project_id"]],
@@ -1009,15 +979,13 @@ def network_rbac_create(ctx: click.Context, object_type: str, object_id: str,
         --action access_as_shared \\
         --target-project '*'
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
-    body = {
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    p = svc.create_rbac_policy({
         "object_type": object_type,
         "object_id": object_id,
         "action": action,
         "target_tenant": target_project,
-    }
-    p = client.post(f"{client.network_url}/v2.0/rbac-policies",
-                    json={"rbac_policy": body}).get("rbac_policy", {})
+    })
     console.print(f"[green]RBAC policy created: {p.get('id', '?')}[/green]")
 
 
@@ -1027,10 +995,10 @@ def network_rbac_create(ctx: click.Context, object_type: str, object_id: str,
 @click.pass_context
 def network_rbac_delete(ctx: click.Context, rbac_id: str, yes: bool) -> None:
     """Delete an RBAC policy."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     if not yes:
         click.confirm(f"Delete RBAC policy {rbac_id}?", abort=True)
-    client.delete(f"{client.network_url}/v2.0/rbac-policies/{rbac_id}")
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_rbac_policy(rbac_id)
     console.print(f"[green]RBAC policy {rbac_id} deleted.[/green]")
 
 
@@ -1047,11 +1015,8 @@ def network_rbac_update(ctx: click.Context, rbac_id: str, target_project: str) -
       orca network rbac-update <rbac-id> --target-project <project-id>
       orca network rbac-update <rbac-id> --target-project '*'
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.put(
-        f"{client.network_url}/v2.0/rbac-policies/{rbac_id}",
-        json={"rbac_policy": {"target_tenant": target_project}},
-    )
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_rbac_policy(rbac_id, {"target_tenant": target_project})
     console.print(f"[green]RBAC policy {rbac_id} updated.[/green]")
 
 
@@ -1080,14 +1045,13 @@ def network_port_unset(ctx: click.Context, port_id: str,
       orca network port-unset <port-id> --qos-policy
       orca network port-unset <port-id> --description
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
-    base = _net_base(client)
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
     did_something = False
     body: dict = {}
 
     if security_groups:
         # Fetch current SGs, remove the specified ones, then PUT
-        current = client.get(f"{base}/ports/{port_id}").get("port", {})
+        current = svc.get_port(port_id)
         current_sgs = [sg for sg in current.get("security_groups", [])
                        if sg not in security_groups]
         body["security_groups"] = current_sgs
@@ -1105,7 +1069,7 @@ def network_port_unset(ctx: click.Context, port_id: str,
         console.print("[yellow]Nothing to unset — provide --security-group, --qos-policy, or --description.[/yellow]")
         return
 
-    client.put(f"{base}/ports/{port_id}", json={"port": body})
+    svc.update_port(port_id, body)
     console.print(f"[green]Port {port_id} updated.[/green]")
 
 
@@ -1130,14 +1094,11 @@ def network_router_set_gateway(ctx: click.Context, router_id: str,
       orca network router-set-gateway <router-id> --external-network <net-id>
       orca network router-set-gateway <router-id> --external-network <net-id> --enable-snat
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
     gw: dict = {"network_id": network_id}
     if snat is not None:
         gw["enable_snat"] = snat
-    client.put(
-        f"{_net_base(client)}/routers/{router_id}",
-        json={"router": {"external_gateway_info": gw}},
-    )
+    svc.update_router(router_id, {"external_gateway_info": gw})
     console.print(f"[green]Gateway set on router {router_id} → network {network_id}.[/green]")
 
 
@@ -1151,11 +1112,8 @@ def network_router_unset_gateway(ctx: click.Context, router_id: str) -> None:
     Example:
       orca network router-unset-gateway <router-id>
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.put(
-        f"{_net_base(client)}/routers/{router_id}",
-        json={"router": {"external_gateway_info": {}}},
-    )
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_router(router_id, {"external_gateway_info": {}})
     console.print(f"[green]Gateway removed from router {router_id}.[/green]")
 
 
@@ -1179,11 +1137,8 @@ def network_router_add_route(ctx: click.Context, router_id: str,
     Example:
       orca network router-add-route <router-id> --destination 10.1.0.0/24 --nexthop 192.168.1.1
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.put(
-        f"{_net_base(client)}/routers/{router_id}/add_extraroutes",
-        json={"router": {"routes": [{"destination": destination, "nexthop": nexthop}]}},
-    )
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    svc.add_router_routes(router_id, [{"destination": destination, "nexthop": nexthop}])
     console.print(
         f"[green]Route {destination} via {nexthop} added to router {router_id}.[/green]"
     )
@@ -1204,11 +1159,8 @@ def network_router_remove_route(ctx: click.Context, router_id: str,
     Example:
       orca network router-remove-route <router-id> --destination 10.1.0.0/24 --nexthop 192.168.1.1
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.put(
-        f"{_net_base(client)}/routers/{router_id}/remove_extraroutes",
-        json={"router": {"routes": [{"destination": destination, "nexthop": nexthop}]}},
-    )
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    svc.remove_router_routes(router_id, [{"destination": destination, "nexthop": nexthop}])
     console.print(
         f"[green]Route {destination} via {nexthop} removed from router {router_id}.[/green]"
     )
@@ -1224,11 +1176,10 @@ def network_router_remove_route(ctx: click.Context, router_id: str,
 @click.pass_context
 def network_segment_list(ctx, network_id, output_format, columns, fit_width, max_width, noindent):
     """List network segments."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
     params = {"network_id": network_id} if network_id else None
-    data = client.get(f"{_net_base(client)}/segments", params=params)
     print_list(
-        data.get("segments", []),
+        svc.find_segments(params=params),
         [
             ("ID", "id", {"style": "cyan", "no_wrap": True}),
             ("Name", "name", {"style": "bold"}),
@@ -1250,8 +1201,8 @@ def network_segment_list(ctx, network_id, output_format, columns, fit_width, max
 @click.pass_context
 def network_segment_show(ctx, segment_id, output_format, columns, fit_width, max_width, noindent):
     """Show a network segment."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    s = client.get(f"{_net_base(client)}/segments/{segment_id}").get("segment", {})
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    s = svc.get_segment(segment_id)
     print_detail(
         [(k, str(s.get(k, "") or "")) for k in
          ("id", "name", "network_id", "network_type",
@@ -1275,7 +1226,7 @@ def network_segment_show(ctx, segment_id, output_format, columns, fit_width, max
 def network_segment_create(ctx, name, network_id, network_type, physical_network,
                            segmentation_id, description):
     """Create a network segment."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {"name": name, "network_id": network_id, "network_type": network_type}
     if physical_network:
         body["physical_network"] = physical_network
@@ -1283,8 +1234,7 @@ def network_segment_create(ctx, name, network_id, network_type, physical_network
         body["segmentation_id"] = segmentation_id
     if description:
         body["description"] = description
-    data = client.post(f"{_net_base(client)}/segments", json={"segment": body})
-    s = data.get("segment", data)
+    s = svc.create_segment(body)
     console.print(f"[green]Segment '{s.get('name')}' ({s.get('id')}) created.[/green]")
 
 
@@ -1303,8 +1253,8 @@ def network_segment_set(ctx, segment_id, name, description):
     if not body:
         console.print("[yellow]Nothing to update.[/yellow]")
         return
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.put(f"{_net_base(client)}/segments/{segment_id}", json={"segment": body})
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_segment(segment_id, body)
     console.print(f"[green]Segment {segment_id} updated.[/green]")
 
 
@@ -1316,8 +1266,8 @@ def network_segment_delete(ctx, segment_id, yes):
     """Delete a network segment."""
     if not yes:
         click.confirm(f"Delete segment {segment_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{_net_base(client)}/segments/{segment_id}")
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_segment(segment_id)
     console.print(f"[green]Segment {segment_id} deleted.[/green]")
 
 
@@ -1342,11 +1292,9 @@ def network_auto_allocated_topology_show(ctx, project_id, check_resources,
       orca network auto-allocated-topology-show --project-id <pid>
       orca network auto-allocated-topology-show --check-resources
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
-    scope = project_id or "null"
-    params = {"fields": "dry-run"} if check_resources else None
-    data = client.get(f"{_net_base(client)}/auto-allocated-topology/{scope}", params=params)
-    topo = data.get("auto_allocated_topology", data)
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    topo = svc.get_auto_allocated_topology(project_id or "null",
+                                           dry_run=check_resources)
     print_detail(
         [(k, str(topo.get(k, "") or "")) for k in
          ("id", "tenant_id")],
@@ -1363,9 +1311,8 @@ def network_auto_allocated_topology_delete(ctx, project_id, yes):
     """Delete the auto-allocated topology for a project."""
     if not yes:
         click.confirm("Delete auto-allocated topology?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    scope = project_id or "null"
-    client.delete(f"{_net_base(client)}/auto-allocated-topology/{scope}")
+    svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_auto_allocated_topology(project_id or "null")
     console.print("[green]Auto-allocated topology deleted.[/green]")
 
 
