@@ -6,10 +6,7 @@ import click
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import output_options, print_list
-
-
-def _nova(client) -> str:
-    return client.compute_url
+from orca_cli.services.compute import ComputeService
 
 
 @click.group(name="availability-zone")
@@ -25,11 +22,8 @@ def availability_zone(ctx: click.Context) -> None:
 @click.pass_context
 def az_list(ctx, long_format, output_format, columns, fit_width, max_width, noindent):
     """List availability zones."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_nova(client)}/os-availability-zone/detail"
-                      if long_format else f"{_nova(client)}/os-availability-zone")
-
-    zones = data.get("availabilityZoneInfo", [])
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
+    zones = svc.find_availability_zones(detail=long_format)
     print_list(
         zones,
         [

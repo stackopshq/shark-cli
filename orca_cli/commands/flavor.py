@@ -7,6 +7,7 @@ import click
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
+from orca_cli.services.compute import ComputeService
 
 
 @click.group()
@@ -29,8 +30,8 @@ def flavor_list(ctx: click.Context, limit: int | None,
     With no ``--limit`` the command auto-paginates through all flavors using
     the Nova ``marker`` cursor (useful on clouds exposing hundreds of flavors).
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
-    flavors: list[dict] = []
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
+    flavors: list = []
     # Nova caps a single page at 1000; walk until we've seen them all.
     page_size = min(limit, 1000) if limit else 1000
     marker: str | None = None
@@ -38,8 +39,7 @@ def flavor_list(ctx: click.Context, limit: int | None,
         params: dict = {"limit": page_size}
         if marker:
             params["marker"] = marker
-        page = client.get(f"{client.compute_url}/flavors/detail", params=params)
-        batch = page.get("flavors", [])
+        batch = svc.find_flavors(params=params)
         if not batch:
             break
         flavors.extend(batch)
@@ -77,9 +77,8 @@ def flavor_list(ctx: click.Context, limit: int | None,
 @click.pass_context
 def flavor_show(ctx: click.Context, flavor_id: str, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show flavor details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{client.compute_url}/flavors/{flavor_id}")
-    f = data.get("flavor", data)
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
+    f = svc.get_flavor(flavor_id)
 
     extra = f.get("extra_specs") or {}
     fields = [
@@ -118,7 +117,7 @@ def flavor_create(ctx: click.Context, name: str, vcpus: int, ram: int, disk: int
                   ephemeral: int, swap: int, rxtx_factor: float, is_public: bool,
                   flavor_id: str) -> None:
     """Create a flavor."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {
         "name": name, "vcpus": vcpus, "ram": ram, "disk": disk,
         "OS-FLV-EXT-DATA:ephemeral": ephemeral,
@@ -130,8 +129,7 @@ def flavor_create(ctx: click.Context, name: str, vcpus: int, ram: int, disk: int
     if flavor_id != "auto":
         body["id"] = flavor_id
 
-    data = client.post(f"{client.compute_url}/flavors", json={"flavor": body})
-    f = data.get("flavor", data)
+    f = svc.create_flavor(body)
     console.print(f"[green]Flavor '{f.get('name')}' ({f.get('id')}) created.[/green]")
 
 
@@ -143,8 +141,8 @@ def flavor_delete(ctx: click.Context, flavor_id: str, yes: bool) -> None:
     """Delete a flavor."""
     if not yes:
         click.confirm(f"Delete flavor {flavor_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{client.compute_url}/flavors/{flavor_id}")
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_flavor(flavor_id)
     console.print(f"[green]Flavor {flavor_id} deleted.[/green]")
 
 
@@ -164,15 +162,14 @@ def flavor_set(ctx: click.Context, flavor_id: str, properties: tuple[str, ...]) 
     if not properties:
         console.print("[yellow]No properties specified.[/yellow]")
         return
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
     specs = {}
     for prop in properties:
         if "=" not in prop:
             raise click.UsageError(f"Invalid property format '{prop}', expected KEY=VALUE.")
         k, v = prop.split("=", 1)
         specs[k] = v
-    client.post(f"{client.compute_url}/flavors/{flavor_id}/os-extra-specs",
-                json={"extra_specs": specs})
+    svc.set_flavor_extra_specs(flavor_id, specs)
     console.print(f"[green]Extra specs updated on flavor {flavor_id}.[/green]")
 
 
@@ -186,9 +183,9 @@ def flavor_unset(ctx: click.Context, flavor_id: str, properties: tuple[str, ...]
     if not properties:
         console.print("[yellow]No properties specified.[/yellow]")
         return
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
     for key in properties:
-        client.delete(f"{client.compute_url}/flavors/{flavor_id}/os-extra-specs/{key}")
+        svc.unset_flavor_extra_spec(flavor_id, key)
     console.print(f"[green]Extra specs removed from flavor {flavor_id}.[/green]")
 
 
@@ -202,10 +199,8 @@ def flavor_access_list(ctx: click.Context, flavor_id: str,
                        output_format: str, columns: tuple[str, ...],
                        fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List projects that have access to a private flavor."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    accesses = client.get(
-        f"{client.compute_url}/flavors/{flavor_id}/os-flavor-access"
-    ).get("flavor_access", [])
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
+    accesses = svc.list_flavor_access(flavor_id)
 
     print_list(
         accesses,
@@ -226,11 +221,8 @@ def flavor_access_list(ctx: click.Context, flavor_id: str,
 @click.pass_context
 def flavor_access_add(ctx: click.Context, flavor_id: str, project_id: str) -> None:
     """Grant a project access to a private flavor."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.post(
-        f"{client.compute_url}/flavors/{flavor_id}/action",
-        json={"addTenantAccess": {"tenant": project_id}},
-    )
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
+    svc.add_flavor_access(flavor_id, project_id)
     console.print(f"[green]Project {project_id} now has access to flavor {flavor_id}.[/green]")
 
 
@@ -241,11 +233,8 @@ def flavor_access_add(ctx: click.Context, flavor_id: str, project_id: str) -> No
 @click.pass_context
 def flavor_access_remove(ctx: click.Context, flavor_id: str, project_id: str, yes: bool) -> None:
     """Revoke a project's access to a private flavor."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
     if not yes:
         click.confirm(f"Remove project {project_id} from flavor {flavor_id}?", abort=True)
-    client.post(
-        f"{client.compute_url}/flavors/{flavor_id}/action",
-        json={"removeTenantAccess": {"tenant": project_id}},
-    )
+    svc.remove_flavor_access(flavor_id, project_id)
     console.print(f"[green]Project {project_id} access to flavor {flavor_id} revoked.[/green]")

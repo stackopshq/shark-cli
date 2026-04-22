@@ -6,10 +6,7 @@ import click
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import output_options, print_detail, print_list
-
-
-def _nova(client) -> str:
-    return client.compute_url
+from orca_cli.services.compute import ComputeService
 
 
 @click.group()
@@ -24,10 +21,9 @@ def hypervisor(ctx: click.Context) -> None:
 @click.pass_context
 def hypervisor_list(ctx, output_format, columns, fit_width, max_width, noindent):
     """List hypervisors."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_nova(client)}/os-hypervisors/detail")
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
     print_list(
-        data.get("hypervisors", []),
+        svc.find_hypervisors(),
         [
             ("ID", "id", {"style": "cyan"}),
             ("Hostname", "hypervisor_hostname", {"style": "bold"}),
@@ -51,9 +47,8 @@ def hypervisor_list(ctx, output_format, columns, fit_width, max_width, noindent)
 @click.pass_context
 def hypervisor_show(ctx, hypervisor_id, output_format, columns, fit_width, max_width, noindent):
     """Show hypervisor details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_nova(client)}/os-hypervisors/{hypervisor_id}")
-    h = data.get("hypervisor", data)
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
+    h = svc.get_hypervisor(hypervisor_id)
     print_detail(
         [
             ("ID", str(h.get("id", ""))),
@@ -80,9 +75,8 @@ def hypervisor_show(ctx, hypervisor_id, output_format, columns, fit_width, max_w
 @click.pass_context
 def hypervisor_stats(ctx):
     """Show aggregated hypervisor statistics."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_nova(client)}/os-hypervisors/statistics")
-    stats = data.get("hypervisor_statistics", data)
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
+    stats = svc.hypervisor_statistics()
 
     from rich.table import Table
     table = Table(title="Hypervisor Statistics", show_header=False)
@@ -141,9 +135,8 @@ def hypervisor_usage(ctx, sort_by, reverse, threshold, top_n,
       Yellow 70–90%  — monitor closely
       Red    ≥ 90%   — critical
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_nova(client)}/os-hypervisors/detail")
-    hypervisors = data.get("hypervisors", [])
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
+    hypervisors = svc.find_hypervisors()
 
     enriched = []
     for h in hypervisors:

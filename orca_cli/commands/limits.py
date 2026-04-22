@@ -5,10 +5,7 @@ from __future__ import annotations
 import click
 
 from orca_cli.core.context import OrcaContext
-
-
-def _nova(client) -> str:
-    return client.compute_url
+from orca_cli.services.compute import ComputeService
 
 
 @click.group()
@@ -23,13 +20,9 @@ def limits(ctx: click.Context) -> None:
 @click.pass_context
 def limits_show(ctx, project_id):
     """Show compute quotas and current usage for this project."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    params = {}
-    if project_id:
-        params["tenant_id"] = project_id
-    data = client.get(f"{_nova(client)}/limits", params=params)
-    lims = data.get("limits", {})
-    absolute = lims.get("absolute", {})
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
+    params = {"tenant_id": project_id} if project_id else None
+    absolute = svc.get_limits(params=params)
 
     from rich.table import Table
     table = Table(title="Compute Limits", show_lines=False)

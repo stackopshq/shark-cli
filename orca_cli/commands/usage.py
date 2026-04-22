@@ -6,6 +6,7 @@ import click
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_list
+from orca_cli.services.compute import ComputeService
 
 
 @click.command()
@@ -28,7 +29,7 @@ def usage(ctx: click.Context, start: str | None, end: str | None,
     """
     from datetime import datetime, timedelta, timezone
 
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
 
     now = datetime.now(timezone.utc)
     if end:
@@ -44,12 +45,9 @@ def usage(ctx: click.Context, start: str | None, end: str | None,
     end_str = end_dt.strftime("%Y-%m-%dT23:59:59")
 
     with console.status("[bold cyan]Fetching usage data…[/bold cyan]"):
-        data = client.get(
-            f"{client.compute_url}/os-simple-tenant-usage",
+        usages = svc.find_tenant_usages(
             params={"start": start_str, "end": end_str, "detailed": 1},
         )
-
-    usages = data.get("tenant_usages", [])
     if not usages:
         console.print("[yellow]No usage data for this period.[/yellow]")
         return

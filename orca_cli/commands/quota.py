@@ -6,6 +6,7 @@ import click
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_list
+from orca_cli.services.compute import ComputeService
 
 
 @click.command()
@@ -20,7 +21,7 @@ def quota(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_
     with console.status("[bold cyan]Fetching quotas…[/bold cyan]"):
         # ── Nova (compute) ───────────────────────────────────────────
         try:
-            nova = client.get(f"{client.compute_url}/limits").get("limits", {}).get("absolute", {})
+            nova = ComputeService(client).get_limits()
             rows.extend([
                 _row("Compute", "Instances", nova.get("totalInstancesUsed", 0), nova.get("maxTotalInstances", -1)),
                 _row("Compute", "vCPUs", nova.get("totalCoresUsed", 0), nova.get("maxTotalCores", -1)),

@@ -6,6 +6,7 @@ import click
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_list
+from orca_cli.services.compute import ComputeService
 
 
 @click.group("compute-service")
@@ -22,15 +23,14 @@ def compute_service() -> None:
 def compute_service_list(ctx, host, binary,
                          output_format, columns, fit_width, max_width, noindent):
     """List compute services."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    params = {}
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
+    params: dict = {}
     if host:
         params["host"] = host
     if binary:
         params["binary"] = binary
 
-    services = client.get(f"{client.compute_url}/os-services",
-                          params=params).get("services", [])
+    services = svc.find_services(params=params or None)
 
     print_list(
         services,
@@ -75,7 +75,6 @@ def compute_service_set(ctx, service_id, enable, disabled_reason, force_down):
       orca compute-service set 1 --enable
       orca compute-service set 1 --force-down
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
     body: dict = {}
 
     if enable is not None:
@@ -89,7 +88,8 @@ def compute_service_set(ctx, service_id, enable, disabled_reason, force_down):
         console.print("[yellow]Nothing to update. Use --enable/--disable or --force-down.[/yellow]")
         return
 
-    client.put(f"{client.compute_url}/os-services/{service_id}", json=body)
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_service(service_id, body)
     console.print(f"[green]Compute service {service_id} updated.[/green]")
 
 
@@ -102,8 +102,8 @@ def compute_service_delete(ctx, service_id, yes):
 
     Use this to remove stale service entries after a host is decommissioned.
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
     if not yes:
         click.confirm(f"Force-delete compute service {service_id}?", abort=True)
-    client.delete(f"{client.compute_url}/os-services/{service_id}")
+    svc.delete_service(service_id)
     console.print(f"[green]Compute service {service_id} deleted.[/green]")

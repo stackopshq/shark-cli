@@ -10,6 +10,7 @@ import click
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import safe_output_path
+from orca_cli.services.compute import ComputeService
 
 _DEFAULT_KEY_DIR = Path.home() / ".ssh"
 
@@ -28,11 +29,8 @@ def keypair(ctx: click.Context) -> None:
 @click.pass_context
 def keypair_list(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List key pairs."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.compute_url}/os-keypairs"
-    data = client.get(url)
-
-    keypairs = [kp.get("keypair", kp) for kp in data.get("keypairs", [])]
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
+    keypairs = [kp.get("keypair", kp) for kp in svc.find_keypairs()]
 
     print_list(
         keypairs,
@@ -56,11 +54,8 @@ def keypair_list(ctx: click.Context, output_format: str, columns: tuple[str, ...
 @click.pass_context
 def keypair_show(ctx: click.Context, name: str, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show key pair details (fingerprint & public key)."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.compute_url}/os-keypairs/{name}"
-    data = client.get(url)
-
-    kp = data.get("keypair", data)
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
+    kp = svc.get_keypair(name)
 
     print_detail(
         [
@@ -98,12 +93,8 @@ def keypair_create(ctx: click.Context, name: str, save_to: str | None) -> None:
     OpenStack generates both keys. The private key is returned ONCE
     and saved locally. The public key is stored server-side.
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
-
-    url = f"{client.compute_url}/os-keypairs"
-    data = client.post(url, json={"keypair": {"name": name}})
-
-    kp = data.get("keypair", data)
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
+    kp = svc.create_keypair({"name": name})
     fingerprint = kp.get("fingerprint", "")
     private_key = kp.get("private_key", "")
 
@@ -188,11 +179,8 @@ def keypair_generate(ctx: click.Context, name: str, key_type: str, bits: int | N
     console.print(f"  [cyan]Public key:[/cyan]  {pub_path}")
 
     pub_content = pub_path.read_text().strip()
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.compute_url}/os-keypairs"
-    data = client.post(url, json={"keypair": {"name": name, "public_key": pub_content}})
-
-    kp = data.get("keypair", data)
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
+    kp = svc.create_keypair({"name": name, "public_key": pub_content})
     console.print(f"\n[bold green]Key pair '{name}' generated and uploaded![/bold green]")
     console.print(f"  [cyan]Fingerprint:[/cyan] {kp.get('fingerprint', '')}")
     console.print(f"\n  ssh -i {priv_path} <user>@<ip>\n")
@@ -240,11 +228,8 @@ def keypair_upload(ctx: click.Context, name: str, public_key_file: str | None, p
                 "Use --public-key-file or --public-key."
             )
 
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.compute_url}/os-keypairs"
-    data = client.post(url, json={"keypair": {"name": name, "public_key": pub_content}})
-
-    kp = data.get("keypair", data)
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
+    kp = svc.create_keypair({"name": name, "public_key": pub_content})
     console.print(f"\n[bold green]Public key '{kp.get('name')}' uploaded.[/bold green]")
     console.print(f"  [cyan]Fingerprint:[/cyan] {kp.get('fingerprint', '')}\n")
 
@@ -260,7 +245,6 @@ def keypair_delete(ctx: click.Context, name: str, yes: bool) -> None:
     if not yes:
         click.confirm(f"Delete key pair '{name}'?", abort=True)
 
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.compute_url}/os-keypairs/{name}"
-    client.delete(url)
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_keypair(name)
     console.print(f"[green]Key pair '{name}' deleted.[/green]")

@@ -180,8 +180,10 @@ class ComputeService:
 
     # ── compute services (os-services) ─────────────────────────────────
 
-    def find_services(self) -> list[ComputeServiceModel]:
-        data = self._client.get(f"{self._base}/os-services")
+    def find_services(
+        self, *, params: dict[str, Any] | None = None,
+    ) -> list[ComputeServiceModel]:
+        data = self._client.get(f"{self._base}/os-services", params=params)
         return data.get("services", [])
 
     def update_service(self, service_id: str,
@@ -195,8 +197,11 @@ class ComputeService:
 
     # ── server groups ──────────────────────────────────────────────────
 
-    def find_server_groups(self) -> list[ServerGroup]:
-        data = self._client.get(f"{self._base}/os-server-groups")
+    def find_server_groups(
+        self, *, params: dict[str, Any] | None = None,
+    ) -> list[ServerGroup]:
+        data = self._client.get(f"{self._base}/os-server-groups",
+                                params=params)
         return data.get("server_groups", [])
 
     def get_server_group(self, group_id: str) -> ServerGroup:
@@ -212,6 +217,16 @@ class ComputeService:
         self._client.delete(f"{self._base}/os-server-groups/{group_id}")
 
     # ── usage & limits ─────────────────────────────────────────────────
+
+    def find_tenant_usages(
+        self, *, params: dict[str, Any] | None = None,
+    ) -> list[TenantUsage]:
+        """All tenants usage (admin). Pass start/end/detailed in params."""
+        data = self._client.get(
+            f"{self._base}/os-simple-tenant-usage",
+            params=params,
+        )
+        return data.get("tenant_usages", [])
 
     def get_tenant_usage(
         self, tenant_id: str, *,

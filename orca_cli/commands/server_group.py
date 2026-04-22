@@ -6,10 +6,7 @@ import click
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
-
-
-def _nova(client) -> str:
-    return client.compute_url
+from orca_cli.services.compute import ComputeService
 
 
 @click.group(name="server-group")
@@ -25,11 +22,10 @@ def server_group(ctx: click.Context) -> None:
 @click.pass_context
 def server_group_list(ctx, all_projects, output_format, columns, fit_width, max_width, noindent):
     """List server groups."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    params = {"all_projects": "true"} if all_projects else {}
-    data = client.get(f"{_nova(client)}/os-server-groups", params=params)
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
+    params = {"all_projects": "true"} if all_projects else None
     print_list(
-        data.get("server_groups", []),
+        svc.find_server_groups(params=params),
         [
             ("ID", "id", {"style": "cyan", "no_wrap": True}),
             ("Name", "name", {"style": "bold"}),
@@ -49,9 +45,8 @@ def server_group_list(ctx, all_projects, output_format, columns, fit_width, max_
 @click.pass_context
 def server_group_show(ctx, group_id, output_format, columns, fit_width, max_width, noindent):
     """Show server group details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_nova(client)}/os-server-groups/{group_id}")
-    sg = data.get("server_group", data)
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
+    sg = svc.get_server_group(group_id)
     policies = sg.get("policies") or sg.get("policy") or []
     print_detail(
         [
@@ -86,10 +81,8 @@ def server_group_create(ctx, name, policy):
       soft-anti-affinity — prefer different hosts
       soft-affinity      — prefer same host
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.post(f"{_nova(client)}/os-server-groups",
-                       json={"server_group": {"name": name, "policies": [policy]}})
-    sg = data.get("server_group", data)
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
+    sg = svc.create_server_group({"name": name, "policies": [policy]})
     console.print(f"[green]Server group '{sg.get('name')}' ({sg.get('id')}) created "
                   f"with policy '{policy}'.[/green]")
 
@@ -102,6 +95,6 @@ def server_group_delete(ctx, group_id, yes):
     """Delete a server group."""
     if not yes:
         click.confirm(f"Delete server group {group_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{_nova(client)}/os-server-groups/{group_id}")
+    svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_server_group(group_id)
     console.print(f"[green]Server group {group_id} deleted.[/green]")
