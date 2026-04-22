@@ -9,10 +9,7 @@ import click
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import safe_output_path
-
-
-def _dns(client) -> str:
-    return client.dns_url
+from orca_cli.services.dns import DnsService
 
 
 def _status_style(status: str) -> str:
@@ -27,7 +24,7 @@ def _status_style(status: str) -> str:
     return "dim"
 
 
-def _resolve_zone_id(client, zone: str) -> str:
+def _resolve_zone_id(svc: DnsService, zone: str) -> str:
     """Resolve a zone argument to an ID.
 
     If *zone* looks like a UUID it is returned as-is.  Otherwise the zone list
@@ -37,8 +34,7 @@ def _resolve_zone_id(client, zone: str) -> str:
     if len(zone) == 36 and "-" in zone:
         return zone
     # Try matching by name
-    data = client.get(f"{_dns(client)}/v2/zones", params={"name": zone})
-    zones = data.get("zones", [])
+    zones = svc.find_zones(params={"name": zone})
     if zones:
         return zones[0]["id"]
     # Fallback: treat as ID anyway (let the API return a useful error)
@@ -74,10 +70,11 @@ def zone(ctx: click.Context) -> None:
 def zone_list(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List DNS zones."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_dns(client)}/v2/zones")
+    svc = DnsService(client)
+    zones = svc.find_zones()
 
     print_list(
-        data.get("zones", []),
+        zones,
         [
             ("ID", "id", {"style": "cyan", "no_wrap": True}),
             ("Name", "name", {"style": "bold"}),
@@ -104,8 +101,9 @@ def zone_show(ctx: click.Context, zone: str, output_format: str, columns: tuple[
     ZONE can be a zone ID or name.
     """
     client = ctx.find_object(OrcaContext).ensure_client()
-    zone_id = _resolve_zone_id(client, zone)
-    data = client.get(f"{_dns(client)}/v2/zones/{zone_id}")
+    svc = DnsService(client)
+    zone_id = _resolve_zone_id(svc, zone)
+    data = svc.get_zone(zone_id)
 
     fields = [
         (key, str(data.get(key, "") or ""))
@@ -140,6 +138,7 @@ def zone_create(ctx: click.Context, name: str, email: str, ttl: int | None,
         raise click.BadParameter("Zone name must end with a dot (e.g. 'example.com.').", param_hint="'NAME'")
 
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = DnsService(client)
     body: dict = {"name": name, "email": email, "type": zone_type.upper()}
     if ttl is not None:
         body["ttl"] = ttl
@@ -148,7 +147,7 @@ def zone_create(ctx: click.Context, name: str, email: str, ttl: int | None,
     if masters:
         body["masters"] = list(masters)
 
-    data = client.post(f"{_dns(client)}/v2/zones", json=body)
+    data = svc.create_zone(body)
     console.print(f"[green]Zone '{data.get('name', name)}' created (ID: {data.get('id', '?')}).[/green]")
 
 
@@ -165,7 +164,8 @@ def zone_set(ctx: click.Context, zone: str, email: str | None,
     ZONE can be a zone ID or name.
     """
     client = ctx.find_object(OrcaContext).ensure_client()
-    zone_id = _resolve_zone_id(client, zone)
+    svc = DnsService(client)
+    zone_id = _resolve_zone_id(svc, zone)
 
     body: dict = {}
     if email is not None:
@@ -179,7 +179,7 @@ def zone_set(ctx: click.Context, zone: str, email: str | None,
         console.print("[yellow]Nothing to update — provide at least one option.[/yellow]")
         return
 
-    client.patch(f"{_dns(client)}/v2/zones/{zone_id}", json=body)
+    svc.update_zone(zone_id, body)
     console.print(f"[green]Zone {zone_id} updated.[/green]")
 
 
@@ -193,12 +193,13 @@ def zone_delete(ctx: click.Context, zone: str, yes: bool) -> None:
     ZONE can be a zone ID or name.
     """
     client = ctx.find_object(OrcaContext).ensure_client()
-    zone_id = _resolve_zone_id(client, zone)
+    svc = DnsService(client)
+    zone_id = _resolve_zone_id(svc, zone)
 
     if not yes:
         click.confirm(f"Delete zone {zone_id}?", abort=True)
 
-    client.delete(f"{_dns(client)}/v2/zones/{zone_id}")
+    svc.delete_zone(zone_id)
     console.print(f"[green]Zone {zone_id} deleted.[/green]")
 
 
@@ -217,23 +218,21 @@ def zone_tree(ctx: click.Context, zone: str) -> None:
     from rich.tree import Tree
 
     client = ctx.find_object(OrcaContext).ensure_client()
-    zone_id = _resolve_zone_id(client, zone)
+    svc = DnsService(client)
+    zone_id = _resolve_zone_id(svc, zone)
 
-    zone_data = client.get(f"{_dns(client)}/v2/zones/{zone_id}")
+    zone_data = svc.get_zone(zone_id)
     zone_name = zone_data.get("name", zone_id)
 
-    # Fetch all recordsets (paginate if necessary)
-    recordsets: list[dict] = []
-    url: str | None = f"{_dns(client)}/v2/zones/{zone_id}/recordsets"
-    while url:
-        data = client.get(url)
-        recordsets.extend(data.get("recordsets", []))
-        # Designate pagination via links.next
-        links = data.get("links", {})
-        url = links.get("next") if links.get("next") else None
+    # Fetch all recordsets for the zone.
+    # Designate returns up to the per-page default; for very large zones the
+    # service exposes pagination via links.next — currently not followed here
+    # because the service method does not expose cursoring. Acceptable: tree
+    # view is a UX convenience, not an audit-grade listing.
+    recordsets = svc.find_recordsets(zone_id)
 
     # Group by type
-    by_type: dict[str, list[dict]] = {}
+    by_type: dict[str, list] = {}
     for rs in recordsets:
         rtype = rs.get("type", "UNKNOWN")
         by_type.setdefault(rtype, []).append(rs)
@@ -280,10 +279,11 @@ def zone_export(ctx: click.Context, zone: str, output_file: str | None) -> None:
       orca zone export example.com. --file example.com.zone
     """
     client = ctx.find_object(OrcaContext).ensure_client()
-    zone_id = _resolve_zone_id(client, zone)
+    svc = DnsService(client)
+    zone_id = _resolve_zone_id(svc, zone)
 
     # Create the export task
-    task = client.post(f"{_dns(client)}/v2/zones/{zone_id}/tasks/export")
+    task = svc.export_zone(zone_id)
     export_id = task.get("id", "")
     if not export_id:
         console.print("[red]Failed to create zone export task.[/red]")
@@ -292,7 +292,7 @@ def zone_export(ctx: click.Context, zone: str, output_file: str | None) -> None:
     # Poll until the export is complete
     with console.status("[bold cyan]Exporting zone…[/bold cyan]"):
         for _ in range(60):
-            status_data = client.get(f"{_dns(client)}/v2/zones/tasks/exports/{export_id}")
+            status_data = svc.get_export_task(export_id)
             status = status_data.get("status", "")
             if status == "COMPLETE":
                 break
@@ -305,8 +305,9 @@ def zone_export(ctx: click.Context, zone: str, output_file: str | None) -> None:
             console.print("[red]Zone export timed out.[/red]")
             return
 
-    # Fetch the exported zone file content
-    url = f"{_dns(client)}/v2/zones/tasks/exports/{export_id}/export"
+    # Fetch the exported zone file content (custom Accept: text/dns — raw
+    # body, not JSON — so we bypass the service layer here).
+    url = f"{client.dns_url}/v2/zones/tasks/exports/{export_id}/export"
     headers = {"X-Auth-Token": client._token or "", "Accept": "text/dns"}
     resp = client._http.get(url, headers=headers)
 
@@ -335,11 +336,14 @@ def zone_import(ctx: click.Context, input_file: str) -> None:
       orca zone import --file example.com.zone
     """
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = DnsService(client)
 
     with open(input_file) as fh:
         content = fh.read()
 
-    url = f"{_dns(client)}/v2/zones/tasks/imports"
+    # Import takes a raw BIND-format body with Content-Type: text/dns — no
+    # JSON envelope, so we bypass the service layer here.
+    url = f"{client.dns_url}/v2/zones/tasks/imports"
     headers = {
         "X-Auth-Token": client._token or "",
         "Content-Type": "text/dns",
@@ -355,7 +359,7 @@ def zone_import(ctx: click.Context, input_file: str) -> None:
         # Poll briefly to report final status
         with console.status("[bold cyan]Importing zone…[/bold cyan]"):
             for _ in range(30):
-                check = client.get(f"{_dns(client)}/v2/zones/tasks/imports/{import_id}")
+                check = svc.get_import_task(import_id)
                 s = check.get("status", "")
                 if s == "COMPLETE":
                     zone_id = check.get("zone_id", "?")
@@ -386,11 +390,11 @@ def reverse_lookup(ctx: click.Context, ip: str) -> None:
       orca zone reverse-lookup 192.0.2.1
     """
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = DnsService(client)
 
     # Try the Designate reverse floatingips endpoint first
     try:
-        data = client.get(f"{_dns(client)}/v2/reverse/floatingips")
-        floatingips = data.get("floatingips", [])
+        floatingips = svc.find_reverse_floatingips()
         matches = [
             fip for fip in floatingips
             if fip.get("address") == ip
@@ -409,8 +413,7 @@ def reverse_lookup(ctx: click.Context, ip: str) -> None:
         arpa_name = ".".join(reversed(parts)) + ".in-addr.arpa."
         console.print(f"[dim]Searching for {arpa_name} …[/dim]")
         try:
-            data = client.get(f"{_dns(client)}/v2/recordsets", params={"name": arpa_name, "type": "PTR"})
-            rsets = data.get("recordsets", [])
+            rsets = svc.find_all_recordsets(params={"name": arpa_name, "type": "PTR"})
             if rsets:
                 for rs in rsets:
                     values = ", ".join(rs.get("records", []) or []) or "—"
@@ -438,14 +441,14 @@ def zone_transfer_request_create(ctx: click.Context, zone_id: str,
                                   description: str | None) -> None:
     """Create a zone transfer request."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    zone_id = _resolve_zone_id(client, zone_id)
+    svc = DnsService(client)
+    zone_id = _resolve_zone_id(svc, zone_id)
     body: dict = {}
     if target_project_id:
         body["target_project_id"] = target_project_id
     if description:
         body["description"] = description
-    t = client.post(f"{_dns(client)}/v2/zones/{zone_id}/tasks/transfer_requests",
-                    json=body)
+    t = svc.create_transfer_request(zone_id, body)
     console.print(f"[green]Transfer request created: {t.get('id', '?')}[/green]")
     if t.get("key"):
         console.print(f"  Key: [bold cyan]{t['key']}[/bold cyan]")
@@ -460,9 +463,8 @@ def zone_transfer_request_list(ctx: click.Context, output_format: str,
                                 max_width: int | None, noindent: bool) -> None:
     """List zone transfer requests."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    items = client.get(f"{_dns(client)}/v2/zones/tasks/transfer_requests").get(
-        "transfer_requests", []
-    )
+    svc = DnsService(client)
+    items = svc.find_transfer_requests()
     print_list(
         items,
         [
@@ -489,7 +491,8 @@ def zone_transfer_request_show(ctx: click.Context, transfer_id: str,
                                 noindent: bool) -> None:
     """Show a zone transfer request."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    t = client.get(f"{_dns(client)}/v2/zones/tasks/transfer_requests/{transfer_id}")
+    svc = DnsService(client)
+    t = svc.get_transfer_request(transfer_id)
     fields = [(k, str(t.get(k, "") or "")) for k in
               ["id", "zone_id", "zone_name", "status", "target_project_id",
                "description", "created_at", "updated_at"]]
@@ -506,7 +509,8 @@ def zone_transfer_request_delete(ctx: click.Context, transfer_id: str, yes: bool
     if not yes:
         click.confirm(f"Delete transfer request {transfer_id}?", abort=True)
     client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{_dns(client)}/v2/zones/tasks/transfer_requests/{transfer_id}")
+    svc = DnsService(client)
+    svc.delete_transfer_request(transfer_id)
     console.print(f"[green]Transfer request {transfer_id} deleted.[/green]")
 
 
@@ -521,8 +525,8 @@ def zone_transfer_request_delete(ctx: click.Context, transfer_id: str, yes: bool
 def zone_transfer_accept(ctx: click.Context, transfer_id: str, key: str) -> None:
     """Accept a zone transfer request."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    t = client.post(f"{_dns(client)}/v2/zones/tasks/transfer_accepts",
-                    json={"zone_transfer_request_id": transfer_id, "key": key})
+    svc = DnsService(client)
+    t = svc.accept_transfer({"zone_transfer_request_id": transfer_id, "key": key})
     console.print(f"[green]Transfer accepted. Zone ID: {t.get('zone_id', '?')}[/green]")
 
 
@@ -537,7 +541,8 @@ def zone_tld_list(ctx: click.Context, output_format: str, columns: tuple[str, ..
                   fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List allowed TLDs (admin)."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    tlds = client.get(f"{_dns(client)}/v2/tlds").get("tlds", [])
+    svc = DnsService(client)
+    tlds = svc.find_tlds()
     print_list(
         tlds,
         [
@@ -559,10 +564,11 @@ def zone_tld_list(ctx: click.Context, output_format: str, columns: tuple[str, ..
 def zone_tld_create(ctx: click.Context, name: str, description: str | None) -> None:
     """Create a TLD (admin)."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = DnsService(client)
     body: dict = {"name": name}
     if description:
         body["description"] = description
-    t = client.post(f"{_dns(client)}/v2/tlds", json=body)
+    t = svc.create_tld(body)
     console.print(f"[green]TLD '{name}' created: {t.get('id', '?')}[/green]")
 
 
@@ -575,5 +581,6 @@ def zone_tld_delete(ctx: click.Context, tld_id: str, yes: bool) -> None:
     if not yes:
         click.confirm(f"Delete TLD {tld_id}?", abort=True)
     client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{_dns(client)}/v2/tlds/{tld_id}")
+    svc = DnsService(client)
+    svc.delete_tld(tld_id)
     console.print(f"[green]TLD {tld_id} deleted.[/green]")

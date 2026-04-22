@@ -6,13 +6,10 @@ import click
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
+from orca_cli.services.dns import DnsService
 
 
-def _dns(client) -> str:
-    return client.dns_url
-
-
-def _resolve_zone_id(client, zone: str) -> str:
+def _resolve_zone_id(svc: DnsService, zone: str) -> str:
     """Resolve a zone argument to an ID.
 
     If *zone* looks like a UUID it is returned as-is.  Otherwise the zone list
@@ -22,8 +19,7 @@ def _resolve_zone_id(client, zone: str) -> str:
     if len(zone) == 36 and "-" in zone:
         return zone
     # Try matching by name
-    data = client.get(f"{_dns(client)}/v2/zones", params={"name": zone})
-    zones = data.get("zones", [])
+    zones = svc.find_zones(params={"name": zone})
     if zones:
         return zones[0]["id"]
     # Fallback: treat as ID anyway (let the API return a useful error)
@@ -52,7 +48,8 @@ def recordset_list(ctx: click.Context, zone: str, record_type: str | None,
     ZONE can be a zone ID or name.
     """
     client = ctx.find_object(OrcaContext).ensure_client()
-    zone_id = _resolve_zone_id(client, zone)
+    svc = DnsService(client)
+    zone_id = _resolve_zone_id(svc, zone)
 
     params: dict = {}
     if record_type:
@@ -60,7 +57,7 @@ def recordset_list(ctx: click.Context, zone: str, record_type: str | None,
     if record_name:
         params["name"] = record_name
 
-    data = client.get(f"{_dns(client)}/v2/zones/{zone_id}/recordsets", params=params)
+    recordsets = svc.find_recordsets(zone_id, params=params or None)
 
     def _format_records(r: dict) -> str:
         records = r.get("records", []) or []
@@ -76,7 +73,7 @@ def recordset_list(ctx: click.Context, zone: str, record_type: str | None,
         return "\n".join(records)
 
     print_list(
-        data.get("recordsets", []),
+        recordsets,
         [
             ("ID", "id", {"style": "cyan", "overflow": "fold"}),
             ("Name", "name", {"style": "bold"}),
@@ -105,8 +102,9 @@ def recordset_show(ctx: click.Context, zone: str, recordset_id: str,
     ZONE and RECORDSET can be IDs or names.
     """
     client = ctx.find_object(OrcaContext).ensure_client()
-    zone_id = _resolve_zone_id(client, zone)
-    data = client.get(f"{_dns(client)}/v2/zones/{zone_id}/recordsets/{recordset_id}")
+    svc = DnsService(client)
+    zone_id = _resolve_zone_id(svc, zone)
+    data = svc.get_recordset(zone_id, recordset_id)
 
     fields = [
         (key, str(data.get(key, "") or ""))
@@ -141,7 +139,8 @@ def recordset_create(ctx: click.Context, zone: str, name: str, record_type: str,
       orca recordset create example.com. example.com. --type A --record 1.2.3.4 --record 5.6.7.8
     """
     client = ctx.find_object(OrcaContext).ensure_client()
-    zone_id = _resolve_zone_id(client, zone)
+    svc = DnsService(client)
+    zone_id = _resolve_zone_id(svc, zone)
 
     body: dict = {
         "name": name,
@@ -153,7 +152,7 @@ def recordset_create(ctx: click.Context, zone: str, name: str, record_type: str,
     if description:
         body["description"] = description
 
-    data = client.post(f"{_dns(client)}/v2/zones/{zone_id}/recordsets", json=body)
+    data = svc.create_recordset(zone_id, body)
     console.print(f"[green]Recordset '{data.get('name', name)}' ({record_type.upper()}) created "
                   f"(ID: {data.get('id', '?')}).[/green]")
 
@@ -175,7 +174,8 @@ def recordset_set(ctx: click.Context, zone: str, recordset_id: str,
     all existing record values.
     """
     client = ctx.find_object(OrcaContext).ensure_client()
-    zone_id = _resolve_zone_id(client, zone)
+    svc = DnsService(client)
+    zone_id = _resolve_zone_id(svc, zone)
 
     body: dict = {}
     if records:
@@ -189,7 +189,7 @@ def recordset_set(ctx: click.Context, zone: str, recordset_id: str,
         console.print("[yellow]Nothing to update — provide at least one option.[/yellow]")
         return
 
-    client.put(f"{_dns(client)}/v2/zones/{zone_id}/recordsets/{recordset_id}", json=body)
+    svc.update_recordset(zone_id, recordset_id, body)
     console.print(f"[green]Recordset {recordset_id} updated.[/green]")
 
 
@@ -204,10 +204,11 @@ def recordset_delete(ctx: click.Context, zone: str, recordset_id: str, yes: bool
     ZONE and RECORDSET can be IDs or names.
     """
     client = ctx.find_object(OrcaContext).ensure_client()
-    zone_id = _resolve_zone_id(client, zone)
+    svc = DnsService(client)
+    zone_id = _resolve_zone_id(svc, zone)
 
     if not yes:
         click.confirm(f"Delete recordset {recordset_id}?", abort=True)
 
-    client.delete(f"{_dns(client)}/v2/zones/{zone_id}/recordsets/{recordset_id}")
+    svc.delete_recordset(zone_id, recordset_id)
     console.print(f"[green]Recordset {recordset_id} deleted.[/green]")

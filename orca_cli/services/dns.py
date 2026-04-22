@@ -20,8 +20,12 @@ class DnsService:
     def find_zones(self, *,
                    params: dict[str, Any] | None = None,
                    headers: dict[str, str] | None = None) -> list[Zone]:
-        data = self._client.get(f"{self._base}/zones",
-                                params=params, headers=headers)
+        kwargs: dict[str, Any] = {}
+        if params is not None:
+            kwargs["params"] = params
+        if headers is not None:
+            kwargs["headers"] = headers
+        data = self._client.get(f"{self._base}/zones", **kwargs)
         return data.get("zones", [])
 
     def get_zone(self, zone_id: str) -> Zone:

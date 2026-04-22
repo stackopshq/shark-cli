@@ -9,6 +9,7 @@ import click
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import APIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
+from orca_cli.services.dns import DnsService
 from orca_cli.services.identity import IdentityService
 from orca_cli.services.image import ImageService
 from orca_cli.services.load_balancer import LoadBalancerService
@@ -234,7 +235,7 @@ def _delete_one(client, rtype: str, rid: str, rname: str) -> bool:
         elif rtype == "backup":
             client.delete(f"{client.volume_url}/backups/{rid}")
         elif rtype == "dns-zone":
-            client.delete(f"{client.dns_url}/v2/zones/{rid}")
+            DnsService(client).delete_zone(rid)
         elif rtype == "container":
             # rid == container name for Swift; delete all objects first
             obj_svc = ObjectStoreService(client)
@@ -376,12 +377,11 @@ def project_cleanup(ctx, target_project, dry_run, yes, created_before, skip_type
                 dns_params["project_id"] = proj_id
                 dns_headers["X-Auth-All-Projects"] = "true"
             try:
-                dns_data = client.get(
-                    f"{client.dns_url}/v2/zones",
+                zones = DnsService(client).find_zones(
                     params=dns_params or None,
                     headers=dns_headers or None,
                 )
-                for z in dns_data.get("zones", []):
+                for z in zones:
                     if _before_cutoff(z, cutoff):
                         resources.append(("dns-zone", z["id"], z.get("name") or "—"))
             except Exception:
