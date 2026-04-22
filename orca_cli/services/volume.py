@@ -390,3 +390,10 @@ class VolumeService:
         """``action`` is the verb path ('enable', 'disable', 'disable-log-reason').
         """
         return self._client.put(f"{self._base}/os-services/{action}", json=body)
+
+    # ── limits ─────────────────────────────────────────────────────────
+
+    def get_limits(self) -> dict:
+        """Absolute project limits (totalVolumesUsed etc.)."""
+        data = self._client.get(f"{self._base}/limits")
+        return data.get("limits", {}).get("absolute", {})

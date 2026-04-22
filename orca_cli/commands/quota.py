@@ -7,6 +7,8 @@ import click
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_list
 from orca_cli.services.compute import ComputeService
+from orca_cli.services.network import NetworkService
+from orca_cli.services.volume import VolumeService
 
 
 @click.command()
@@ -34,7 +36,7 @@ def quota(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_
 
         # ── Cinder (volume) ──────────────────────────────────────────
         try:
-            cinder = client.get(f"{client.volume_url}/limits").get("limits", {}).get("absolute", {})
+            cinder = VolumeService(client).get_limits()
             rows.extend([
                 _row("Volume", "Volumes", cinder.get("totalVolumesUsed", 0), cinder.get("maxTotalVolumes", -1)),
                 _row("Volume", "Volume Storage (GB)", cinder.get("totalGigabytesUsed", 0), cinder.get("maxTotalVolumeGigabytes", -1)),
@@ -47,19 +49,20 @@ def quota(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_
 
         # ── Neutron (network) ────────────────────────────────────────
         try:
-            neutron = client.get(f"{client.network_url}/v2.0/quotas").get("quotas", [])
-            if neutron:
-                q = neutron[0] if isinstance(neutron, list) else neutron
+            net_svc = NetworkService(client)
+            quotas = net_svc.find_quotas()
+            if quotas:
+                q = quotas[0]
             else:
-                q = client.get(f"{client.network_url}/v2.0/quotas/{client._project_id}").get("quota", {})
+                q = net_svc.get_quota(client._project_id)
 
             # Count current usage
-            nets = len(client.get(f"{client.network_url}/v2.0/networks").get("networks", []))
-            subnets = len(client.get(f"{client.network_url}/v2.0/subnets").get("subnets", []))
-            ports = len(client.get(f"{client.network_url}/v2.0/ports").get("ports", []))
-            routers = len(client.get(f"{client.network_url}/v2.0/routers").get("routers", []))
-            fips = len(client.get(f"{client.network_url}/v2.0/floatingips").get("floatingips", []))
-            sgs = len(client.get(f"{client.network_url}/v2.0/security-groups").get("security_groups", []))
+            nets = len(net_svc.find())
+            subnets = len(net_svc.find_subnets())
+            ports = len(net_svc.find_ports())
+            routers = len(net_svc.find_routers())
+            fips = len(net_svc.find_floating_ips())
+            sgs = len(net_svc.find_security_groups())
 
             rows.extend([
                 _row("Network", "Networks", nets, q.get("network", -1)),

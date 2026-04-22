@@ -481,3 +481,15 @@ class NetworkService:
 
     def delete_auto_allocated_topology(self, scope: str) -> None:
         self._client.delete(f"{self._base}/auto-allocated-topology/{scope}")
+
+    # ── quotas ─────────────────────────────────────────────────────────
+
+    def find_quotas(self) -> list[dict]:
+        """All quota entries visible to the caller (admin)."""
+        data = self._client.get(f"{self._base}/quotas")
+        q = data.get("quotas", [])
+        return q if isinstance(q, list) else []
+
+    def get_quota(self, project_id: str) -> dict:
+        data = self._client.get(f"{self._base}/quotas/{project_id}")
+        return data.get("quota", data)
