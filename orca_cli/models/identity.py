@@ -167,3 +167,23 @@ class AccessRule(TypedDict, total=False):
     service: str
     method: str
     path: str
+
+
+class RegisteredLimit(TypedDict, total=False):
+    id: str
+    service_id: str
+    region_id: str
+    resource_name: str
+    default_limit: int
+    description: str
+
+
+class Limit(TypedDict, total=False):
+    id: str
+    service_id: str
+    region_id: str
+    resource_name: str
+    resource_limit: int
+    description: str
+    project_id: str
+    domain_id: str

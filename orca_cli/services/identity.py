@@ -35,10 +35,12 @@ from orca_cli.models.identity import (
     FederationProtocol,
     Group,
     IdentityProvider,
+    Limit,
     Mapping,
     Policy,
     Project,
     Region,
+    RegisteredLimit,
     Role,
     RoleAssignment,
     RoleInference,
@@ -612,3 +614,70 @@ class IdentityService:
         self._client.delete(
             f"{self._v3}/users/{user_id}/access_rules/{rule_id}"
         )
+
+    # ── registered limits (Keystone enforcement defaults) ──────────────
+
+    def find_registered_limits(
+        self, *, params: dict[str, Any] | None = None,
+    ) -> list[RegisteredLimit]:
+        data = self._client.get(f"{self._v3}/registered_limits",
+                                params=params)
+        return data.get("registered_limits", [])
+
+    def get_registered_limit(self, limit_id: str) -> RegisteredLimit:
+        data = self._client.get(f"{self._v3}/registered_limits/{limit_id}")
+        return data.get("registered_limit", data)
+
+    def create_registered_limits(
+        self, items: list[dict[str, Any]],
+    ) -> list[RegisteredLimit]:
+        """Keystone POST accepts a list of registered limits at once."""
+        data = self._client.post(
+            f"{self._v3}/registered_limits",
+            json={"registered_limits": items},
+        )
+        return data.get("registered_limits", []) if data else []
+
+    def update_registered_limit(
+        self, limit_id: str, body: dict[str, Any],
+    ) -> RegisteredLimit:
+        data = self._client.patch(
+            f"{self._v3}/registered_limits/{limit_id}",
+            json={"registered_limit": body},
+        )
+        return data.get("registered_limit", data) if data else {}
+
+    def delete_registered_limit(self, limit_id: str) -> None:
+        self._client.delete(f"{self._v3}/registered_limits/{limit_id}")
+
+    # ── project-scoped limits (overrides) ──────────────────────────────
+
+    def find_limits(
+        self, *, params: dict[str, Any] | None = None,
+    ) -> list[Limit]:
+        data = self._client.get(f"{self._v3}/limits", params=params)
+        return data.get("limits", [])
+
+    def get_limit(self, limit_id: str) -> Limit:
+        data = self._client.get(f"{self._v3}/limits/{limit_id}")
+        return data.get("limit", data)
+
+    def create_limits(
+        self, items: list[dict[str, Any]],
+    ) -> list[Limit]:
+        """Keystone POST accepts a list of limits at once."""
+        data = self._client.post(
+            f"{self._v3}/limits", json={"limits": items},
+        )
+        return data.get("limits", []) if data else []
+
+    def update_limit(
+        self, limit_id: str, body: dict[str, Any],
+    ) -> Limit:
+        data = self._client.patch(
+            f"{self._v3}/limits/{limit_id}", json={"limit": body},
+        )
+        return data.get("limit", data) if data else {}
+
+    def delete_limit(self, limit_id: str) -> None:
+        self._client.delete(f"{self._v3}/limits/{limit_id}")

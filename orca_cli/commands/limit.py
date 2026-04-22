@@ -7,11 +7,7 @@ import click
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
-
-
-def _iam(client) -> str:
-    return client.identity_url
-
+from orca_cli.services.identity import IdentityService
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  Registered Limits
@@ -32,16 +28,15 @@ def registered_limit(ctx: click.Context) -> None:
 def rl_list(ctx, service_id, region_id, resource_name,
             output_format, columns, fit_width, max_width, noindent):
     """List registered limits."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    params = {}
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    params: dict = {}
     if service_id:
         params["service_id"] = service_id
     if region_id:
         params["region_id"] = region_id
     if resource_name:
         params["resource_name"] = resource_name
-    data = client.get(f"{_iam(client)}/v3/registered_limits", params=params)
-    items = data.get("registered_limits", [])
+    items = svc.find_registered_limits(params=params or None)
     if not items:
         console.print("No registered limits found.")
         return
@@ -64,9 +59,8 @@ def rl_list(ctx, service_id, region_id, resource_name,
 @click.pass_context
 def rl_show(ctx, registered_limit_id, output_format, columns, fit_width, max_width, noindent):
     """Show a registered limit."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_iam(client)}/v3/registered_limits/{registered_limit_id}")
-    rl = data.get("registered_limit", data)
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    rl = svc.get_registered_limit(registered_limit_id)
     fields = [
         ("ID", rl.get("id", "")),
         ("Service ID", rl.get("service_id", "")),
@@ -91,7 +85,7 @@ def rl_show(ctx, registered_limit_id, output_format, columns, fit_width, max_wid
 def rl_create(ctx, service_id, resource_name, default_limit, region_id, description,
               output_format, columns, fit_width, max_width, noindent):
     """Create a registered limit."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {
         "service_id": service_id,
         "resource_name": resource_name,
@@ -100,9 +94,7 @@ def rl_create(ctx, service_id, resource_name, default_limit, region_id, descript
     }
     if region_id:
         body["region_id"] = region_id
-    data = client.post(f"{_iam(client)}/v3/registered_limits",
-                       json={"registered_limits": [body]})
-    items = data.get("registered_limits", [data])
+    items = svc.create_registered_limits([body])
     rl = items[0] if items else {}
     fields = [
         ("ID", rl.get("id", "")),
@@ -126,7 +118,6 @@ def rl_create(ctx, service_id, resource_name, default_limit, region_id, descript
 def rl_set(ctx, registered_limit_id, service_id, resource_name, default_limit,
            region_id, description):
     """Update a registered limit."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     body: dict = {}
     if service_id is not None:
         body["service_id"] = service_id
@@ -141,8 +132,8 @@ def rl_set(ctx, registered_limit_id, service_id, resource_name, default_limit,
     if not body:
         console.print("Nothing to update.")
         return
-    client.patch(f"{_iam(client)}/v3/registered_limits/{registered_limit_id}",
-                 json={"registered_limit": body})
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_registered_limit(registered_limit_id, body)
     console.print(f"Registered limit [bold]{registered_limit_id}[/bold] updated.")
 
 
@@ -152,10 +143,10 @@ def rl_set(ctx, registered_limit_id, service_id, resource_name, default_limit,
 @click.pass_context
 def rl_delete(ctx, registered_limit_id, yes):
     """Delete a registered limit."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     if not yes:
         click.confirm(f"Delete registered limit {registered_limit_id}?", abort=True)
-    client.delete(f"{_iam(client)}/v3/registered_limits/{registered_limit_id}")
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_registered_limit(registered_limit_id)
     console.print(f"Registered limit [bold]{registered_limit_id}[/bold] deleted.")
 
 
@@ -179,8 +170,8 @@ def limit(ctx: click.Context) -> None:
 def limit_list(ctx, service_id, region_id, resource_name, project_id,
                output_format, columns, fit_width, max_width, noindent):
     """List limits."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    params = {}
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    params: dict = {}
     if service_id:
         params["service_id"] = service_id
     if region_id:
@@ -189,8 +180,7 @@ def limit_list(ctx, service_id, region_id, resource_name, project_id,
         params["resource_name"] = resource_name
     if project_id:
         params["project_id"] = project_id
-    data = client.get(f"{_iam(client)}/v3/limits", params=params)
-    items = data.get("limits", [])
+    items = svc.find_limits(params=params or None)
     if not items:
         console.print("No limits found.")
         return
@@ -213,9 +203,8 @@ def limit_list(ctx, service_id, region_id, resource_name, project_id,
 @click.pass_context
 def limit_show(ctx, limit_id, output_format, columns, fit_width, max_width, noindent):
     """Show a limit."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_iam(client)}/v3/limits/{limit_id}")
-    lim = data.get("limit", data)
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    lim = svc.get_limit(limit_id)
     fields = [
         ("ID", lim.get("id", "")),
         ("Project ID", lim.get("project_id", "")),
@@ -243,7 +232,7 @@ def limit_create(ctx, project_id, service_id, resource_name, resource_limit,
                  region_id, description,
                  output_format, columns, fit_width, max_width, noindent):
     """Create a project-level limit."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {
         "project_id": project_id,
         "service_id": service_id,
@@ -253,9 +242,7 @@ def limit_create(ctx, project_id, service_id, resource_name, resource_limit,
     }
     if region_id:
         body["region_id"] = region_id
-    data = client.post(f"{_iam(client)}/v3/limits",
-                       json={"limits": [body]})
-    items = data.get("limits", [data])
+    items = svc.create_limits([body])
     lim = items[0] if items else {}
     fields = [
         ("ID", lim.get("id", "")),
@@ -275,7 +262,6 @@ def limit_create(ctx, project_id, service_id, resource_name, resource_limit,
 @click.pass_context
 def limit_set(ctx, limit_id, resource_limit, description):
     """Update a project-level limit."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     body: dict = {}
     if resource_limit is not None:
         body["resource_limit"] = resource_limit
@@ -284,7 +270,8 @@ def limit_set(ctx, limit_id, resource_limit, description):
     if not body:
         console.print("Nothing to update.")
         return
-    client.patch(f"{_iam(client)}/v3/limits/{limit_id}", json={"limit": body})
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_limit(limit_id, body)
     console.print(f"Limit [bold]{limit_id}[/bold] updated.")
 
 
@@ -294,8 +281,8 @@ def limit_set(ctx, limit_id, resource_limit, description):
 @click.pass_context
 def limit_delete(ctx, limit_id, yes):
     """Delete a project-level limit."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     if not yes:
         click.confirm(f"Delete limit {limit_id}?", abort=True)
-    client.delete(f"{_iam(client)}/v3/limits/{limit_id}")
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_limit(limit_id)
     console.print(f"Limit [bold]{limit_id}[/bold] deleted.")
