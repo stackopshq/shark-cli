@@ -3528,6 +3528,13 @@ readers can see how far along the work is.</p>
   direct <code>client.put</code> in <code>commands/server.py</code>), and routed the
   <code>volume tree</code> server-name lookup through <code>ServerService.find</code>
   instead of a direct <code>/servers/detail</code> call.</li>
+<li>2026-04-22 — <code>load-balancer</code> (Octavia): LoadBalancerService +
+  LoadBalancer / Listener / Pool / Member / HealthMonitor / L7Policy
+  / L7Rule / Amphora TypedDicts. Migrated <code>commands/loadbalancer.py</code>
+  (lb CRUD + stats + status, listeners, pools + members, health
+  monitors, L7 policies + rules, admin amphorae + failover) and the
+  cross-service Octavia callers in <code>commands/cleanup.py</code>,
+  <code>commands/project.py</code> and <code>commands/ip_whois.py</code>.</li>
 <li>2026-04-22 — <code>orchestration</code> (Heat): OrchestrationService + Stack /
   StackResource / StackEvent / StackOutput TypedDicts. Migrated
   <code>commands/stack.py</code> (stack CRUD + actions + abandon; resources,
