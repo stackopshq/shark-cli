@@ -495,7 +495,7 @@ def volume_tree(ctx: click.Context, filter_vol: str | None) -> None:  # noqa: C9
 
         # Fetch servers for name resolution
         try:
-            srv_list = ServerService(client).find(limit=1000)
+            srv_list = ServerService(client).find_all()
             servers = {s["id"]: s.get("name", s["id"]) for s in srv_list}
         except Exception:
             servers = {}

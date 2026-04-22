@@ -512,7 +512,7 @@ def network_topology(ctx: click.Context, filter_net: str | None) -> None:
 
         # Fetch servers for name resolution
         try:
-            servers_list = ServerService(client).find(limit=1000)
+            servers_list = ServerService(client).find_all()
             servers = {s["id"]: s.get("name", s["id"]) for s in servers_list}
         except Exception:
             servers = {}

@@ -249,7 +249,7 @@ def event_all(
     svc = ServerService(client)
 
     with console.status("Fetching events..."):
-        servers = svc.find(limit=1000)
+        servers = svc.find_all()
 
         server_map: dict[str, str] = {}
         for srv in servers:

@@ -1327,7 +1327,7 @@ def server_bulk(ctx: click.Context, action: str, name_pattern: str | None,
         raise click.ClickException("Provide --name, --status, or --all to select servers.")
 
     service = ServerService(ctx.find_object(OrcaContext).ensure_client())
-    servers = service.find(limit=1000)
+    servers = service.find_all()
 
     # Filter
     matched = []

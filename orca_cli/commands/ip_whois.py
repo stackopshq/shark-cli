@@ -62,7 +62,7 @@ def ip_whois(ctx: click.Context, address: str) -> None:
                                     f"device: {dev_id}, mac: {mac}, net: {p.get('network_id', '')}"))
 
         # ── Servers ──────────────────────────────────────────────────
-        servers = ServerService(client).find(limit=1000)
+        servers = ServerService(client).find_all()
         for srv in servers:
             for net_name, addrs in srv.get("addresses", {}).items():
                 for a in addrs:

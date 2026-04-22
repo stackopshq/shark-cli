@@ -352,8 +352,8 @@ def project_cleanup(ctx, target_project, dry_run, yes, created_before, skip_type
 
         if "server" not in skip:
             try:
-                servers = ServerService(client).find(
-                    limit=1000, params={"project_id": proj_id},
+                servers = ServerService(client).find_all(
+                    params={"project_id": proj_id},
                 )
             except Exception:
                 servers = []
