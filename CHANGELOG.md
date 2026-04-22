@@ -4,6 +4,41 @@ All notable changes to orca are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] — 2026-04-22
+
+### Changed
+
+- **Service layer completed.** Every OpenStack resource orca talks to
+  now routes through a typed ``*Service`` class in ``orca_cli/services/``
+  instead of constructing endpoint URLs in the command modules.
+  Thirteen services land in this release — ``NetworkService``
+  (Neutron), ``ComputeService`` (Nova non-server),
+  ``IdentityService`` (Keystone, including enforcement limits),
+  ``OrchestrationService`` (Heat), ``LoadBalancerService`` (Octavia),
+  ``ObjectStoreService`` (Swift), ``DnsService`` (Designate),
+  ``KeyManagerService`` (Barbican), ``RatingService`` (CloudKitty),
+  ``MetricService`` + ``AlarmService`` (Gnocchi + Aodh),
+  ``ContainerInfraService`` (Magnum), ``PlacementService``, plus the
+  existing ``ServerService`` / ``VolumeService`` / ``ImageService``.
+  Each service exposes ``find`` / ``get`` / ``create`` / ``update`` /
+  ``delete`` methods and returns TypedDicts from ``orca_cli/models/``
+  so mypy catches field-name typos at check time. ADR-0007 is updated
+  per resource. Behaviour is unchanged — retry, auth, pagination still
+  live in ``OrcaClient``. This is a surface-level reorganisation of
+  the codebase; the CLI surface is identical.
+
+### Fixed
+
+- **Silent 1000-item cap in batch commands.** ``orca project cleanup``
+  and ``orca server bulk {stop,delete,reboot}`` called
+  ``ServerService.find(limit=1000)`` and silently dropped extra rows
+  on tenants with more than 1000 servers — the batch operation
+  reported success while leaving resources behind. Every such call
+  now uses ``find_all()`` with full pagination. Also applied to the
+  server-name-resolution side calls in ``orca volume tree``,
+  ``orca network topology`` / ``trace``, ``orca ip-whois`` and
+  ``orca event``.
+
 ## [1.4.0] — 2026-04-20
 
 ### Security
