@@ -7,16 +7,7 @@ import click
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
-
-
-def _url(client) -> str:
-    return client.placement_url
-
-
-def _ph() -> dict:
-    """Return the Placement API microversion header required for most endpoints."""
-    return {"OpenStack-API-Version": "placement 1.6"}
-
+from orca_cli.services.placement import PlacementService
 
 # ── Root group ───────────────────────────────────────────────────────────────
 
@@ -39,6 +30,7 @@ def placement(ctx: click.Context) -> None:
 def rp_list(ctx, name, uuid, in_tree, output_format, columns, fit_width, max_width, noindent):
     """List resource providers."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = PlacementService(client)
     params = {}
     if name:
         params["name"] = name
@@ -46,8 +38,7 @@ def rp_list(ctx, name, uuid, in_tree, output_format, columns, fit_width, max_wid
         params["uuid"] = uuid
     if in_tree:
         params["in_tree"] = in_tree
-    data = client.get(f"{_url(client)}/resource_providers", params=params)
-    items = data.get("resource_providers", [])
+    items = svc.find_providers(params=params)
     if not items:
         console.print("No resource providers found.")
         return
@@ -69,7 +60,8 @@ def rp_list(ctx, name, uuid, in_tree, output_format, columns, fit_width, max_wid
 def rp_show(ctx, uuid, output_format, columns, fit_width, max_width, noindent):
     """Show a resource provider."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_url(client)}/resource_providers/{uuid}")
+    svc = PlacementService(client)
+    data = svc.get_provider(uuid)
     fields = [
         ("UUID", data.get("uuid", "")),
         ("Name", data.get("name", "")),
@@ -92,12 +84,13 @@ def rp_show(ctx, uuid, output_format, columns, fit_width, max_width, noindent):
 def rp_create(ctx, name, uuid, parent_uuid, output_format, columns, fit_width, max_width, noindent):
     """Create a resource provider."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = PlacementService(client)
     body: dict = {"name": name}
     if uuid:
         body["uuid"] = uuid
     if parent_uuid:
         body["parent_provider_uuid"] = parent_uuid
-    data = client.post(f"{_url(client)}/resource_providers", json=body)
+    data = svc.create_provider(body)
     fields = [
         ("UUID", data.get("uuid", "")),
         ("Name", data.get("name", "")),
@@ -116,6 +109,7 @@ def rp_create(ctx, name, uuid, parent_uuid, output_format, columns, fit_width, m
 def rp_set(ctx, uuid, name, parent_uuid):
     """Update a resource provider."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = PlacementService(client)
     body = {}
     if name:
         body["name"] = name
@@ -124,7 +118,7 @@ def rp_set(ctx, uuid, name, parent_uuid):
     if not body:
         console.print("Nothing to update.")
         return
-    client.put(f"{_url(client)}/resource_providers/{uuid}", json=body)
+    svc.update_provider(uuid, body)
     console.print(f"Resource provider [bold]{uuid}[/bold] updated.")
 
 
@@ -135,9 +129,10 @@ def rp_set(ctx, uuid, name, parent_uuid):
 def rp_delete(ctx, uuid, yes):
     """Delete a resource provider."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = PlacementService(client)
     if not yes:
         click.confirm(f"Delete resource provider {uuid}?", abort=True)
-    client.delete(f"{_url(client)}/resource_providers/{uuid}")
+    svc.delete_provider(uuid)
     console.print(f"Resource provider [bold]{uuid}[/bold] deleted.")
 
 
@@ -152,7 +147,8 @@ def rp_delete(ctx, uuid, yes):
 def rp_inventory_list(ctx, uuid, output_format, columns, fit_width, max_width, noindent):
     """List inventories for a resource provider."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_url(client)}/resource_providers/{uuid}/inventories")
+    svc = PlacementService(client)
+    data = svc.find_inventories(uuid)
     raw = data.get("inventories", {})
     items = [{"resource_class": rc, **vals} for rc, vals in raw.items()]
     if not items:
@@ -186,8 +182,9 @@ def rp_inventory_set(ctx, uuid, resource_class, total, reserved,
                      min_unit, max_unit, step_size, allocation_ratio):
     """Create or update a single inventory for a resource provider."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = PlacementService(client)
     # Fetch current generation
-    rp = client.get(f"{_url(client)}/resource_providers/{uuid}")
+    rp = svc.get_provider(uuid)
     body = {
         "resource_provider_generation": rp.get("generation", 0),
         "total": total,
@@ -197,8 +194,7 @@ def rp_inventory_set(ctx, uuid, resource_class, total, reserved,
         "step_size": step_size,
         "allocation_ratio": allocation_ratio,
     }
-    client.put(f"{_url(client)}/resource_providers/{uuid}/inventories/{resource_class}",
-               json=body)
+    svc.set_inventory(uuid, resource_class, body)
     console.print(f"Inventory [bold]{resource_class}[/bold] set for provider [bold]{uuid}[/bold].")
 
 
@@ -210,9 +206,10 @@ def rp_inventory_set(ctx, uuid, resource_class, total, reserved,
 def rp_inventory_delete(ctx, uuid, resource_class, yes):
     """Delete an inventory for a resource provider."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = PlacementService(client)
     if not yes:
         click.confirm(f"Delete inventory {resource_class} for {uuid}?", abort=True)
-    client.delete(f"{_url(client)}/resource_providers/{uuid}/inventories/{resource_class}")
+    svc.delete_inventory(uuid, resource_class)
     console.print(f"Inventory [bold]{resource_class}[/bold] deleted.")
 
 
@@ -227,7 +224,8 @@ def rp_inventory_delete(ctx, uuid, resource_class, yes):
 def rp_usage(ctx, uuid, output_format, columns, fit_width, max_width, noindent):
     """Show usages for a resource provider."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_url(client)}/resource_providers/{uuid}/usages")
+    svc = PlacementService(client)
+    data = svc.get_provider_usages(uuid)
     raw = data.get("usages", {})
     items = [{"resource_class": rc, "usage": used} for rc, used in raw.items()]
     if not items:
@@ -247,12 +245,13 @@ def rp_usage(ctx, uuid, output_format, columns, fit_width, max_width, noindent):
 def usage_list(ctx, project_id, user_id, output_format, columns, fit_width, max_width, noindent):
     """Show aggregated usages by project/user."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = PlacementService(client)
     params = {}
     if project_id:
         params["project_id"] = project_id
     if user_id:
         params["user_id"] = user_id
-    data = client.get(f"{_url(client)}/usages", params=params, headers=_ph())
+    data = svc.get_project_usages(params=params)
     raw = data.get("usages", {})
     items = [{"resource_class": rc, "usage": used} for rc, used in raw.items()]
     if not items:
@@ -274,8 +273,8 @@ def usage_list(ctx, project_id, user_id, output_format, columns, fit_width, max_
 def rc_list(ctx, output_format, columns, fit_width, max_width, noindent):
     """List resource classes."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_url(client)}/resource_classes", headers=_ph())
-    items = data.get("resource_classes", [])
+    svc = PlacementService(client)
+    items = svc.find_resource_classes()
     if not items:
         console.print("No resource classes found.")
         return
@@ -291,9 +290,10 @@ def rc_list(ctx, output_format, columns, fit_width, max_width, noindent):
 def rc_show(ctx, name):
     """Show a resource class."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = PlacementService(client)
     # Standard classes return 204 on GET; custom classes return 200 with links.
     # We just confirm existence via GET.
-    client.get(f"{_url(client)}/resource_classes/{name}", headers=_ph())
+    svc.get_resource_class(name)
     console.print(f"Resource class [bold]{name}[/bold] exists.")
 
 
@@ -303,7 +303,8 @@ def rc_show(ctx, name):
 def rc_create(ctx, name):
     """Create a custom resource class (must start with CUSTOM_)."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    client.put(f"{_url(client)}/resource_classes/{name}", json={}, headers=_ph())
+    svc = PlacementService(client)
+    svc.create_resource_class(name)
     console.print(f"Resource class [bold]{name}[/bold] created.")
 
 
@@ -314,9 +315,10 @@ def rc_create(ctx, name):
 def rc_delete(ctx, name, yes):
     """Delete a custom resource class."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = PlacementService(client)
     if not yes:
         click.confirm(f"Delete resource class {name}?", abort=True)
-    client.delete(f"{_url(client)}/resource_classes/{name}", headers=_ph())
+    svc.delete_resource_class(name)
     console.print(f"Resource class [bold]{name}[/bold] deleted.")
 
 
@@ -333,13 +335,13 @@ def rc_delete(ctx, name, yes):
 def trait_list(ctx, name, associated, output_format, columns, fit_width, max_width, noindent):
     """List traits."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = PlacementService(client)
     params = {}
     if name:
         params["name"] = name
     if associated:
         params["associated"] = "true"
-    data = client.get(f"{_url(client)}/traits", params=params, headers=_ph())
-    raw = data.get("traits", [])
+    raw = svc.find_traits(params=params)
     items = [{"name": t} for t in raw]
     if not items:
         console.print("No traits found.")
@@ -356,7 +358,8 @@ def trait_list(ctx, name, associated, output_format, columns, fit_width, max_wid
 def trait_create(ctx, name):
     """Create a custom trait (must start with CUSTOM_)."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    client.put(f"{_url(client)}/traits/{name}", json={}, headers=_ph())
+    svc = PlacementService(client)
+    svc.create_trait(name)
     console.print(f"Trait [bold]{name}[/bold] created.")
 
 
@@ -367,9 +370,10 @@ def trait_create(ctx, name):
 def trait_delete(ctx, name, yes):
     """Delete a custom trait."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = PlacementService(client)
     if not yes:
         click.confirm(f"Delete trait {name}?", abort=True)
-    client.delete(f"{_url(client)}/traits/{name}", headers=_ph())
+    svc.delete_trait(name)
     console.print(f"Trait [bold]{name}[/bold] deleted.")
 
 
@@ -380,7 +384,8 @@ def trait_delete(ctx, name, yes):
 def rp_trait_list(ctx, uuid, output_format, columns, fit_width, max_width, noindent):
     """List traits associated with a resource provider."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_url(client)}/resource_providers/{uuid}/traits", headers=_ph())
+    svc = PlacementService(client)
+    data = svc.find_provider_traits(uuid)
     raw = data.get("traits", [])
     items = [{"name": t} for t in raw]
     if not items:
@@ -399,12 +404,13 @@ def rp_trait_list(ctx, uuid, output_format, columns, fit_width, max_width, noind
 def rp_trait_set(ctx, uuid, traits):
     """Set (replace) traits on a resource provider."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    rp = client.get(f"{_url(client)}/resource_providers/{uuid}", headers=_ph())
+    svc = PlacementService(client)
+    rp = svc.get_provider(uuid)
     body = {
         "resource_provider_generation": rp.get("generation", 0),
         "traits": list(traits),
     }
-    client.put(f"{_url(client)}/resource_providers/{uuid}/traits", json=body, headers=_ph())
+    svc.set_provider_traits(uuid, body)
     console.print(f"Traits set on [bold]{uuid}[/bold].")
 
 
@@ -415,9 +421,10 @@ def rp_trait_set(ctx, uuid, traits):
 def rp_trait_delete(ctx, uuid, yes):
     """Remove all traits from a resource provider."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = PlacementService(client)
     if not yes:
         click.confirm(f"Remove all traits from {uuid}?", abort=True)
-    client.delete(f"{_url(client)}/resource_providers/{uuid}/traits", headers=_ph())
+    svc.delete_provider_traits(uuid)
     console.print(f"All traits removed from [bold]{uuid}[/bold].")
 
 
@@ -432,7 +439,8 @@ def rp_trait_delete(ctx, uuid, yes):
 def allocation_show(ctx, consumer_uuid, output_format, columns, fit_width, max_width, noindent):
     """Show allocations for a consumer."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_url(client)}/allocations/{consumer_uuid}")
+    svc = PlacementService(client)
+    data = svc.get_allocations(consumer_uuid)
     allocs = data.get("allocations", {})
     items = []
     for rp_uuid, val in allocs.items():
@@ -458,9 +466,10 @@ def allocation_show(ctx, consumer_uuid, output_format, columns, fit_width, max_w
 def allocation_delete(ctx, consumer_uuid, yes):
     """Delete all allocations for a consumer."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = PlacementService(client)
     if not yes:
         click.confirm(f"Delete all allocations for consumer {consumer_uuid}?", abort=True)
-    client.delete(f"{_url(client)}/allocations/{consumer_uuid}")
+    svc.delete_allocations(consumer_uuid)
     console.print(f"Allocations for [bold]{consumer_uuid}[/bold] deleted.")
 
 
@@ -476,6 +485,7 @@ def allocation_delete(ctx, consumer_uuid, yes):
 def allocation_set(ctx, consumer_uuid, rp_uuid, resources, project_id, user_id):
     """Set (replace) allocations for a consumer against a single resource provider."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = PlacementService(client)
     parsed: dict[str, int] = {}
     for item in resources:
         if "=" not in item:
@@ -492,7 +502,7 @@ def allocation_set(ctx, consumer_uuid, rp_uuid, resources, project_id, user_id):
         "project_id": project_id,
         "user_id": user_id,
     }
-    client.put(f"{_url(client)}/allocations/{consumer_uuid}", json=body)
+    svc.set_allocations(consumer_uuid, body)
     console.print(f"Allocations for consumer [bold]{consumer_uuid}[/bold] set.")
 
 
@@ -514,6 +524,7 @@ def allocation_candidate_list(ctx, resources, required_traits, forbidden_traits,
                                output_format, columns, fit_width, max_width, noindent):
     """List allocation candidates for the requested resources."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = PlacementService(client)
     params: dict = {}
     for item in resources:
         if "=" not in item:
@@ -528,7 +539,7 @@ def allocation_candidate_list(ctx, resources, required_traits, forbidden_traits,
         params["forbidden"] = ",".join(f"!{t}" for t in forbidden_traits)
     if limit:
         params["limit"] = limit
-    data = client.get(f"{_url(client)}/allocation_candidates", params=params)
+    data = svc.find_allocation_candidates(params=params)
     candidates = data.get("allocation_requests", [])
     if not candidates:
         console.print("No allocation candidates found.")
@@ -566,7 +577,8 @@ def allocation_candidate_list(ctx, resources, required_traits, forbidden_traits,
 def rp_aggregate_list(ctx, uuid, output_format, columns, fit_width, max_width, noindent):
     """List aggregates associated with a resource provider."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_url(client)}/resource_providers/{uuid}/aggregates")
+    svc = PlacementService(client)
+    data = svc.get_provider_aggregates(uuid)
     raw = data.get("aggregates", [])
     items = [{"uuid": agg} for agg in raw]
     if not items:
@@ -585,12 +597,13 @@ def rp_aggregate_list(ctx, uuid, output_format, columns, fit_width, max_width, n
 def rp_aggregate_set(ctx, uuid, aggregates):
     """Set (replace) aggregates on a resource provider."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    rp = client.get(f"{_url(client)}/resource_providers/{uuid}")
+    svc = PlacementService(client)
+    rp = svc.get_provider(uuid)
     body = {
         "aggregates": list(aggregates),
         "resource_provider_generation": rp.get("generation", 0),
     }
-    client.put(f"{_url(client)}/resource_providers/{uuid}/aggregates", json=body)
+    svc.set_provider_aggregates(uuid, body)
     console.print(f"Aggregates set on [bold]{uuid}[/bold].")
 
 
@@ -601,14 +614,15 @@ def rp_aggregate_set(ctx, uuid, aggregates):
 def rp_aggregate_delete(ctx, uuid, yes):
     """Remove all aggregate associations from a resource provider."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = PlacementService(client)
     if not yes:
         click.confirm(f"Remove all aggregates from {uuid}?", abort=True)
-    rp = client.get(f"{_url(client)}/resource_providers/{uuid}")
+    rp = svc.get_provider(uuid)
     body = {
         "aggregates": [],
         "resource_provider_generation": rp.get("generation", 0),
     }
-    client.put(f"{_url(client)}/resource_providers/{uuid}/aggregates", json=body)
+    svc.set_provider_aggregates(uuid, body)
     console.print(f"All aggregates removed from [bold]{uuid}[/bold].")
 
 
@@ -624,8 +638,9 @@ def rp_aggregate_delete(ctx, uuid, yes):
 def rp_inventory_show(ctx, uuid, resource_class, output_format, columns, fit_width, max_width, noindent):
     """Show a single inventory for a resource provider."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    # No dedicated service method for a single inventory endpoint.
     data = client.get(
-        f"{_url(client)}/resource_providers/{uuid}/inventories/{resource_class}"
+        f"{client.placement_url}/resource_providers/{uuid}/inventories/{resource_class}"
     )
     fields = [
         ("Resource Class", resource_class),
@@ -650,5 +665,6 @@ def rp_inventory_delete_all(ctx, uuid, yes):
     client = ctx.find_object(OrcaContext).ensure_client()
     if not yes:
         click.confirm(f"Delete all inventories for {uuid}?", abort=True)
-    client.delete(f"{_url(client)}/resource_providers/{uuid}/inventories")
+    # Bulk delete isn't on the service (no separate endpoint for it).
+    client.delete(f"{client.placement_url}/resource_providers/{uuid}/inventories")
     console.print(f"All inventories deleted for [bold]{uuid}[/bold].")
