@@ -105,6 +105,13 @@ readers can see how far along the work is.
   direct ``client.put`` in ``commands/server.py``), and routed the
   ``volume tree`` server-name lookup through ``ServerService.find``
   instead of a direct ``/servers/detail`` call.
+- 2026-04-22 — ``orchestration`` (Heat): OrchestrationService + Stack /
+  StackResource / StackEvent / StackOutput TypedDicts. Migrated
+  ``commands/stack.py`` (stack CRUD + actions + abandon; resources,
+  events, outputs, templates, validate, resource types) and the
+  Heat callers in ``commands/cleanup.py`` (failed-stack discovery +
+  delete) and ``commands/project.py`` (project cleanup + _delete_one
+  stack branch).
 - 2026-04-22 — ``identity`` (Keystone v3): IdentityService + Project /
   User / Role (+ RoleAssignment / RoleInference) / Domain / Group /
   Credential / ApplicationCredential / Endpoint / EndpointGroup /
