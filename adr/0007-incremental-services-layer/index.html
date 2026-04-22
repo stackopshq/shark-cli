@@ -3528,6 +3528,12 @@ readers can see how far along the work is.</p>
   direct <code>client.put</code> in <code>commands/server.py</code>), and routed the
   <code>volume tree</code> server-name lookup through <code>ServerService.find</code>
   instead of a direct <code>/servers/detail</code> call.</li>
+<li>2026-04-22 — <code>quota</code> (cross-service): no dedicated service; the
+  <code>orca quota</code> command routes each slice through its owning service
+  — <code>ComputeService.get_limits</code> (Nova), a new
+  <code>VolumeService.get_limits</code> (Cinder absolute limits), and new
+  <code>NetworkService.find_quotas</code> / <code>get_quota</code> (Neutron), with the
+  Neutron usage counts going through the existing <code>find_*</code> methods.</li>
 <li>2026-04-22 — <code>placement</code>: PlacementService + ResourceProvider /
   Inventory / ProviderUsages / ResourceClass / Trait / Allocation /
   AllocationCandidate TypedDicts. Resource providers (CRUD),
