@@ -105,6 +105,13 @@ readers can see how far along the work is.
   direct ``client.put`` in ``commands/server.py``), and routed the
   ``volume tree`` server-name lookup through ``ServerService.find``
   instead of a direct ``/servers/detail`` call.
+- 2026-04-22 — ``load-balancer`` (Octavia): LoadBalancerService +
+  LoadBalancer / Listener / Pool / Member / HealthMonitor / L7Policy
+  / L7Rule / Amphora TypedDicts. Migrated ``commands/loadbalancer.py``
+  (lb CRUD + stats + status, listeners, pools + members, health
+  monitors, L7 policies + rules, admin amphorae + failover) and the
+  cross-service Octavia callers in ``commands/cleanup.py``,
+  ``commands/project.py`` and ``commands/ip_whois.py``.
 - 2026-04-22 — ``orchestration`` (Heat): OrchestrationService + Stack /
   StackResource / StackEvent / StackOutput TypedDicts. Migrated
   ``commands/stack.py`` (stack CRUD + actions + abandon; resources,
