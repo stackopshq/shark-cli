@@ -66,7 +66,7 @@ class LoadBalancerService:
 
     def get_status(self, lb_id: str) -> dict:
         data = self._client.get(
-            f"{self._base}/loadbalancers/{lb_id}/status"
+            f"{self._base}/loadbalancers/{lb_id}/statuses"
         )
         return data.get("statuses", data) if data else {}
 
