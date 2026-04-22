@@ -3528,6 +3528,19 @@ readers can see how far along the work is.</p>
   direct <code>client.put</code> in <code>commands/server.py</code>), and routed the
   <code>volume tree</code> server-name lookup through <code>ServerService.find</code>
   instead of a direct <code>/servers/detail</code> call.</li>
+<li>2026-04-22 — <code>compute</code> (Nova, non-server): ComputeService + Flavor
+  (+ FlavorAccess) / Keypair / Aggregate / Hypervisor (+ statistics) /
+  AvailabilityZone / ComputeService / ServerGroup / TenantUsage /
+  AbsoluteLimits TypedDicts. Eight command modules migrated:
+  <code>commands/flavor.py</code> (incl. extra-specs + tenant-access actions),
+  <code>commands/keypair.py</code>, <code>commands/aggregate.py</code> (incl. add/remove
+  host, set/unset metadata, cache-image), <code>commands/hypervisor.py</code>
+  (list/show/statistics/usage ranking), <code>commands/availability_zone.py</code>,
+  <code>commands/compute_service.py</code>, <code>commands/server_group.py</code>,
+  <code>commands/usage.py</code>, <code>commands/limits.py</code> (absolute),
+  <code>commands/quota.py</code> (Nova portion). Cross-service <code>os-keypairs</code>
+  callers in <code>overview.py</code>, <code>export.py</code>, <code>find.py</code> route through
+  ComputeService. ServerService stays the owner of <code>/servers</code>.</li>
 <li>2026-04-22 — <code>network</code>: NetworkService + Network / Subnet / Port /
   Router / FloatingIp / SecurityGroup (+ SecurityGroupRule) /
   SubnetPool / Trunk (+ TrunkSubPort) / QosPolicy (+ QosRule) / Agent
