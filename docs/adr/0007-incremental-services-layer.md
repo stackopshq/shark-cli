@@ -105,6 +105,27 @@ readers can see how far along the work is.
   direct ``client.put`` in ``commands/server.py``), and routed the
   ``volume tree`` server-name lookup through ``ServerService.find``
   instead of a direct ``/servers/detail`` call.
+- 2026-04-22 — IdentityService extension: Keystone enforcement
+  limits. Added ``find_registered_limits`` / ``get_registered_limit``
+  / ``create_registered_limits`` (batched POST) / ``update_registered_limit``
+  / ``delete_registered_limit`` and their project-scoped twins
+  ``find_limits`` / ``get_limit`` / ``create_limits`` /
+  ``update_limit`` / ``delete_limit``. TypedDicts: RegisteredLimit
+  and Limit. Migrated ``commands/limit.py`` — the last ``_iam()``
+  helper in the Keystone set is gone.
+- 2026-04-22 — Final cross-service cleanup: routed every remaining
+  direct ``client.get/post/put/delete`` call that targeted a ``*_url``
+  with an existing service wrapper through that service. Touched
+  ``commands/watch.py``, ``audit.py``, ``ip_whois.py``, ``cleanup.py``
+  (dropped the dead ``_collect`` helper), ``project.py`` (same),
+  ``overview.py``, ``export.py``, ``find.py`` (dropped the dead
+  ``_safe_list`` helper), ``network.py`` (topology + trace server
+  lookups). Only documented exceptions keep direct ``client.*``:
+  health probes in ``doctor.py``, Swift binary streaming + account
+  metadata POST in ``object_store.py``, Designate text/dns import/
+  export in ``zone.py``, Barbican text/plain payload GET in
+  ``secret.py``, Placement single-inventory GET + bulk DELETE-all in
+  ``placement.py``, and the auth flow in ``auth.py``.
 - 2026-04-22 — ``quota`` (cross-service): no dedicated service; the
   ``orca quota`` command routes each slice through its owning service
   — ``ComputeService.get_limits`` (Nova), a new
