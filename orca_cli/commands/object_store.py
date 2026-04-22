@@ -6,6 +6,7 @@ import hashlib
 import json
 import mimetypes
 from pathlib import Path
+from typing import Any, cast
 
 import click
 from rich.tree import Tree
@@ -13,6 +14,7 @@ from rich.tree import Tree
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import safe_child_path, safe_output_path
+from orca_cli.services.object_store import ObjectStoreService
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -29,39 +31,6 @@ def _human_size(num_bytes: int | float | str | None) -> str:
             return f"{n:.1f} {unit}"
         n /= 1024.0
     return f"{n:.1f} PB"
-
-
-def _head(client, url: str) -> dict[str, str]:
-    """Perform a HEAD request and return the response headers as a dict."""
-    resp = client._http.head(url, headers=client._headers())
-    if resp.status_code == 401:
-        from orca_cli.core.exceptions import AuthenticationError
-        raise AuthenticationError()
-    if resp.status_code == 403:
-        from orca_cli.core.exceptions import PermissionDeniedError
-        raise PermissionDeniedError()
-    if not resp.is_success:
-        from orca_cli.core.exceptions import APIError
-        raise APIError(resp.status_code, resp.text[:300])
-    return dict(resp.headers)
-
-
-def _post_no_body(client, url: str, extra_headers: dict[str, str] | None = None) -> dict[str, str]:
-    """Perform a POST request with optional extra headers and no JSON body."""
-    headers = client._headers()
-    if extra_headers:
-        headers.update(extra_headers)
-    resp = client._http.post(url, headers=headers)
-    if resp.status_code == 401:
-        from orca_cli.core.exceptions import AuthenticationError
-        raise AuthenticationError()
-    if resp.status_code == 403:
-        from orca_cli.core.exceptions import PermissionDeniedError
-        raise PermissionDeniedError()
-    if not resp.is_success:
-        from orca_cli.core.exceptions import APIError
-        raise APIError(resp.status_code, resp.text[:300])
-    return dict(resp.headers)
 
 
 # ── Group ────────────────────────────────────────────────────────────────────
@@ -83,8 +52,8 @@ def object_store(ctx: click.Context) -> None:
 def object_stats(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show account-level storage statistics."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    base = client.object_store_url
-    headers = _head(client, base)
+    svc = ObjectStoreService(client)
+    headers = svc.head_account()
 
     containers = headers.get("x-account-container-count", "0")
     objects = headers.get("x-account-object-count", "0")
@@ -116,10 +85,8 @@ def object_stats(ctx: click.Context, output_format: str, columns: tuple[str, ...
 def container_list(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List containers."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    base = client.object_store_url
-    data = client.get(f"{base}?format=json")
-
-    containers = data if isinstance(data, list) else []
+    svc = ObjectStoreService(client)
+    containers = svc.find_containers()
 
     column_defs = [
         ("Name", "name", {"style": "bold"}),
@@ -148,8 +115,8 @@ def container_list(ctx: click.Context, output_format: str, columns: tuple[str, .
 def container_show(ctx: click.Context, container: str, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show container metadata."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    base = client.object_store_url
-    headers = _head(client, f"{base}/{container}")
+    svc = ObjectStoreService(client)
+    headers = svc.head_container(container)
 
     fields: list[tuple[str, str]] = [
         ("Container", container),
@@ -179,19 +146,8 @@ def container_show(ctx: click.Context, container: str, output_format: str, colum
 def container_create(ctx: click.Context, container: str) -> None:
     """Create a container."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    base = client.object_store_url
-    url = f"{base}/{container}"
-    headers = client._headers()
-    resp = client._http.put(url, headers=headers)
-    if resp.status_code == 401:
-        from orca_cli.core.exceptions import AuthenticationError
-        raise AuthenticationError()
-    if resp.status_code == 403:
-        from orca_cli.core.exceptions import PermissionDeniedError
-        raise PermissionDeniedError()
-    if not resp.is_success:
-        from orca_cli.core.exceptions import APIError
-        raise APIError(resp.status_code, resp.text[:300])
+    svc = ObjectStoreService(client)
+    svc.create_container(container)
     console.print(f"[green]Container '{container}' created.[/green]")
 
 
@@ -211,19 +167,18 @@ def container_delete(ctx: click.Context, container: str, recursive: bool, yes: b
     if not yes:
         click.confirm(f"Delete container '{container}'?", abort=True)
     client = ctx.find_object(OrcaContext).ensure_client()
-    base = client.object_store_url
+    svc = ObjectStoreService(client)
 
     if recursive:
         # Fetch and delete all objects first
-        data = client.get(f"{base}/{container}?format=json")
-        objects = data if isinstance(data, list) else []
+        objects = svc.find_objects(container)
         for obj in objects:
             obj_name = obj.get("name", "")
             if obj_name:
-                client.delete(f"{base}/{container}/{obj_name}")
+                svc.delete_object(container, obj_name)
                 console.print(f"  Deleted object: {obj_name}")
 
-    client.delete(f"{base}/{container}")
+    svc.delete_container(container)
     console.print(f"[green]Container '{container}' deleted.[/green]")
 
 
@@ -237,7 +192,7 @@ def container_delete(ctx: click.Context, container: str, recursive: bool, yes: b
 def container_set(ctx: click.Context, container: str, properties: tuple[str, ...]) -> None:
     """Set metadata on a container."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    base = client.object_store_url
+    svc = ObjectStoreService(client)
 
     extra_headers: dict[str, str] = {}
     for prop in properties:
@@ -246,7 +201,7 @@ def container_set(ctx: click.Context, container: str, properties: tuple[str, ...
         key, val = prop.split("=", 1)
         extra_headers[f"X-Container-Meta-{key}"] = val
 
-    _post_no_body(client, f"{base}/{container}", extra_headers=extra_headers)
+    svc.post_container_metadata(container, extra_headers)
     console.print(f"[green]Metadata set on container '{container}'.[/green]")
 
 
@@ -260,10 +215,9 @@ def container_set(ctx: click.Context, container: str, properties: tuple[str, ...
 def container_save(ctx: click.Context, container: str, output_dir: str) -> None:
     """Download all objects in a container to a local directory."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    base = client.object_store_url
+    svc = ObjectStoreService(client)
 
-    data = client.get(f"{base}/{container}?format=json")
-    objects = data if isinstance(data, list) else []
+    objects = svc.find_objects(container)
 
     if not objects:
         console.print("[yellow]Container is empty — nothing to download.[/yellow]")
@@ -283,7 +237,7 @@ def container_save(ctx: click.Context, container: str, output_dir: str) -> None:
             continue
         dest.parent.mkdir(parents=True, exist_ok=True)
 
-        url = f"{base}/{container}/{obj_name}"
+        url = svc.object_url(container, obj_name)
         resp = client._http.get(url, headers=client._headers())
         if not resp.is_success:
             console.print(f"[red]Failed to download '{obj_name}': HTTP {resp.status_code}[/red]")
@@ -309,16 +263,9 @@ def object_list(ctx: click.Context, container: str, prefix: str | None, delimite
                 output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List objects in a container."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    base = client.object_store_url
+    svc = ObjectStoreService(client)
 
-    params = "format=json"
-    if prefix:
-        params += f"&prefix={prefix}"
-    if delimiter:
-        params += f"&delimiter={delimiter}"
-
-    data = client.get(f"{base}/{container}?{params}")
-    objects = data if isinstance(data, list) else []
+    objects = cast("list[dict[str, Any]]", svc.find_objects(container, prefix=prefix, delimiter=delimiter))
 
     column_defs: list[tuple] = [
         ("Name", "name", {"style": "bold"}),
@@ -363,8 +310,8 @@ def object_list(ctx: click.Context, container: str, prefix: str | None, delimite
 def object_show(ctx: click.Context, container: str, object_name: str, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show object metadata."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    base = client.object_store_url
-    headers = _head(client, f"{base}/{container}/{object_name}")
+    svc = ObjectStoreService(client)
+    headers = svc.head_object(container, object_name)
 
     content_length = headers.get("content-length", "0")
 
@@ -395,7 +342,7 @@ SLO_SEGMENT_SIZE = 4 * 1024 * 1024 * 1024  # 4 GB per segment
 SLO_THRESHOLD = 5 * 1024 * 1024 * 1024     # use SLO above 5 GB
 
 
-def _upload_simple(client, base, container, obj_name, path, content_type, file_size, progress, task):
+def _upload_simple(client, svc, container, obj_name, path, content_type, file_size, progress, task):
     """Single-PUT upload for files <= 5 GB."""
     headers = client._headers()
     headers["Content-Type"] = content_type
@@ -411,7 +358,7 @@ def _upload_simple(client, base, container, obj_name, path, content_type, file_s
 
     with open(path, "rb") as f:
         resp = client._http.put(
-            f"{base}/{container}/{obj_name}",
+            svc.object_url(container, obj_name),
             headers=headers,
             content=_iter(f),
         )
@@ -427,13 +374,11 @@ def _upload_simple(client, base, container, obj_name, path, content_type, file_s
         raise APIError(resp.status_code, resp.text[:300])
 
 
-def _upload_slo(client, base, container, obj_name, path, content_type, file_size, progress, task):
+def _upload_slo(client, svc, container, obj_name, path, content_type, file_size, progress, task):
     """Segmented upload (SLO) for files > 5 GB."""
     seg_container = f"{container}_segments"
     # Ensure segments container exists
-    headers = client._headers()
-    headers["Content-Length"] = "0"
-    client._http.put(f"{base}/{seg_container}", headers=headers)
+    svc.create_container(seg_container)
 
     manifest = []
     seg_num = 0
@@ -471,7 +416,7 @@ def _upload_slo(client, base, container, obj_name, path, content_type, file_size
             seg_headers["Content-Length"] = str(seg_size)
 
             resp = client._http.put(
-                f"{base}/{seg_container}/{seg_name}",
+                svc.object_url(seg_container, seg_name),
                 headers=seg_headers,
                 content=_seg_iter(),
             )
@@ -500,7 +445,7 @@ def _upload_slo(client, base, container, obj_name, path, content_type, file_size
     manifest_headers["Content-Length"] = str(len(manifest_body))
 
     resp = client._http.put(
-        f"{base}/{container}/{obj_name}?multipart-manifest=put",
+        f"{svc.object_url(container, obj_name)}?multipart-manifest=put",
         headers=manifest_headers,
         content=manifest_body,
     )
@@ -530,7 +475,7 @@ def object_upload(ctx: click.Context, container: str, files: tuple[str, ...],
     using Swift SLO (Static Large Object).
     """
     client = ctx.find_object(OrcaContext).ensure_client()
-    base = client.object_store_url
+    svc = ObjectStoreService(client)
 
     if override_name and len(files) > 1:
         raise click.UsageError("--name can only be used when uploading a single file.")
@@ -559,11 +504,11 @@ def object_upload(ctx: click.Context, container: str, files: tuple[str, ...],
                 n_segments = (file_size + SLO_SEGMENT_SIZE - 1) // SLO_SEGMENT_SIZE
                 task = progress.add_task(
                     f"Uploading {path.name} ({n_segments} segments)", total=file_size)
-                _upload_slo(client, base, container, obj_name, path,
+                _upload_slo(client, svc, container, obj_name, path,
                             content_type, file_size, progress, task)
             else:
                 task = progress.add_task(f"Uploading {path.name}", total=file_size)
-                _upload_simple(client, base, container, obj_name, path,
+                _upload_simple(client, svc, container, obj_name, path,
                                content_type, file_size, progress, task)
 
         console.print(f"[green]Uploaded '{path.name}' -> '{container}/{obj_name}' ({_human_size(file_size)})[/green]")
@@ -582,8 +527,8 @@ def object_download(ctx: click.Context, container: str, object_name: str, output
     from rich.progress import BarColumn, DownloadColumn, Progress, TimeRemainingColumn, TransferSpeedColumn
 
     client = ctx.find_object(OrcaContext).ensure_client()
-    base = client.object_store_url
-    url = f"{base}/{container}/{object_name}"
+    svc = ObjectStoreService(client)
+    url = svc.object_url(container, object_name)
     dest = safe_output_path(output_file if output_file else object_name.split("/")[-1])
     dest.parent.mkdir(parents=True, exist_ok=True)
 
@@ -629,10 +574,10 @@ def object_download(ctx: click.Context, container: str, object_name: str, output
 def object_delete(ctx: click.Context, container: str, objects: tuple[str, ...]) -> None:
     """Delete one or more objects from a container."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    base = client.object_store_url
+    svc = ObjectStoreService(client)
 
     for obj_name in objects:
-        client.delete(f"{base}/{container}/{obj_name}")
+        svc.delete_object(container, obj_name)
         console.print(f"  Deleted: {container}/{obj_name}")
 
     console.print(f"[green]Deleted {len(objects)} object(s) from '{container}'.[/green]")
@@ -649,7 +594,7 @@ def object_delete(ctx: click.Context, container: str, objects: tuple[str, ...]) 
 def object_set(ctx: click.Context, container: str, object_name: str, properties: tuple[str, ...]) -> None:
     """Set metadata on an object."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    base = client.object_store_url
+    svc = ObjectStoreService(client)
 
     extra_headers: dict[str, str] = {}
     for prop in properties:
@@ -658,7 +603,7 @@ def object_set(ctx: click.Context, container: str, object_name: str, properties:
         key, val = prop.split("=", 1)
         extra_headers[f"X-Object-Meta-{key}"] = val
 
-    _post_no_body(client, f"{base}/{container}/{object_name}", extra_headers=extra_headers)
+    svc.post_object_metadata(container, object_name, extra_headers)
     console.print(f"[green]Metadata set on '{container}/{object_name}'.[/green]")
 
 
@@ -673,13 +618,13 @@ def object_set(ctx: click.Context, container: str, object_name: str, properties:
 def object_unset(ctx: click.Context, container: str, object_name: str, properties: tuple[str, ...]) -> None:
     """Remove metadata from an object."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    base = client.object_store_url
+    svc = ObjectStoreService(client)
 
     extra_headers: dict[str, str] = {}
     for key in properties:
         extra_headers[f"X-Remove-Object-Meta-{key}"] = "x"
 
-    _post_no_body(client, f"{base}/{container}/{object_name}", extra_headers=extra_headers)
+    svc.post_object_metadata(container, object_name, extra_headers)
     console.print(f"[green]Metadata removed from '{container}/{object_name}'.[/green]")
 
 
@@ -701,7 +646,18 @@ def object_account_set(ctx: click.Context, properties: tuple[str, ...]) -> None:
         key, val = prop.split("=", 1)
         extra_headers[f"X-Account-Meta-{key}"] = val
 
-    _post_no_body(client, base, extra_headers=extra_headers)
+    headers = client._headers()
+    headers.update(extra_headers)
+    resp = client._http.post(base, headers=headers)
+    if resp.status_code == 401:
+        from orca_cli.core.exceptions import AuthenticationError
+        raise AuthenticationError()
+    if resp.status_code == 403:
+        from orca_cli.core.exceptions import PermissionDeniedError
+        raise PermissionDeniedError()
+    if not resp.is_success:
+        from orca_cli.core.exceptions import APIError
+        raise APIError(resp.status_code, resp.text[:300])
     console.print("[green]Account metadata set.[/green]")
 
 
@@ -720,7 +676,18 @@ def object_account_unset(ctx: click.Context, properties: tuple[str, ...]) -> Non
     for key in properties:
         extra_headers[f"X-Remove-Account-Meta-{key}"] = "x"
 
-    _post_no_body(client, base, extra_headers=extra_headers)
+    headers = client._headers()
+    headers.update(extra_headers)
+    resp = client._http.post(base, headers=headers)
+    if resp.status_code == 401:
+        from orca_cli.core.exceptions import AuthenticationError
+        raise AuthenticationError()
+    if resp.status_code == 403:
+        from orca_cli.core.exceptions import PermissionDeniedError
+        raise PermissionDeniedError()
+    if not resp.is_success:
+        from orca_cli.core.exceptions import APIError
+        raise APIError(resp.status_code, resp.text[:300])
     console.print("[green]Account metadata removed.[/green]")
 
 
@@ -738,12 +705,11 @@ def object_tree(ctx: click.Context, container: str | None, delimiter: str) -> No
     shows the pseudo-folder structure of objects within it.
     """
     client = ctx.find_object(OrcaContext).ensure_client()
-    base = client.object_store_url
+    svc = ObjectStoreService(client)
 
     if container is None:
         # Show all containers as top-level tree
-        data = client.get(f"{base}?format=json")
-        containers = data if isinstance(data, list) else []
+        containers = svc.find_containers()
 
         tree = Tree("[bold]Account[/bold]")
         for c in containers:
@@ -755,25 +721,24 @@ def object_tree(ctx: click.Context, container: str | None, delimiter: str) -> No
         console.print(tree)
     else:
         # Show pseudo-folder structure for a single container
-        data = client.get(f"{base}/{container}?format=json")
-        objects = data if isinstance(data, list) else []
+        objects = cast("list[dict[str, Any]]", svc.find_objects(container))
 
         tree = Tree(f"[bold]{container}[/bold]")
 
         # Build a nested dict representing the folder hierarchy
         folder_tree: dict = {}
         for obj in objects:
-            name = obj.get("name", "")
-            size = obj.get("bytes", 0)
-            parts = name.split(delimiter) if delimiter else [name]
+            obj_name = obj.get("name", "")
+            obj_size = obj.get("bytes", 0)
+            parts = obj_name.split(delimiter) if delimiter else [obj_name]
             node = folder_tree
             for part in parts[:-1]:
                 if part not in node:
                     node[part] = {}
                 node = node[part]
             # Leaf node stores the size
-            leaf_name = parts[-1] if parts[-1] else parts[-2] + delimiter if len(parts) > 1 else name
-            node[leaf_name] = {"__size__": size}
+            leaf_name = parts[-1] if parts[-1] else parts[-2] + delimiter if len(parts) > 1 else obj_name
+            node[leaf_name] = {"__size__": obj_size}
 
         def _add_nodes(parent_tree: Tree, subtree: dict) -> None:
             for key in sorted(subtree.keys()):

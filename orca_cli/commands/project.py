@@ -13,6 +13,7 @@ from orca_cli.services.identity import IdentityService
 from orca_cli.services.image import ImageService
 from orca_cli.services.load_balancer import LoadBalancerService
 from orca_cli.services.network import NetworkService
+from orca_cli.services.object_store import ObjectStoreService
 from orca_cli.services.orchestration import OrchestrationService
 
 
@@ -236,21 +237,19 @@ def _delete_one(client, rtype: str, rid: str, rname: str) -> bool:
             client.delete(f"{client.dns_url}/v2/zones/{rid}")
         elif rtype == "container":
             # rid == container name for Swift; delete all objects first
-            base = client.object_store_url
+            obj_svc = ObjectStoreService(client)
             try:
-                objects = client.get(
-                    f"{base}/{rid}", params={"format": "json"}
-                )
-                if isinstance(objects, list):
-                    for obj in objects:
-                        obj_name = obj.get("name", obj) if isinstance(obj, dict) else obj
-                        try:
-                            client.delete(f"{base}/{rid}/{obj_name}")
-                        except Exception:
-                            pass
+                for obj in obj_svc.find_objects(rid):
+                    obj_name = obj.get("name", "")
+                    if not obj_name:
+                        continue
+                    try:
+                        obj_svc.delete_object(rid, obj_name)
+                    except Exception:
+                        pass
             except Exception:
                 pass
-            client.delete(f"{base}/{rid}")
+            obj_svc.delete_container(rid)
         console.print(f"  [green]✓[/green] {label}")
         return True
     except APIError as exc:
@@ -451,15 +450,11 @@ def project_cleanup(ctx, target_project, dry_run, yes, created_before, skip_type
             # Swift: GET {url}?format=json returns [{name, count, bytes}, ...]
             # Containers have no created_at so cutoff does not apply.
             try:
-                containers = client.get(
-                    f"{client.object_store_url}", params={"format": "json"}
-                )
-                if isinstance(containers, list):
-                    for c in containers:
-                        name = c.get("name", "") if isinstance(c, dict) else str(c)
-                        if name:
-                            # Use name as both id and display name (Swift has no UUID)
-                            resources.append(("container", name, name))
+                for c in ObjectStoreService(client).find_containers():
+                    name = c.get("name", "")
+                    if name:
+                        # Use name as both id and display name (Swift has no UUID)
+                        resources.append(("container", name, name))
             except Exception:
                 pass
 
