@@ -3528,6 +3528,13 @@ readers can see how far along the work is.</p>
   direct <code>client.put</code> in <code>commands/server.py</code>), and routed the
   <code>volume tree</code> server-name lookup through <code>ServerService.find</code>
   instead of a direct <code>/servers/detail</code> call.</li>
+<li>2026-04-22 — <code>key-manager</code> (Barbican): KeyManagerService + Secret
+  / SecretContainer / Order / Acl TypedDicts. Secrets, secret ACLs,
+  secret containers, orders. Migrated <code>commands/secret.py</code> (drops
+  <code>_barbican()</code> helper, consolidates <code>secret_ref</code> UUID extractor)
+  and the secret branch in <code>project.py</code>. The raw text/plain
+  <code>secret get-payload</code> keeps its <code>client._http</code> call — the
+  service exposes JSON-bodied methods only.</li>
 <li>2026-04-22 — <code>dns</code> (Designate): DnsService + Zone / Recordset /
   ZoneTransferRequest / Tld TypedDicts. Zones CRUD, recordsets CRUD
   (per-zone + cross-zone), export/import tasks, transfer requests +
