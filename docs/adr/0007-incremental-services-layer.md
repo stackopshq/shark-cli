@@ -105,6 +105,16 @@ readers can see how far along the work is.
   direct ``client.put`` in ``commands/server.py``), and routed the
   ``volume tree`` server-name lookup through ``ServerService.find``
   instead of a direct ``/servers/detail`` call.
+- 2026-04-22 — ``object-store`` (Swift): ObjectStoreService +
+  Container / ObjectEntry TypedDicts. Account/container/object CRUD,
+  HEAD metadata reads, POST metadata writes (with full-name header
+  keys), and an ``object_url(container, name)`` helper for streaming
+  upload/download. Migrated ``commands/object_store.py`` and
+  ``commands/container.py`` (dropped the local ``_head`` /
+  ``_post_no_body`` / ``_swift`` helpers), plus the Swift container
+  branch of ``commands/project.py`` cleanup. Binary up/download still
+  uses ``client._http`` directly (streaming), which is intentional —
+  the service provides the URL only.
 - 2026-04-22 — ``load-balancer`` (Octavia): LoadBalancerService +
   LoadBalancer / Listener / Pool / Member / HealthMonitor / L7Policy
   / L7Rule / Amphora TypedDicts. Migrated ``commands/loadbalancer.py``
