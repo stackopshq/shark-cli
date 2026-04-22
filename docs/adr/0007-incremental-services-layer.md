@@ -105,3 +105,20 @@ readers can see how far along the work is.
   direct ``client.put`` in ``commands/server.py``), and routed the
   ``volume tree`` server-name lookup through ``ServerService.find``
   instead of a direct ``/servers/detail`` call.
+- 2026-04-22 — ``network``: NetworkService + Network / Subnet / Port /
+  Router / FloatingIp / SecurityGroup (+ SecurityGroupRule) /
+  SubnetPool / Trunk (+ TrunkSubPort) / QosPolicy (+ QosRule) / Agent
+  / RbacPolicy / Segment / AutoAllocatedTopology TypedDicts. All six
+  Neutron command modules (``commands/network.py`` with 50+ subcommands
+  — networks, subnets, ports, routers with add/remove/set/unset
+  subgroups, agents, RBAC, segments, auto-allocated-topology, plus
+  topology/trace diagnostics; ``commands/floating_ip.py``,
+  ``commands/security_group.py``, ``commands/subnet_pool.py``,
+  ``commands/trunk.py``, ``commands/qos_policy.py``) now go through
+  the service. Cross-service Neutron fetches in ``commands/overview.py``,
+  ``commands/export.py``, ``commands/cleanup.py``, ``commands/find.py``
+  and ``commands/project.py`` (incl. the router interface detach loop
+  before delete) route through NetworkService too. Only non-Neutron
+  callers (Nova os-keypairs, Cinder, Heat, Octavia, Swift, Designate,
+  Barbican) keep direct ``client.*`` calls until their respective
+  services land.
