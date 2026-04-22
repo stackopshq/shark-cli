@@ -30,8 +30,11 @@ class ContainerInfraService:
 
     def update(self, cluster_id: str, body: list[dict[str, Any]]) -> Cluster:
         """Magnum's cluster PATCH expects a JSON Patch array."""
-        data = self._client.patch(f"{self._base}/clusters/{cluster_id}",
-                                  json=body)
+        data = self._client.patch(
+            f"{self._base}/clusters/{cluster_id}",
+            json=body,
+            content_type="application/json-patch+json",
+        )
         return data if data else {}
 
     def delete(self, cluster_id: str) -> None:
@@ -95,6 +98,7 @@ class ContainerInfraService:
         data = self._client.patch(
             f"{self._base}/clusters/{cluster_id}/nodegroups/{nodegroup_id}",
             json=body,
+            content_type="application/json-patch+json",
         )
         return data if data else {}
 

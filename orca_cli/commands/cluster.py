@@ -6,11 +6,7 @@ import click
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
-
-
-def _magnum(client) -> str:
-    return client.container_infra_url
-
+from orca_cli.services.container_infra import ContainerInfraService
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Clusters
@@ -29,10 +25,11 @@ def cluster(ctx: click.Context) -> None:
 def cluster_list(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List clusters."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_magnum(client)}/clusters")
+    svc = ContainerInfraService(client)
+    clusters = svc.find()
 
     print_list(
-        data.get("clusters", []),
+        clusters,
         [
             ("UUID", "uuid", {"style": "cyan", "no_wrap": True}),
             ("Name", "name", {"style": "bold"}),
@@ -55,7 +52,8 @@ def cluster_list(ctx: click.Context, output_format: str, columns: tuple[str, ...
 def cluster_show(ctx: click.Context, cluster_id: str, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show cluster details."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_magnum(client)}/clusters/{cluster_id}")
+    svc = ContainerInfraService(client)
+    data = svc.get(cluster_id)
 
     fields = [(key, str(data.get(key, ""))) for key in
               ["uuid", "name", "status", "status_reason", "coe_version",
@@ -89,6 +87,7 @@ def cluster_create(ctx: click.Context, name: str, cluster_template_id: str,
       orca cluster create prod --template <id> --master-count 3 --node-count 5 --keypair my-key
     """
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = ContainerInfraService(client)
     body: dict = {
         "name": name,
         "cluster_template_id": cluster_template_id,
@@ -103,7 +102,7 @@ def cluster_create(ctx: click.Context, name: str, cluster_template_id: str,
     if master_flavor_id:
         body["master_flavor_id"] = master_flavor_id
 
-    data = client.post(f"{_magnum(client)}/clusters", json=body)
+    data = svc.create(body)
     uuid = data.get("uuid", "") if data else ""
     console.print(f"[green]Cluster '{name}' creation started ({uuid}).[/green]")
     console.print("[dim]Use 'orca cluster show' to track progress.[/dim]")
@@ -118,7 +117,8 @@ def cluster_delete(ctx: click.Context, cluster_id: str, yes: bool) -> None:
     if not yes:
         click.confirm(f"Delete cluster {cluster_id}?", abort=True)
     client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{_magnum(client)}/clusters/{cluster_id}")
+    svc = ContainerInfraService(client)
+    svc.delete(cluster_id)
     console.print(f"[green]Cluster {cluster_id} deletion started.[/green]")
 
 
@@ -129,9 +129,9 @@ def cluster_delete(ctx: click.Context, cluster_id: str, yes: bool) -> None:
 def cluster_resize(ctx: click.Context, cluster_id: str, node_count: int) -> None:
     """Resize a cluster (change worker node count)."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = ContainerInfraService(client)
     body = [{"op": "replace", "path": "/node_count", "value": node_count}]
-    client.patch(f"{_magnum(client)}/clusters/{cluster_id}",
-                 json=body, content_type="application/json-patch+json")
+    svc.update(cluster_id, body)
     console.print(f"[green]Cluster {cluster_id} resize to {node_count} nodes started.[/green]")
 
 
@@ -141,7 +141,8 @@ def cluster_resize(ctx: click.Context, cluster_id: str, node_count: int) -> None
 def cluster_kubeconfig(ctx: click.Context, cluster_id: str) -> None:
     """Show the cluster API address and connection info."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_magnum(client)}/clusters/{cluster_id}")
+    svc = ContainerInfraService(client)
+    data = svc.get(cluster_id)
 
     api = data.get("api_address", "")
     status = data.get("status", "")
@@ -169,10 +170,11 @@ def cluster_kubeconfig(ctx: click.Context, cluster_id: str) -> None:
 def template_list(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List cluster templates."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_magnum(client)}/clustertemplates")
+    svc = ContainerInfraService(client)
+    templates = svc.find_templates()
 
     print_list(
-        data.get("clustertemplates", []),
+        templates,
         [
             ("UUID", "uuid", {"style": "cyan", "no_wrap": True}),
             ("Name", "name", {"style": "bold"}),
@@ -195,7 +197,8 @@ def template_list(ctx: click.Context, output_format: str, columns: tuple[str, ..
 def template_show(ctx: click.Context, template_id: str, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show cluster template details."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_magnum(client)}/clustertemplates/{template_id}")
+    svc = ContainerInfraService(client)
+    data = svc.get_template(template_id)
 
     fields = [(key, str(data.get(key, "") if data.get(key) is not None else "")) for key in
               ["uuid", "name", "coe", "image_id", "keypair_id",
@@ -232,6 +235,7 @@ def template_create(ctx: click.Context, name: str, image_id: str, external_netwo
                     labels: tuple[str, ...]) -> None:
     """Create a cluster template."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = ContainerInfraService(client)
     body: dict = {
         "name": name,
         "image_id": image_id,
@@ -254,7 +258,7 @@ def template_create(ctx: click.Context, name: str, image_id: str, external_netwo
     if labels:
         body["labels"] = dict(item.split("=", 1) for item in labels)
 
-    data = client.post(f"{_magnum(client)}/clustertemplates", json=body)
+    data = svc.create_template(body)
     console.print(f"[green]Template '{data.get('name')}' ({data.get('uuid')}) created.[/green]")
 
 
@@ -267,7 +271,8 @@ def template_delete(ctx: click.Context, template_id: str, yes: bool) -> None:
     if not yes:
         click.confirm(f"Delete template {template_id}?", abort=True)
     client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{_magnum(client)}/clustertemplates/{template_id}")
+    svc = ContainerInfraService(client)
+    svc.delete_template(template_id)
     console.print(f"[green]Template {template_id} deleted.[/green]")
 
 
@@ -287,11 +292,11 @@ def cluster_upgrade(ctx: click.Context, cluster_id: str, template_id: str,
                     max_batch_size: int, nodegroup: str | None) -> None:
     """Upgrade a cluster to a new template version."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = ContainerInfraService(client)
     body: dict = {"cluster_template": template_id, "max_batch_size": max_batch_size}
     if nodegroup:
         body["nodegroup"] = nodegroup
-    client.post(f"{_magnum(client)}/clusters/{cluster_id}/actions/upgrade",
-                json=body)
+    svc.upgrade(cluster_id, body)
     console.print(f"[green]Cluster {cluster_id} upgrade started.[/green]")
 
 
@@ -308,9 +313,8 @@ def nodegroup_list(ctx: click.Context, cluster_id: str, output_format: str,
                    max_width: int | None, noindent: bool) -> None:
     """List node groups in a cluster."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    ngs = client.get(f"{_magnum(client)}/clusters/{cluster_id}/nodegroups").get(
-        "nodegroups", []
-    )
+    svc = ContainerInfraService(client)
+    ngs = svc.find_nodegroups(cluster_id)
     print_list(
         ngs,
         [
@@ -338,9 +342,8 @@ def nodegroup_show(ctx: click.Context, cluster_id: str, nodegroup_id: str,
                    fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """Show node group details."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    ng = client.get(
-        f"{_magnum(client)}/clusters/{cluster_id}/nodegroups/{nodegroup_id}"
-    )
+    svc = ContainerInfraService(client)
+    ng = svc.get_nodegroup(cluster_id, nodegroup_id)
     fields = [(k, str(ng.get(k, "") or "")) for k in
               ["uuid", "name", "cluster_id", "role", "flavor_id", "image_id",
                "node_count", "min_node_count", "max_node_count",
@@ -369,6 +372,7 @@ def nodegroup_create(ctx: click.Context, cluster_id: str, name: str,
                      role: str, image_id: str | None) -> None:
     """Create a node group in a cluster."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = ContainerInfraService(client)
     body: dict = {
         "name": name, "flavor_id": flavor_id,
         "node_count": node_count, "role": role,
@@ -379,9 +383,7 @@ def nodegroup_create(ctx: click.Context, cluster_id: str, name: str,
         body["max_node_count"] = max_node_count
     if image_id:
         body["image_id"] = image_id
-    ng = client.post(
-        f"{_magnum(client)}/clusters/{cluster_id}/nodegroups", json=body
-    )
+    ng = svc.create_nodegroup(cluster_id, body)
     console.print(f"[green]Node group '{name}' created: {ng.get('uuid', '?')}[/green]")
 
 
@@ -397,6 +399,7 @@ def nodegroup_update(ctx: click.Context, cluster_id: str, nodegroup_id: str,
                      max_node_count: int | None) -> None:
     """Update a node group (resize / autoscaling bounds)."""
     client = ctx.find_object(OrcaContext).ensure_client()
+    svc = ContainerInfraService(client)
     ops = []
     for path, val in [("/node_count", node_count),
                       ("/min_node_count", min_node_count),
@@ -406,8 +409,7 @@ def nodegroup_update(ctx: click.Context, cluster_id: str, nodegroup_id: str,
     if not ops:
         console.print("[yellow]Nothing to update.[/yellow]")
         return
-    client.patch(f"{_magnum(client)}/clusters/{cluster_id}/nodegroups/{nodegroup_id}",
-                 json=ops)
+    svc.update_nodegroup(cluster_id, nodegroup_id, ops)
     console.print(f"[green]Node group {nodegroup_id} updated.[/green]")
 
 
@@ -422,7 +424,6 @@ def nodegroup_delete(ctx: click.Context, cluster_id: str, nodegroup_id: str,
     if not yes:
         click.confirm(f"Delete node group {nodegroup_id}?", abort=True)
     client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(
-        f"{_magnum(client)}/clusters/{cluster_id}/nodegroups/{nodegroup_id}"
-    )
+    svc = ContainerInfraService(client)
+    svc.delete_nodegroup(cluster_id, nodegroup_id)
     console.print(f"[green]Node group {nodegroup_id} deleted.[/green]")
