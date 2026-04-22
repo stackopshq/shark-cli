@@ -88,3 +88,20 @@ readers can see how far along the work is.
   not HTTP calls. Service covers volumes, snapshots, backups,
   attachments, types (+ access + extra-specs), QoS, transfers,
   messages, groups, group snapshots, group types, services.
+- 2026-04-22 — `image`: ImageService + Image / ImageMember / ImageTask
+  / ImageStore TypedDicts. All 24 ``orca image`` subcommands go through
+  the service (CRUD, upload/stage/download streaming, deactivate/
+  reactivate, tags, members/sharing, import API, cache admin, multi-
+  backend stores info, async tasks). Cross-service Glance lookups in
+  ``commands/server.py`` (SSH user detection), ``commands/overview.py``,
+  ``commands/export.py``, ``commands/project.py`` (purge + delete) and
+  ``commands/find.py`` (universal search) now route through
+  ImageService too. Only ``commands/doctor.py`` keeps a raw
+  ``client.image_url`` reference — it is an intentional health-probe
+  URL, not a business call.
+- 2026-04-22 — Residual cleanups on migrated resources: added
+  ``ServerService.set_tags`` / ``delete_all_tags`` to cover the bulk
+  ``PUT /servers/{id}/tags`` replacement (previously the only remaining
+  direct ``client.put`` in ``commands/server.py``), and routed the
+  ``volume tree`` server-name lookup through ``ServerService.find``
+  instead of a direct ``/servers/detail`` call.
