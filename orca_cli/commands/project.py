@@ -12,6 +12,7 @@ from orca_cli.core.output import console, output_options, print_detail, print_li
 from orca_cli.services.identity import IdentityService
 from orca_cli.services.image import ImageService
 from orca_cli.services.network import NetworkService
+from orca_cli.services.orchestration import OrchestrationService
 
 
 @click.group()
@@ -193,7 +194,7 @@ def _delete_one(client, rtype: str, rid: str, rname: str) -> bool:
     label = f"{rtype} {rname} ({rid})"
     try:
         if rtype == "stack":
-            client.delete(f"{client.orchestration_url}/stacks/{rname}/{rid}")
+            OrchestrationService(client).delete(rname, rid)
         elif rtype == "loadbalancer":
             client.delete(
                 f"{client.load_balancer_url}/v2/lbaas/loadbalancers/{rid}?cascade=true"
@@ -341,10 +342,12 @@ def project_cleanup(ctx, target_project, dry_run, yes, created_before, skip_type
             auth_proj = client._token_data.get("project", {}).get("id")
             if proj_id != auth_proj:
                 stack_params = {"project_id": proj_id, "global_tenant": "true"}
-            add("stack",
-                _collect(client, f"{client.orchestration_url}/stacks", "stacks",
-                         params=stack_params or None),
-                name_key="stack_name")
+            heat_svc = OrchestrationService(client)
+            try:
+                heat_stacks = heat_svc.find(params=stack_params or None)
+            except Exception:
+                heat_stacks = []
+            add("stack", heat_stacks, name_key="stack_name")
 
         if "loadbalancer" not in skip:
             add("loadbalancer",

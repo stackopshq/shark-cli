@@ -12,12 +12,10 @@ import yaml
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import safe_output_path
+from orca_cli.models.orchestration import Stack
+from orca_cli.services.orchestration import OrchestrationService
 
 # ── Helpers ──────────────────────────────────────────────────────────────
-
-
-def _heat(client) -> str:
-    return client.orchestration_url
 
 
 def _status_style(status: str) -> str:
@@ -42,27 +40,24 @@ def _styled_status(status: str) -> str:
     return status
 
 
-def _resolve_stack(client, stack: str) -> dict:
+def _resolve_stack(client, stack: str) -> Stack:
     """GET a stack by name or ID, returning the full stack dict.
 
     Heat's ``GET /stacks/<name>`` returns a 302 redirect to
     ``/stacks/<name>/<id>``.  To avoid following redirects we first list
     stacks filtered by name and derive the canonical URL ourselves.
     """
-    base = _heat(client)
+    svc = OrchestrationService(client)
     # Try listing by name first (no redirect risk)
-    data = client.get(f"{base}/stacks", params={"name": stack})
-    stacks = data.get("stacks", [])
+    stacks = svc.find(params={"name": stack})
     if stacks:
         s = stacks[0]
         name = s.get("stack_name", stack)
         sid = s.get("id", "")
-        detail = client.get(f"{base}/stacks/{name}/{sid}")
-        return detail.get("stack", detail)
+        return svc.get(name, sid)
     # Fallback: maybe caller passed the canonical ``name/id`` form
     try:
-        detail = client.get(f"{base}/stacks/{stack}")
-        return detail.get("stack", detail)
+        return svc.get(stack)
     except Exception as exc:
         raise click.ClickException(f"Stack not found: {stack}") from exc
 
@@ -112,13 +107,13 @@ def _load_environment(path: str) -> dict:
     return result
 
 
-def _wait_for_stack(client, stack_name: str, stack_id: str, action: str) -> dict:
+def _wait_for_stack(client, stack_name: str, stack_id: str, action: str) -> Stack:
     """Poll stack status until a terminal state is reached."""
+    svc = OrchestrationService(client)
     terminal_suffixes = ("_COMPLETE", "_FAILED")
     with console.status(f"[bold cyan]Waiting for stack {action}..."):
         while True:
-            data = client.get(f"{_heat(client)}/stacks/{stack_name}/{stack_id}")
-            stk = data.get("stack", data)
+            stk = svc.get(stack_name, stack_id)
             status = stk.get("stack_status", "")
             if any(status.upper().endswith(s) for s in terminal_suffixes):
                 style = _status_style(status)
@@ -149,9 +144,8 @@ def stack(ctx: click.Context) -> None:
 def stack_list(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
     """List stacks."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_heat(client)}/stacks")
-
-    stacks = data.get("stacks", [])
+    svc = OrchestrationService(client)
+    stacks = svc.find()
 
     print_list(
         stacks,
@@ -238,8 +232,8 @@ def stack_create(ctx: click.Context, name: str, template: str, environment: str 
     if timeout_mins is not None:
         body["timeout_mins"] = timeout_mins
 
-    data = client.post(f"{_heat(client)}/stacks", json=body)
-    stk = data.get("stack", data)
+    svc = OrchestrationService(client)
+    stk = svc.create(body)
     stack_id = stk.get("id", "")
     console.print(f"[green]Stack '{name}' creation started ({stack_id}).[/green]")
 
@@ -287,7 +281,7 @@ def stack_update(ctx: click.Context, stack_name_or_id: str, template: str, envir
     if timeout_mins is not None:
         body["timeout_mins"] = timeout_mins
 
-    client.put(f"{_heat(client)}/stacks/{s_name}/{s_id}", json=body)
+    OrchestrationService(client).update(s_name, s_id, body)
     console.print(f"[green]Stack '{s_name}' update started.[/green]")
 
     if wait:
@@ -311,7 +305,7 @@ def stack_delete(ctx: click.Context, stack_name_or_id: str, yes: bool, wait: boo
     if not yes:
         click.confirm(f"Delete stack {s_name}?", abort=True)
 
-    client.delete(f"{_heat(client)}/stacks/{s_name}/{s_id}")
+    OrchestrationService(client).delete(s_name, s_id)
     console.print(f"[green]Stack '{s_name}' deletion started.[/green]")
 
     if wait:
@@ -326,7 +320,7 @@ def _stack_action(ctx: click.Context, stack_name_or_id: str, action: dict, label
     stk = _resolve_stack(client, stack_name_or_id)
     s_name = stk["stack_name"]
     s_id = stk["id"]
-    client.post(f"{_heat(client)}/stacks/{s_name}/{s_id}/actions", json=action)
+    OrchestrationService(client).action(s_name, s_id, action)
     console.print(f"[green]{label} request sent for stack '{s_name}'.[/green]")
 
 
@@ -377,8 +371,7 @@ def resource_list(ctx: click.Context, stack_name_or_id: str, output_format: str,
     s_name = stk["stack_name"]
     s_id = stk["id"]
 
-    data = client.get(f"{_heat(client)}/stacks/{s_name}/{s_id}/resources")
-    resources = data.get("resources", [])
+    resources = OrchestrationService(client).find_resources(s_name, s_id)
 
     print_list(
         resources,
@@ -407,8 +400,7 @@ def resource_show(ctx: click.Context, stack_name_or_id: str, resource_name: str,
     s_name = stk["stack_name"]
     s_id = stk["id"]
 
-    data = client.get(f"{_heat(client)}/stacks/{s_name}/{s_id}/resources/{resource_name}")
-    res = data.get("resource", data)
+    res = OrchestrationService(client).get_resource(s_name, s_id, resource_name)
 
     fields = [
         ("resource_name", res.get("resource_name", "")),
@@ -448,8 +440,7 @@ def event_list(ctx: click.Context, stack_name_or_id: str, resource_name: str | N
     if limit is not None:
         params["limit"] = limit
 
-    data = client.get(f"{_heat(client)}/stacks/{s_name}/{s_id}/events", params=params)
-    events = data.get("events", [])
+    events = OrchestrationService(client).find_events(s_name, s_id, params=params)
 
     if resource_name:
         events = [e for e in events if e.get("resource_name") == resource_name]
@@ -483,8 +474,7 @@ def event_show(ctx: click.Context, stack_name_or_id: str, resource_name: str, ev
     s_name = stk["stack_name"]
     s_id = stk["id"]
 
-    data = client.get(f"{_heat(client)}/stacks/{s_name}/{s_id}/resources/{resource_name}/events/{event_id}")
-    evt = data.get("event", data)
+    evt = OrchestrationService(client).get_event(s_name, s_id, resource_name, event_id)
 
     fields = [
         ("id", evt.get("id", "")),
@@ -515,8 +505,7 @@ def output_list(ctx: click.Context, stack_name_or_id: str, output_format: str, c
     s_name = stk["stack_name"]
     s_id = stk["id"]
 
-    data = client.get(f"{_heat(client)}/stacks/{s_name}/{s_id}/outputs")
-    outputs = data.get("outputs", [])
+    outputs = OrchestrationService(client).find_outputs(s_name, s_id)
 
     print_list(
         outputs,
@@ -543,8 +532,7 @@ def output_show(ctx: click.Context, stack_name_or_id: str, key: str, output_form
     s_name = stk["stack_name"]
     s_id = stk["id"]
 
-    data = client.get(f"{_heat(client)}/stacks/{s_name}/{s_id}/outputs/{key}")
-    out = data.get("output", data)
+    out = OrchestrationService(client).get_output(s_name, s_id, key)
 
     fields = [
         ("output_key", out.get("output_key", "")),
@@ -569,7 +557,7 @@ def template_show(ctx: click.Context, stack_name_or_id: str) -> None:
     s_name = stk["stack_name"]
     s_id = stk["id"]
 
-    data = client.get(f"{_heat(client)}/stacks/{s_name}/{s_id}/template")
+    data = OrchestrationService(client).get_template(s_name, s_id)
 
     from rich.syntax import Syntax
     yaml_output = yaml.dump(data, default_flow_style=False, sort_keys=False)
@@ -605,7 +593,7 @@ def template_validate(ctx: click.Context, template: str, environment: str | None
     if parameters:
         body["parameters"] = _parse_params(parameters)
 
-    data = client.post(f"{_heat(client)}/validate", json=body)
+    data = OrchestrationService(client).validate_template(body)
     console.print("[green]Template is valid.[/green]")
 
     desc = data.get("Description", data.get("description", ""))
@@ -653,7 +641,7 @@ def stack_diff(ctx: click.Context, stack_name_or_id: str, template_path: str) ->
     s_id = stk["id"]
 
     # Fetch deployed template
-    deployed = client.get(f"{_heat(client)}/stacks/{s_name}/{s_id}/template")
+    deployed = OrchestrationService(client).get_template(s_name, s_id)
     deployed_yaml = yaml.dump(deployed, default_flow_style=False, sort_keys=True)
 
     # Load local template and normalise through YAML round-trip for fair comparison
@@ -697,8 +685,7 @@ def stack_topology(ctx: click.Context, stack_name_or_id: str) -> None:
 
     tree = Tree(f"[bold]{s_name}[/bold]  {_styled_status(s_status)}")
 
-    data = client.get(f"{_heat(client)}/stacks/{s_name}/{s_id}/resources")
-    resources = data.get("resources", [])
+    resources = OrchestrationService(client).find_resources(s_name, s_id)
 
     for res in resources:
         r_name = res.get("resource_name", "?")
@@ -737,7 +724,7 @@ def stack_abandon(ctx: click.Context, stack_name_or_id: str, yes: bool,
     stk = _resolve_stack(client, stack_name_or_id)
     s_name = stk["stack_name"]
     s_id = stk["id"]
-    data = client.delete(f"{_heat(client)}/stacks/{s_name}/{s_id}/abandon")
+    data = OrchestrationService(client).abandon(s_name, s_id)
     if out_file:
         out = safe_output_path(out_file)
         out.write_text(json.dumps(data, indent=2))
@@ -765,8 +752,9 @@ def stack_resource_type_list(ctx: click.Context, filter_str: str | None,
     params: dict = {}
     if filter_str:
         params["name"] = filter_str
-    types = client.get(f"{_heat(client)}/resource_types",
-                       params=params).get("resource_types", [])
+    types = OrchestrationService(client).find_resource_types(
+        params=params or None,
+    )
     # resource_types is a list of strings
     items = [{"type": t} for t in types]
     print_list(
@@ -790,6 +778,7 @@ def stack_resource_type_show(ctx: click.Context, resource_type: str,
     """Show the schema for a Heat resource type."""
     import json
     client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_heat(client)}/resource_types/{resource_type}/template",
-                      params={"template_type": template_type})
+    data = OrchestrationService(client).get_resource_type_template(
+        resource_type, params={"template_type": template_type},
+    )
     console.print(json.dumps(data, indent=2))

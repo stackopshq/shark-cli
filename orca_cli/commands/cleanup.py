@@ -10,6 +10,7 @@ from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import APIError
 from orca_cli.core.output import console
 from orca_cli.services.network import NetworkService
+from orca_cli.services.orchestration import OrchestrationService
 
 # Resource types that can be detected and optionally deleted
 CLEANUP_TYPES = [
@@ -198,7 +199,8 @@ def cleanup(ctx: click.Context, do_delete: bool, older_than: int | None,  # noqa
 
         # ── Heat stacks in failed/rollback state ─────────────────────────────
         if "stack" not in skip:
-            for s in _collect(client, f"{client.orchestration_url}/stacks", "stacks"):
+            heat_svc = OrchestrationService(client)
+            for s in _safe(heat_svc.find):
                 if s.get("stack_status") in FAILED_STACK_STATUSES:
                     issues.append((
                         "stack", s["id"], s.get("stack_name", ""),
@@ -262,7 +264,7 @@ def cleanup(ctx: click.Context, do_delete: bool, older_than: int | None,  # noqa
             elif rtype == "router":
                 net_svc.delete_router(rid)
             elif rtype == "stack":
-                client.delete(f"{client.orchestration_url}/stacks/{rname}/{rid}")
+                OrchestrationService(client).delete(rname, rid)
             elif rtype == "loadbalancer":
                 client.delete(
                     f"{client.load_balancer_url}/v2/lbaas/loadbalancers/{rid}?cascade=true"
