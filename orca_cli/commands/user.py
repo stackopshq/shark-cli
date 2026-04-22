@@ -6,10 +6,7 @@ import click
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
-
-
-def _iam(client) -> str:
-    return client.identity_url
+from orca_cli.services.identity import IdentityService
 
 
 @click.group()
@@ -28,8 +25,8 @@ def user(ctx: click.Context) -> None:
 def user_list(ctx, domain, project, enabled,
               output_format, columns, fit_width, max_width, noindent):
     """List users."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    params = {}
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    params: dict = {}
     if domain:
         params["domain_id"] = domain
     if project:
@@ -37,9 +34,8 @@ def user_list(ctx, domain, project, enabled,
     if enabled is not None:
         params["enabled"] = str(enabled).lower()
 
-    data = client.get(f"{_iam(client)}/v3/users", params=params)
     print_list(
-        data.get("users", []),
+        svc.find_users(params=params or None),
         [
             ("ID", "id", {"style": "cyan", "no_wrap": True}),
             ("Name", "name", {"style": "bold"}),
@@ -60,9 +56,8 @@ def user_list(ctx, domain, project, enabled,
 @click.pass_context
 def user_show(ctx, user_id, output_format, columns, fit_width, max_width, noindent):
     """Show user details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_iam(client)}/v3/users/{user_id}")
-    u = data.get("user", data)
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    u = svc.get_user(user_id)
     print_detail(
         [
             ("ID", u.get("id", "")),
@@ -95,7 +90,7 @@ def user_show(ctx, user_id, output_format, columns, fit_width, max_width, noinde
 def user_create(ctx, name, password, email, description, domain_id,
                 default_project_id, enabled):
     """Create a user."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {"name": name, "password": password, "enabled": enabled}
     if email:
         body["email"] = email
@@ -106,8 +101,7 @@ def user_create(ctx, name, password, email, description, domain_id,
     if default_project_id:
         body["default_project_id"] = default_project_id
 
-    data = client.post(f"{_iam(client)}/v3/users", json={"user": body})
-    u = data.get("user", data)
+    u = svc.create_user(body)
     console.print(f"[green]User '{u.get('name')}' ({u.get('id')}) created.[/green]")
 
 
@@ -121,8 +115,7 @@ def user_create(ctx, name, password, email, description, domain_id,
 @click.pass_context
 def user_set(ctx, user_id, name, email, description, password, enabled):
     """Update a user."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    body = {}
+    body: dict = {}
     if name:
         body["name"] = name
     if email:
@@ -138,7 +131,8 @@ def user_set(ctx, user_id, name, email, description, password, enabled):
         console.print("[yellow]Nothing to update.[/yellow]")
         return
 
-    client.patch(f"{_iam(client)}/v3/users/{user_id}", json={"user": body})
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_user(user_id, body)
     console.print(f"[green]User {user_id} updated.[/green]")
 
 
@@ -150,8 +144,8 @@ def user_delete(ctx, user_id, yes):
     """Delete a user."""
     if not yes:
         click.confirm(f"Delete user {user_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{_iam(client)}/v3/users/{user_id}")
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_user(user_id)
     console.print(f"[green]User {user_id} deleted.[/green]")
 
 
@@ -162,7 +156,6 @@ def user_delete(ctx, user_id, yes):
 @click.pass_context
 def user_set_password(ctx, user_id, password):
     """Set a user's password (admin)."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.patch(f"{_iam(client)}/v3/users/{user_id}",
-                 json={"user": {"password": password}})
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_user(user_id, {"password": password})
     console.print(f"[green]Password updated for user {user_id}.[/green]")

@@ -6,10 +6,7 @@ import click
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
-
-
-def _iam(client) -> str:
-    return client.identity_url
+from orca_cli.services.identity import IdentityService
 
 
 @click.group()
@@ -24,10 +21,9 @@ def domain(ctx: click.Context) -> None:
 @click.pass_context
 def domain_list(ctx, output_format, columns, fit_width, max_width, noindent):
     """List domains."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_iam(client)}/v3/domains")
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     print_list(
-        data.get("domains", []),
+        svc.find_domains(),
         [
             ("ID", "id", {"style": "cyan", "no_wrap": True}),
             ("Name", "name", {"style": "bold"}),
@@ -47,9 +43,8 @@ def domain_list(ctx, output_format, columns, fit_width, max_width, noindent):
 @click.pass_context
 def domain_show(ctx, domain_id, output_format, columns, fit_width, max_width, noindent):
     """Show domain details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_iam(client)}/v3/domains/{domain_id}")
-    d = data.get("domain", data)
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    d = svc.get_domain(domain_id)
     print_detail(
         [
             ("ID", d.get("id", "")),
@@ -69,12 +64,11 @@ def domain_show(ctx, domain_id, output_format, columns, fit_width, max_width, no
 @click.pass_context
 def domain_create(ctx, name, description, enabled):
     """Create a domain."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {"name": name, "enabled": enabled}
     if description:
         body["description"] = description
-    data = client.post(f"{_iam(client)}/v3/domains", json={"domain": body})
-    d = data.get("domain", data)
+    d = svc.create_domain(body)
     console.print(f"[green]Domain '{d.get('name')}' ({d.get('id')}) created.[/green]")
 
 
@@ -86,7 +80,6 @@ def domain_create(ctx, name, description, enabled):
 @click.pass_context
 def domain_set(ctx, domain_id, name, description, enabled):
     """Update a domain."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     body = {}
     if name:
         body["name"] = name
@@ -97,7 +90,8 @@ def domain_set(ctx, domain_id, name, description, enabled):
     if not body:
         console.print("[yellow]Nothing to update.[/yellow]")
         return
-    client.patch(f"{_iam(client)}/v3/domains/{domain_id}", json={"domain": body})
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_domain(domain_id, body)
     console.print(f"[green]Domain {domain_id} updated.[/green]")
 
 
@@ -109,6 +103,6 @@ def domain_delete(ctx, domain_id, yes):
     """Delete a domain."""
     if not yes:
         click.confirm(f"Delete domain {domain_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{_iam(client)}/v3/domains/{domain_id}")
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_domain(domain_id)
     console.print(f"[green]Domain {domain_id} deleted.[/green]")

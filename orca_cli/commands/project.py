@@ -9,12 +9,9 @@ import click
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import APIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
+from orca_cli.services.identity import IdentityService
 from orca_cli.services.image import ImageService
 from orca_cli.services.network import NetworkService
-
-
-def _iam(client) -> str:
-    return client.identity_url
 
 
 @click.group()
@@ -33,8 +30,8 @@ def project(ctx: click.Context) -> None:
 def project_list(ctx, domain, user_id, enabled,
                  output_format, columns, fit_width, max_width, noindent):
     """List projects."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    params = {}
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    params: dict = {}
     if domain:
         params["domain_id"] = domain
     if user_id:
@@ -42,9 +39,8 @@ def project_list(ctx, domain, user_id, enabled,
     if enabled is not None:
         params["enabled"] = str(enabled).lower()
 
-    data = client.get(f"{_iam(client)}/v3/projects", params=params)
     print_list(
-        data.get("projects", []),
+        svc.find_projects(params=params or None),
         [
             ("ID", "id", {"style": "cyan", "no_wrap": True}),
             ("Name", "name", {"style": "bold"}),
@@ -65,9 +61,8 @@ def project_list(ctx, domain, user_id, enabled,
 @click.pass_context
 def project_show(ctx, project_id, output_format, columns, fit_width, max_width, noindent):
     """Show project details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_iam(client)}/v3/projects/{project_id}")
-    p = data.get("project", data)
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    p = svc.get_project(project_id)
     print_detail(
         [
             ("ID", p.get("id", "")),
@@ -92,7 +87,7 @@ def project_show(ctx, project_id, output_format, columns, fit_width, max_width, 
 @click.pass_context
 def project_create(ctx, name, domain_id, description, enabled, tags):
     """Create a project."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {"name": name, "enabled": enabled}
     if domain_id:
         body["domain_id"] = domain_id
@@ -101,8 +96,7 @@ def project_create(ctx, name, domain_id, description, enabled, tags):
     if tags:
         body["tags"] = list(tags)
 
-    data = client.post(f"{_iam(client)}/v3/projects", json={"project": body})
-    p = data.get("project", data)
+    p = svc.create_project(body)
     console.print(f"[green]Project '{p.get('name')}' ({p.get('id')}) created.[/green]")
 
 
@@ -114,8 +108,7 @@ def project_create(ctx, name, domain_id, description, enabled, tags):
 @click.pass_context
 def project_set(ctx, project_id, name, description, enabled):
     """Update a project."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    body = {}
+    body: dict = {}
     if name:
         body["name"] = name
     if description:
@@ -127,7 +120,8 @@ def project_set(ctx, project_id, name, description, enabled):
         console.print("[yellow]Nothing to update.[/yellow]")
         return
 
-    client.patch(f"{_iam(client)}/v3/projects/{project_id}", json={"project": body})
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_project(project_id, body)
     console.print(f"[green]Project {project_id} updated.[/green]")
 
 
@@ -139,8 +133,8 @@ def project_delete(ctx, project_id, yes):
     """Delete a project."""
     if not yes:
         click.confirm(f"Delete project {project_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{_iam(client)}/v3/projects/{project_id}")
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_project(project_id)
     console.print(f"[green]Project {project_id} deleted.[/green]")
 
 
@@ -304,15 +298,20 @@ def project_cleanup(ctx, target_project, dry_run, yes, created_before, skip_type
     cutoff = _parse_cutoff(created_before)
 
     # ── Resolve the target project ID ────────────────────────────────────────
+    ident_svc = IdentityService(client)
     if target_project:
-        candidates = _collect(client, f"{_iam(client)}/v3/projects", "projects",
-                              params={"name": target_project})
+        try:
+            candidates = ident_svc.find_projects(
+                params={"name": target_project},
+            )
+        except Exception:
+            candidates = []
         if candidates:
             proj_id = candidates[0]["id"]
         else:
             try:
-                data = client.get(f"{_iam(client)}/v3/projects/{target_project}")
-                proj_id = data.get("project", {}).get("id", target_project)
+                p = ident_svc.get_project(target_project)
+                proj_id = p.get("id", target_project)
             except Exception as exc:
                 raise click.ClickException(f"Project '{target_project}' not found.") from exc
     else:

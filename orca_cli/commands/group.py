@@ -6,10 +6,7 @@ import click
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
-
-
-def _iam(client) -> str:
-    return client.identity_url
+from orca_cli.services.identity import IdentityService
 
 
 @click.group()
@@ -25,13 +22,12 @@ def group(ctx: click.Context) -> None:
 @click.pass_context
 def group_list(ctx, domain, output_format, columns, fit_width, max_width, noindent):
     """List groups."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     params = {}
     if domain:
         params["domain_id"] = domain
-    data = client.get(f"{_iam(client)}/v3/groups", params=params)
     print_list(
-        data.get("groups", []),
+        svc.find_groups(params=params or None),
         [
             ("ID", "id", {"style": "cyan", "no_wrap": True}),
             ("Name", "name", {"style": "bold"}),
@@ -51,9 +47,8 @@ def group_list(ctx, domain, output_format, columns, fit_width, max_width, noinde
 @click.pass_context
 def group_show(ctx, group_id, output_format, columns, fit_width, max_width, noindent):
     """Show group details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_iam(client)}/v3/groups/{group_id}")
-    g = data.get("group", data)
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    g = svc.get_group(group_id)
     print_detail(
         [
             ("ID", g.get("id", "")),
@@ -73,14 +68,13 @@ def group_show(ctx, group_id, output_format, columns, fit_width, max_width, noin
 @click.pass_context
 def group_create(ctx, name, description, domain_id):
     """Create a group."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {"name": name}
     if description:
         body["description"] = description
     if domain_id:
         body["domain_id"] = domain_id
-    data = client.post(f"{_iam(client)}/v3/groups", json={"group": body})
-    g = data.get("group", data)
+    g = svc.create_group(body)
     console.print(f"[green]Group '{g.get('name')}' ({g.get('id')}) created.[/green]")
 
 
@@ -91,7 +85,6 @@ def group_create(ctx, name, description, domain_id):
 @click.pass_context
 def group_set(ctx, group_id, name, description):
     """Update a group."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     body = {}
     if name:
         body["name"] = name
@@ -100,7 +93,8 @@ def group_set(ctx, group_id, name, description):
     if not body:
         console.print("[yellow]Nothing to update.[/yellow]")
         return
-    client.patch(f"{_iam(client)}/v3/groups/{group_id}", json={"group": body})
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_group(group_id, body)
     console.print(f"[green]Group {group_id} updated.[/green]")
 
 
@@ -112,8 +106,8 @@ def group_delete(ctx, group_id, yes):
     """Delete a group."""
     if not yes:
         click.confirm(f"Delete group {group_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{_iam(client)}/v3/groups/{group_id}")
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_group(group_id)
     console.print(f"[green]Group {group_id} deleted.[/green]")
 
 
@@ -123,8 +117,8 @@ def group_delete(ctx, group_id, yes):
 @click.pass_context
 def group_add_user(ctx, group_id, user_id):
     """Add a user to a group."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.put(f"{_iam(client)}/v3/groups/{group_id}/users/{user_id}")
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.add_group_user(group_id, user_id)
     console.print(f"[green]User {user_id} added to group {group_id}.[/green]")
 
 
@@ -134,8 +128,8 @@ def group_add_user(ctx, group_id, user_id):
 @click.pass_context
 def group_remove_user(ctx, group_id, user_id):
     """Remove a user from a group."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{_iam(client)}/v3/groups/{group_id}/users/{user_id}")
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.remove_group_user(group_id, user_id)
     console.print(f"[green]User {user_id} removed from group {group_id}.[/green]")
 
 
@@ -145,10 +139,9 @@ def group_remove_user(ctx, group_id, user_id):
 @click.pass_context
 def group_member_list(ctx, group_id, output_format, columns, fit_width, max_width, noindent):
     """List users in a group."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_iam(client)}/v3/groups/{group_id}/users")
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     print_list(
-        data.get("users", []),
+        svc.list_group_users(group_id),
         [
             ("ID", "id", {"style": "cyan", "no_wrap": True}),
             ("Name", "name", {"style": "bold"}),

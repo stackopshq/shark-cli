@@ -7,22 +7,20 @@ import click
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
+from orca_cli.services.identity import IdentityService
 
 
-def _iam(client) -> str:
-    return client.identity_url
-
-
-def _role_assignment_url(base, user_id, group_id, project_id, domain_id, role_id):
-    """Build Keystone role assignment URL."""
+def _resolve_grant(user_id, group_id, project_id, domain_id):
+    """Validate and return (scope_type, scope_id, actor_type, actor_id) tuple."""
     if not (user_id or group_id):
         raise click.UsageError("Specify --user or --group.")
     if not (project_id or domain_id):
         raise click.UsageError("Specify --project or --domain.")
-
-    actor = f"users/{user_id}" if user_id else f"groups/{group_id}"
-    scope = f"projects/{project_id}" if project_id else f"domains/{domain_id}"
-    return f"{base}/v3/{scope}/{actor}/roles/{role_id}"
+    actor_type = "users" if user_id else "groups"
+    actor_id = user_id or group_id
+    scope_type = "projects" if project_id else "domains"
+    scope_id = project_id or domain_id
+    return scope_type, scope_id, actor_type, actor_id
 
 
 @click.group()
@@ -38,13 +36,10 @@ def role(ctx: click.Context) -> None:
 @click.pass_context
 def role_list(ctx, domain, output_format, columns, fit_width, max_width, noindent):
     """List roles."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    params = {}
-    if domain:
-        params["domain_id"] = domain
-    data = client.get(f"{_iam(client)}/v3/roles", params=params)
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    params = {"domain_id": domain} if domain else None
     print_list(
-        data.get("roles", []),
+        svc.find_roles(params=params),
         [
             ("ID", "id", {"style": "cyan", "no_wrap": True}),
             ("Name", "name", {"style": "bold"}),
@@ -64,9 +59,8 @@ def role_list(ctx, domain, output_format, columns, fit_width, max_width, noinden
 @click.pass_context
 def role_show(ctx, role_id, output_format, columns, fit_width, max_width, noindent):
     """Show role details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_iam(client)}/v3/roles/{role_id}")
-    r = data.get("role", data)
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    r = svc.get_role(role_id)
     print_detail(
         [
             ("ID", r.get("id", "")),
@@ -86,14 +80,13 @@ def role_show(ctx, role_id, output_format, columns, fit_width, max_width, noinde
 @click.pass_context
 def role_create(ctx, name, description, domain_id):
     """Create a role."""
-    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {"name": name}
     if description:
         body["description"] = description
     if domain_id:
         body["domain_id"] = domain_id
-    data = client.post(f"{_iam(client)}/v3/roles", json={"role": body})
-    r = data.get("role", data)
+    r = svc.create_role(body)
     console.print(f"[green]Role '{r.get('name')}' ({r.get('id')}) created.[/green]")
 
 
@@ -105,8 +98,8 @@ def role_delete(ctx, role_id, yes):
     """Delete a role."""
     if not yes:
         click.confirm(f"Delete role {role_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{_iam(client)}/v3/roles/{role_id}")
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_role(role_id)
     console.print(f"[green]Role {role_id} deleted.[/green]")
 
 
@@ -125,9 +118,15 @@ def role_add(ctx, user_id, group_id, project_id, domain_id, role_id):
       orca role add --user <uid> --project <pid> <role-id>
       orca role add --group <gid> --domain <did> <role-id>
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = _role_assignment_url(_iam(client), user_id, group_id, project_id, domain_id, role_id)
-    client.put(url)
+    scope_type, scope_id, actor_type, actor_id = _resolve_grant(
+        user_id, group_id, project_id, domain_id,
+    )
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.grant_role(
+        scope_type=scope_type, scope_id=scope_id,
+        actor_type=actor_type, actor_id=actor_id,
+        role_id=role_id,
+    )
     console.print(f"[green]Role {role_id} granted.[/green]")
 
 
@@ -140,9 +139,15 @@ def role_add(ctx, user_id, group_id, project_id, domain_id, role_id):
 @click.pass_context
 def role_remove(ctx, user_id, group_id, project_id, domain_id, role_id):
     """Revoke a role from a user or group."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = _role_assignment_url(_iam(client), user_id, group_id, project_id, domain_id, role_id)
-    client.delete(url)
+    scope_type, scope_id, actor_type, actor_id = _resolve_grant(
+        user_id, group_id, project_id, domain_id,
+    )
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.revoke_role(
+        scope_type=scope_type, scope_id=scope_id,
+        actor_type=actor_type, actor_id=actor_id,
+        role_id=role_id,
+    )
     console.print(f"[green]Role {role_id} revoked.[/green]")
 
 
@@ -158,8 +163,8 @@ def role_remove(ctx, user_id, group_id, project_id, domain_id, role_id):
 def role_assignment_list(ctx, user_id, group_id, project_id, domain_id, role_id, effective,
                          output_format, columns, fit_width, max_width, noindent):
     """List role assignments."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    params = {}
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    params: dict = {}
     if user_id:
         params["user.id"] = user_id
     if group_id:
@@ -173,8 +178,7 @@ def role_assignment_list(ctx, user_id, group_id, project_id, domain_id, role_id,
     if effective:
         params["effective"] = ""
 
-    data = client.get(f"{_iam(client)}/v3/role_assignments", params=params)
-    assignments = data.get("role_assignments", [])
+    assignments = svc.find_role_assignments(params=params or None)
 
     rows = []
     for a in assignments:
@@ -215,9 +219,8 @@ def role_assignment_list(ctx, user_id, group_id, project_id, domain_id, role_id,
 @click.pass_context
 def role_implied_list(ctx, output_format, columns, fit_width, max_width, noindent):
     """List all implied role relationships."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_iam(client)}/v3/role_inferences")
-    raw = data.get("role_inferences", [])
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    raw = svc.find_role_inferences()
     items = []
     for entry in raw:
         prior = entry.get("prior_role", {})
@@ -248,11 +251,8 @@ def role_implied_list(ctx, output_format, columns, fit_width, max_width, noinden
 @click.pass_context
 def role_implied_create(ctx, prior_role_id, implied_role_id):
     """Create an implied role (prior implies implied)."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.put(
-        f"{_iam(client)}/v3/role_inferences/{prior_role_id}/implies/{implied_role_id}",
-        json={},
-    )
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.create_role_inference(prior_role_id, implied_role_id)
     console.print(
         f"Role [bold]{prior_role_id}[/bold] now implies [bold]{implied_role_id}[/bold]."
     )
@@ -265,14 +265,12 @@ def role_implied_create(ctx, prior_role_id, implied_role_id):
 @click.pass_context
 def role_implied_delete(ctx, prior_role_id, implied_role_id, yes):
     """Delete an implied role relationship."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     if not yes:
         click.confirm(
-            f"Remove implied role {implied_role_id} from {prior_role_id}?", abort=True
+            f"Remove implied role {implied_role_id} from {prior_role_id}?", abort=True,
         )
-    client.delete(
-        f"{_iam(client)}/v3/role_inferences/{prior_role_id}/implies/{implied_role_id}"
-    )
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_role_inference(prior_role_id, implied_role_id)
     console.print("Implied role relationship deleted.")
 
 
@@ -301,6 +299,6 @@ def role_set(ctx: click.Context, role_id: str, name: str | None, description: st
         console.print("[yellow]Nothing to update.[/yellow]")
         return
 
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.patch(f"{_iam(client)}/v3/roles/{role_id}", json={"role": body})
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_role(role_id, body)
     console.print(f"[green]Role {role_id} updated.[/green]")
