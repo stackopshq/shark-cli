@@ -1,0 +1,15 @@
+/* Align the mkdocs-material primary color with the orca logo background
+ * (RGB 9, 23, 43 — #09172B). Overrides both the light and dark palettes so
+ * the top-bar tone stays consistent with the logo on either scheme.
+ */
+:root {
+  --md-primary-fg-color:        #09172B;
+  --md-primary-fg-color--light: #1a2d4a;
+  --md-primary-fg-color--dark:  #050d18;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color:        #09172B;
+  --md-primary-fg-color--light: #1a2d4a;
+  --md-primary-fg-color--dark:  #050d18;
+}
