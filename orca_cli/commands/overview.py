@@ -9,6 +9,7 @@ from rich.table import Table
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console
+from orca_cli.services.image import ImageService
 
 
 @click.command()
@@ -28,7 +29,7 @@ def overview(ctx: click.Context) -> None:
             f"{client.network_url}/v2.0/security-groups", "security_groups"
         ),
         "kps": lambda: client.get(f"{client.compute_url}/os-keypairs").get("keypairs", []),
-        "images": lambda: client.paginate(f"{client.image_url}/v2/images", "images"),
+        "images": lambda: ImageService(client).find_all(),
     }
 
     with console.status("[bold cyan]Gathering project overview…[/bold cyan]"):

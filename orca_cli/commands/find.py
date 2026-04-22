@@ -20,6 +20,7 @@ from rich.table import Table
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console
+from orca_cli.services.image import ImageService
 
 # ── Per-resource search helpers ──────────────────────────────────────────
 
@@ -160,9 +161,11 @@ def _find_security_groups(client, q: str) -> list[tuple[dict, str]]:
 
 
 def _find_images(client, q: str) -> list[tuple[dict, str]]:
-    images = _safe_list(client, f"{client.image_url}/v2/images", "images",
-                        params={"limit": 500})
-    hits = []
+    try:
+        images = ImageService(client).find(params={"limit": 500})
+    except Exception:
+        images = []
+    hits: list[tuple[dict, str]] = []
     for i in images:
         why = None
         if _contains(i.get("id"), q):
@@ -170,7 +173,7 @@ def _find_images(client, q: str) -> list[tuple[dict, str]]:
         elif _contains(i.get("name"), q):
             why = "name"
         if why:
-            hits.append((i, why))
+            hits.append((dict(i), why))
     return hits
 
 

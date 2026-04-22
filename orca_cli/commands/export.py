@@ -13,6 +13,7 @@ import yaml
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console
 from orca_cli.core.validators import safe_output_path
+from orca_cli.services.image import ImageService
 
 VALID_RESOURCE_TYPES = (
     "servers",
@@ -300,8 +301,7 @@ def _fetchers(client: Any) -> dict[str, Any]:
             f"{client.network_url}/v2.0/security-groups", "security_groups"),
         "keypairs": lambda: client.get(
             f"{client.compute_url}/os-keypairs").get("keypairs", []),
-        "images": lambda: client.paginate(
-            f"{client.image_url}/v2/images", "images"),
+        "images": lambda: ImageService(client).find_all(),
     }
 
 

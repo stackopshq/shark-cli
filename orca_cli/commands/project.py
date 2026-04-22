@@ -9,6 +9,7 @@ import click
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import APIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
+from orca_cli.services.image import ImageService
 
 
 def _iam(client) -> str:
@@ -230,7 +231,7 @@ def _delete_one(client, rtype: str, rid: str, rname: str) -> bool:
         elif rtype == "snapshot":
             client.delete(f"{client.volume_url}/snapshots/{rid}")
         elif rtype == "image":
-            client.delete(f"{client.image_url}/v2/images/{rid}")
+            ImageService(client).delete(rid)
         elif rtype == "secret":
             client.delete(f"{client.key_manager_url}/v1/secrets/{rid}")
         elif rtype == "backup":
@@ -410,9 +411,11 @@ def project_cleanup(ctx, target_project, dry_run, yes, created_before, skip_type
                          "snapshots", params=p_filter))
 
         if "image" not in skip:
-            add("image",
-                _collect(client, f"{client.image_url}/v2/images",
-                         "images", params={"owner": proj_id}))
+            try:
+                imgs = ImageService(client).find(params={"owner": proj_id})
+            except Exception:
+                imgs = []
+            add("image", imgs)
 
         if "backup" not in skip:
             add("backup",
