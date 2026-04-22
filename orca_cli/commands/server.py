@@ -23,6 +23,7 @@ from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
 from orca_cli.core.waiter import wait_for_resource
+from orca_cli.services.image import ImageService
 from orca_cli.services.server import ServerService
 from orca_cli.services.volume import VolumeService
 
@@ -1067,11 +1068,7 @@ def _detect_ssh_user(client, srv: Mapping[str, Any]) -> str | None:
     # 1) Try image reference on the server
     image = srv.get("image")
     if isinstance(image, dict) and image.get("id"):
-        try:
-            data = client.get(f"{client.image_url}/v2/images/{image['id']}")
-            distro = (data.get("os_distro") or "").lower()
-        except Exception:
-            distro = ""
+        distro = ImageService(client).get_distro(image["id"])
 
     # 2) Fallback: look at the boot volume's image metadata
     if not distro:
