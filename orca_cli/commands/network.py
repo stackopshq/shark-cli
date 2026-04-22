@@ -9,6 +9,7 @@ from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
 from orca_cli.services.network import NetworkService
+from orca_cli.services.server import ServerService
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Networks
@@ -511,8 +512,8 @@ def network_topology(ctx: click.Context, filter_net: str | None) -> None:
 
         # Fetch servers for name resolution
         try:
-            servers_data = client.get(f"{client.compute_url}/servers/detail", params={"limit": 1000})
-            servers = {s["id"]: s.get("name", s["id"]) for s in servers_data.get("servers", [])}
+            servers_list = ServerService(client).find(limit=1000)
+            servers = {s["id"]: s.get("name", s["id"]) for s in servers_list}
         except Exception:
             servers = {}
 
@@ -599,13 +600,11 @@ def net_trace(ctx: click.Context, server_id: str) -> None:
     svc = NetworkService(client)
 
     # ── Resolve server ──
+    server_svc = ServerService(client)
     try:
-        srv_data = client.get(f"{client.compute_url}/servers/{server_id}")
-        srv = srv_data.get("server", srv_data)
+        srv = server_svc.get(server_id)
     except Exception:
-        data = client.get(f"{client.compute_url}/servers/detail",
-                          params={"name": server_id})
-        matches = data.get("servers", [])
+        matches = server_svc.find(params={"name": server_id})
         if not matches:
             raise click.ClickException(f"Server '{server_id}' not found.") from None
         if len(matches) > 1:

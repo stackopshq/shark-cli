@@ -7,6 +7,8 @@ import click
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console
 from orca_cli.services.load_balancer import LoadBalancerService
+from orca_cli.services.network import NetworkService
+from orca_cli.services.server import ServerService
 
 
 @click.group("ip")
@@ -33,11 +35,12 @@ def ip_whois(ctx: click.Context, address: str) -> None:
     from rich.table import Table
 
     client = ctx.find_object(OrcaContext).ensure_client()
+    network = NetworkService(client)
     results: list[tuple[str, str, str, str]] = []  # (type, id, name, detail)
 
     with console.status(f"[bold cyan]Looking up {address}…[/bold cyan]"):
         # ── Floating IPs ─────────────────────────────────────────────
-        fips = client.get(f"{client.network_url}/v2.0/floatingips").get("floatingips", [])
+        fips = network.find_floating_ips()
         for f in fips:
             if f.get("floating_ip_address") == address:
                 port_id = f.get("port_id", "") or "—"
@@ -48,7 +51,7 @@ def ip_whois(ctx: click.Context, address: str) -> None:
                                 f"fixed: {address}, port: {f.get('port_id', '')}"))
 
         # ── Ports ────────────────────────────────────────────────────
-        ports = client.get(f"{client.network_url}/v2.0/ports").get("ports", [])
+        ports = network.find_ports()
         for p in ports:
             for ip in p.get("fixed_ips", []):
                 if ip.get("ip_address") == address:
@@ -59,7 +62,7 @@ def ip_whois(ctx: click.Context, address: str) -> None:
                                     f"device: {dev_id}, mac: {mac}, net: {p.get('network_id', '')}"))
 
         # ── Servers ──────────────────────────────────────────────────
-        servers = client.get(f"{client.compute_url}/servers/detail", params={"limit": 1000}).get("servers", [])
+        servers = ServerService(client).find(limit=1000)
         for srv in servers:
             for net_name, addrs in srv.get("addresses", {}).items():
                 for a in addrs:
@@ -69,7 +72,7 @@ def ip_whois(ctx: click.Context, address: str) -> None:
                                         f"{net_name}, {ip_type}, status: {srv.get('status', '')}"))
 
         # ── Routers (gateway IPs) ────────────────────────────────────
-        routers = client.get(f"{client.network_url}/v2.0/routers").get("routers", [])
+        routers = network.find_routers()
         for r in routers:
             gw = r.get("external_gateway_info", {})
             if gw:
@@ -79,7 +82,7 @@ def ip_whois(ctx: click.Context, address: str) -> None:
                                         f"external gateway on subnet {eip.get('subnet_id', '')}"))
 
         # ── Subnets (gateway) ────────────────────────────────────────
-        subnets = client.get(f"{client.network_url}/v2.0/subnets").get("subnets", [])
+        subnets = network.find_subnets()
         for s in subnets:
             if s.get("gateway_ip") == address:
                 results.append(("subnet (gateway)", s["id"], s.get("name", ""),

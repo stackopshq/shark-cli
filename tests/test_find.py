@@ -23,27 +23,24 @@ def _client(**urls):
     return c
 
 
-class TestSafeList:
+class TestSafe:
 
-    def test_returns_list_from_key(self):
-        c = _client()
-        c.get.return_value = {"items": [{"id": "1"}]}
-        assert find_mod._safe_list(c, "http://x", "items") == [{"id": "1"}]
+    def test_returns_result_from_callable(self):
+        fn = MagicMock(return_value=[{"id": "1"}])
+        assert find_mod._safe(fn) == [{"id": "1"}]
 
     def test_swallows_exception(self):
-        c = _client()
-        c.get.side_effect = RuntimeError("api down")
-        assert find_mod._safe_list(c, "http://x", "items") == []
+        fn = MagicMock(side_effect=RuntimeError("api down"))
+        assert find_mod._safe(fn) == []
 
-    def test_missing_key_returns_empty(self):
-        c = _client()
-        c.get.return_value = {"other": []}
-        assert find_mod._safe_list(c, "http://x", "items") == []
+    def test_forwards_args_and_kwargs(self):
+        fn = MagicMock(return_value=[])
+        find_mod._safe(fn, 1, 2, limit=10)
+        fn.assert_called_once_with(1, 2, limit=10)
 
-    def test_none_value_coerced_to_empty(self):
-        c = _client()
-        c.get.return_value = {"items": None}
-        assert find_mod._safe_list(c, "http://x", "items") == []
+    def test_empty_result_passes_through(self):
+        fn = MagicMock(return_value=[])
+        assert find_mod._safe(fn) == []
 
 
 class TestFindServers:

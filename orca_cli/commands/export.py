@@ -16,6 +16,8 @@ from orca_cli.core.validators import safe_output_path
 from orca_cli.services.compute import ComputeService
 from orca_cli.services.image import ImageService
 from orca_cli.services.network import NetworkService
+from orca_cli.services.server import ServerService
+from orca_cli.services.volume import VolumeService
 
 VALID_RESOURCE_TYPES = (
     "servers",
@@ -287,10 +289,8 @@ def _fetchers(client: Any) -> dict[str, Any]:
     net_svc = NetworkService(client)
     compute_svc = ComputeService(client)
     return {
-        "servers": lambda: client.paginate(
-            f"{client.compute_url}/servers/detail", "servers"),
-        "volumes": lambda: client.paginate(
-            f"{client.volume_url}/volumes/detail", "volumes"),
+        "servers": ServerService(client).find_all,
+        "volumes": VolumeService(client).find_all,
         "networks": net_svc.find_all,
         "subnets": net_svc.find_all_subnets,
         "routers": net_svc.find_all_routers,

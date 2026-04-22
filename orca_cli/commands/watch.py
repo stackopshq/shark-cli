@@ -5,7 +5,7 @@ from __future__ import annotations
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 
 import click
 from rich.console import Group
@@ -16,6 +16,9 @@ from rich.text import Text
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console
+from orca_cli.services.network import NetworkService
+from orca_cli.services.server import ServerService
+from orca_cli.services.volume import VolumeService
 
 # ── Status colour mapping ────────────────────────────────────────────────
 
@@ -66,32 +69,28 @@ def _extract_ip(addresses: dict[str, list[dict]]) -> str:
 
 def _fetch_servers(client: Any) -> list[dict]:
     try:
-        data = client.get(f"{client.compute_url}/servers/detail")
-        return data.get("servers", [])
+        return cast("list[dict]", ServerService(client).find(limit=1000))
     except Exception:
         return []
 
 
 def _fetch_volumes(client: Any) -> list[dict]:
     try:
-        data = client.get(f"{client.volume_url}/volumes/detail")
-        return data.get("volumes", [])
+        return cast("list[dict]", VolumeService(client).find())
     except Exception:
         return []
 
 
 def _fetch_floating_ips(client: Any) -> list[dict]:
     try:
-        data = client.get(f"{client.network_url}/v2.0/floatingips")
-        return data.get("floatingips", [])
+        return cast("list[dict]", NetworkService(client).find_floating_ips())
     except Exception:
         return []
 
 
 def _fetch_networks(client: Any) -> list[dict]:
     try:
-        data = client.get(f"{client.network_url}/v2.0/networks")
-        return data.get("networks", [])
+        return cast("list[dict]", NetworkService(client).find())
     except Exception:
         return []
 
@@ -102,12 +101,11 @@ def _fetch_recent_events(client: Any, servers: list[dict], limit: int = 5) -> li
     if not target:
         return []
 
+    service = ServerService(client)
+
     def _one(srv: dict) -> list[dict]:
         try:
-            data = client.get(
-                f"{client.compute_url}/servers/{srv['id']}/os-instance-actions"
-            )
-            actions = data.get("instanceActions", [])
+            actions = service.find_instance_actions(srv["id"])
             for action in actions:
                 action["_server_name"] = srv.get("name", srv["id"][:8])
             return actions

@@ -12,6 +12,8 @@ from orca_cli.core.output import console
 from orca_cli.services.load_balancer import LoadBalancerService
 from orca_cli.services.network import NetworkService
 from orca_cli.services.orchestration import OrchestrationService
+from orca_cli.services.server import ServerService
+from orca_cli.services.volume import VolumeService
 
 # Resource types that can be detected and optionally deleted
 CLEANUP_TYPES = [
@@ -25,20 +27,8 @@ FAILED_STACK_STATUSES = {
 }
 
 
-def _collect(client, url: str, key: str, params: dict | None = None) -> list:
-    """Fetch a resource list silently (returns [] if service unavailable).
-
-    Walks all pages via ``client.paginate`` so tenants with more than a
-    single page of a given resource type aren't silently truncated.
-    """
-    try:
-        return client.paginate(url, key, params=params)
-    except Exception:
-        return []
-
-
 def _safe(fn, *args, **kwargs) -> list:
-    """Call a NetworkService method; swallow errors (service unavailable)."""
+    """Call a service method; swallow errors (service unavailable)."""
     try:
         return fn(*args, **kwargs)
     except Exception:
@@ -94,6 +84,8 @@ def cleanup(ctx: click.Context, do_delete: bool, older_than: int | None,  # noqa
     client = ctx.find_object(OrcaContext).ensure_client()
     net_svc = NetworkService(client)
     lb_svc = LoadBalancerService(client)
+    server_svc = ServerService(client)
+    volume_svc = VolumeService(client)
     skip = set(skip_types)
     issues: list[tuple[str, str, str, str]] = []  # (type, id, name, reason)
 
@@ -115,7 +107,7 @@ def cleanup(ctx: click.Context, do_delete: bool, older_than: int | None,  # noqa
 
         # ── Volumes ──────────────────────────────────────────────────────────
         if "volume" not in skip:
-            for v in _collect(client, f"{client.volume_url}/volumes/detail", "volumes"):
+            for v in _safe(volume_svc.find_all):
                 name = v.get("name") or "—"
                 status = v.get("status", "")
                 if status == "available" and not v.get("attachments"):
@@ -131,7 +123,7 @@ def cleanup(ctx: click.Context, do_delete: bool, older_than: int | None,  # noqa
 
         # ── Snapshots ────────────────────────────────────────────────────────
         if "snapshot" not in skip:
-            for s in _collect(client, f"{client.volume_url}/snapshots/detail", "snapshots"):
+            for s in _safe(volume_svc.find_snapshots):
                 name = s.get("name") or "—"
                 if s.get("status") == "error":
                     issues.append(("snapshot", s["id"], name, "error state"))
@@ -152,9 +144,7 @@ def cleanup(ctx: click.Context, do_delete: bool, older_than: int | None,  # noqa
         # ── Unused security groups ────────────────────────────────────────────
         if "security-group" not in skip:
             sgs = _safe(net_svc.find_all_security_groups)
-            servers = _collect(
-                client, f"{client.compute_url}/servers/detail", "servers",
-            )
+            servers = _safe(server_svc.find_all)
             used_sg_ids: set[str] = set()
             for srv in servers:
                 for sg in srv.get("security_groups", []):
@@ -171,8 +161,8 @@ def cleanup(ctx: click.Context, do_delete: bool, older_than: int | None,  # noqa
         # ── Servers in ERROR ─────────────────────────────────────────────────
         if "server" not in skip:
             # Reuse servers list if already fetched, otherwise fetch
-            _servers = servers if "security-group" not in skip else _collect(
-                client, f"{client.compute_url}/servers/detail", "servers",
+            _servers = servers if "security-group" not in skip else _safe(
+                server_svc.find_all,
             )
             for srv in _servers:
                 if srv.get("status") == "ERROR":
@@ -250,15 +240,15 @@ def cleanup(ctx: click.Context, do_delete: bool, older_than: int | None,  # noqa
             if rtype == "floating-ip":
                 net_svc.delete_floating_ip(rid)
             elif rtype == "volume":
-                client.delete(f"{client.volume_url}/volumes/{rid}?cascade=true")
+                volume_svc.delete(rid, cascade=True)
             elif rtype == "snapshot":
-                client.delete(f"{client.volume_url}/snapshots/{rid}")
+                volume_svc.delete_snapshot(rid)
             elif rtype == "port":
                 net_svc.delete_port(rid)
             elif rtype == "security-group":
                 net_svc.delete_security_group(rid)
             elif rtype == "server":
-                client.delete(f"{client.compute_url}/servers/{rid}")
+                server_svc.delete(rid)
             elif rtype == "router":
                 net_svc.delete_router(rid)
             elif rtype == "stack":

@@ -17,6 +17,8 @@ from orca_cli.services.load_balancer import LoadBalancerService
 from orca_cli.services.network import NetworkService
 from orca_cli.services.object_store import ObjectStoreService
 from orca_cli.services.orchestration import OrchestrationService
+from orca_cli.services.server import ServerService
+from orca_cli.services.volume import VolumeService
 
 
 @click.group()
@@ -185,14 +187,6 @@ def _before_cutoff(resource: dict, cutoff: datetime | None) -> bool:
         return True
 
 
-def _collect(client, url: str, key: str, params: dict | None = None) -> list:
-    """Fetch a resource list silently (returns [] if service unavailable)."""
-    try:
-        return client.get(url, params=params).get(key, [])
-    except Exception:
-        return []
-
-
 def _delete_one(client, rtype: str, rid: str, rname: str) -> bool:
     """Delete a single resource by type. Returns True on success."""
     label = f"{rtype} {rname} ({rid})"
@@ -202,7 +196,7 @@ def _delete_one(client, rtype: str, rid: str, rname: str) -> bool:
         elif rtype == "loadbalancer":
             LoadBalancerService(client).delete(rid, cascade=True)
         elif rtype == "server":
-            client.delete(f"{client.compute_url}/servers/{rid}")
+            ServerService(client).delete(rid)
         elif rtype == "floating-ip":
             NetworkService(client).delete_floating_ip(rid)
         elif rtype == "router":
@@ -226,15 +220,15 @@ def _delete_one(client, rtype: str, rid: str, rname: str) -> bool:
         elif rtype == "security-group":
             NetworkService(client).delete_security_group(rid)
         elif rtype == "volume":
-            client.delete(f"{client.volume_url}/volumes/{rid}?cascade=true")
+            VolumeService(client).delete(rid, cascade=True)
         elif rtype == "snapshot":
-            client.delete(f"{client.volume_url}/snapshots/{rid}")
+            VolumeService(client).delete_snapshot(rid)
         elif rtype == "image":
             ImageService(client).delete(rid)
         elif rtype == "secret":
             KeyManagerService(client).delete_secret(rid)
         elif rtype == "backup":
-            client.delete(f"{client.volume_url}/backups/{rid}")
+            VolumeService(client).delete_backup(rid)
         elif rtype == "dns-zone":
             DnsService(client).delete_zone(rid)
         elif rtype == "container":
@@ -357,9 +351,13 @@ def project_cleanup(ctx, target_project, dry_run, yes, created_before, skip_type
             add("loadbalancer", lbs)
 
         if "server" not in skip:
-            add("server",
-                _collect(client, f"{client.compute_url}/servers/detail", "servers",
-                         params={"project_id": proj_id, "limit": 1000}))
+            try:
+                servers = ServerService(client).find(
+                    limit=1000, params={"project_id": proj_id},
+                )
+            except Exception:
+                servers = []
+            add("server", servers)
 
         if "floating-ip" not in skip:
             try:
@@ -413,14 +411,18 @@ def project_cleanup(ctx, target_project, dry_run, yes, created_before, skip_type
                 [sg for sg in sgs if sg.get("name") != "default"])
 
         if "volume" not in skip:
-            add("volume",
-                _collect(client, f"{client.volume_url}/volumes/detail",
-                         "volumes", params=p_filter))
+            try:
+                vols = VolumeService(client).find(params=p_filter)
+            except Exception:
+                vols = []
+            add("volume", vols)
 
         if "snapshot" not in skip:
-            add("snapshot",
-                _collect(client, f"{client.volume_url}/snapshots/detail",
-                         "snapshots", params=p_filter))
+            try:
+                snaps = VolumeService(client).find_snapshots(params=p_filter)
+            except Exception:
+                snaps = []
+            add("snapshot", snaps)
 
         if "image" not in skip:
             try:
@@ -430,9 +432,11 @@ def project_cleanup(ctx, target_project, dry_run, yes, created_before, skip_type
             add("image", imgs)
 
         if "backup" not in skip:
-            add("backup",
-                _collect(client, f"{client.volume_url}/backups/detail",
-                         "backups", params=p_filter))
+            try:
+                backups = VolumeService(client).find_backups(params=p_filter)
+            except Exception:
+                backups = []
+            add("backup", backups)
 
         if "secret" not in skip:
             try:

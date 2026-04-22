@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Any, Callable
 
 import click
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console
+from orca_cli.services.network import NetworkService
+from orca_cli.services.server import ServerService
+from orca_cli.services.volume import VolumeService
 
 _DANGEROUS_PORTS = {22, 3389, 3306, 5432, 6379, 27017, 9200, 11211}
 _DANGEROUS_LABELS = {
@@ -37,13 +41,15 @@ def audit(ctx: click.Context) -> None:  # noqa: C901
     client = ctx.find_object(OrcaContext).ensure_client()
     findings: list[tuple[str, str, str, str]] = []  # (severity, resource, id/name, detail)
 
-    fetchers = {
-        "sgs": lambda: client.paginate(
-            f"{client.network_url}/v2.0/security-groups", "security_groups"
-        ),
-        "servers": lambda: client.paginate(f"{client.compute_url}/servers/detail", "servers"),
-        "vols": lambda: client.paginate(f"{client.volume_url}/volumes/detail", "volumes"),
-        "fips": lambda: client.paginate(f"{client.network_url}/v2.0/floatingips", "floatingips"),
+    network = NetworkService(client)
+    server_svc = ServerService(client)
+    volume_svc = VolumeService(client)
+
+    fetchers: dict[str, Callable[[], list[Any]]] = {
+        "sgs": network.find_all_security_groups,
+        "servers": server_svc.find_all,
+        "vols": volume_svc.find_all,
+        "fips": network.find_all_floating_ips,
     }
 
     with console.status("[bold cyan]Running security audit…[/bold cyan]"):

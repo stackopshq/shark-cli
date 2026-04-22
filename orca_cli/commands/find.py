@@ -23,17 +23,10 @@ from orca_cli.core.output import console
 from orca_cli.services.compute import ComputeService
 from orca_cli.services.image import ImageService
 from orca_cli.services.network import NetworkService
+from orca_cli.services.server import ServerService
+from orca_cli.services.volume import VolumeService
 
 # ── Per-resource search helpers ──────────────────────────────────────────
-
-def _safe_list(client, url: str, key: str, params: dict | None = None) -> list[dict]:
-    """GET *url*, return data[key] as list — swallow all errors to []."""
-    try:
-        data = client.get(url, params=params or {})
-        return data.get(key, []) or []
-    except Exception:
-        return []
-
 
 def _safe(fn, *args, **kwargs) -> list[dict]:
     """Call a service method; swallow all errors to []."""
@@ -48,8 +41,7 @@ def _contains(value: Any, q: str) -> bool:
 
 
 def _find_servers(client, q: str) -> list[tuple[dict, str]]:
-    servers = _safe_list(client, f"{client.compute_url}/servers/detail",
-                         "servers", params={"limit": 500})
+    servers = _safe(ServerService(client).find, limit=500)
     hits: list[tuple[dict, str]] = []
     for s in servers:
         why = None
@@ -112,7 +104,7 @@ def _find_floatingips(client, q: str) -> list[tuple[dict, str]]:
 
 
 def _find_volumes(client, q: str) -> list[tuple[dict, str]]:
-    vols = _safe_list(client, f"{client.volume_url}/volumes/detail", "volumes")
+    vols = _safe(VolumeService(client).find)
     hits = []
     for v in vols:
         why = None

@@ -13,6 +13,8 @@ from orca_cli.core.output import console
 from orca_cli.services.compute import ComputeService
 from orca_cli.services.image import ImageService
 from orca_cli.services.network import NetworkService
+from orca_cli.services.server import ServerService
+from orca_cli.services.volume import VolumeService
 
 
 @click.command()
@@ -22,10 +24,12 @@ def overview(ctx: click.Context) -> None:
     client = ctx.find_object(OrcaContext).ensure_client()
     net_svc = NetworkService(client)
     compute_svc = ComputeService(client)
+    server_svc = ServerService(client)
+    volume_svc = VolumeService(client)
 
     fetchers: dict[str, Callable[[], list[Any]]] = {
-        "servers": lambda: client.paginate(f"{client.compute_url}/servers/detail", "servers"),
-        "volumes": lambda: client.paginate(f"{client.volume_url}/volumes/detail", "volumes"),
+        "servers": server_svc.find_all,
+        "volumes": volume_svc.find_all,
         "fips": lambda: net_svc.find_all_floating_ips(),
         "nets": lambda: net_svc.find_all(),
         "subnets": lambda: net_svc.find_all_subnets(),
