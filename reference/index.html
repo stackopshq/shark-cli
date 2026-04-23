@@ -47989,11 +47989,14 @@ instances. Use --delete to remove them.</p>
 </table>
 <h4 id="orca-server-clone">orca server clone<a class="headerlink" href="#orca-server-clone" title="Permanent link">&para;</a></h4>
 <p>Clone a server — recreate one with the same config.</p>
-<p>Copies flavor, network, security groups, key pair, and boot
-volume size from the source server into a new one.</p>
+<p>Copies flavor, network, security groups, key pair, and image from
+the source server into a new one. The clone's boot mode follows the
+same policy as <code>orca server create</code>: boot-from-image by default,
+fallback to boot-from-volume only when the flavor has <code>disk == 0</code>.
+Override with <code>--boot-from-image</code> / <code>--boot-from-volume</code>.</p>
 <p>Examples:
   orca server clone <id> --name web-02
-  orca server clone <id> --name web-02 --disk-size 50</p>
+  orca server clone <id> --name web-02 --boot-from-volume --disk-size 50</p>
 <p><strong>Usage:</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-571-1" name="__codelineno-571-1" href="#__codelineno-571-1"></a>orca server clone [OPTIONS] SERVER_ID
 </code></pre></div>
@@ -48017,8 +48020,20 @@ volume size from the source server into a new one.</p>
 <tr>
 <td><code>--disk-size</code></td>
 <td>integer</td>
-<td>Boot volume size in GB. Default: same as source.</td>
+<td>Boot volume size in GB (BFV only). Default: same as source.</td>
 <td>None</td>
+</tr>
+<tr>
+<td><code>--boot-from-image</code></td>
+<td>boolean</td>
+<td>Force boot from the image on the compute's local disk (requires flavor disk &gt; 0).</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--boot-from-volume</code></td>
+<td>boolean</td>
+<td>Force boot from a Cinder volume created from the image.</td>
+<td><code>False</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
