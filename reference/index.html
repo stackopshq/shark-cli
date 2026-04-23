@@ -48225,7 +48225,12 @@ volume size from the source server into a new one.</p>
 </tbody>
 </table>
 <h4 id="orca-server-create">orca server create<a class="headerlink" href="#orca-server-create" title="Permanent link">&para;</a></h4>
-<p>Create a new server (boot from volume).</p>
+<p>Create a new server.</p>
+<p>By default the server boots from the image directly on the compute's
+local disk (flavor <code>disk</code> field). Flavors declared with <code>disk=0</code>
+fall back to boot-from-volume automatically since Nova cannot boot
+them otherwise. Use <code>--boot-from-image</code> or <code>--boot-from-volume</code>
+to override the auto-detection.</p>
 <p>Non-interactive example:
   orca server create \
     --name my-vm \
@@ -48292,6 +48297,18 @@ volume size from the source server into a new one.</p>
 <td>text</td>
 <td>Security group name (repeatable).</td>
 <td>None</td>
+</tr>
+<tr>
+<td><code>--boot-from-image</code></td>
+<td>boolean</td>
+<td>Force boot from the image on the compute's local disk (requires flavor disk &gt; 0).</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--boot-from-volume</code></td>
+<td>boolean</td>
+<td>Force boot from a Cinder volume created from the image.</td>
+<td><code>False</code></td>
 </tr>
 <tr>
 <td><code>--wait</code></td>
