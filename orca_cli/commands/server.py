@@ -23,9 +23,49 @@ from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
 from orca_cli.core.waiter import wait_for_resource
+from orca_cli.services.compute import ComputeService
 from orca_cli.services.image import ImageService
 from orca_cli.services.server import ServerService
 from orca_cli.services.volume import VolumeService
+
+
+def _resolve_boot_mode(
+    client,
+    flavor_id: str,
+    boot_from_image: bool,
+    boot_from_volume: bool,
+) -> bool:
+    """Return True if the new server must boot from a Cinder volume.
+
+    Precedence: explicit --boot-from-volume > explicit --boot-from-image >
+    auto. Auto falls back to BFV only when the flavor has no local root
+    disk (``disk == 0``), which is the single case where Nova itself
+    refuses a boot-from-image.
+    """
+    if boot_from_image and boot_from_volume:
+        raise click.UsageError(
+            "--boot-from-image and --boot-from-volume are mutually exclusive."
+        )
+    if boot_from_volume:
+        return True
+    try:
+        flavor = ComputeService(client).get_flavor(flavor_id)
+    except Exception:
+        # If we can't inspect the flavor (transient Nova error or auth gap),
+        # respect the user's explicit flag; otherwise fall back to BFV, which
+        # works on every deployment including disk=0 flavors.
+        return not boot_from_image
+    disk = int(flavor.get("disk") or 0)
+    if boot_from_image:
+        if disk == 0:
+            raise click.UsageError(
+                f"Flavor {flavor_id} has disk=0 — boot-from-image is not "
+                "supported on this flavor. Drop --boot-from-image or use "
+                "--boot-from-volume explicitly."
+            )
+        return False
+    # Auto: boot-from-image by default when the flavor can carry a root disk.
+    return disk == 0
 
 
 @click.group()
@@ -280,6 +320,11 @@ def server_show(ctx: click.Context, server_id: str, output_format: str, columns:
               help="SSH key pair name (see 'orca keypair list').")
 @click.option("--security-group", "security_groups", multiple=True, shell_complete=complete_security_groups,
               help="Security group name (repeatable).")
+@click.option("--boot-from-image", is_flag=True,
+              help="Force boot from the image on the compute's local disk "
+                   "(requires flavor disk > 0).")
+@click.option("--boot-from-volume", is_flag=True,
+              help="Force boot from a Cinder volume created from the image.")
 @click.option("--wait", is_flag=True, help="Wait until the server reaches ACTIVE status.")
 @click.option("--interactive", "-i", is_flag=True,
               help="Step-by-step wizard — browse images, flavors, and networks interactively.")
@@ -293,10 +338,18 @@ def server_create(
     network_id: str | None,
     key_name: str | None,
     security_groups: tuple[str, ...],
+    boot_from_image: bool,
+    boot_from_volume: bool,
     wait: bool,
     interactive: bool,
 ) -> None:
-    """Create a new server (boot from volume).
+    """Create a new server.
+
+    By default the server boots from the image directly on the compute's
+    local disk (flavor ``disk`` field). Flavors declared with ``disk=0``
+    fall back to boot-from-volume automatically since Nova cannot boot
+    them otherwise. Use ``--boot-from-image`` or ``--boot-from-volume``
+    to override the auto-detection.
 
     \b
     Non-interactive example:
@@ -384,10 +437,16 @@ def server_create(
                 "Use -i / --interactive for the guided wizard."
             )
 
+    use_bfv = _resolve_boot_mode(
+        client, flavor_id or "", boot_from_image, boot_from_volume,
+    )
+
     body: dict = {
         "name": name,
         "flavorRef": flavor_id,
-        "block_device_mapping_v2": [
+    }
+    if use_bfv:
+        body["block_device_mapping_v2"] = [
             {
                 "boot_index": 0,
                 "uuid": image_id,
@@ -396,8 +455,11 @@ def server_create(
                 "volume_size": disk_size,
                 "delete_on_termination": True,
             }
-        ],
-    }
+        ]
+    else:
+        # Boot-from-image: Nova sizes the root disk from the flavor, so
+        # --disk-size is ignored here (the flag remains valid for BFV).
+        body["imageRef"] = image_id
 
     if network_id:
         body["networks"] = [{"uuid": network_id}]
@@ -415,7 +477,10 @@ def server_create(
     console.print("\n[bold green]Server created successfully![/bold green]")
     console.print(f"  [cyan]ID:[/cyan]       {srv_id}")
     console.print(f"  [cyan]Name:[/cyan]     {name}")
-    console.print(f"  [cyan]Disk:[/cyan]     {disk_size} GB (boot volume)")
+    if use_bfv:
+        console.print(f"  [cyan]Disk:[/cyan]     {disk_size} GB (boot volume)")
+    else:
+        console.print("  [cyan]Boot:[/cyan]     from image (flavor root disk)")
     if admin_pass:
         console.print(f"  [cyan]Password:[/cyan] {admin_pass}")
 
