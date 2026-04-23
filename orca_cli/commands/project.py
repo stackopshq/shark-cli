@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from enum import Enum
 
 import click
 
@@ -248,8 +249,40 @@ def _delete_network(client, nid: str) -> None:
     net_svc.delete(nid)
 
 
-def _delete_one(client, rtype: str, rid: str, rname: str) -> bool:
-    """Delete a single resource by type. Returns True on success."""
+class Outcome(Enum):
+    """Result of a single resource delete attempt.
+
+    ALREADY_GONE distinguishes idempotent successes (the resource was
+    deleted by a cascade — typical for volumes attached to a server with
+    delete_on_termination=True) from real failures. BLOCKED flags
+    dependency errors (409) separately from transport/server errors so
+    the operator can retry cleanup without chasing a spurious red line.
+    """
+
+    SUCCESS = "success"
+    ALREADY_GONE = "already_gone"
+    BLOCKED = "blocked"
+    FAILED = "failed"
+
+
+_OUTCOME_MARKER = {
+    Outcome.SUCCESS: "[green]✓[/green]",
+    Outcome.ALREADY_GONE: "[cyan]~[/cyan]",
+    Outcome.BLOCKED: "[yellow]⊘[/yellow]",
+    Outcome.FAILED: "[red]✗[/red]",
+}
+
+
+def _classify_api_error(exc: APIError) -> Outcome:
+    if exc.status_code == 404:
+        return Outcome.ALREADY_GONE
+    if exc.status_code == 409:
+        return Outcome.BLOCKED
+    return Outcome.FAILED
+
+
+def _delete_one(client, rtype: str, rid: str, rname: str) -> Outcome:
+    """Delete a single resource by type. Returns the classified outcome."""
     label = f"{rtype} {rname} ({rid})"
     try:
         if rtype == "stack":
@@ -293,14 +326,21 @@ def _delete_one(client, rtype: str, rid: str, rname: str) -> bool:
             except Exception:
                 pass
             obj_svc.delete_container(rid)
-        console.print(f"  [green]✓[/green] {label}")
-        return True
+        console.print(f"  {_OUTCOME_MARKER[Outcome.SUCCESS]} {label}")
+        return Outcome.SUCCESS
     except APIError as exc:
-        console.print(f"  [red]✗[/red] {label}: {exc}")
-        return False
+        outcome = _classify_api_error(exc)
+        if outcome is Outcome.ALREADY_GONE:
+            console.print(
+                f"  {_OUTCOME_MARKER[outcome]} {label} "
+                f"[dim](already gone)[/dim]"
+            )
+        else:
+            console.print(f"  {_OUTCOME_MARKER[outcome]} {label}: {exc}")
+        return outcome
     except Exception as exc:
-        console.print(f"  [red]✗[/red] {label}: {exc}")
-        return False
+        console.print(f"  {_OUTCOME_MARKER[Outcome.FAILED]} {label}: {exc}")
+        return Outcome.FAILED
 
 
 @project.command("cleanup")
@@ -543,10 +583,15 @@ def project_cleanup(ctx, target_project, dry_run, yes, created_before, skip_type
     for rtype, rid, rname in resources:
         by_type.setdefault(rtype, []).append((rid, rname))
 
-    success = 0
+    tally: dict[Outcome, int] = {o: 0 for o in Outcome}
     for rtype in DELETION_ORDER:
         for rid, rname in by_type.get(rtype, []):
-            if _delete_one(client, rtype, rid, rname):
-                success += 1
+            tally[_delete_one(client, rtype, rid, rname)] += 1
 
-    console.print(f"\n[bold]{success}/{len(resources)} resources deleted.[/bold]")
+    parts = [
+        f"[green]{tally[Outcome.SUCCESS]} deleted[/green]",
+        f"[cyan]{tally[Outcome.ALREADY_GONE]} already gone[/cyan]",
+        f"[yellow]{tally[Outcome.BLOCKED]} blocked[/yellow]",
+        f"[red]{tally[Outcome.FAILED]} failed[/red]",
+    ]
+    console.print(f"\n[bold]{' · '.join(parts)}[/bold] (of {len(resources)})")
