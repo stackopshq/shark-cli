@@ -1442,18 +1442,34 @@ def server_bulk(ctx: click.Context, action: str, name_pattern: str | None,
 @server.command("clone")
 @click.argument("server_id", callback=validate_id)
 @click.option("--name", required=True, help="Name for the cloned server.")
-@click.option("--disk-size", type=int, default=None, help="Boot volume size in GB. Default: same as source.")
+@click.option("--disk-size", type=int, default=None,
+              help="Boot volume size in GB (BFV only). Default: same as source.")
+@click.option("--boot-from-image", is_flag=True,
+              help="Force boot from the image on the compute's local disk "
+                   "(requires flavor disk > 0).")
+@click.option("--boot-from-volume", is_flag=True,
+              help="Force boot from a Cinder volume created from the image.")
 @click.pass_context
-def server_clone(ctx: click.Context, server_id: str, name: str, disk_size: int | None) -> None:
+def server_clone(
+    ctx: click.Context,
+    server_id: str,
+    name: str,
+    disk_size: int | None,
+    boot_from_image: bool,
+    boot_from_volume: bool,
+) -> None:
     """Clone a server — recreate one with the same config.
 
-    Copies flavor, network, security groups, key pair, and boot
-    volume size from the source server into a new one.
+    Copies flavor, network, security groups, key pair, and image from
+    the source server into a new one. The clone's boot mode follows the
+    same policy as ``orca server create``: boot-from-image by default,
+    fallback to boot-from-volume only when the flavor has ``disk == 0``.
+    Override with ``--boot-from-image`` / ``--boot-from-volume``.
 
     \b
     Examples:
       orca server clone <id> --name web-02
-      orca server clone <id> --name web-02 --disk-size 50
+      orca server clone <id> --name web-02 --boot-from-volume --disk-size 50
     """
     client = ctx.find_object(OrcaContext).ensure_client()
     service = ServerService(client)
@@ -1517,11 +1533,15 @@ def server_clone(ctx: click.Context, server_id: str, name: str, disk_size: int |
     # Key pair
     key_name = src.get("key_name")
 
+    use_bfv = _resolve_boot_mode(client, flavor_id, boot_from_image, boot_from_volume)
+
     # Build the new server
     body: dict = {
         "name": name,
         "flavorRef": flavor_id,
-        "block_device_mapping_v2": [
+    }
+    if use_bfv:
+        body["block_device_mapping_v2"] = [
             {
                 "boot_index": 0,
                 "uuid": image_id,
@@ -1530,8 +1550,9 @@ def server_clone(ctx: click.Context, server_id: str, name: str, disk_size: int |
                 "volume_size": src_disk,
                 "delete_on_termination": True,
             }
-        ],
-    }
+        ]
+    else:
+        body["imageRef"] = image_id
     if networks:
         body["networks"] = networks
     if security_groups:
@@ -1542,7 +1563,10 @@ def server_clone(ctx: click.Context, server_id: str, name: str, disk_size: int |
     console.print(f"[bold]Cloning '{src_name}' → '{name}'[/bold]")
     console.print(f"  Flavor:  {flavor_id}")
     console.print(f"  Image:   {image_id}")
-    console.print(f"  Disk:    {src_disk} GB")
+    if use_bfv:
+        console.print(f"  Disk:    {src_disk} GB (boot volume)")
+    else:
+        console.print("  Boot:    from image (flavor root disk)")
     console.print(f"  Key:     {key_name or '—'}")
     console.print(f"  SGs:     {', '.join(sg['name'] for sg in security_groups) or '—'}")
     console.print(f"  Nets:    {len(networks)}")
