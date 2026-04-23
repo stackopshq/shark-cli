@@ -240,6 +240,95 @@ class TestDeleteOneOutcomes:
         assert out is Outcome.FAILED
 
 
+class TestRefreshAndWaitVolumes:
+    """Volume settle window between server-delete and volume-delete phases.
+
+    Tests pin the settle timings to near-zero so the suite stays fast.
+    """
+
+    def _zero_timing(self, monkeypatch):
+        monkeypatch.setattr(proj_mod, "_VOLUME_SETTLE_INTERVAL", 0.0)
+        monkeypatch.setattr(proj_mod, "_VOLUME_SETTLE_TIMEOUT", 0.01)
+        monkeypatch.setattr(proj_mod.time, "sleep", lambda _s: None)
+
+    def test_returns_immediately_when_no_transient(self, monkeypatch):
+        self._zero_timing(monkeypatch)
+        svc = MagicMock()
+        svc.find.return_value = [
+            {"id": "v1", "name": "n1", "status": "available"},
+            {"id": "v2", "name": "n2", "status": "error"},
+        ]
+        monkeypatch.setattr(proj_mod, "VolumeService", lambda _c: svc)
+
+        result = proj_mod._refresh_and_wait_volumes(object(), "p-1", None)
+
+        assert result == [("v1", "n1"), ("v2", "n2")]
+        svc.find.assert_called_once()
+
+    def test_polls_until_transient_clears(self, monkeypatch):
+        self._zero_timing(monkeypatch)
+        svc = MagicMock()
+        # First call: one volume still detaching. Second call: both settled.
+        svc.find.side_effect = [
+            [
+                {"id": "v1", "name": "n1", "status": "detaching"},
+                {"id": "v2", "name": "n2", "status": "available"},
+            ],
+            [
+                {"id": "v1", "name": "n1", "status": "available"},
+                {"id": "v2", "name": "n2", "status": "available"},
+            ],
+        ]
+        monkeypatch.setattr(proj_mod, "VolumeService", lambda _c: svc)
+
+        result = proj_mod._refresh_and_wait_volumes(object(), "p-1", None)
+
+        assert result == [("v1", "n1"), ("v2", "n2")]
+        assert svc.find.call_count == 2
+
+    def test_returns_last_seen_on_timeout(self, monkeypatch):
+        """Timeout must not raise — the stuck volume surfaces as FAILED later."""
+        self._zero_timing(monkeypatch)
+        svc = MagicMock()
+        svc.find.return_value = [
+            {"id": "stuck", "name": "s", "status": "detaching"},
+        ]
+        monkeypatch.setattr(proj_mod, "VolumeService", lambda _c: svc)
+
+        result = proj_mod._refresh_and_wait_volumes(object(), "p-1", None)
+
+        assert result == [("stuck", "s")]
+
+    def test_missing_service_is_tolerated(self, monkeypatch):
+        self._zero_timing(monkeypatch)
+        svc = MagicMock()
+        svc.find.side_effect = RuntimeError("cinder down")
+        monkeypatch.setattr(proj_mod, "VolumeService", lambda _c: svc)
+
+        result = proj_mod._refresh_and_wait_volumes(object(), "p-1", None)
+
+        assert result == []
+
+    def test_cutoff_is_applied_on_refresh(self, monkeypatch):
+        """Fresh list honors --created-before, same as the initial scan."""
+        from datetime import datetime, timezone
+
+        self._zero_timing(monkeypatch)
+        svc = MagicMock()
+        svc.find.return_value = [
+            {"id": "old", "name": "o", "status": "available",
+             "created_at": "2020-01-01T00:00:00+00:00"},
+            {"id": "new", "name": "n", "status": "available",
+             "created_at": "2099-01-01T00:00:00+00:00"},
+        ]
+        monkeypatch.setattr(proj_mod, "VolumeService", lambda _c: svc)
+
+        cutoff = datetime(2025, 1, 1, tzinfo=timezone.utc)
+        result = proj_mod._refresh_and_wait_volumes(object(), "p-1", cutoff)
+
+        assert result == [("old", "o")]
+
+
 class TestSummaryRendering:
     """End-to-end through the Click command: the summary line must aggregate
     the four outcomes independently — a mix of 404s, 409s and real failures

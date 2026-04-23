@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from datetime import datetime
 from enum import Enum
 
@@ -186,6 +187,48 @@ def _before_cutoff(resource: dict, cutoff: datetime | None) -> bool:
         return dt < cutoff
     except (ValueError, TypeError):
         return True
+
+
+# Short settle window for volumes freshly detached by a server delete.
+# Kept module-level so tests can monkeypatch them to zero without global state
+# leaking into production. Values are deliberately conservative: 30 s is long
+# enough to cover typical Cinder detach latency on a loaded cloud, 2 s limits
+# the polling to ~15 round-trips in the worst case.
+_VOLUME_SETTLE_TIMEOUT = 30.0
+_VOLUME_SETTLE_INTERVAL = 2.0
+_VOLUME_TRANSIENT_STATUSES = frozenset({"detaching", "in-use"})
+
+
+def _refresh_and_wait_volumes(
+    client,
+    proj_id: str,
+    cutoff: datetime | None,
+) -> list[tuple[str, str]]:
+    """Re-list project volumes and wait until none are in a transient state.
+
+    Called between the server-delete and volume-delete phases. Server
+    deletion releases attached volumes asynchronously — they transition
+    ``in-use → detaching → available`` in Cinder, and deleting a volume
+    mid-detach raises HTTP 400. Polling here lets us meet the volume
+    phase with a clean set instead of firing 400s the user has to ignore.
+
+    On timeout we return whatever we last observed; a lingering DELETE
+    will surface as FAILED via ``_delete_one``, which is the right
+    signal — silence would hide a stuck volume.
+    """
+    deadline = time.monotonic() + _VOLUME_SETTLE_TIMEOUT
+    while True:
+        try:
+            vols: list = list(VolumeService(client).find(
+                params={"project_id": proj_id},
+            ))
+        except Exception:
+            vols = []
+        vols = [v for v in vols if _before_cutoff(v, cutoff)]
+        transient = [v for v in vols if v.get("status") in _VOLUME_TRANSIENT_STATUSES]
+        if not transient or time.monotonic() >= deadline:
+            return [(v["id"], v.get("name") or "—") for v in vols]
+        time.sleep(_VOLUME_SETTLE_INTERVAL)
 
 
 # device_owner values for ports attached to a router that need to be detached
@@ -585,6 +628,15 @@ def project_cleanup(ctx, target_project, dry_run, yes, created_before, skip_type
 
     tally: dict[Outcome, int] = {o: 0 for o in Outcome}
     for rtype in DELETION_ORDER:
+        if rtype == "volume" and by_type.get("volume"):
+            # Server deletion releases attached volumes asynchronously; wait
+            # for them to settle before attempting the volume-phase DELETEs.
+            with console.status(
+                "[bold cyan]Waiting for volumes to detach…[/bold cyan]"
+            ):
+                by_type["volume"] = _refresh_and_wait_volumes(
+                    client, proj_id, cutoff,
+                )
         for rid, rname in by_type.get(rtype, []):
             tally[_delete_one(client, rtype, rid, rname)] += 1
 
