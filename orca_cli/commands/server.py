@@ -763,7 +763,17 @@ def server_rename(ctx: click.Context, server_id: str, new_name: str) -> None:
 @click.argument("image_name")
 @click.pass_context
 def server_create_image(ctx: click.Context, server_id: str, image_name: str) -> None:
-    """Create a snapshot image from a server."""
+    """Create a snapshot image from a server.
+
+    \b
+    See also:
+      For boot-from-volume instances, the resulting image is a 0-byte
+      shell that points at a Cinder snapshot — not a downloadable image.
+      To obtain a self-contained, transportable image, use:
+          orca volume snapshot create --force
+          orca volume create --snapshot-id ...
+          orca volume upload-to-image ...
+    """
     ServerService(ctx.find_object(OrcaContext).ensure_client()).create_image(server_id, image_name)
     console.print(f"[green]Image '{image_name}' creation started from {server_id}.[/green]")
     console.print("[dim]Use 'orca image list' to track progress.[/dim]")

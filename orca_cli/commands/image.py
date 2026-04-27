@@ -423,6 +423,13 @@ def image_download(ctx: click.Context, image_id: str, output_path: str) -> None:
     Supports large files — streams to disk without loading into memory.
     Examples:
       orca image download <id> -o /tmp/my-image.qcow2
+
+    \b
+    Note:
+      Snapshots taken with 'orca server image create' on a boot-from-volume
+      instance return 0 bytes — they are Glance shells pointing at a Cinder
+      snapshot. Use 'orca volume upload-to-image' to materialize the
+      underlying volume as a real, downloadable image first.
     """
     service = ImageService(ctx.find_object(OrcaContext).ensure_client())
 
