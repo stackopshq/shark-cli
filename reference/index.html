@@ -10409,6 +10409,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#orca-volume-upload-to-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        upload-to-image
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -23613,6 +23624,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#orca-volume-upload-to-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        upload-to-image
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -31794,6 +31816,11 @@ dimension) so the most-saturated hypervisors surface at the top.</p>
 <p>Supports large files — streams to disk without loading into memory.
 Examples:
   orca image download <id> -o /tmp/my-image.qcow2</p>
+<p>Note:
+  Snapshots taken with 'orca server image create' on a boot-from-volume
+  instance return 0 bytes — they are Glance shells pointing at a Cinder
+  snapshot. Use 'orca volume upload-to-image' to materialize the
+  underlying volume as a real, downloadable image first.</p>
 <p><strong>Usage:</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-187-1" name="__codelineno-187-1" href="#__codelineno-187-1"></a>orca image download [OPTIONS] IMAGE_ID
 </code></pre></div>
@@ -48386,6 +48413,13 @@ to override the auto-detection.</p>
 </table>
 <h4 id="orca-server-create-image">orca server create-image<a class="headerlink" href="#orca-server-create-image" title="Permanent link">&para;</a></h4>
 <p>Create a snapshot image from a server.</p>
+<p>See also:
+  For boot-from-volume instances, the resulting image is a 0-byte
+  shell that points at a Cinder snapshot — not a downloadable image.
+  To obtain a self-contained, transportable image, use:
+      orca volume snapshot create --force
+      orca volume create --snapshot-id ...
+      orca volume upload-to-image ...</p>
 <p><strong>Usage:</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-579-1" name="__codelineno-579-1" href="#__codelineno-579-1"></a>orca server create-image [OPTIONS] SERVER_ID IMAGE_NAME
 </code></pre></div>
@@ -48674,6 +48708,13 @@ a crash dump. The server must be ACTIVE.</p>
 </table>
 <h5 id="orca-server-image-create">orca server image create<a class="headerlink" href="#orca-server-image-create" title="Permanent link">&para;</a></h5>
 <p>Create a snapshot image from a server.</p>
+<p>See also:
+  For boot-from-volume instances, the resulting image is a 0-byte
+  shell that points at a Cinder snapshot — not a downloadable image.
+  To obtain a self-contained, transportable image, use:
+      orca volume snapshot create --force
+      orca volume create --snapshot-id ...
+      orca volume upload-to-image ...</p>
 <p><strong>Usage:</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-589-1" name="__codelineno-589-1" href="#__codelineno-589-1"></a>orca server image create [OPTIONS] SERVER_ID IMAGE_NAME
 </code></pre></div>
@@ -60000,10 +60041,85 @@ see what depends on what.</p>
 </tr>
 </tbody>
 </table>
+<h4 id="orca-volume-upload-to-image">orca volume upload-to-image<a class="headerlink" href="#orca-volume-upload-to-image" title="Permanent link">&para;</a></h4>
+<p>Materialize a volume's data as a downloadable Glance image.</p>
+<p>Wraps Cinder's <code>os-volume_upload_image</code> action. The resulting image is
+a self-contained binary (unlike a server snapshot of a boot-from-volume
+instance, which is a 0-byte shell pointing at a Cinder snapshot) and can
+therefore be downloaded with <code>orca image download</code>.</p>
+<p>Examples:
+  orca volume upload-to-image <volume-id> my-image
+  orca volume upload-to-image my-vol my-image --disk-format raw
+  orca volume upload-to-image <id> img --force                # in-use volume
+  orca volume upload-to-image <id> img --property os_distro=ubuntu --wait</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-864-1" name="__codelineno-864-1" href="#__codelineno-864-1"></a>orca volume upload-to-image [OPTIONS] VOLUME_ID_OR_NAME IMAGE_NAME
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--disk-format</code></td>
+<td>choice (<code>raw</code> &#x7C; <code>qcow2</code> &#x7C; <code>vmdk</code> &#x7C; <code>vdi</code> &#x7C; <code>vhd</code> &#x7C; <code>vhdx</code> &#x7C; <code>iso</code> &#x7C; <code>aki</code> &#x7C; <code>ari</code> &#x7C; <code>ami</code>)</td>
+<td>Disk format.</td>
+<td><code>qcow2</code></td>
+</tr>
+<tr>
+<td><code>--container-format</code></td>
+<td>choice (<code>bare</code> &#x7C; <code>ovf</code> &#x7C; <code>ova</code> &#x7C; <code>aki</code> &#x7C; <code>ari</code> &#x7C; <code>ami</code> &#x7C; <code>docker</code>)</td>
+<td>Container format.</td>
+<td><code>bare</code></td>
+</tr>
+<tr>
+<td><code>--visibility</code></td>
+<td>choice (<code>private</code> &#x7C; <code>shared</code> &#x7C; <code>community</code> &#x7C; <code>public</code>)</td>
+<td>Image visibility.</td>
+<td><code>private</code></td>
+</tr>
+<tr>
+<td><code>--protected</code> / <code>--no-protected</code></td>
+<td>boolean</td>
+<td>Mark the resulting image as protected (deletion-locked).</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--force</code></td>
+<td>boolean</td>
+<td>Required when uploading from an in-use volume.</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--property</code></td>
+<td>text</td>
+<td>Custom Glance property to set on the resulting image. Repeatable. Applied via JSON-Patch after the upload action.</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>--wait</code></td>
+<td>boolean</td>
+<td>Poll the resulting image until it reaches 'active' (or 'killed'/'deleted', in which case exit non-zero).</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
 <h3 id="orca-watch">orca watch<a class="headerlink" href="#orca-watch" title="Permanent link">&para;</a></h3>
 <p>Live dashboard — auto-refreshing project overview.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-864-1" name="__codelineno-864-1" href="#__codelineno-864-1"></a>orca watch [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-865-1" name="__codelineno-865-1" href="#__codelineno-865-1"></a>orca watch [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -60033,7 +60149,7 @@ see what depends on what.</p>
 <h3 id="orca-zone">orca zone<a class="headerlink" href="#orca-zone" title="Permanent link">&para;</a></h3>
 <p>Manage DNS zones (Designate).</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-865-1" name="__codelineno-865-1" href="#__codelineno-865-1"></a>orca zone [OPTIONS] COMMAND [ARGS]...
+<div class="highlight"><pre><span></span><code><a id="__codelineno-866-1" name="__codelineno-866-1" href="#__codelineno-866-1"></a>orca zone [OPTIONS] COMMAND [ARGS]...
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -60059,7 +60175,7 @@ see what depends on what.</p>
 <p>NAME must be a fully-qualified domain name ending with a dot, e.g.:
   orca zone create example.com. --email admin@example.com</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-866-1" name="__codelineno-866-1" href="#__codelineno-866-1"></a>orca zone create [OPTIONS] NAME
+<div class="highlight"><pre><span></span><code><a id="__codelineno-867-1" name="__codelineno-867-1" href="#__codelineno-867-1"></a>orca zone create [OPTIONS] NAME
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -60114,7 +60230,7 @@ see what depends on what.</p>
 <p>Delete a DNS zone.</p>
 <p>ZONE can be a zone ID or name.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-867-1" name="__codelineno-867-1" href="#__codelineno-867-1"></a>orca zone delete [OPTIONS] ZONE
+<div class="highlight"><pre><span></span><code><a id="__codelineno-868-1" name="__codelineno-868-1" href="#__codelineno-868-1"></a>orca zone delete [OPTIONS] ZONE
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -60147,7 +60263,7 @@ see what depends on what.</p>
   orca zone export example.com.
   orca zone export example.com. --file example.com.zone</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-868-1" name="__codelineno-868-1" href="#__codelineno-868-1"></a>orca zone export [OPTIONS] ZONE
+<div class="highlight"><pre><span></span><code><a id="__codelineno-869-1" name="__codelineno-869-1" href="#__codelineno-869-1"></a>orca zone export [OPTIONS] ZONE
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -60179,7 +60295,7 @@ see what depends on what.</p>
 <p>Examples:
   orca zone import --file example.com.zone</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-869-1" name="__codelineno-869-1" href="#__codelineno-869-1"></a>orca zone import [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-870-1" name="__codelineno-870-1" href="#__codelineno-870-1"></a>orca zone import [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -60209,7 +60325,7 @@ see what depends on what.</p>
 <h4 id="orca-zone-list">orca zone list<a class="headerlink" href="#orca-zone-list" title="Permanent link">&para;</a></h4>
 <p>List DNS zones.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-870-1" name="__codelineno-870-1" href="#__codelineno-870-1"></a>orca zone list [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-871-1" name="__codelineno-871-1" href="#__codelineno-871-1"></a>orca zone list [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -60267,7 +60383,7 @@ in-addr.arpa / ip6.arpa zones.</p>
 <p>Examples:
   orca zone reverse-lookup 192.0.2.1</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-871-1" name="__codelineno-871-1" href="#__codelineno-871-1"></a>orca zone reverse-lookup [OPTIONS] IP
+<div class="highlight"><pre><span></span><code><a id="__codelineno-872-1" name="__codelineno-872-1" href="#__codelineno-872-1"></a>orca zone reverse-lookup [OPTIONS] IP
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -60292,7 +60408,7 @@ in-addr.arpa / ip6.arpa zones.</p>
 <p>Update a DNS zone.</p>
 <p>ZONE can be a zone ID or name.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-872-1" name="__codelineno-872-1" href="#__codelineno-872-1"></a>orca zone set [OPTIONS] ZONE
+<div class="highlight"><pre><span></span><code><a id="__codelineno-873-1" name="__codelineno-873-1" href="#__codelineno-873-1"></a>orca zone set [OPTIONS] ZONE
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -60335,7 +60451,7 @@ in-addr.arpa / ip6.arpa zones.</p>
 <p>Show DNS zone details.</p>
 <p>ZONE can be a zone ID or name.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-873-1" name="__codelineno-873-1" href="#__codelineno-873-1"></a>orca zone show [OPTIONS] ZONE
+<div class="highlight"><pre><span></span><code><a id="__codelineno-874-1" name="__codelineno-874-1" href="#__codelineno-874-1"></a>orca zone show [OPTIONS] ZONE
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -60389,7 +60505,7 @@ in-addr.arpa / ip6.arpa zones.</p>
 <h4 id="orca-zone-tld-create">orca zone tld-create<a class="headerlink" href="#orca-zone-tld-create" title="Permanent link">&para;</a></h4>
 <p>Create a TLD (admin).</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-874-1" name="__codelineno-874-1" href="#__codelineno-874-1"></a>orca zone tld-create [OPTIONS] NAME
+<div class="highlight"><pre><span></span><code><a id="__codelineno-875-1" name="__codelineno-875-1" href="#__codelineno-875-1"></a>orca zone tld-create [OPTIONS] NAME
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -60419,7 +60535,7 @@ in-addr.arpa / ip6.arpa zones.</p>
 <h4 id="orca-zone-tld-delete">orca zone tld-delete<a class="headerlink" href="#orca-zone-tld-delete" title="Permanent link">&para;</a></h4>
 <p>Delete a TLD (admin).</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-875-1" name="__codelineno-875-1" href="#__codelineno-875-1"></a>orca zone tld-delete [OPTIONS] TLD_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-876-1" name="__codelineno-876-1" href="#__codelineno-876-1"></a>orca zone tld-delete [OPTIONS] TLD_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -60449,7 +60565,7 @@ in-addr.arpa / ip6.arpa zones.</p>
 <h4 id="orca-zone-tld-list">orca zone tld-list<a class="headerlink" href="#orca-zone-tld-list" title="Permanent link">&para;</a></h4>
 <p>List allowed TLDs (admin).</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-876-1" name="__codelineno-876-1" href="#__codelineno-876-1"></a>orca zone tld-list [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-877-1" name="__codelineno-877-1" href="#__codelineno-877-1"></a>orca zone tld-list [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -60503,7 +60619,7 @@ in-addr.arpa / ip6.arpa zones.</p>
 <h4 id="orca-zone-transfer-accept">orca zone transfer-accept<a class="headerlink" href="#orca-zone-transfer-accept" title="Permanent link">&para;</a></h4>
 <p>Accept a zone transfer request.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-877-1" name="__codelineno-877-1" href="#__codelineno-877-1"></a>orca zone transfer-accept [OPTIONS] TRANSFER_ID KEY
+<div class="highlight"><pre><span></span><code><a id="__codelineno-878-1" name="__codelineno-878-1" href="#__codelineno-878-1"></a>orca zone transfer-accept [OPTIONS] TRANSFER_ID KEY
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -60527,7 +60643,7 @@ in-addr.arpa / ip6.arpa zones.</p>
 <h4 id="orca-zone-transfer-request-create">orca zone transfer-request-create<a class="headerlink" href="#orca-zone-transfer-request-create" title="Permanent link">&para;</a></h4>
 <p>Create a zone transfer request.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-878-1" name="__codelineno-878-1" href="#__codelineno-878-1"></a>orca zone transfer-request-create [OPTIONS] ZONE_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-879-1" name="__codelineno-879-1" href="#__codelineno-879-1"></a>orca zone transfer-request-create [OPTIONS] ZONE_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -60563,7 +60679,7 @@ in-addr.arpa / ip6.arpa zones.</p>
 <h4 id="orca-zone-transfer-request-delete">orca zone transfer-request-delete<a class="headerlink" href="#orca-zone-transfer-request-delete" title="Permanent link">&para;</a></h4>
 <p>Delete a zone transfer request.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-879-1" name="__codelineno-879-1" href="#__codelineno-879-1"></a>orca zone transfer-request-delete [OPTIONS] TRANSFER_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-880-1" name="__codelineno-880-1" href="#__codelineno-880-1"></a>orca zone transfer-request-delete [OPTIONS] TRANSFER_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -60593,7 +60709,7 @@ in-addr.arpa / ip6.arpa zones.</p>
 <h4 id="orca-zone-transfer-request-list">orca zone transfer-request-list<a class="headerlink" href="#orca-zone-transfer-request-list" title="Permanent link">&para;</a></h4>
 <p>List zone transfer requests.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-880-1" name="__codelineno-880-1" href="#__codelineno-880-1"></a>orca zone transfer-request-list [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-881-1" name="__codelineno-881-1" href="#__codelineno-881-1"></a>orca zone transfer-request-list [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -60647,7 +60763,7 @@ in-addr.arpa / ip6.arpa zones.</p>
 <h4 id="orca-zone-transfer-request-show">orca zone transfer-request-show<a class="headerlink" href="#orca-zone-transfer-request-show" title="Permanent link">&para;</a></h4>
 <p>Show a zone transfer request.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-881-1" name="__codelineno-881-1" href="#__codelineno-881-1"></a>orca zone transfer-request-show [OPTIONS] TRANSFER_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-882-1" name="__codelineno-882-1" href="#__codelineno-882-1"></a>orca zone transfer-request-show [OPTIONS] TRANSFER_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -60704,7 +60820,7 @@ in-addr.arpa / ip6.arpa zones.</p>
 types — each colour-coded for quick scanning.</p>
 <p>ZONE can be a zone ID or name.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-882-1" name="__codelineno-882-1" href="#__codelineno-882-1"></a>orca zone tree [OPTIONS] ZONE
+<div class="highlight"><pre><span></span><code><a id="__codelineno-883-1" name="__codelineno-883-1" href="#__codelineno-883-1"></a>orca zone tree [OPTIONS] ZONE
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>

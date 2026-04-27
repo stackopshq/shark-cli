@@ -3735,6 +3735,10 @@ re-read.</p>
   Compound verb that reads naturally; nesting it under a sub-group
   (<code>server tunnel forward</code>) would gain nothing since there are no
   sibling commands.</li>
+<li><code>volume upload-to-image</code> — mirrors the Cinder action name
+  <code>os-volume_upload_image</code>. Compound verb; nesting it as
+  <code>volume image upload</code> would imply <code>image</code> is a sub-resource of
+  <code>volume</code>, when Glance is in fact the <em>target</em> of the action.</li>
 </ul>
 <p>Adding to this list requires a deliberate choice and an inline
 comment in the test whitelist explaining why.</p>
@@ -3752,8 +3756,9 @@ comment in the test whitelist explaining why.</p>
   <code>type</code>, <code>type access</code>). <code>revert-to-snapshot</code> becomes
   <code>volume snapshot revert</code>. <code>set-bootable</code> / <code>set-readonly</code> fold
   into <code>volume set --bootable</code> / <code>--read-only</code> with the two old
-  commands kept as deprecated façades. Whitelist for <code>volume</code> is
-  empty — no permanent exceptions.</li>
+  commands kept as deprecated façades. Whitelist for <code>volume</code> was
+  initially empty; <code>upload-to-image</code> was later added as a permanent
+  exception (compound verb, see above).</li>
 <li>2026-04-20 — <code>network</code>: 38 commands moved into 7 sub-groups
   (<code>agent</code>, <code>auto-allocated-topology</code> — compound noun, <code>port</code>,
   <code>rbac</code>, <code>segment</code>, <code>subnet</code>, <code>router</code>) and 4 sub-sub-groups under
