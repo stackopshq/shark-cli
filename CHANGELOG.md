@@ -4,6 +4,39 @@ All notable changes to orca are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] — 2026-04-27
+
+### Fixed
+
+- **Error messages now reach the central red ``Error:`` formatter
+  instead of falling through as ``Unexpected error: …``.** A
+  CLI-coherence audit on 2026-04-27 found 72 distinct ``raise
+  click.ClickException(…)`` and ``raise click.UsageError(…)`` paths
+  spread across 17 command modules (profile lookups, KEY=VALUE parse
+  errors, mutually-exclusive flag violations, file I/O failures,
+  ambiguous name resolution, …). These bypassed ``main()``'s
+  ``OrcaCLIError`` handler — per CLAUDE.md every error surfaced to
+  the user must subclass ``OrcaCLIError``. All 72 sites now raise
+  ``OrcaCLIError``; the ratchet test
+  ``tests/test_no_click_exceptions_in_commands.py`` rejects new
+  occurrences. Behaviour-equivalent on the happy path; the visible
+  change is the consistent red ``Error: …`` line.
+
+### Added
+
+- **Shell tab-completion now covers every common resource ID
+  argument.** The same audit found four modules — ``flavor``,
+  ``image``, ``network``, ``server-group`` — with no
+  ``shell_complete=`` callbacks on their UUID args, so ``orca flavor
+  show <TAB>`` and equivalents returned no suggestions even though
+  the per-resource callbacks existed in
+  ``orca_cli/core/completions.py``. Wired ``complete_flavors``,
+  ``complete_images`` and ``complete_networks`` onto the four
+  resource groups; added the missing ``complete_server_groups``
+  callback. ``volume upload-to-image`` (added in 2.1.1) gets
+  ``complete_volumes`` for parity with the other ``volume``
+  subcommands.
+
 ## [2.1.2] — 2026-04-27
 
 ### Fixed
