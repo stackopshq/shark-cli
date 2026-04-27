@@ -4,6 +4,29 @@ All notable changes to orca are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] — 2026-04-27
+
+### Added
+
+- **`orca volume upload-to-image`** — materialize a Cinder volume as a
+  downloadable Glance image (wraps the `os-volume_upload_image` action).
+  This is the missing primitive for migrating boot-from-volume instances
+  between clouds: `orca server image create` on a BFV server only produces
+  a 0-byte Glance shell that points at a Cinder snapshot, whereas the new
+  command yields a self-contained image that `orca image download` can
+  actually pull. Supports `--disk-format`, `--container-format`,
+  `--visibility`, `--protected`, `--force` (required for in-use volumes,
+  with a client-side pre-flight so users get an actionable message instead
+  of an opaque 400), `--property KEY=VALUE` (validated against Glance's
+  schema and applied via JSON-Patch on the resulting image, since Cinder
+  itself does not accept arbitrary properties in the action body), and
+  `--wait` (adaptive polling: 5 s for the first minute, then 15 s, with a
+  live status/size line and an early exit on `killed`/`deleted`). The
+  `--help` of `orca server image create` and `orca image download` now
+  cross-reference the new workflow so the BFV pitfall is discoverable
+  from both ends. ADR-0008 records `volume upload-to-image` as a
+  permanent compound-verb exception (mirrors the Cinder action name).
+
 ## [2.1.0] — 2026-04-27
 
 ### Added
