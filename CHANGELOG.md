@@ -4,6 +4,24 @@ All notable changes to orca are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **Shell completion install no longer slows shell startup.** The
+  bash/zsh install used to append
+  `eval "$(_ORCA_COMPLETE=bash_source orca)"` to the rc file, which
+  re-spawned `orca` (with its full ~60-module command tree) and a
+  `bash --version` subprocess on every login (Click's
+  `_check_version()`). Real-world cost was 1–3 s per shell, with a
+  documented incident where hundreds of `orca` processes piled up on
+  a single SSH session. `orca completion install bash` (and `zsh`)
+  now generates the completion script **once** into
+  `$XDG_DATA_HOME/orca/completion.<shell>` and writes a plain
+  `source <path>` line into the rc — login cost drops to microseconds.
+  Re-running the install on an older config silently migrates the
+  legacy `eval` line out of the rc. See ADR 0010.
+
 ## [2.0.1] — 2026-04-22
 
 ### Fixed
