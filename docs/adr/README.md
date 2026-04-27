@@ -39,3 +39,4 @@ of the documentation.
 - [ADR-0007 — Incremental services layer with typed models](0007-incremental-services-layer.md)
 - [ADR-0008 — Command naming follows openstackclient convention](0008-command-naming-convention.md)
 - [ADR-0009 — Server boot mode defaults to boot-from-image](0009-server-boot-mode-policy.md)
+- [ADR-0010 — Static completion script for bash/zsh](0010-static-completion-script.md)

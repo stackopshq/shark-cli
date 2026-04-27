@@ -15,12 +15,26 @@ console = Console()
 
 INSTRUCTIONS = {
     "bash": (
-        'Add this to your ~/.bashrc:\n'
-        '  eval "$(_ORCA_COMPLETE=bash_source orca)"'
+        'Generate the completion script once and source it at login:\n'
+        '  mkdir -p ~/.local/share/orca\n'
+        '  _ORCA_COMPLETE=bash_source orca > ~/.local/share/orca/completion.bash\n'
+        '\n'
+        'Then add this to your ~/.bashrc:\n'
+        '  [ -f ~/.local/share/orca/completion.bash ] && source ~/.local/share/orca/completion.bash\n'
+        '\n'
+        'Why: sourcing a static file at login is microseconds; the previous\n'
+        '"eval" pattern re-ran orca on every shell startup (see ADR 0010).'
     ),
     "zsh": (
-        'Add this to your ~/.zshrc:\n'
-        '  eval "$(_ORCA_COMPLETE=zsh_source orca)"'
+        'Generate the completion script once and source it at login:\n'
+        '  mkdir -p ~/.local/share/orca\n'
+        '  _ORCA_COMPLETE=zsh_source orca > ~/.local/share/orca/completion.zsh\n'
+        '\n'
+        'Then add this to your ~/.zshrc:\n'
+        '  [ -f ~/.local/share/orca/completion.zsh ] && source ~/.local/share/orca/completion.zsh\n'
+        '\n'
+        'Why: sourcing a static file at login is microseconds; the previous\n'
+        '"eval" pattern re-ran orca on every shell startup (see ADR 0010).'
     ),
     "fish": (
         'Run the following command:\n'

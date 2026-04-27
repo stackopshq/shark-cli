@@ -248,35 +248,120 @@ class TestDetectShell:
 
 
 class TestInstallCompletionBashZsh:
+    """Static-script install (ADR 0010): generate the script once, then source.
 
-    def test_creates_rc_file_if_missing(self, tmp_path, monkeypatch):
+    Each test patches ``XDG_DATA_HOME`` to ``tmp_path`` and stubs the
+    subprocess-driven script generation so we exercise the rc-rewriting and
+    file-placement logic without invoking a real ``orca`` binary.
+    """
+
+    @staticmethod
+    def _patch_paths(tmp_path, monkeypatch, shell_name="bash"):
+        rc = tmp_path / (".bashrc" if shell_name == "bash" else ".zshrc")
         monkeypatch.setattr("orca_cli.core.shell_completion._RC_FILE",
                             {"bash": tmp_path / ".bashrc", "zsh": tmp_path / ".zshrc"})
-        msg = install_completion_bashzsh("zsh")
-        rc = tmp_path / ".zshrc"
-        assert rc.exists()
-        assert "_ORCA_COMPLETE=zsh_source" in rc.read_text()
-        assert "Appended" in msg
+        monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "share"))
+        # Pretend orca is on PATH so subprocess.run is reached.
+        monkeypatch.setattr("orca_cli.core.shell_completion.shutil.which",
+                            lambda _: "/usr/local/bin/orca")
+        return rc
 
-    def test_idempotent_when_already_present(self, tmp_path, monkeypatch):
-        rc = tmp_path / ".zshrc"
-        rc.write_text('# existing\neval "$(_ORCA_COMPLETE=zsh_source orca)"\n')
-        monkeypatch.setattr("orca_cli.core.shell_completion._RC_FILE",
-                            {"bash": tmp_path / ".bashrc", "zsh": rc})
-        msg = install_completion_bashzsh("zsh")
-        assert "Already present" in msg
-        # Line not duplicated
-        assert rc.read_text().count("_ORCA_COMPLETE=zsh_source") == 1
+    @staticmethod
+    def _stub_subprocess(monkeypatch, stdout="# generated bash completion\ncomplete -F _orca_completion orca\n"):
+        class _Result:
+            returncode = 0
+            stderr = ""
+        result = _Result()
+        result.stdout = stdout
+        monkeypatch.setattr("orca_cli.core.shell_completion.subprocess.run",
+                            lambda *a, **kw: result)
 
-    def test_appends_to_existing_rc_without_marker(self, tmp_path, monkeypatch):
-        rc = tmp_path / ".bashrc"
+    def test_writes_static_script_and_source_line(self, tmp_path, monkeypatch):
+        rc = self._patch_paths(tmp_path, monkeypatch, shell_name="zsh")
+        self._stub_subprocess(monkeypatch, stdout="# zsh completion script\n")
+
+        msg = install_completion_bashzsh("zsh")
+
+        script = tmp_path / "share" / "orca" / "completion.zsh"
+        assert script.exists()
+        assert script.read_text() == "# zsh completion script\n"
+        # The rc must source the static script — no eager eval anywhere.
+        rc_content = rc.read_text()
+        assert f"source {script}" in rc_content
+        assert "_ORCA_COMPLETE=" not in rc_content
+        assert str(script) in msg
+
+    def test_appends_alongside_existing_rc_content(self, tmp_path, monkeypatch):
+        rc = self._patch_paths(tmp_path, monkeypatch, shell_name="bash")
         rc.write_text("# some prior config\nexport PATH=$PATH:/foo\n")
-        monkeypatch.setattr("orca_cli.core.shell_completion._RC_FILE",
-                            {"bash": rc, "zsh": tmp_path / ".zshrc"})
+        self._stub_subprocess(monkeypatch)
+
         install_completion_bashzsh("bash")
+
         content = rc.read_text()
         assert "export PATH=$PATH:/foo" in content
-        assert "_ORCA_COMPLETE=bash_source" in content
+        assert "completion.bash" in content
+        assert "source " in content
+
+    def test_idempotent_re_install_does_not_duplicate(self, tmp_path, monkeypatch):
+        rc = self._patch_paths(tmp_path, monkeypatch, shell_name="bash")
+        self._stub_subprocess(monkeypatch)
+
+        install_completion_bashzsh("bash")
+        first = rc.read_text()
+        install_completion_bashzsh("bash")
+        second = rc.read_text()
+
+        # Block header marks the start of our managed block — must appear once.
+        marker = "# orca-cli shell completion"
+        assert first.count(marker) == 1
+        assert second.count(marker) == 1
+        # And the source line that does the work — also exactly once.
+        assert second.count("&& source ") == 1
+
+    def test_migrates_legacy_eval_to_source_line(self, tmp_path, monkeypatch):
+        """Old install (eval line) is detected and replaced — ADR 0010 migration."""
+        rc = self._patch_paths(tmp_path, monkeypatch, shell_name="bash")
+        rc.write_text(
+            "# user content above\n"
+            "export EDITOR=vim\n"
+            "\n"
+            "# orca-cli shell completion\n"
+            'eval "$(_ORCA_COMPLETE=bash_source orca)"\n'
+            "\n"
+            "# user content below\n"
+            "alias ll='ls -la'\n",
+        )
+        self._stub_subprocess(monkeypatch)
+
+        msg = install_completion_bashzsh("bash")
+
+        content = rc.read_text()
+        # Legacy eval gone …
+        assert "_ORCA_COMPLETE=" not in content
+        assert 'eval "$(' not in content
+        # … replaced by a source line …
+        assert "completion.bash" in content
+        assert "source " in content
+        # … untouched user content preserved on both sides.
+        assert "export EDITOR=vim" in content
+        assert "alias ll='ls -la'" in content
+        # Status message tells the user a migration happened.
+        assert "Migrated" in msg
+
+    def test_install_fails_gracefully_when_orca_missing(self, tmp_path, monkeypatch):
+        monkeypatch.setattr("orca_cli.core.shell_completion._RC_FILE",
+                            {"bash": tmp_path / ".bashrc", "zsh": tmp_path / ".zshrc"})
+        monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "share"))
+        monkeypatch.setattr("orca_cli.core.shell_completion.shutil.which", lambda _: None)
+
+        from orca_cli.core.exceptions import OrcaCLIError
+        try:
+            install_completion_bashzsh("bash")
+        except OrcaCLIError as exc:
+            assert "PATH" in str(exc)
+        else:
+            raise AssertionError("expected OrcaCLIError when orca is not on PATH")
 
 
 class TestInstallCompletionFish:
