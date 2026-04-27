@@ -143,6 +143,11 @@ def test_happy_path_with_property_and_wait(monkeypatch, invoke, setup):
     assert payload["image_name"] == "my-image"
     assert payload["disk_format"] == "qcow2"
     assert payload["force"] is False
+    # ``visibility`` and ``protected`` must NOT be present when the user
+    # didn't pass the corresponding flags — older Cinder microversions
+    # reject the action with HTTP 400 if those keys appear.
+    assert "visibility" not in payload
+    assert "protected" not in payload
 
     # One PATCH to the resulting image with the property added.
     assert len(rec.patches) == 1
@@ -255,6 +260,101 @@ def test_missing_image_id_in_response_aborts(invoke, setup):
     assert "image_id" in out
     # No PATCH should be attempted without an image to target.
     assert rec.patches == []
+
+
+# ── older-microversion compatibility ────────────────────────────────────
+
+
+def test_default_omits_visibility_and_protected(invoke, setup):
+    """Without explicit flags, the body must not carry visibility/protected.
+
+    Mirrors a strict Cinder that rejects the action with HTTP 400 when those
+    keys appear (microversion older than the one that introduced them).
+    """
+    rec = _Recorder().install(setup)
+
+    result = invoke(["volume", "upload-to-image", VOL_ID, "img"])
+
+    assert result.exit_code == 0, result.output
+    payload = next(b for u, b in rec.posts if "/action" in u)["os-volume_upload_image"]
+    assert "visibility" not in payload
+    assert "protected" not in payload
+
+
+def test_explicit_visibility_is_forwarded(invoke, setup):
+    rec = _Recorder().install(setup)
+
+    result = invoke([
+        "volume", "upload-to-image", VOL_ID, "img",
+        "--visibility", "shared",
+    ])
+
+    assert result.exit_code == 0, result.output
+    payload = next(b for u, b in rec.posts if "/action" in u)["os-volume_upload_image"]
+    assert payload["visibility"] == "shared"
+    assert "protected" not in payload
+
+
+def test_explicit_protected_is_forwarded(invoke, setup):
+    rec = _Recorder().install(setup)
+
+    result = invoke([
+        "volume", "upload-to-image", VOL_ID, "img",
+        "--protected",
+    ])
+
+    assert result.exit_code == 0, result.output
+    payload = next(b for u, b in rec.posts if "/action" in u)["os-volume_upload_image"]
+    assert payload["protected"] is True
+    assert "visibility" not in payload
+
+
+def test_strict_cinder_rejects_when_visibility_present(invoke, setup):
+    """Simulate the Infomaniak-class 400 to prove the default path passes
+    on a strict back-end and that explicit flags surface the error.
+    """
+    rec = _Recorder()
+
+    def _strict_post(url, **kwargs):
+        body = kwargs.get("json", {})
+        rec.posts.append((url, body))
+        if "/volumes/" in url and "/action" in url:
+            inner = body.get("os-volume_upload_image", {})
+            if "visibility" in inner or "protected" in inner:
+                from orca_cli.core.exceptions import APIError
+                raise APIError(
+                    400,
+                    "Additional properties are not allowed "
+                    "('protected', 'visibility' were unexpected)",
+                )
+            return {
+                "os-volume_upload_image": {
+                    "id": VOL_ID, "image_id": IMG_ID, "status": "uploading",
+                },
+            }
+        return {}
+
+    setup.volume_url = "https://cinder.example.com/v3"
+    setup.image_url = "https://glance.example.com"
+    setup.get = lambda url, **kw: (
+        {"volume": _vol()} if f"/volumes/{VOL_ID}" in url and "/action" not in url
+        else {"volumes": []}
+    )
+    setup.post = _strict_post
+    setup.patch = lambda url, **kw: _img()
+
+    # Default invocation: must succeed.
+    result_default = invoke(["volume", "upload-to-image", VOL_ID, "img"])
+    assert result_default.exit_code == 0, result_default.output
+
+    # Explicit visibility: must surface the strict back-end's 400.
+    result_strict = invoke([
+        "volume", "upload-to-image", VOL_ID, "img",
+        "--visibility", "shared",
+    ])
+    assert result_strict.exit_code != 0
+    out = result_strict.output + (result_strict.stderr_bytes or b"").decode(errors="replace")
+    assert "400" in out
 
 
 # ── name resolution ──────────────────────────────────────────────────────

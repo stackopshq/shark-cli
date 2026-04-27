@@ -81,24 +81,32 @@ class VolumeService:
                         image_name: str,
                         disk_format: str = "qcow2",
                         container_format: str = "bare",
-                        visibility: str = "private",
-                        protected: bool = False,
+                        visibility: str | None = None,
+                        protected: bool | None = None,
                         force: bool = False) -> dict[str, Any]:
         """Materialize a volume as a Glance image (``os-volume_upload_image``).
 
-        Returns the inner ``os-volume_upload_image`` envelope, which Cinder
-        populates with at least ``image_id``, ``status``, ``volume_type``
-        and the chosen formats.
+        ``visibility`` and ``protected`` are only sent when not ``None`` —
+        they were added in a later Cinder microversion and older clouds
+        reject the action with HTTP 400 if the keys appear in the body.
+        Pass them through verbatim from a CLI flag *only* when the user
+        supplied one explicitly; otherwise let Glance apply its defaults.
+
+        Returns the inner ``os-volume_upload_image`` envelope, which
+        Cinder populates with at least ``image_id``, ``status``,
+        ``volume_type`` and the chosen formats.
         """
-        body = {"os-volume_upload_image": {
+        inner: dict[str, Any] = {
             "image_name": image_name,
             "force": force,
             "container_format": container_format,
             "disk_format": disk_format,
-            "visibility": visibility,
-            "protected": protected,
-        }}
-        data = self.action(volume_id, body) or {}
+        }
+        if visibility is not None:
+            inner["visibility"] = visibility
+        if protected is not None:
+            inner["protected"] = protected
+        data = self.action(volume_id, {"os-volume_upload_image": inner}) or {}
         return data.get("os-volume_upload_image", data)
 
     def migrate(self, volume_id: str, host: str, *,

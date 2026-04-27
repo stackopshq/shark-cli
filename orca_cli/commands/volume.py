@@ -481,9 +481,15 @@ def _wait_for_image_active(service: ImageService, image_id: str,
 @click.option("--visibility",
               type=click.Choice(["private", "shared", "community", "public"],
                                 case_sensitive=False),
-              default="private", show_default=True, help="Image visibility.")
-@click.option("--protected/--no-protected", default=False, show_default=True,
-              help="Mark the resulting image as protected (deletion-locked).")
+              default=None,
+              help="Image visibility. Only sent to Cinder when explicit "
+                   "(older microversions reject the field); otherwise "
+                   "Glance applies its own default.")
+@click.option("--protected/--no-protected", "protected",
+              default=None,
+              help="Mark the resulting image as protected (deletion-locked). "
+                   "Only sent to Cinder when explicit; otherwise omitted "
+                   "from the action body for older-microversion compatibility.")
 @click.option("--force", is_flag=True, default=False,
               help="Required when uploading from an in-use volume.")
 @click.option("--property", "properties", multiple=True, callback=_parse_property,
@@ -497,7 +503,7 @@ def _wait_for_image_active(service: ImageService, image_id: str,
 def volume_upload_to_image(ctx: click.Context, volume_id_or_name: str,
                            image_name: str,
                            disk_format: str, container_format: str,
-                           visibility: str, protected: bool,
+                           visibility: str | None, protected: bool | None,
                            force: bool,
                            properties: tuple[tuple[str, str], ...],
                            wait: bool) -> None:
