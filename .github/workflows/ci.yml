@@ -140,15 +140,21 @@ jobs:
           python-version: "3.11"
           cache: pip
 
-      - name: Install project + pip-audit
-        run: |
-          pip install -e .
-          pip install pip-audit
+      - name: Install poetry + pip-audit
+        # poetry-plugin-export is bundled in poetry < 2.0 but split out in
+        # poetry 2.x; pin it explicitly so this works on either side of
+        # that boundary.
+        run: pip install poetry "poetry-plugin-export>=1.7" pip-audit
+
+      - name: Export runtime requirements
+        # Audit only what we actually ship — orca's declared runtime deps —
+        # rather than the runner's whole environment. The previous
+        # ``pip-audit --skip-editable`` invocation walked every package
+        # installed in the job's Python (pip, setuptools, wheel, …) and
+        # failed the build on advisories in the tooling itself, e.g.
+        # CVE-2026-3219 in pip 26.0.1. Those have nothing to do with
+        # orca's supply chain.
+        run: poetry export --format requirements.txt --without-hashes --only main --output /tmp/runtime-requirements.txt
 
       - name: Audit runtime dependencies
-        # --skip-editable excludes our own package (installed via -e .) —
-        # pip-audit would otherwise try to resolve it against PyPI. We drop
-        # --strict because it would turn that skip into a fatal error;
-        # pip-audit still exits non-zero on actual CVE findings, which is
-        # what we want to fail the build on.
-        run: pip-audit --skip-editable
+        run: pip-audit --requirement /tmp/runtime-requirements.txt
