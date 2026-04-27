@@ -2,290 +2,290 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://stackopshq.github.io/orca-cli/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/getting-started/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/reference/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/adr/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/adr/0001-lazy-command-registration/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/adr/0002-dual-format-config-file/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/adr/0003-auth-type-auto-detection/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/adr/0004-no-services-layer/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/adr/0005-durable-token-cache/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/adr/0006-idempotent-only-retries/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/adr/0007-incremental-services-layer/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/adr/0008-command-naming-convention/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/adr/0009-server-boot-mode-policy/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/access-rule/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/aggregate/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/alarm/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/application-credential/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/audit/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/auth/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/availability-zone/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/backup/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/catalog/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/cleanup/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/cluster/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/completion/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/compute-service/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/container/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/credential/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/doctor/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/domain/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/endpoint-group/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/endpoint/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/event/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/export/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/flavor/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/floating-ip/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/group/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/hypervisor/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/image/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/ip/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/keypair/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/limit/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/limits/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/loadbalancer/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/metric/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/network/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/object/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/overview/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/placement/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/profile/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/project/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/qos/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/quota/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/recordset/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/region/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/role/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/secret/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/security-group/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/server-group/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/server/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/service/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/stack/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/subnet-pool/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/token/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/trunk/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/trust/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/usage/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/user/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/volume/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/watch/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
     <url>
          <loc>https://stackopshq.github.io/orca-cli/commands/zone/</loc>
-         <lastmod>2026-04-23</lastmod>
+         <lastmod>2026-04-27</lastmod>
     </url>
 </urlset>
