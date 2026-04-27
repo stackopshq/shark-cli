@@ -5,7 +5,7 @@ from __future__ import annotations
 import click
 
 from orca_cli.core.context import OrcaContext
-from orca_cli.core.exceptions import APIError
+from orca_cli.core.exceptions import APIError, OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
 from orca_cli.services.load_balancer import LoadBalancerService
@@ -112,7 +112,7 @@ def lb_delete(ctx: click.Context, lb_id: str, cascade: bool, yes: bool) -> None:
         svc.delete(lb_id, cascade=cascade)
     except APIError as exc:
         if exc.status_code == 409:
-            raise click.ClickException(
+            raise OrcaCLIError(
                 f"Load balancer {lb_id} is busy (provisioning in progress). "
                 "Wait for it to reach ACTIVE or ERROR state before deleting."
             ) from exc

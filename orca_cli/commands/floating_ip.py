@@ -5,6 +5,7 @@ from __future__ import annotations
 import click
 
 from orca_cli.core.context import OrcaContext
+from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
 from orca_cli.services.network import NetworkService
@@ -134,7 +135,7 @@ def fip_set(ctx: click.Context, floating_ip_id: str, port_id: str | None,
       orca floating-ip set <id> --no-qos-policy
     """
     if qos_policy_id and no_qos_policy:
-        raise click.UsageError("--qos-policy and --no-qos-policy are mutually exclusive.")
+        raise OrcaCLIError("--qos-policy and --no-qos-policy are mutually exclusive.")
 
     body: dict = {}
     if port_id is not None:

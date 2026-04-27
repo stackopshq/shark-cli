@@ -5,6 +5,7 @@ from __future__ import annotations
 import click
 
 from orca_cli.core.context import OrcaContext
+from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.services.compute import ComputeService
 
@@ -133,7 +134,7 @@ def aggregate_set(ctx, aggregate_id, name, availability_zone, properties):
         meta = {}
         for prop in properties:
             if "=" not in prop:
-                raise click.UsageError(f"Invalid format '{prop}', expected KEY=VALUE.")
+                raise OrcaCLIError(f"Invalid format '{prop}', expected KEY=VALUE.")
             k, v = prop.split("=", 1)
             meta[k] = v
         svc.set_aggregate_metadata(aggregate_id, meta)

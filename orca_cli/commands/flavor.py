@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import click
 
+from orca_cli.core.completions import complete_flavors
 from orca_cli.core.context import OrcaContext
+from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
 from orca_cli.services.compute import ComputeService
@@ -72,7 +74,7 @@ def flavor_list(ctx: click.Context, limit: int | None,
 
 
 @flavor.command("show")
-@click.argument("flavor_id")
+@click.argument("flavor_id", shell_complete=complete_flavors)
 @output_options
 @click.pass_context
 def flavor_show(ctx: click.Context, flavor_id: str, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
@@ -134,7 +136,7 @@ def flavor_create(ctx: click.Context, name: str, vcpus: int, ram: int, disk: int
 
 
 @flavor.command("delete")
-@click.argument("flavor_id")
+@click.argument("flavor_id", shell_complete=complete_flavors)
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
 def flavor_delete(ctx: click.Context, flavor_id: str, yes: bool) -> None:
@@ -147,7 +149,7 @@ def flavor_delete(ctx: click.Context, flavor_id: str, yes: bool) -> None:
 
 
 @flavor.command("set")
-@click.argument("flavor_id")
+@click.argument("flavor_id", shell_complete=complete_flavors)
 @click.option("--property", "properties", multiple=True, metavar="KEY=VALUE",
               help="Extra spec key=value (repeatable).")
 @click.pass_context
@@ -166,7 +168,7 @@ def flavor_set(ctx: click.Context, flavor_id: str, properties: tuple[str, ...]) 
     specs = {}
     for prop in properties:
         if "=" not in prop:
-            raise click.UsageError(f"Invalid property format '{prop}', expected KEY=VALUE.")
+            raise OrcaCLIError(f"Invalid property format '{prop}', expected KEY=VALUE.")
         k, v = prop.split("=", 1)
         specs[k] = v
     svc.set_flavor_extra_specs(flavor_id, specs)
@@ -174,7 +176,7 @@ def flavor_set(ctx: click.Context, flavor_id: str, properties: tuple[str, ...]) 
 
 
 @flavor.command("unset")
-@click.argument("flavor_id")
+@click.argument("flavor_id", shell_complete=complete_flavors)
 @click.option("--property", "properties", multiple=True, metavar="KEY",
               help="Extra spec key to remove (repeatable).")
 @click.pass_context
@@ -192,7 +194,7 @@ def flavor_unset(ctx: click.Context, flavor_id: str, properties: tuple[str, ...]
 # ── flavor access (private flavors) ───────────────────────────────────────
 
 @flavor.command("access-list")
-@click.argument("flavor_id", callback=validate_id)
+@click.argument("flavor_id", callback=validate_id, shell_complete=complete_flavors)
 @output_options
 @click.pass_context
 def flavor_access_list(ctx: click.Context, flavor_id: str,
@@ -216,7 +218,7 @@ def flavor_access_list(ctx: click.Context, flavor_id: str,
 
 
 @flavor.command("access-add")
-@click.argument("flavor_id", callback=validate_id)
+@click.argument("flavor_id", callback=validate_id, shell_complete=complete_flavors)
 @click.argument("project_id", callback=validate_id)
 @click.pass_context
 def flavor_access_add(ctx: click.Context, flavor_id: str, project_id: str) -> None:
@@ -227,7 +229,7 @@ def flavor_access_add(ctx: click.Context, flavor_id: str, project_id: str) -> No
 
 
 @flavor.command("access-remove")
-@click.argument("flavor_id", callback=validate_id)
+@click.argument("flavor_id", callback=validate_id, shell_complete=complete_flavors)
 @click.argument("project_id", callback=validate_id)
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context

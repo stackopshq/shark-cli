@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 import click
 
 from orca_cli.core.context import OrcaContext
+from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
 from orca_cli.services.rating import RatingService
@@ -470,7 +471,7 @@ def hm_mapping_create(ctx, field_id, service_id, value, cost, mapping_type, grou
       orca rating hashmap mapping-create --service-id <svc_id> --cost 1.10 --type rate
     """
     if not field_id and not service_id:
-        raise click.UsageError("Provide either --field-id or --service-id.")
+        raise OrcaCLIError("Provide either --field-id or --service-id.")
     client = ctx.find_object(OrcaContext).ensure_client()
     svc = RatingService(client)
     body: dict = {"cost": cost, "type": mapping_type}
@@ -546,7 +547,7 @@ def hm_threshold_list(ctx, service_id, field_id, group_id,
 def hm_threshold_create(ctx, field_id, service_id, level, cost, threshold_type, group_id):
     """Create a HashMap threshold."""
     if not field_id and not service_id:
-        raise click.UsageError("Provide either --field-id or --service-id.")
+        raise OrcaCLIError("Provide either --field-id or --service-id.")
     client = ctx.find_object(OrcaContext).ensure_client()
     svc = RatingService(client)
     body: dict = {"level": level, "cost": cost, "type": threshold_type}

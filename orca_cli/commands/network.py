@@ -5,7 +5,9 @@ from __future__ import annotations
 import click
 
 from orca_cli.core.aliases import add_command_with_alias
+from orca_cli.core.completions import complete_networks
 from orca_cli.core.context import OrcaContext
+from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
 from orca_cli.services.network import NetworkService
@@ -106,7 +108,7 @@ def network_list(ctx: click.Context, output_format: str, columns: tuple[str, ...
 
 
 @network.command("show")
-@click.argument("network_id", callback=validate_id)
+@click.argument("network_id", callback=validate_id, shell_complete=complete_networks)
 @output_options
 @click.pass_context
 def network_show(ctx: click.Context, network_id: str, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
@@ -137,7 +139,7 @@ def network_create(ctx: click.Context, name: str, admin_state: bool, shared: boo
 
 
 @network.command("update")
-@click.argument("network_id", callback=validate_id)
+@click.argument("network_id", callback=validate_id, shell_complete=complete_networks)
 @click.option("--name", default=None, help="New name.")
 @click.option("--admin-state/--no-admin-state", default=None, help="Admin state.")
 @click.pass_context
@@ -157,7 +159,7 @@ def network_update(ctx: click.Context, network_id: str, name: str | None, admin_
 
 
 @network.command("delete")
-@click.argument("network_id", callback=validate_id)
+@click.argument("network_id", callback=validate_id, shell_complete=complete_networks)
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
 def network_delete(ctx: click.Context, network_id: str, yes: bool) -> None:
@@ -606,11 +608,11 @@ def net_trace(ctx: click.Context, server_id: str) -> None:
     except Exception:
         matches = server_svc.find(params={"name": server_id})
         if not matches:
-            raise click.ClickException(f"Server '{server_id}' not found.") from None
+            raise OrcaCLIError(f"Server '{server_id}' not found.") from None
         if len(matches) > 1:
             for m in matches:
                 console.print(f"  {m['id']}  {m.get('name', '')}")
-            raise click.ClickException("Multiple matches — use the server ID.") from None
+            raise OrcaCLIError("Multiple matches — use the server ID.") from None
         srv = matches[0]
 
     srv_name = srv.get("name", server_id)

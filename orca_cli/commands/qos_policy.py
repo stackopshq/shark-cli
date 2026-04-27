@@ -5,6 +5,7 @@ from __future__ import annotations
 import click
 
 from orca_cli.core.context import OrcaContext
+from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
 from orca_cli.services.network import NetworkService
@@ -188,18 +189,18 @@ def qos_rule_create(ctx, policy_id, rule_type, max_kbps, max_burst_kbps,
     body: dict = {}
     if rule_type == "bandwidth-limit":
         if max_kbps is None:
-            raise click.UsageError("--max-kbps is required for bandwidth-limit rules.")
+            raise OrcaCLIError("--max-kbps is required for bandwidth-limit rules.")
         body["max_kbps"] = max_kbps
         body["direction"] = direction
         if max_burst_kbps is not None:
             body["max_burst_kbps"] = max_burst_kbps
     elif rule_type == "dscp-marking":
         if dscp_mark is None:
-            raise click.UsageError("--dscp-mark is required for dscp-marking rules.")
+            raise OrcaCLIError("--dscp-mark is required for dscp-marking rules.")
         body["dscp_mark"] = dscp_mark
     elif rule_type in ("minimum-bandwidth", "minimum-packet-rate"):
         if min_kbps is None:
-            raise click.UsageError(f"--min-kbps is required for {rule_type} rules.")
+            raise OrcaCLIError(f"--min-kbps is required for {rule_type} rules.")
         body["min_kbps"] = min_kbps
         body["direction"] = direction
 

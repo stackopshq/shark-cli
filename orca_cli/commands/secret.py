@@ -5,6 +5,7 @@ from __future__ import annotations
 import click
 
 from orca_cli.core.context import OrcaContext
+from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
 from orca_cli.services.key_manager import KeyManagerService
@@ -234,7 +235,7 @@ def container_create(ctx: click.Context, name: str | None, container_type: str,
     refs = []
     for ref in secret_refs:
         if "=" not in ref:
-            raise click.UsageError(f"Invalid format '{ref}', expected NAME=SECRET_REF.")
+            raise OrcaCLIError(f"Invalid format '{ref}', expected NAME=SECRET_REF.")
         n, r = ref.split("=", 1)
         refs.append({"name": n, "secret_ref": r})
     body: dict = {"type": container_type, "secret_refs": refs}

@@ -10,6 +10,7 @@ import click
 import yaml
 
 from orca_cli.core.context import OrcaContext
+from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import safe_output_path
 from orca_cli.models.orchestration import Stack
@@ -59,7 +60,7 @@ def _resolve_stack(client, stack: str) -> Stack:
     try:
         return svc.get(stack)
     except Exception as exc:
-        raise click.ClickException(f"Stack not found: {stack}") from exc
+        raise OrcaCLIError(f"Stack not found: {stack}") from exc
 
 
 def _parse_params(params: tuple[str, ...]) -> dict:

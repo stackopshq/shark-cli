@@ -240,7 +240,7 @@ def volume_create(ctx: click.Context, name: str | None, size: int | None,
         if not size:
             missing.append("--size")
         if missing:
-            raise click.UsageError(
+            raise OrcaCLIError(
                 f"Missing required option(s): {', '.join(missing)}. "
                 "Use -i / --interactive for the guided wizard."
             )
@@ -467,7 +467,7 @@ def _wait_for_image_active(service: ImageService, image_id: str,
 
 
 @volume.command("upload-to-image")
-@click.argument("volume_id_or_name")
+@click.argument("volume_id_or_name", shell_complete=complete_volumes)
 @click.argument("image_name")
 @click.option("--disk-format",
               type=click.Choice(["raw", "qcow2", "vmdk", "vdi", "vhd", "vhdx",
@@ -658,9 +658,9 @@ def snapshot_create(ctx: click.Context, volume_id_or_name: str, name: str, descr
     else:
         vols = service.find(params={"name": volume_id_or_name})
         if not vols:
-            raise click.ClickException(f"No volume found with name '{volume_id_or_name}'")
+            raise OrcaCLIError(f"No volume found with name '{volume_id_or_name}'")
         if len(vols) > 1:
-            raise click.ClickException(f"Multiple volumes match '{volume_id_or_name}' — use a UUID")
+            raise OrcaCLIError(f"Multiple volumes match '{volume_id_or_name}' — use a UUID")
         volume_id = vols[0]["id"]
 
     body: dict = {"volume_id": volume_id, "name": name, "force": force}
@@ -1066,7 +1066,7 @@ def volume_set(ctx: click.Context, volume_id: str, properties: tuple[str, ...],
         meta: dict = {}
         for prop in properties:
             if "=" not in prop:
-                raise click.UsageError(f"Invalid property format '{prop}', expected KEY=VALUE.")
+                raise OrcaCLIError(f"Invalid property format '{prop}', expected KEY=VALUE.")
             k, v = prop.split("=", 1)
             meta[k] = v
         service.set_metadata(volume_id, meta)
@@ -1124,7 +1124,7 @@ def snapshot_set(ctx: click.Context, snapshot_id: str, name: str | None,
         meta: dict = {}
         for prop in properties:
             if "=" not in prop:
-                raise click.UsageError(f"Invalid property format '{prop}', expected KEY=VALUE.")
+                raise OrcaCLIError(f"Invalid property format '{prop}', expected KEY=VALUE.")
             k, v = prop.split("=", 1)
             meta[k] = v
         service.update_snapshot_metadata(snapshot_id, meta)
@@ -1202,7 +1202,7 @@ def volume_type_create(ctx: click.Context, name: str, description: str | None,
         specs: dict = {}
         for prop in properties:
             if "=" not in prop:
-                raise click.UsageError(f"Invalid format '{prop}', expected KEY=VALUE.")
+                raise OrcaCLIError(f"Invalid format '{prop}', expected KEY=VALUE.")
             k, v = prop.split("=", 1)
             specs[k] = v
         service.set_type_extra_specs(t["id"], specs)
@@ -1231,7 +1231,7 @@ def volume_type_set(ctx: click.Context, type_id: str, name: str | None,
         specs: dict = {}
         for prop in properties:
             if "=" not in prop:
-                raise click.UsageError(f"Invalid format '{prop}', expected KEY=VALUE.")
+                raise OrcaCLIError(f"Invalid format '{prop}', expected KEY=VALUE.")
             k, v = prop.split("=", 1)
             specs[k] = v
         service.set_type_extra_specs(type_id, specs)
@@ -1449,7 +1449,7 @@ def volume_qos_create(ctx: click.Context, name: str, consumer: str,
     specs: dict = {}
     for prop in properties:
         if "=" not in prop:
-            raise click.UsageError(f"Invalid format '{prop}', expected KEY=VALUE.")
+            raise OrcaCLIError(f"Invalid format '{prop}', expected KEY=VALUE.")
         k, v = prop.split("=", 1)
         specs[k] = v
     body: dict = {"name": name, "consumer": consumer}
@@ -1473,7 +1473,7 @@ def volume_qos_set(ctx: click.Context, qos_id: str, properties: tuple[str, ...])
     specs: dict = {}
     for prop in properties:
         if "=" not in prop:
-            raise click.UsageError(f"Invalid format '{prop}', expected KEY=VALUE.")
+            raise OrcaCLIError(f"Invalid format '{prop}', expected KEY=VALUE.")
         k, v = prop.split("=", 1)
         specs[k] = v
     service.update_qos(qos_id, {"specs": specs})
@@ -1567,7 +1567,7 @@ def volume_service_set(ctx: click.Context, host: str, binary: str,
                        action: str | None, disabled_reason: str | None) -> None:
     """Enable or disable a Cinder service."""
     if not action:
-        raise click.UsageError("Specify --enable or --disable.")
+        raise OrcaCLIError("Specify --enable or --disable.")
     service = VolumeService(ctx.find_object(OrcaContext).ensure_client())
     body: dict = {"host": host, "binary": binary}
     if action == "disable":
@@ -2164,7 +2164,7 @@ def volume_group_type_set(ctx: click.Context, group_type_id: str,
         specs: dict = {}
         for p in properties:
             if "=" not in p:
-                raise click.UsageError(f"Invalid format '{p}', expected KEY=VALUE.")
+                raise OrcaCLIError(f"Invalid format '{p}', expected KEY=VALUE.")
             k, v = p.split("=", 1)
             specs[k] = v
         service.set_group_specs(group_type_id, specs)

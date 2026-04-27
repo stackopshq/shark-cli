@@ -19,6 +19,7 @@ from orca_cli.core.config import (
     save_profile,
     set_active_profile,
 )
+from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console
 from orca_cli.core.validators import safe_output_path
 
@@ -153,7 +154,7 @@ def profile_show(name: str | None) -> None:
 
     cfg = get_profile(name)
     if not cfg:
-        raise click.ClickException(f"Profile '{name}' not found.")
+        raise OrcaCLIError(f"Profile '{name}' not found.")
 
     active = get_active_profile_name()
     marker = " (active)" if name == active else ""
@@ -205,7 +206,7 @@ def profile_add(name: str, copy_from: str | None, profile_color: str | None) -> 
     """
     profiles = list_profiles()
     if name in profiles:
-        raise click.ClickException(f"Profile '{name}' already exists. Use 'orca profile edit {name}'.")
+        raise OrcaCLIError(f"Profile '{name}' already exists. Use 'orca profile edit {name}'.")
 
     console.print(f"\n[bold cyan]New profile: {name}[/bold cyan]\n")
 
@@ -255,7 +256,7 @@ def profile_edit(name: str | None) -> None:
 
     existing = get_profile(name)
     if not existing:
-        raise click.ClickException(f"Profile '{name}' not found.")
+        raise OrcaCLIError(f"Profile '{name}' not found.")
 
     console.print(f"\n[bold cyan]Editing profile: {name}[/bold cyan]")
     console.print("[dim]Press Enter to keep current value.[/dim]\n")
@@ -306,7 +307,7 @@ def profile_switch(name: str | None) -> None:
 
     profiles = list_profiles()
     if not profiles:
-        raise click.ClickException("No profiles configured. Run 'orca profile add <name>'.")
+        raise OrcaCLIError("No profiles configured. Run 'orca profile add <name>'.")
 
     if not name:
         active = get_active_profile_name()
@@ -330,7 +331,7 @@ def profile_switch(name: str | None) -> None:
     cfg = get_profile(name)
     if not cfg:
         available = ", ".join(sorted(profiles.keys()))
-        raise click.ClickException(f"Profile '{name}' not found. Available: {available}")
+        raise OrcaCLIError(f"Profile '{name}' not found. Available: {available}")
     set_active_profile(name)
 
     color = _profile_color(cfg)
@@ -361,7 +362,7 @@ def profile_set_color(color: str, name: str | None) -> None:
 
     cfg = get_profile(name)
     if not cfg:
-        raise click.ClickException(f"Profile '{name}' not found.")
+        raise OrcaCLIError(f"Profile '{name}' not found.")
 
     if color.lower() == "none":
         cfg.pop("color", None)
@@ -428,7 +429,7 @@ def profile_set_region(region: str, name: str | None) -> None:
 
     cfg = get_profile(name)
     if not cfg:
-        raise click.ClickException(f"Profile '{name}' not found.")
+        raise OrcaCLIError(f"Profile '{name}' not found.")
 
     if region.lower() == "none":
         cfg.pop("region_name", None)
@@ -505,7 +506,7 @@ def _resolve_config(name: str | None) -> tuple[str, dict]:
         name = get_active_profile_name()
     cfg = get_profile(name)
     if not cfg:
-        raise click.ClickException(f"Profile '{name}' not found.")
+        raise OrcaCLIError(f"Profile '{name}' not found.")
     _normalise_legacy_keys(cfg)
     return name, cfg
 
@@ -694,7 +695,7 @@ def profile_from_openrc(file: str, profile_name: str | None) -> None:
 
     env_vars = _parse_openrc(path.read_text())
     if not env_vars.get("OS_AUTH_URL"):
-        raise click.ClickException(f"No OS_AUTH_URL found in {file}.")
+        raise OrcaCLIError(f"No OS_AUTH_URL found in {file}.")
 
     cfg = _os_env_to_cfg(env_vars)
 
@@ -727,14 +728,14 @@ def profile_from_clouds(cloud_name: str, profile_name: str | None, clouds_file: 
     if clouds_file:
         p = Path(clouds_file)
         if not p.exists():
-            raise click.ClickException(f"File not found: {clouds_file}")
+            raise OrcaCLIError(f"File not found: {clouds_file}")
         with open(p, "r") as fh:
             data = yaml.safe_load(fh) or {}
         cloud = data.get("clouds", {}).get(cloud_name)
     else:
         found = _find_clouds_yaml()
         if not found:
-            raise click.ClickException(
+            raise OrcaCLIError(
                 "No clouds.yaml found. Searched: ./clouds.yaml, "
                 "~/.config/openstack/clouds.yaml, /etc/openstack/clouds.yaml"
             )
@@ -743,12 +744,12 @@ def profile_from_clouds(cloud_name: str, profile_name: str | None, clouds_file: 
         cloud = data.get("clouds", {}).get(cloud_name)
         if not cloud:
             available = ", ".join(sorted(data.get("clouds", {}).keys()))
-            raise click.ClickException(
+            raise OrcaCLIError(
                 f"Cloud '{cloud_name}' not found. Available: {available or 'none'}"
             )
 
     if not cloud:
-        raise click.ClickException(f"Cloud '{cloud_name}' not found in file.")
+        raise OrcaCLIError(f"Cloud '{cloud_name}' not found in file.")
 
     from orca_cli.core.config import _normalise_clouds_yaml
     cfg = _normalise_clouds_yaml(cloud)

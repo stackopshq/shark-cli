@@ -5,6 +5,7 @@ from __future__ import annotations
 import click
 
 from orca_cli.core.context import OrcaContext
+from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
 from orca_cli.services.identity import IdentityService
@@ -13,9 +14,9 @@ from orca_cli.services.identity import IdentityService
 def _resolve_grant(user_id, group_id, project_id, domain_id):
     """Validate and return (scope_type, scope_id, actor_type, actor_id) tuple."""
     if not (user_id or group_id):
-        raise click.UsageError("Specify --user or --group.")
+        raise OrcaCLIError("Specify --user or --group.")
     if not (project_id or domain_id):
-        raise click.UsageError("Specify --project or --domain.")
+        raise OrcaCLIError("Specify --project or --domain.")
     actor_type = "users" if user_id else "groups"
     actor_id = user_id or group_id
     scope_type = "projects" if project_id else "domains"

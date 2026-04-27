@@ -12,6 +12,7 @@ from rich.progress import BarColumn, DownloadColumn, Progress, TimeRemainingColu
 from rich.table import Table
 
 from orca_cli.core.client import APIError, AuthenticationError
+from orca_cli.core.completions import complete_images
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError, PermissionDeniedError
 from orca_cli.core.output import console, output_options, print_detail, print_list
@@ -107,7 +108,7 @@ def image_list(ctx: click.Context, output_format: str, columns: tuple[str, ...],
 
 
 @image.command("show")
-@click.argument("image_id")
+@click.argument("image_id", shell_complete=complete_images)
 @output_options
 @click.pass_context
 def image_show(ctx: click.Context, image_id: str, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
@@ -243,7 +244,7 @@ def image_create(ctx: click.Context, name: str, disk_format: str, container_form
 
 
 @image.command("update")
-@click.argument("image_id")
+@click.argument("image_id", shell_complete=complete_images)
 @click.option("--name", default=None, help="New name.")
 @click.option("--min-disk", type=int, default=None, help="New min disk (GB).")
 @click.option("--min-ram", type=int, default=None, help="New min RAM (MB).")
@@ -363,7 +364,7 @@ def _stream_with_progress(client, *, url: str, path: Path, description: str) -> 
 
 
 @image.command("upload")
-@click.argument("image_id")
+@click.argument("image_id", shell_complete=complete_images)
 @click.argument("file_path", type=click.Path(exists=True))
 @click.pass_context
 def image_upload(ctx: click.Context, image_id: str, file_path: str) -> None:
@@ -384,7 +385,7 @@ def image_upload(ctx: click.Context, image_id: str, file_path: str) -> None:
 
 
 @image.command("stage")
-@click.argument("image_id")
+@click.argument("image_id", shell_complete=complete_images)
 @click.argument("file_path", type=click.Path(exists=True))
 @click.pass_context
 def image_stage(ctx: click.Context, image_id: str, file_path: str) -> None:
@@ -413,7 +414,7 @@ def image_stage(ctx: click.Context, image_id: str, file_path: str) -> None:
 
 
 @image.command("download")
-@click.argument("image_id")
+@click.argument("image_id", shell_complete=complete_images)
 @click.option("--output", "-o", "output_path", required=True, type=click.Path(), help="Output file path.")
 @click.pass_context
 def image_download(ctx: click.Context, image_id: str, output_path: str) -> None:
@@ -468,7 +469,7 @@ def image_download(ctx: click.Context, image_id: str, output_path: str) -> None:
 
 
 @image.command("deactivate")
-@click.argument("image_id")
+@click.argument("image_id", shell_complete=complete_images)
 @click.pass_context
 def image_deactivate(ctx: click.Context, image_id: str) -> None:
     """Deactivate an image (make data unavailable)."""
@@ -477,7 +478,7 @@ def image_deactivate(ctx: click.Context, image_id: str) -> None:
 
 
 @image.command("reactivate")
-@click.argument("image_id")
+@click.argument("image_id", shell_complete=complete_images)
 @click.pass_context
 def image_reactivate(ctx: click.Context, image_id: str) -> None:
     """Reactivate a deactivated image."""
@@ -486,7 +487,7 @@ def image_reactivate(ctx: click.Context, image_id: str) -> None:
 
 
 @image.command("tag-add")
-@click.argument("image_id")
+@click.argument("image_id", shell_complete=complete_images)
 @click.argument("tag")
 @click.pass_context
 def image_tag_add(ctx: click.Context, image_id: str, tag: str) -> None:
@@ -496,7 +497,7 @@ def image_tag_add(ctx: click.Context, image_id: str, tag: str) -> None:
 
 
 @image.command("tag-delete")
-@click.argument("image_id")
+@click.argument("image_id", shell_complete=complete_images)
 @click.argument("tag")
 @click.pass_context
 def image_tag_delete(ctx: click.Context, image_id: str, tag: str) -> None:
@@ -506,7 +507,7 @@ def image_tag_delete(ctx: click.Context, image_id: str, tag: str) -> None:
 
 
 @image.command("delete")
-@click.argument("image_id")
+@click.argument("image_id", shell_complete=complete_images)
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
 def image_delete(ctx: click.Context, image_id: str, yes: bool) -> None:
@@ -534,7 +535,7 @@ def _human_size(size: int | None) -> str:
 
 
 @image.command("shrink")
-@click.argument("image_id")
+@click.argument("image_id", shell_complete=complete_images)
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
 def image_shrink(ctx: click.Context, image_id: str, yes: bool) -> None:
@@ -754,7 +755,7 @@ def image_unused(ctx: click.Context, do_delete: bool, yes: bool, include_snapsho
 # ══════════════════════════════════════════════════════════════════════════
 
 @image.command("member-list")
-@click.argument("image_id")
+@click.argument("image_id", shell_complete=complete_images)
 @output_options
 @click.pass_context
 def image_member_list(ctx: click.Context, image_id: str, output_format: str,
@@ -782,7 +783,7 @@ def image_member_list(ctx: click.Context, image_id: str, output_format: str,
 
 
 @image.command("member-show")
-@click.argument("image_id")
+@click.argument("image_id", shell_complete=complete_images)
 @click.argument("member_id", metavar="PROJECT_ID")
 @output_options
 @click.pass_context
@@ -804,7 +805,7 @@ def image_member_show(ctx: click.Context, image_id: str, member_id: str,
 
 
 @image.command("member-create")
-@click.argument("image_id")
+@click.argument("image_id", shell_complete=complete_images)
 @click.argument("member_id", metavar="PROJECT_ID")
 @click.pass_context
 def image_member_create(ctx: click.Context, image_id: str, member_id: str) -> None:
@@ -828,7 +829,7 @@ def image_member_create(ctx: click.Context, image_id: str, member_id: str) -> No
 
 
 @image.command("member-delete")
-@click.argument("image_id")
+@click.argument("image_id", shell_complete=complete_images)
 @click.argument("member_id", metavar="PROJECT_ID")
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -841,7 +842,7 @@ def image_member_delete(ctx: click.Context, image_id: str, member_id: str, yes: 
 
 
 @image.command("member-set")
-@click.argument("image_id")
+@click.argument("image_id", shell_complete=complete_images)
 @click.argument("member_id", metavar="PROJECT_ID")
 @click.option(
     "--status", required=True,
@@ -868,7 +869,7 @@ def image_member_set(ctx: click.Context, image_id: str, member_id: str, status: 
 
 
 @image.command("share-and-accept")
-@click.argument("image_id")
+@click.argument("image_id", shell_complete=complete_images)
 @click.argument("member_id", metavar="PROJECT_ID")
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -904,7 +905,7 @@ def image_share_and_accept(ctx: click.Context, image_id: str, member_id: str, ye
 # ══════════════════════════════════════════════════════════════════════════
 
 @image.command("import")
-@click.argument("image_id")
+@click.argument("image_id", shell_complete=complete_images)
 @click.option("--method", "import_method",
               type=click.Choice(["web-download", "glance-direct", "copy-image"]),
               default="web-download", show_default=True,
@@ -931,7 +932,7 @@ def image_import(ctx: click.Context, image_id: str, import_method: str,
       orca image import <id> --method copy-image --store ceph1 --store ceph2
     """
     if import_method == "web-download" and not uri:
-        raise click.UsageError("--uri is required for web-download.")
+        raise OrcaCLIError("--uri is required for web-download.")
 
     ImageService(ctx.find_object(OrcaContext).ensure_client()).import_(
         image_id, import_method, uri=uri, stores=list(stores) if stores else None,
@@ -972,7 +973,7 @@ def image_cache_list(ctx: click.Context, output_format: str, columns: tuple[str,
 
 
 @image.command("cache-queue")
-@click.argument("image_id")
+@click.argument("image_id", shell_complete=complete_images)
 @click.pass_context
 def image_cache_queue(ctx: click.Context, image_id: str) -> None:
     """Queue an image for pre-caching (admin)."""
@@ -981,7 +982,7 @@ def image_cache_queue(ctx: click.Context, image_id: str) -> None:
 
 
 @image.command("cache-delete")
-@click.argument("image_id")
+@click.argument("image_id", shell_complete=complete_images)
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
 def image_cache_delete(ctx: click.Context, image_id: str, yes: bool) -> None:

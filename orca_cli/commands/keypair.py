@@ -8,6 +8,7 @@ from pathlib import Path
 import click
 
 from orca_cli.core.context import OrcaContext
+from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import safe_output_path
 from orca_cli.services.compute import ComputeService
@@ -154,7 +155,7 @@ def keypair_generate(ctx: click.Context, name: str, key_type: str, bits: int | N
     pub_path = Path(f"{priv_path}.pub")
 
     if priv_path.exists():
-        raise click.ClickException(f"File already exists: {priv_path}")
+        raise OrcaCLIError(f"File already exists: {priv_path}")
 
     priv_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -171,7 +172,7 @@ def keypair_generate(ctx: click.Context, name: str, key_type: str, bits: int | N
     console.print(f"[dim]Generating {key_type} key pair...[/dim]")
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
-        raise click.ClickException(f"ssh-keygen failed: {result.stderr.strip()}")
+        raise OrcaCLIError(f"ssh-keygen failed: {result.stderr.strip()}")
 
     priv_path.chmod(stat.S_IRUSR | stat.S_IWUSR)  # 600
 
@@ -223,7 +224,7 @@ def keypair_upload(ctx: click.Context, name: str, public_key_file: str | None, p
                 console.print(f"[dim]Using {default_path}[/dim]")
                 break
         else:
-            raise click.ClickException(
+            raise OrcaCLIError(
                 "No public key provided and no default key found in ~/.ssh/. "
                 "Use --public-key-file or --public-key."
             )

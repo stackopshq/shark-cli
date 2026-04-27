@@ -6,6 +6,7 @@ import click
 
 from orca_cli.core.config import save_profile
 from orca_cli.core.context import OrcaContext
+from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.services.identity import IdentityService
 
@@ -18,7 +19,7 @@ def _current_user_id(client) -> str:
     """
     user_id = client._token_data.get("user", {}).get("id")
     if not user_id:
-        raise click.ClickException(
+        raise OrcaCLIError(
             "Cannot determine current user id from token. "
             "Pass --user explicitly."
         )
@@ -116,7 +117,7 @@ def app_credential_create(ctx, name, description, secret, expires_at,
 
     if save_profile_name:
         if not a.get("secret"):
-            raise click.ClickException(
+            raise OrcaCLIError(
                 "Cannot save profile: Keystone did not return the credential secret."
             )
         profile_cfg = {

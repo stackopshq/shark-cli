@@ -12,6 +12,7 @@ import click
 from rich.tree import Tree
 
 from orca_cli.core.context import OrcaContext
+from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import safe_child_path, safe_output_path
 from orca_cli.services.object_store import ObjectStoreService
@@ -478,7 +479,7 @@ def object_upload(ctx: click.Context, container: str, files: tuple[str, ...],
     svc = ObjectStoreService(client)
 
     if override_name and len(files) > 1:
-        raise click.UsageError("--name can only be used when uploading a single file.")
+        raise OrcaCLIError("--name can only be used when uploading a single file.")
 
     if segment_size:
         global SLO_SEGMENT_SIZE

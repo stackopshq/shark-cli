@@ -20,6 +20,7 @@ from orca_cli.core.completions import (
     complete_servers,
 )
 from orca_cli.core.context import OrcaContext
+from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
 from orca_cli.core.waiter import wait_for_resource
@@ -43,7 +44,7 @@ def _resolve_boot_mode(
     refuses a boot-from-image.
     """
     if boot_from_image and boot_from_volume:
-        raise click.UsageError(
+        raise OrcaCLIError(
             "--boot-from-image and --boot-from-volume are mutually exclusive."
         )
     if boot_from_volume:
@@ -58,7 +59,7 @@ def _resolve_boot_mode(
     disk = int(flavor.get("disk") or 0)
     if boot_from_image:
         if disk == 0:
-            raise click.UsageError(
+            raise OrcaCLIError(
                 f"Flavor {flavor_id} has disk=0 — boot-from-image is not "
                 "supported on this flavor. Drop --boot-from-image or use "
                 "--boot-from-volume explicitly."
@@ -432,7 +433,7 @@ def server_create(
         if not image_id:
             missing.append("--image")
         if missing:
-            raise click.UsageError(
+            raise OrcaCLIError(
                 f"Missing required option(s): {', '.join(missing)}. "
                 "Use -i / --interactive for the guided wizard."
             )
@@ -853,7 +854,7 @@ def server_attach_interface(ctx: click.Context, server_id: str, port_id: str | N
       orca server add network <server-id> <network-id> [--fixed-ip <ip>]
     """
     if not port_id and not net_id:
-        raise click.ClickException("Provide --port-id or --net-id.")
+        raise OrcaCLIError("Provide --port-id or --net-id.")
 
     if port_id:
         suggestion = f"server add port {server_id} {port_id}"
@@ -975,7 +976,7 @@ def server_password(ctx: click.Context, server_id: str, private_key_path: str | 
                 break
 
     if not key_path or not key_path.exists():
-        raise click.ClickException(
+        raise OrcaCLIError(
             "No private key found. Use --key <path> to specify your RSA private key."
         )
 
@@ -985,7 +986,7 @@ def server_password(ctx: click.Context, server_id: str, private_key_path: str | 
     try:
         encrypted_bytes = base64.b64decode(encrypted_b64)
     except Exception as exc:
-        raise click.ClickException("Failed to decode encrypted password (invalid base64).") from exc
+        raise OrcaCLIError("Failed to decode encrypted password (invalid base64).") from exc
 
     # Decrypt with openssl, feeding ciphertext via stdin to avoid leaving
     # an RSA-encrypted blob on disk (even briefly).
@@ -1003,7 +1004,7 @@ def server_password(ctx: click.Context, server_id: str, private_key_path: str | 
         )
     if result.returncode != 0:
         stderr = result.stderr.decode(errors="replace").strip()
-        raise click.ClickException(
+        raise OrcaCLIError(
             f"Decryption failed. Make sure you use the matching RSA private key.\n"
             f"  openssl error: {stderr}"
         )
@@ -1234,19 +1235,19 @@ def server_ssh(ctx: click.Context, server_id: str, remote_args: tuple,
     except Exception:
         matches = service.find(params={"name": server_id})
         if not matches:
-            raise click.ClickException(f"Server '{server_id}' not found.") from None
+            raise OrcaCLIError(f"Server '{server_id}' not found.") from None
         if len(matches) > 1:
             console.print(f"[yellow]Multiple servers match '{server_id}':[/yellow]")
             for m in matches:
                 console.print(f"  {m['id']}  {m.get('name', '')}")
-            raise click.ClickException("Be more specific or use the server ID.") from None
+            raise OrcaCLIError("Be more specific or use the server ID.") from None
         srv = matches[0]
 
     name = srv.get("name") or server_id
 
     ip = _pick_ssh_ip(srv, prefer_fixed=use_fixed)
     if not ip:
-        raise click.ClickException(f"No IP address found for server '{name}'.")
+        raise OrcaCLIError(f"No IP address found for server '{name}'.")
 
     if not ssh_user:
         ssh_user = _detect_ssh_user(client, srv) or "root"
@@ -1367,11 +1368,11 @@ def server_wait(ctx: click.Context, server_id: str, target_status: str, timeout:
                 msg = f"Server {server_id} entered ERROR state."
                 if fault:
                     msg += f" Fault: {fault}"
-                raise click.ClickException(msg)
+                raise OrcaCLIError(msg)
 
             elapsed = time.monotonic() - start
             if elapsed >= timeout:
-                raise click.ClickException(
+                raise OrcaCLIError(
                     f"Timeout after {timeout}s. Server is still '{current}'."
                 )
 
@@ -1399,7 +1400,7 @@ def server_bulk(ctx: click.Context, action: str, name_pattern: str | None,
       orca server bulk reboot --name "web-*" --status ACTIVE
     """
     if not name_pattern and not status_filter and not select_all:
-        raise click.ClickException("Provide --name, --status, or --all to select servers.")
+        raise OrcaCLIError("Provide --name, --status, or --all to select servers.")
 
     service = ServerService(ctx.find_object(OrcaContext).ensure_client())
     servers = service.find_all()
@@ -1492,7 +1493,7 @@ def server_clone(
     flavor = src.get("flavor", {})
     flavor_id = flavor.get("id", "")
     if not flavor_id:
-        raise click.ClickException("Cannot determine source server flavor.")
+        raise OrcaCLIError("Cannot determine source server flavor.")
 
     # Image — get from boot volume
     image_id = ""
@@ -1523,7 +1524,7 @@ def server_clone(
                     image_id = vol.get("volume_image_metadata", {}).get("image_id", "")
 
     if not image_id:
-        raise click.ClickException(
+        raise OrcaCLIError(
             "Cannot determine source image. The server may have been booted from a "
             "volume without image metadata."
         )
@@ -1725,23 +1726,23 @@ def server_port_forward(
     except Exception:
         matches = service.find(params={"name": server_id})
         if not matches:
-            raise click.ClickException(f"Server '{server_id}' not found.") from None
+            raise OrcaCLIError(f"Server '{server_id}' not found.") from None
         if len(matches) > 1:
             console.print(f"[yellow]Multiple servers match '{server_id}':[/yellow]")
             for m in matches:
                 console.print(f"  {m['id']}  {m.get('name', '')}")
-            raise click.ClickException("Be more specific or use the server ID.") from None
+            raise OrcaCLIError("Be more specific or use the server ID.") from None
         srv = matches[0]
 
     ip = _pick_ssh_ip(srv)
     if not ip:
-        raise click.ClickException(
+        raise OrcaCLIError(
             f"No IP address found for server '{srv.get('name', server_id)}'.")
 
     # Validate port mapping
     parts = port_mapping.split(":")
     if len(parts) != 3:
-        raise click.ClickException(
+        raise OrcaCLIError(
             "PORT_MAPPING must be LOCAL_PORT:REMOTE_HOST:REMOTE_PORT "
             "(e.g. 8080:localhost:80)")
     local_port, remote_host, remote_port = parts
@@ -1817,7 +1818,7 @@ def server_migrate(ctx: click.Context, server_id: str, host: str | None,
         console.print(f"[green]Live migration of server {server_id} started.[/green]")
     else:
         if block_migration:
-            raise click.UsageError("--block-migration only applies in --live mode.")
+            raise OrcaCLIError("--block-migration only applies in --live mode.")
         service.migrate(server_id, host)
         console.print(f"[green]Migration of server {server_id} started.[/green]")
     console.print("[dim]Use 'orca server show' to track progress.[/dim]")
@@ -1909,7 +1910,7 @@ def server_set(ctx: click.Context, server_id: str, name: str | None,
         meta = {}
         for prop in properties:
             if "=" not in prop:
-                raise click.UsageError(f"Invalid format '{prop}', expected KEY=VALUE.")
+                raise OrcaCLIError(f"Invalid format '{prop}', expected KEY=VALUE.")
             k, v = prop.split("=", 1)
             meta[k] = v
         service.set_metadata(server_id, meta)

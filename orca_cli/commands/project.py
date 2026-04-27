@@ -9,7 +9,7 @@ from enum import Enum
 import click
 
 from orca_cli.core.context import OrcaContext
-from orca_cli.core.exceptions import APIError
+from orca_cli.core.exceptions import APIError, OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.services.dns import DnsService
 from orca_cli.services.identity import IdentityService
@@ -438,11 +438,11 @@ def project_cleanup(ctx, target_project, dry_run, yes, created_before, skip_type
                 p = ident_svc.get_project(target_project)
                 proj_id = p.get("id", target_project)
             except Exception as exc:
-                raise click.ClickException(f"Project '{target_project}' not found.") from exc
+                raise OrcaCLIError(f"Project '{target_project}' not found.") from exc
     else:
         proj_id = client._token_data.get("project", {}).get("id")
         if not proj_id:
-            raise click.ClickException(
+            raise OrcaCLIError(
                 "Could not determine current project. Use --project to specify one."
             )
 

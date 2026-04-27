@@ -5,6 +5,7 @@ from __future__ import annotations
 import click
 
 from orca_cli.core.context import OrcaContext
+from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
 from orca_cli.services.metric import MetricService
@@ -336,7 +337,7 @@ def metric_measures_add(ctx: click.Context, metric_id: str,
     payload = []
     for m in measures:
         if ":" not in m:
-            raise click.UsageError(f"Invalid format '{m}', expected TIMESTAMP:VALUE.")
+            raise OrcaCLIError(f"Invalid format '{m}', expected TIMESTAMP:VALUE.")
         ts, val = m.rsplit(":", 1)
         payload.append({"timestamp": ts, "value": float(val)})
     MetricService(client).add_measures(metric_id, payload)
@@ -389,7 +390,7 @@ def archive_policy_create(ctx: click.Context, name: str,
     defs = []
     for d in definitions:
         if ":" not in d:
-            raise click.UsageError(f"Invalid definition '{d}', expected GRANULARITY:POINTS.")
+            raise OrcaCLIError(f"Invalid definition '{d}', expected GRANULARITY:POINTS.")
         gran, pts = d.split(":", 1)
         defs.append({"granularity": gran, "points": int(pts)})
     body: dict = {"name": name, "definition": defs}
@@ -446,7 +447,7 @@ def resource_type_create(ctx: click.Context, name: str,
     attrs: dict = {}
     for a in attributes:
         if ":" not in a:
-            raise click.UsageError(f"Invalid attribute '{a}', expected KEY:TYPE.")
+            raise OrcaCLIError(f"Invalid attribute '{a}', expected KEY:TYPE.")
         k, t = a.split(":", 1)
         attrs[k] = {"type": t}
     body: dict = {"name": name, "attributes": attrs}
