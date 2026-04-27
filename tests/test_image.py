@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json as _json
 from unittest.mock import MagicMock
 
 from orca_cli.core.config import save_profile, set_active_profile
@@ -219,7 +220,294 @@ class TestImageUpdate:
 
         result = invoke(["image", "update", IMG_ID])
         assert result.exit_code == 0
-        assert "No properties" in result.output
+        assert "No changes requested" in result.output
+
+
+# ══════════════════════════════════════════════════════════════════════════
+#  image create / update / show — custom property lifecycle
+# ══════════════════════════════════════════════════════════════════════════
+
+
+def _patch_ops(state) -> list[dict]:
+    """Decode the JSON-Patch body captured by ``_setup_mock``."""
+    raw = state["patched"].get("content", b"")
+    return _json.loads(raw.decode()) if raw else []
+
+
+class TestImageCreateProperty:
+
+    def test_create_with_properties_sends_top_level_keys(
+        self, invoke, config_dir, mock_client, sample_profile,
+    ):
+        save_profile("p", sample_profile)
+        set_active_profile("p")
+        state = _setup_mock(mock_client)
+
+        result = invoke([
+            "image", "create", "rt-img",
+            "--property", "os_distro=ubuntu",
+            "--property", "os_version=24.04",
+            "--property", "hw_qemu_guest_agent=yes",
+        ])
+
+        assert result.exit_code == 0, result.output
+        assert state["posted"]["name"] == "rt-img"
+        # Glance v2 takes custom props as top-level keys on the create body.
+        assert state["posted"]["os_distro"] == "ubuntu"
+        assert state["posted"]["os_version"] == "24.04"
+        assert state["posted"]["hw_qemu_guest_agent"] == "yes"
+
+    def test_create_property_value_with_equals_signs_round_trips(
+        self, invoke, config_dir, mock_client, sample_profile,
+    ):
+        save_profile("p", sample_profile)
+        set_active_profile("p")
+        state = _setup_mock(mock_client)
+
+        result = invoke([
+            "image", "create", "rt-img",
+            "--property", "url=https://x?a=1&b=2",
+        ])
+
+        assert result.exit_code == 0, result.output
+        assert state["posted"]["url"] == "https://x?a=1&b=2"
+
+    def test_create_invalid_property_key_exits_before_http(
+        self, invoke, config_dir, mock_client, sample_profile,
+    ):
+        save_profile("p", sample_profile)
+        set_active_profile("p")
+        state = _setup_mock(mock_client)
+
+        result = invoke([
+            "image", "create", "rt-img",
+            "--property", "bad key=v",
+        ])
+
+        assert result.exit_code != 0
+        # No HTTP write must have happened — the key must be rejected client-side.
+        assert state["posted"] == {}
+        assert "invalid property key" in result.output.lower()
+
+    def test_create_property_without_equals_is_rejected(
+        self, invoke, config_dir, mock_client, sample_profile,
+    ):
+        save_profile("p", sample_profile)
+        set_active_profile("p")
+        state = _setup_mock(mock_client)
+
+        result = invoke(["image", "create", "rt-img", "--property", "noequals"])
+
+        assert result.exit_code != 0
+        assert state["posted"] == {}
+
+
+class TestImageUpdateProperty:
+
+    def test_update_replace_existing_property_emits_replace_op(
+        self, invoke, config_dir, mock_client, sample_profile,
+    ):
+        save_profile("p", sample_profile)
+        set_active_profile("p")
+        # Image already has properties A and C — only B is added; A/C stay.
+        current = _image()
+        current["A"] = "old-A"
+        current["B"] = "old-B"
+        current["C"] = "old-C"
+        state = _setup_mock(mock_client, image_detail=current)
+
+        result = invoke(["image", "update", IMG_ID, "--property", "B=new-B"])
+
+        assert result.exit_code == 0, result.output
+        ops = _patch_ops(state)
+        assert ops == [{"op": "replace", "path": "/B", "value": "new-B"}]
+
+    def test_update_add_new_property_emits_add_op(
+        self, invoke, config_dir, mock_client, sample_profile,
+    ):
+        save_profile("p", sample_profile)
+        set_active_profile("p")
+        current = _image()  # no os_distro yet
+        state = _setup_mock(mock_client, image_detail=current)
+
+        result = invoke(["image", "update", IMG_ID, "--property", "os_distro=debian"])
+
+        assert result.exit_code == 0, result.output
+        ops = _patch_ops(state)
+        assert ops == [{"op": "add", "path": "/os_distro", "value": "debian"}]
+
+    def test_update_mixed_property_and_remove_in_one_patch(
+        self, invoke, config_dir, mock_client, sample_profile,
+    ):
+        save_profile("p", sample_profile)
+        set_active_profile("p")
+        current = _image()
+        current["existing"] = "yes"
+        current["to_remove"] = "bye"
+        state = _setup_mock(mock_client, image_detail=current)
+
+        result = invoke([
+            "image", "update", IMG_ID,
+            "--property", "existing=updated",
+            "--property", "fresh=new",
+            "--remove-property", "to_remove",
+        ])
+
+        assert result.exit_code == 0, result.output
+        ops = _patch_ops(state)
+        assert {"op": "replace", "path": "/existing", "value": "updated"} in ops
+        assert {"op": "add", "path": "/fresh", "value": "new"} in ops
+        assert {"op": "remove", "path": "/to_remove"} in ops
+        assert len(ops) == 3
+
+    def test_update_remove_missing_key_is_strict_by_default(
+        self, invoke, config_dir, mock_client, sample_profile,
+    ):
+        save_profile("p", sample_profile)
+        set_active_profile("p")
+        state = _setup_mock(mock_client, image_detail=_image())
+
+        result = invoke([
+            "image", "update", IMG_ID, "--remove-property", "missing_key",
+        ])
+
+        assert result.exit_code != 0
+        assert "missing_key" in result.output
+        # No PATCH must have been issued.
+        assert "content" not in state["patched"]
+
+    def test_update_remove_missing_key_idempotent_with_ignore_missing(
+        self, invoke, config_dir, mock_client, sample_profile,
+    ):
+        save_profile("p", sample_profile)
+        set_active_profile("p")
+        state = _setup_mock(mock_client, image_detail=_image())
+
+        result = invoke([
+            "image", "update", IMG_ID,
+            "--remove-property", "missing_key",
+            "--ignore-missing",
+        ])
+
+        assert result.exit_code == 0, result.output
+        # Nothing to do — no PATCH issued, friendly "no changes" message.
+        assert "content" not in state["patched"]
+        assert "No changes requested" in result.output
+
+    def test_update_invalid_property_key_exits_before_http(
+        self, invoke, config_dir, mock_client, sample_profile,
+    ):
+        save_profile("p", sample_profile)
+        set_active_profile("p")
+        state = _setup_mock(mock_client, image_detail=_image())
+
+        result = invoke([
+            "image", "update", IMG_ID, "--property", "bad key=v",
+        ])
+
+        assert result.exit_code != 0
+        assert "content" not in state["patched"]
+        assert "invalid property key" in result.output.lower()
+
+
+class TestImageShowProperty:
+
+    def _image_with_props(self):
+        img = _image()
+        img.update({
+            "checksum": "abc123",
+            "os_hash_algo": "sha512",
+            "os_hash_value": "deadbeef",
+            "tags": ["prod", "lts"],
+            "os_distro": "ubuntu",
+            "os_version": "24.04",
+            "hw_qemu_guest_agent": "yes",
+        })
+        return img
+
+    def test_show_table_renders_properties_subtable(
+        self, invoke, config_dir, mock_client, sample_profile,
+    ):
+        save_profile("p", sample_profile)
+        set_active_profile("p")
+        _setup_mock(mock_client, image_detail=self._image_with_props())
+
+        result = invoke(["image", "show", IMG_ID])
+
+        assert result.exit_code == 0, result.output
+        assert "Properties" in result.output
+        # Custom props show up; integrity hashes show up as standard fields.
+        assert "os_distro" in result.output
+        assert "ubuntu" in result.output
+        assert "hw_qemu_guest_agent" in result.output
+        assert "abc123" in result.output       # checksum
+        assert "sha512" in result.output       # os_hash_algo
+
+    def test_show_json_nests_properties_under_top_level_key(
+        self, invoke, config_dir, mock_client, sample_profile,
+    ):
+        save_profile("p", sample_profile)
+        set_active_profile("p")
+        _setup_mock(mock_client, image_detail=self._image_with_props())
+
+        result = invoke(["image", "show", IMG_ID, "-f", "json"])
+
+        assert result.exit_code == 0, result.output
+        data = _json.loads(result.output)
+        assert data["properties"]["os_distro"] == "ubuntu"
+        assert data["properties"]["os_version"] == "24.04"
+        assert data["properties"]["hw_qemu_guest_agent"] == "yes"
+        # Integrity hashes are standard, not properties.
+        assert data["checksum"] == "abc123"
+        assert "checksum" not in data["properties"]
+
+    def test_show_json_dual_renders_custom_props_at_top_level(
+        self, invoke, config_dir, mock_client, sample_profile,
+    ):
+        """Backward-compat: ``jq .os_distro`` keeps working alongside ``jq .properties.os_distro``."""
+        save_profile("p", sample_profile)
+        set_active_profile("p")
+        _setup_mock(mock_client, image_detail=self._image_with_props())
+
+        result = invoke(["image", "show", IMG_ID, "-f", "json"])
+
+        assert result.exit_code == 0, result.output
+        data = _json.loads(result.output)
+        # Every custom property is mirrored at the top level — exact same
+        # shape Glance itself returns, plus the extra `properties` aggregate.
+        assert data["os_distro"] == "ubuntu"
+        assert data["os_version"] == "24.04"
+        assert data["hw_qemu_guest_agent"] == "yes"
+        # And the aggregate matches the top-level mirrors verbatim.
+        for k in ("os_distro", "os_version", "hw_qemu_guest_agent"):
+            assert data[k] == data["properties"][k]
+
+    def test_show_value_format_emits_key_value_lines_for_properties(
+        self, invoke, config_dir, mock_client, sample_profile,
+    ):
+        save_profile("p", sample_profile)
+        set_active_profile("p")
+        _setup_mock(mock_client, image_detail=self._image_with_props())
+
+        result = invoke(["image", "show", IMG_ID, "-f", "value"])
+
+        assert result.exit_code == 0, result.output
+        # Property lines use "KEY VALUE" — distinct from the bare-value
+        # standard-field lines that precede them.
+        assert "os_distro ubuntu" in result.output
+        assert "hw_qemu_guest_agent yes" in result.output
+
+    def test_show_without_properties_omits_subtable(
+        self, invoke, config_dir, mock_client, sample_profile,
+    ):
+        save_profile("p", sample_profile)
+        set_active_profile("p")
+        _setup_mock(mock_client, image_detail=_image())
+
+        result = invoke(["image", "show", IMG_ID])
+
+        assert result.exit_code == 0, result.output
+        assert "Properties" not in result.output
 
 
 # ══════════════════════════════════════════════════════════════════════════

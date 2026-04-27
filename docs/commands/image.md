@@ -71,7 +71,7 @@ orca image cache-queue [OPTIONS]
 Create a new image (and optionally upload data).
 
 ```bash
-orca image create [OPTIONS]
+orca image create [OPTIONS] NAME
 ```
 
 | Option | Description |
@@ -82,7 +82,15 @@ orca image create [OPTIONS]
 | `--min-ram INTEGER` | Min RAM (MB).  [default: 0] |
 | `--visibility [private|shared|community|public]` | |
 | `--file PATH` | Upload image data from file immediately. |
+| `--property KEY=VALUE` | Custom image property to set on creation (repeatable). Values may contain `=` — only the first `=` splits. Keys must match `^[A-Za-z0-9_:.\-]{1,255}$`. |
 | `--help` | Show this message and exit. |
+
+```bash
+orca image create ubuntu-24.04 --file ubuntu.qcow2 \
+    --property os_distro=ubuntu \
+    --property os_version=24.04 \
+    --property hw_qemu_guest_agent=yes
+```
 
 ---
 
@@ -276,18 +284,33 @@ orca image share-and-accept [OPTIONS]
 
 ## show
 
-Show image details.
+Show image details, including custom properties and integrity hashes.
 
 ```bash
-orca image show [OPTIONS]
+orca image show [OPTIONS] IMAGE_ID
 ```
+
+Custom properties (anything outside the Glance v2 standard schema, e.g.
+`os_distro`, `os_version`, `hw_qemu_guest_agent`, `cinder_img_volume_type`)
+are surfaced separately:
+
+- **table** — rendered as a `Properties` sub-table after the main table,
+  sorted by key.
+- **json** — exposed both at the top level (mirroring the raw Glance
+  response shape, so existing scripts using `jq .os_distro` keep working)
+  and under a new top-level `"properties"` aggregate so callers can also
+  do `orca image show <id> -f json | jq .properties`.
+- **value** — printed after the standard fields, one `KEY VALUE` per line.
+
+Integrity fields (`checksum`, `os_hash_algo`, `os_hash_value`, `direct_url`)
+and `tags` are always included as standard fields when Glance returns them.
 
 | Option | Description |
 |--------|-------------|
 | `--noindent` | Disable JSON indentation. |
 | `--max-width INTEGER` | Maximum table width (0 = unlimited). |
 | `--fit-width` | Fit table to terminal width. |
-| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
+| `-c, --column TEXT` | Column to include (repeatable). Shows all if omitted. |
 | `-f, --format [table|json|value]` | |
 | `--help` | Show this message and exit. |
 
@@ -429,8 +452,14 @@ orca image unused [OPTIONS]
 Update image properties (JSON-Patch).
 
 ```bash
-orca image update [OPTIONS]
+orca image update [OPTIONS] IMAGE_ID
 ```
+
+All flags compose into a single atomic JSON-Patch document.
+`--property` emits `add` when the key is absent on the image and `replace` when
+it already exists, so untouched properties survive. `--remove-property` is
+strict by default (errors if the key is absent) and turns idempotent under
+`--ignore-missing`.
 
 | Option | Description |
 |--------|-------------|
@@ -438,7 +467,16 @@ orca image update [OPTIONS]
 | `--min-disk INTEGER` | New min disk (GB). |
 | `--min-ram INTEGER` | New min RAM (MB). |
 | `--visibility [private|shared|community|public]` | |
+| `--property KEY=VALUE` | Set or replace a custom image property. Repeatable. |
+| `--remove-property KEY` | Remove a custom image property by key. Repeatable. |
+| `--ignore-missing` | With `--remove-property`: silently skip keys that are not present on the image. |
 | `--help` | Show this message and exit. |
+
+```bash
+orca image update <id> --property os_distro=ubuntu --property os_version=24.04
+orca image update <id> --remove-property hw_qemu_guest_agent
+orca image update <id> --remove-property foo --ignore-missing
+```
 
 ---
 
