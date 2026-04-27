@@ -2,15 +2,18 @@
 
 from __future__ import annotations
 
+import json as _json
+import re
 from pathlib import Path
 from typing import Any
 
 import click
 from rich.progress import BarColumn, DownloadColumn, Progress, TimeRemainingColumn, TransferSpeedColumn
+from rich.table import Table
 
 from orca_cli.core.client import APIError, AuthenticationError
 from orca_cli.core.context import OrcaContext
-from orca_cli.core.exceptions import PermissionDeniedError
+from orca_cli.core.exceptions import OrcaCLIError, PermissionDeniedError
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import safe_output_path
 from orca_cli.models.image import Image
@@ -18,6 +21,55 @@ from orca_cli.services.image import ImageService
 from orca_cli.services.server import ServerService
 
 CHUNK_SIZE = 64 * 1024  # 64 KB
+
+# Glance image-property key constraints (matches Glance schema validation).
+_PROPERTY_KEY_RE = re.compile(r"^[A-Za-z0-9_:.\-]{1,255}$")
+
+# Standard top-level Glance v2 image fields. Anything else returned by the
+# API is treated as a custom image property by ``image show``.
+_STANDARD_IMAGE_FIELDS: frozenset[str] = frozenset({
+    "id", "name", "status", "visibility", "owner", "protected",
+    "disk_format", "container_format", "size", "virtual_size",
+    "min_disk", "min_ram",
+    "checksum", "os_hash_algo", "os_hash_value",
+    "direct_url", "stores", "file", "locations", "self", "schema",
+    "created_at", "updated_at",
+    "tags", "image_type",
+    "os_hidden", "hidden",
+})
+
+
+def _validate_property_key(key: str) -> str:
+    """Reject malformed property keys before any HTTP round-trip."""
+    if not _PROPERTY_KEY_RE.match(key):
+        raise click.BadParameter(
+            f"invalid property key {key!r}: must match [A-Za-z0-9_:.-]{{1,255}}",
+        )
+    return key
+
+
+def _parse_property(_ctx: click.Context, _param: click.Parameter,
+                    values: tuple[str, ...]) -> tuple[tuple[str, str], ...]:
+    """Click callback for ``--property KEY=VALUE`` (repeatable).
+
+    Splits on the first ``=`` so values may themselves contain ``=``.
+    """
+    parsed: list[tuple[str, str]] = []
+    for raw in values:
+        if "=" not in raw:
+            raise click.BadParameter(
+                f"property must be in KEY=VALUE form (got {raw!r})",
+            )
+        key, val = raw.split("=", 1)
+        _validate_property_key(key)
+        parsed.append((key, val))
+    return tuple(parsed)
+
+
+def _parse_remove_property(_ctx: click.Context, _param: click.Parameter,
+                           values: tuple[str, ...]) -> tuple[str, ...]:
+    """Click callback for ``--remove-property KEY`` (repeatable)."""
+    return tuple(_validate_property_key(k) for k in values)
 
 
 @click.group()
@@ -59,20 +111,82 @@ def image_list(ctx: click.Context, output_format: str, columns: tuple[str, ...],
 @output_options
 @click.pass_context
 def image_show(ctx: click.Context, image_id: str, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
-    """Show image details."""
+    """Show image details, including custom properties and integrity hashes.
+
+    \b
+    Custom properties (anything outside the Glance v2 standard schema, e.g.
+    os_distro, os_version, hw_qemu_guest_agent) are surfaced separately:
+      table  →  rendered as a "Properties" sub-table after the main table
+      json   →  nested under a top-level "properties" key
+      value  →  printed after the standard fields, one ``KEY VALUE`` per line
+    """
     img = ImageService(ctx.find_object(OrcaContext).ensure_client()).get(image_id)
 
-    fields = []
-    for key in ["id", "name", "status", "visibility", "os_distro", "os_version",
-                "min_disk", "min_ram", "size", "disk_format", "container_format",
-                "created_at", "updated_at"]:
+    standard_keys = [
+        "id", "name", "status", "visibility", "owner", "protected",
+        "min_disk", "min_ram", "size", "disk_format", "container_format",
+        "checksum", "os_hash_algo", "os_hash_value", "direct_url",
+        "tags", "created_at", "updated_at",
+    ]
+
+    # Pretty-printed view used by the ``table`` and ``value`` formats.
+    fields: list[tuple[str, Any]] = []
+    for key in standard_keys:
         raw: Any = img.get(key, "")
         if key == "size" and raw:
             fields.append((key, f"{round(int(raw) / 1024 / 1024)} MB"))
+        elif key == "tags" and isinstance(raw, list):
+            fields.append((key, ", ".join(raw)))
         else:
-            fields.append((key, str(raw)))
+            fields.append((key, str(raw) if raw != "" else ""))
 
-    print_detail(fields, output_format=output_format, fit_width=fit_width, max_width=max_width, noindent=noindent, columns=columns)
+    # Anything Glance returns that isn't part of the standard schema is a
+    # custom image property (os_distro, hw_*, cinder_img_volume_type, …).
+    properties = {k: v for k, v in img.items() if k not in _STANDARD_IMAGE_FIELDS}
+
+    if output_format == "json":
+        # Preserve raw types from Glance (size as int, tags as list, …) so
+        # JSON consumers can do arithmetic/jq filtering without re-parsing.
+        data: dict[str, Any] = {k: img.get(k) for k in standard_keys if k in img}
+        # Dual-render: every custom property is also exposed at the top level,
+        # mirroring the raw Glance response shape. This preserves backward
+        # compatibility with scripts doing `jq .os_distro` while the new
+        # `.properties` aggregate offers a stable, sorted, schema-distinct view.
+        for k, v in properties.items():
+            data[k] = v
+        if columns:
+            wanted = {c.lower() for c in columns}
+            data = {k: v for k, v in data.items() if k.lower() in wanted}
+        # `properties` is always emitted, even when --column filters narrow
+        # the standard fields — the brief requires it always be surfaced.
+        data["properties"] = {k: properties[k] for k in sorted(properties)}
+        click.echo(_json.dumps(data, default=str, indent=None if noindent else 2))
+        return
+
+    if output_format == "value":
+        display = fields
+        if columns:
+            wanted = {c.lower() for c in columns}
+            display = [(f, v) for f, v in display if f.lower() in wanted]
+        for _, value in display:
+            click.echo(value if value is not None else "")
+        for k in sorted(properties):
+            click.echo(f"{k} {properties[k]}")
+        return
+
+    # table
+    print_detail(fields, output_format=output_format, fit_width=fit_width,
+                 max_width=max_width, noindent=noindent, columns=columns)
+    if properties:
+        prop_table = Table(title="Properties", show_header=True, show_lines=False)
+        prop_table.add_column("Key", style="bold cyan", no_wrap=True)
+        col_kw: dict[str, Any] = {}
+        if fit_width or max_width is not None:
+            col_kw["overflow"] = "fold"
+        prop_table.add_column("Value", **col_kw)
+        for k in sorted(properties):
+            prop_table.add_row(k, str(properties[k]))
+        console.print(prop_table)
 
 
 @image.command("create")
@@ -83,9 +197,14 @@ def image_show(ctx: click.Context, image_id: str, output_format: str, columns: t
 @click.option("--min-ram", type=int, default=0, show_default=True, help="Min RAM (MB).")
 @click.option("--visibility", type=click.Choice(["private", "shared", "community", "public"], case_sensitive=False), default="private", show_default=True, help="Visibility.")
 @click.option("--file", "file_path", type=click.Path(exists=True), default=None, help="Upload image data from file immediately.")
+@click.option("--property", "properties", multiple=True, callback=_parse_property,
+              metavar="KEY=VALUE",
+              help="Custom image property to set on creation (e.g. os_distro=ubuntu). "
+                   "Repeatable. Values may contain '='; only the first '=' splits.")
 @click.pass_context
 def image_create(ctx: click.Context, name: str, disk_format: str, container_format: str,
-                 min_disk: int, min_ram: int, visibility: str, file_path: str | None) -> None:
+                 min_disk: int, min_ram: int, visibility: str, file_path: str | None,
+                 properties: tuple[tuple[str, str], ...]) -> None:
     """Create a new image (and optionally upload data).
 
     \b
@@ -93,16 +212,23 @@ def image_create(ctx: click.Context, name: str, disk_format: str, container_form
       orca image create my-image
       orca image create my-image --file ubuntu.qcow2
       orca image create my-image --disk-format raw --file disk.img
+      orca image create my-image --property os_distro=ubuntu \\
+                                 --property os_version=24.04 \\
+                                 --property hw_qemu_guest_agent=yes
     """
     service = ImageService(ctx.find_object(OrcaContext).ensure_client())
-    img = service.create({
+    body: dict[str, Any] = {
         "name": name,
         "disk_format": disk_format,
         "container_format": container_format,
         "min_disk": min_disk,
         "min_ram": min_ram,
         "visibility": visibility,
-    })
+    }
+    # Glance v2 takes custom properties as top-level keys on the create body.
+    for k, v in properties:
+        body[k] = v
+    img = service.create(body)
     image_id = img.get("id", "")
     console.print(f"[green]Image '{name}' created: {image_id}[/green]")
     console.print(f"  Status: {img.get('status', '')}")
@@ -122,16 +248,39 @@ def image_create(ctx: click.Context, name: str, disk_format: str, container_form
 @click.option("--min-disk", type=int, default=None, help="New min disk (GB).")
 @click.option("--min-ram", type=int, default=None, help="New min RAM (MB).")
 @click.option("--visibility", type=click.Choice(["private", "shared", "community", "public"], case_sensitive=False), default=None, help="New visibility.")
+@click.option("--property", "properties", multiple=True, callback=_parse_property,
+              metavar="KEY=VALUE",
+              help="Set or replace a custom image property (KEY=VALUE). "
+                   "Repeatable. Untouched properties are preserved.")
+@click.option("--remove-property", "remove_properties", multiple=True,
+              callback=_parse_remove_property, metavar="KEY",
+              help="Remove a custom image property by key. Repeatable. "
+                   "Errors if the key is absent (use --ignore-missing for idempotent runs).")
+@click.option("--ignore-missing", is_flag=True, default=False,
+              help="With --remove-property: silently skip keys that aren't on the image.")
 @click.pass_context
 def image_update(ctx: click.Context, image_id: str, name: str | None,
-                 min_disk: int | None, min_ram: int | None, visibility: str | None) -> None:
+                 min_disk: int | None, min_ram: int | None, visibility: str | None,
+                 properties: tuple[tuple[str, str], ...],
+                 remove_properties: tuple[str, ...],
+                 ignore_missing: bool) -> None:
     """Update image properties (JSON-Patch).
+
+    Builds one atomic JSON-Patch document from all flags. ``--property`` emits
+    ``add`` when the key is absent and ``replace`` when it already exists, so
+    untouched properties survive. ``--remove-property`` is strict by default
+    and turns idempotent under ``--ignore-missing``.
 
     \b
     Examples:
       orca image update <id> --name new-name
       orca image update <id> --visibility shared
+      orca image update <id> --property os_distro=ubuntu --property os_version=24.04
+      orca image update <id> --remove-property hw_qemu_guest_agent
+      orca image update <id> --remove-property foo --ignore-missing
     """
+    service = ImageService(ctx.find_object(OrcaContext).ensure_client())
+
     ops: list[dict[str, Any]] = []
     if name is not None:
         ops.append({"op": "replace", "path": "/name", "value": name})
@@ -142,11 +291,30 @@ def image_update(ctx: click.Context, image_id: str, name: str | None,
     if visibility is not None:
         ops.append({"op": "replace", "path": "/visibility", "value": visibility})
 
+    # Need the current state to choose add-vs-replace and to validate removes.
+    if properties or remove_properties:
+        current = service.get(image_id)
+        for k, v in properties:
+            op = "replace" if k in current else "add"
+            ops.append({"op": op, "path": f"/{k}", "value": v})
+        for k in remove_properties:
+            if k not in current:
+                if ignore_missing:
+                    continue
+                raise OrcaCLIError(
+                    f"cannot remove property '{k}': not present on image "
+                    f"{image_id}. Use --ignore-missing for idempotent removal.",
+                )
+            ops.append({"op": "remove", "path": f"/{k}"})
+
     if not ops:
-        console.print("[yellow]No properties to update. Use --name, --min-disk, --min-ram, or --visibility.[/yellow]")
+        console.print(
+            "[yellow]No changes requested. Use --name, --min-disk, --min-ram, "
+            "--visibility, --property, or --remove-property.[/yellow]",
+        )
         return
 
-    data = ImageService(ctx.find_object(OrcaContext).ensure_client()).update(image_id, ops)
+    data = service.update(image_id, ops)
     console.print(f"[green]Image {image_id} updated.[/green]")
     if data:
         console.print(f"  Name: {data.get('name', '')}")

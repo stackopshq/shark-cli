@@ -6,6 +6,25 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Full image-property support across `image create`, `image update` and
+  `image show`.** Custom Glance properties (`os_distro`, `os_version`,
+  `hw_qemu_guest_agent`, `cinder_img_volume_type`, …) can now be set on
+  creation (`--property KEY=VALUE`, repeatable) and edited atomically on
+  existing images (`--property` and `--remove-property`, `--ignore-missing`
+  for idempotent removal). Property keys are validated client-side against
+  Glance's `^[A-Za-z0-9_:.\-]{1,255}$` schema before any HTTP round-trip,
+  and only the first `=` splits the value so URL-like values survive intact
+  (`--property url=https://x?a=1&b=2`). `image show` surfaces every custom
+  key Glance returns plus the integrity fields (`checksum`, `os_hash_algo`,
+  `os_hash_value`, `direct_url`, `tags`): as a `Properties` sub-table in
+  table format, under a new top-level `"properties"` aggregate in JSON
+  (with each custom key **also** mirrored at the JSON root for backward
+  compatibility — `jq .os_distro` keeps working alongside the new
+  `jq .properties.os_distro`), and as `KEY VALUE` lines in value format.
+  This unblocks lossless inter-cloud image migration.
+
 ### Fixed
 
 - **Shell completion install no longer slows shell startup.** The
