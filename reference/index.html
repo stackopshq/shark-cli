@@ -60081,14 +60081,14 @@ therefore be downloaded with <code>orca image download</code>.</p>
 <tr>
 <td><code>--visibility</code></td>
 <td>choice (<code>private</code> &#x7C; <code>shared</code> &#x7C; <code>community</code> &#x7C; <code>public</code>)</td>
-<td>Image visibility.</td>
-<td><code>private</code></td>
+<td>Image visibility. Only sent to Cinder when explicit (older microversions reject the field); otherwise Glance applies its own default.</td>
+<td>None</td>
 </tr>
 <tr>
 <td><code>--protected</code> / <code>--no-protected</code></td>
 <td>boolean</td>
-<td>Mark the resulting image as protected (deletion-locked).</td>
-<td><code>False</code></td>
+<td>Mark the resulting image as protected (deletion-locked). Only sent to Cinder when explicit; otherwise omitted from the action body for older-microversion compatibility.</td>
+<td>None</td>
 </tr>
 <tr>
 <td><code>--force</code></td>
