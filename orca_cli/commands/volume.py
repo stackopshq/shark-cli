@@ -2,17 +2,43 @@
 
 from __future__ import annotations
 
+import re
+import time
+
 import click
 
+from orca_cli.commands.image import _parse_property
 from orca_cli.core import cache
 from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.completions import complete_volumes
 from orca_cli.core.context import OrcaContext
+from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
 from orca_cli.core.waiter import wait_for_resource
+from orca_cli.models.image import Image
+from orca_cli.services.image import ImageService
 from orca_cli.services.server import ServerService
 from orca_cli.services.volume import VolumeService
+
+_UUID_RE = re.compile(
+    r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+    re.IGNORECASE,
+)
+
+
+def _resolve_volume_id(service: VolumeService, value: str) -> str:
+    """Return *value* if it's a UUID, otherwise look up by exact name."""
+    if _UUID_RE.match(value):
+        return value
+    matches = service.find(params={"name": value})
+    if not matches:
+        raise OrcaCLIError(f"No volume found with name '{value}'.")
+    if len(matches) > 1:
+        raise OrcaCLIError(
+            f"Multiple volumes match '{value}' — pass a UUID instead."
+        )
+    return matches[0]["id"]
 
 
 def _vol_action(ctx: click.Context, volume_id: str, action: dict, label: str) -> None:
@@ -372,6 +398,194 @@ def volume_delete(ctx: click.Context, volume_id: str, yes: bool, dry_run: bool, 
         )
     else:
         console.print(f"[green]Volume {volume_id} deleted.[/green]")
+
+
+# ══════════════════════════════════════════════════════════════════════════
+#  upload-to-image
+# ══════════════════════════════════════════════════════════════════════════
+
+
+_IMAGE_TERMINAL_OK = "active"
+_IMAGE_TERMINAL_FAIL = ("killed", "deleted")
+
+
+def _format_size(size: int | None) -> str:
+    """Format bytes for the progress line; '—' when unknown."""
+    if not size:
+        return "—"
+    n = float(size)
+    for unit in ("B", "KB", "MB", "GB", "TB"):
+        if abs(n) < 1024:
+            return f"{n:.1f} {unit}"
+        n /= 1024
+    return f"{n:.1f} PB"
+
+
+def _wait_for_image_active(service: ImageService, image_id: str,
+                           *, fast_interval: int = 5,
+                           slow_interval: int = 15,
+                           fast_window: int = 60) -> tuple[Image, float]:
+    """Poll Glance until the image reaches ``active``.
+
+    Polls every ``fast_interval`` seconds for the first ``fast_window``
+    seconds, then every ``slow_interval`` seconds. Raises ``OrcaCLIError``
+    if the image transitions to a terminal failure state.
+    """
+    start = time.monotonic()
+    last_status = ""
+    last_size: int | None = None
+
+    with console.status(f"[bold cyan]Waiting for image {image_id} → active…[/bold cyan]") as spinner:
+        while True:
+            elapsed = time.monotonic() - start
+            img = service.get(image_id)
+            status = (img.get("status") or "").lower()
+            size = img.get("size")
+
+            if status == _IMAGE_TERMINAL_OK:
+                return img, elapsed
+
+            if status in _IMAGE_TERMINAL_FAIL:
+                fault = img.get("message") or img.get("fault") or ""
+                msg = (
+                    f"Image {image_id} entered terminal state '{status}' "
+                    f"after {elapsed:.0f}s."
+                )
+                if fault:
+                    msg += f" Details: {fault}"
+                raise OrcaCLIError(msg)
+
+            if status != last_status or size != last_size:
+                last_status, last_size = status, size
+                spinner.update(
+                    f"[bold cyan]Image {image_id}: {status or 'pending'} "
+                    f"({_format_size(size)}, {elapsed:.0f}s)…[/bold cyan]"
+                )
+
+            interval = fast_interval if elapsed < fast_window else slow_interval
+            time.sleep(interval)
+
+
+@volume.command("upload-to-image")
+@click.argument("volume_id_or_name")
+@click.argument("image_name")
+@click.option("--disk-format",
+              type=click.Choice(["raw", "qcow2", "vmdk", "vdi", "vhd", "vhdx",
+                                 "iso", "aki", "ari", "ami"],
+                                case_sensitive=False),
+              default="qcow2", show_default=True, help="Disk format.")
+@click.option("--container-format",
+              type=click.Choice(["bare", "ovf", "ova", "aki", "ari", "ami", "docker"],
+                                case_sensitive=False),
+              default="bare", show_default=True, help="Container format.")
+@click.option("--visibility",
+              type=click.Choice(["private", "shared", "community", "public"],
+                                case_sensitive=False),
+              default="private", show_default=True, help="Image visibility.")
+@click.option("--protected/--no-protected", default=False, show_default=True,
+              help="Mark the resulting image as protected (deletion-locked).")
+@click.option("--force", is_flag=True, default=False,
+              help="Required when uploading from an in-use volume.")
+@click.option("--property", "properties", multiple=True, callback=_parse_property,
+              metavar="KEY=VALUE",
+              help="Custom Glance property to set on the resulting image. "
+                   "Repeatable. Applied via JSON-Patch after the upload action.")
+@click.option("--wait", is_flag=True, default=False,
+              help="Poll the resulting image until it reaches 'active' "
+                   "(or 'killed'/'deleted', in which case exit non-zero).")
+@click.pass_context
+def volume_upload_to_image(ctx: click.Context, volume_id_or_name: str,
+                           image_name: str,
+                           disk_format: str, container_format: str,
+                           visibility: str, protected: bool,
+                           force: bool,
+                           properties: tuple[tuple[str, str], ...],
+                           wait: bool) -> None:
+    """Materialize a volume's data as a downloadable Glance image.
+
+    \b
+    Wraps Cinder's ``os-volume_upload_image`` action. The resulting image is
+    a self-contained binary (unlike a server snapshot of a boot-from-volume
+    instance, which is a 0-byte shell pointing at a Cinder snapshot) and can
+    therefore be downloaded with ``orca image download``.
+
+    \b
+    Examples:
+      orca volume upload-to-image <volume-id> my-image
+      orca volume upload-to-image my-vol my-image --disk-format raw
+      orca volume upload-to-image <id> img --force                # in-use volume
+      orca volume upload-to-image <id> img --property os_distro=ubuntu --wait
+    """
+    client = ctx.find_object(OrcaContext).ensure_client()
+    vol_service = VolumeService(client)
+    img_service = ImageService(client)
+
+    volume_id = _resolve_volume_id(vol_service, volume_id_or_name)
+
+    # Pre-flight: refuse to call Cinder when the volume is in-use without
+    # --force, so the user gets an actionable message instead of an opaque
+    # 400 from the back-end.
+    vol = vol_service.get(volume_id)
+    status = (vol.get("status") or "").lower()
+    if status == "in-use" and not force:
+        raise OrcaCLIError(
+            f"Volume {volume_id} is in-use; pass --force to upload anyway "
+            "(the resulting image may be crash-consistent only).",
+        )
+
+    response = vol_service.upload_to_image(
+        volume_id,
+        image_name=image_name,
+        disk_format=disk_format,
+        container_format=container_format,
+        visibility=visibility,
+        protected=protected,
+        force=force,
+    )
+    image_id = response.get("image_id", "")
+    initial_status = response.get("status", "queued")
+    if not image_id:
+        raise OrcaCLIError(
+            "Cinder accepted the upload action but did not return an image_id; "
+            "check 'orca image list' manually.",
+        )
+
+    # Glance does not accept arbitrary properties via os-volume_upload_image,
+    # so we PATCH the freshly-created image instead. We still consult the
+    # current state to choose add-vs-replace, mirroring 'orca image update'.
+    if properties:
+        current = img_service.get(image_id)
+        ops = [
+            {
+                "op": "replace" if k in current else "add",
+                "path": f"/{k}",
+                "value": v,
+            }
+            for k, v in properties
+        ]
+        img_service.update(image_id, ops)
+
+    console.print(
+        f"[green]Image '{image_name}' ({image_id}) creation started "
+        f"from volume {volume_id}.[/green]"
+    )
+    console.print(f"  Status: {initial_status}")
+
+    if not wait:
+        console.print(
+            f"[dim]Use 'orca image show {image_id}' to track progress.[/dim]"
+        )
+        return
+
+    img, elapsed = _wait_for_image_active(img_service, image_id)
+    console.print(f"[green]Image {image_id} is active ({elapsed:.0f}s).[/green]")
+    console.print(f"  Size:          {_format_size(img.get('size'))}")
+    if img.get("checksum"):
+        console.print(f"  Checksum:      {img['checksum']}")
+    if img.get("os_hash_algo") and img.get("os_hash_value"):
+        console.print(
+            f"  {img['os_hash_algo']}: {img['os_hash_value']}"
+        )
 
 
 # ══════════════════════════════════════════════════════════════════════════

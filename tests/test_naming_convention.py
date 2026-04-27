@@ -149,12 +149,16 @@ LEGACY_HYPHENATED_SUBCOMMANDS: dict[str, set[str]] = {
     },
     "trunk": {"add-subport", "remove-subport", "subport-list"},
     "user": {"set-password"},
-    # "volume" entry removed — every former hyphenated subcommand is now
-    # either nested under a sub-group (snapshot, backup, type, type access,
-    # transfer, qos, service, message, attachment, group, group snapshot,
-    # group type) or kept as a `deprecated=True` façade (set-bootable,
-    # set-readonly fold into 'volume set'). Excluded from the whitelist
-    # by the deprecated filter in the test runtime.
+    "volume": {
+        # Deliberate exception (compound verb, no openstack equivalent):
+        # ``upload-to-image`` mirrors the Cinder action name
+        # ``os-volume_upload_image`` and reads as a single verb phrase.
+        # Nesting it under a sub-group (e.g. ``volume image upload``)
+        # would suggest ``image`` is a sub-resource of ``volume``, which
+        # it isn't — Glance is just the target system. Same rationale
+        # as ``server port-forward``.
+        "upload-to-image",
+    },
     "zone": {
         "reverse-lookup",
         "tld-create", "tld-delete", "tld-list",

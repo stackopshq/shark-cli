@@ -17,6 +17,8 @@ class Image(TypedDict, total=False):
     size: int
     virtual_size: int
     checksum: str
+    os_hash_algo: str
+    os_hash_value: str
     min_disk: int
     min_ram: int
     os_distro: str

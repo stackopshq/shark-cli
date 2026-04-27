@@ -120,6 +120,10 @@ re-read.
   Compound verb that reads naturally; nesting it under a sub-group
   (`server tunnel forward`) would gain nothing since there are no
   sibling commands.
+- `volume upload-to-image` — mirrors the Cinder action name
+  `os-volume_upload_image`. Compound verb; nesting it as
+  `volume image upload` would imply `image` is a sub-resource of
+  `volume`, when Glance is in fact the *target* of the action.
 
 Adding to this list requires a deliberate choice and an inline
 comment in the test whitelist explaining why.
@@ -139,8 +143,9 @@ Update this list when a module's hyphenated commands are migrated.
   `type`, `type access`). `revert-to-snapshot` becomes
   `volume snapshot revert`. `set-bootable` / `set-readonly` fold
   into `volume set --bootable` / `--read-only` with the two old
-  commands kept as deprecated façades. Whitelist for `volume` is
-  empty — no permanent exceptions.
+  commands kept as deprecated façades. Whitelist for `volume` was
+  initially empty; `upload-to-image` was later added as a permanent
+  exception (compound verb, see above).
 - 2026-04-20 — `network`: 38 commands moved into 7 sub-groups
   (`agent`, `auto-allocated-topology` — compound noun, `port`,
   `rbac`, `segment`, `subnet`, `router`) and 4 sub-sub-groups under

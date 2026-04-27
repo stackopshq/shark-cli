@@ -77,6 +77,30 @@ class VolumeService:
     def revert_to_snapshot(self, volume_id: str, snapshot_id: str) -> None:
         self.action(volume_id, {"revert": {"snapshot_id": snapshot_id}})
 
+    def upload_to_image(self, volume_id: str, *,
+                        image_name: str,
+                        disk_format: str = "qcow2",
+                        container_format: str = "bare",
+                        visibility: str = "private",
+                        protected: bool = False,
+                        force: bool = False) -> dict[str, Any]:
+        """Materialize a volume as a Glance image (``os-volume_upload_image``).
+
+        Returns the inner ``os-volume_upload_image`` envelope, which Cinder
+        populates with at least ``image_id``, ``status``, ``volume_type``
+        and the chosen formats.
+        """
+        body = {"os-volume_upload_image": {
+            "image_name": image_name,
+            "force": force,
+            "container_format": container_format,
+            "disk_format": disk_format,
+            "visibility": visibility,
+            "protected": protected,
+        }}
+        data = self.action(volume_id, body) or {}
+        return data.get("os-volume_upload_image", data)
+
     def migrate(self, volume_id: str, host: str, *,
                 force_host_copy: bool = False,
                 lock_volume: bool = False) -> None:
