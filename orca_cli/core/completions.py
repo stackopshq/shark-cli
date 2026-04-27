@@ -152,3 +152,13 @@ def complete_security_groups(ctx: click.Context, param: click.Parameter, incompl
                    for sg in c.get(f"{c.network_url}/v2.0/security-groups").get("security_groups", [])],
         lambda i: CompletionItem(i["name"] or i["id"], help=i["id"]),
     )
+
+
+def complete_server_groups(ctx: click.Context, param: click.Parameter, incomplete: str) -> list[CompletionItem]:
+    """Complete server group IDs/names."""
+    return _complete(
+        ctx, incomplete, "server_groups",
+        lambda c: [{"id": sg["id"], "name": sg.get("name", "")}
+                   for sg in c.get(f"{c.compute_url}/os-server-groups").get("server_groups", [])],
+        lambda i: CompletionItem(i["id"], help=i["name"]),
+    )

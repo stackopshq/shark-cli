@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import click
 
+from orca_cli.core.completions import complete_server_groups
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.services.compute import ComputeService
@@ -40,7 +41,7 @@ def server_group_list(ctx, all_projects, output_format, columns, fit_width, max_
 
 
 @server_group.command("show")
-@click.argument("group_id")
+@click.argument("group_id", shell_complete=complete_server_groups)
 @output_options
 @click.pass_context
 def server_group_show(ctx, group_id, output_format, columns, fit_width, max_width, noindent):
@@ -88,7 +89,7 @@ def server_group_create(ctx, name, policy):
 
 
 @server_group.command("delete")
-@click.argument("group_id")
+@click.argument("group_id", shell_complete=complete_server_groups)
 @click.option("--yes", "-y", is_flag=True)
 @click.pass_context
 def server_group_delete(ctx, group_id, yes):
