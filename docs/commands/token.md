@@ -1,39 +1,14 @@
-# `orca token` — token
+# `orca token`
 
-Manage Keystone tokens.
+Inspect and revoke Keystone tokens.
 
----
+The reference below is generated from the live CLI by `mkdocs-click`. It
+always reflects the version installed.
 
-## issue
-
-Issue a token for the current credentials (show token details).
-
-```bash
-orca token issue [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-| `--noindent` | Disable JSON indentation. |
-| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
-| `--fit-width` | Fit table to terminal width. |
-| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
-| `-f, --format [table|json|value]` | |
-| `--help` | Show this message and exit. |
-
----
-
-## revoke
-
-Revoke a token.
-
-```bash
-orca token revoke [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-| `-y, --yes` | Skip confirmation. |
-| `--help` | Show this message and exit. |
-
----
+::: mkdocs-click
+    :module: orca_cli.commands.token
+    :command: token
+    :prog_name: orca token
+    :depth: 2
+    :style: table
+    :list_subcommands: true

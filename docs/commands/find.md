@@ -1,14 +1,14 @@
-# `orca backup`
+# `orca find`
 
-Trilio Freezer backup management.
+Locate a resource by partial ID or name.
 
 The reference below is generated from the live CLI by `mkdocs-click`. It
 always reflects the version installed.
 
 ::: mkdocs-click
-    :module: orca_cli.commands.backup
-    :command: backup
-    :prog_name: orca backup
+    :module: orca_cli.commands.find
+    :command: find
+    :prog_name: orca find
     :depth: 2
     :style: table
     :list_subcommands: true

@@ -1,25 +1,14 @@
-# `orca availability-zone` — availability-zone
+# `orca availability-zone`
 
-Manage availability zones (Nova).
+List availability zones across services.
 
----
+The reference below is generated from the live CLI by `mkdocs-click`. It
+always reflects the version installed.
 
-## list
-
-List availability zones.
-
-```bash
-orca availability-zone list [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-| `--long` | Show hosts and services. |
-| `--noindent` | Disable JSON indentation. |
-| `--max-width INTEGER` | Maximum table width (0 = unlimited). |
-| `--fit-width` | Fit table to terminal width. |
-| `-c, --column TEXT` | Column to include (repeatable). Shows all if |
-| `-f, --format [table|json|value]` | |
-| `--help` | Show this message and exit. |
-
----
+::: mkdocs-click
+    :module: orca_cli.commands.availability_zone
+    :command: availability_zone
+    :prog_name: orca availability-zone
+    :depth: 2
+    :style: table
+    :list_subcommands: true

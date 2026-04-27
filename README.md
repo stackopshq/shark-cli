@@ -52,13 +52,16 @@ Requires Python **3.9 – 3.14**.
 `volume` · `image` (Glance) · `object` / `container` (Swift) · `backup` (Freezer)
 
 ### Identity (Keystone)
-`project` · `user` · `role` · `domain` · `group` · `credential` · `application-credential` · `endpoint` · `endpoint-group` · `service` · `region` · `policy` · `trust` · `token` · `access-rule` · `limit` · `registered-limit` · `identity-provider` · `federation-protocol` · `mapping` · `service-provider` · `catalog`
+`project` · `user` · `role` · `domain` · `group` · `credential` · `application-credential` · `endpoint` · `endpoint-group` · `service` · `region` · `policy` · `trust` · `token` · `auth` · `access-rule` · `limit` · `registered-limit` · `catalog`
+
+### Federation (Keystone)
+`identity-provider` · `federation-protocol` · `mapping` · `service-provider`
 
 ### Platform services
 `stack` (Heat) · `loadbalancer` (Octavia) · `zone` / `recordset` (Designate) · `secret` (Barbican) · `cluster` (Magnum) · `metric` (Gnocchi) · `alarm` (Aodh) · `rating` (CloudKitty) · `placement`
 
 ### Orca-exclusive
-`overview` · `watch` · `doctor` · `audit` · `cleanup` · `export` · `find` · `ip-whois` · `quota` · `profile` · `setup`
+`overview` · `watch` · `doctor` · `audit` · `cleanup` · `export` · `find` · `ip` · `quota` · `profile` · `setup`
 
 ## Documentation
 

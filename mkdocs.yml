@@ -59,7 +59,9 @@ nav:
           - audit: commands/audit.md
           - cleanup: commands/cleanup.md
           - export: commands/export.md
+          - find: commands/find.md
           - profile: commands/profile.md
+          - setup: commands/setup.md
       - Compute:
           - server: commands/server.md
           - flavor: commands/flavor.md
@@ -98,6 +100,8 @@ nav:
       - Metrics & Alarms:
           - metric (Gnocchi): commands/metric.md
           - alarm (Aodh): commands/alarm.md
+      - Rating:
+          - rating (CloudKitty): commands/rating.md
       - Placement:
           - placement: commands/placement.md
       - Secrets:
@@ -108,6 +112,7 @@ nav:
           - domain: commands/domain.md
           - role: commands/role.md
           - group: commands/group.md
+          - policy: commands/policy.md
           - credential: commands/credential.md
           - application-credential: commands/application-credential.md
           - access-rule: commands/access-rule.md
@@ -119,6 +124,12 @@ nav:
           - region: commands/region.md
           - service: commands/service.md
           - limit: commands/limit.md
+          - registered-limit: commands/registered-limit.md
+      - Federation:
+          - identity-provider: commands/identity-provider.md
+          - federation-protocol: commands/federation-protocol.md
+          - mapping: commands/mapping.md
+          - service-provider: commands/service-provider.md
       - Utilities:
           - ip: commands/ip.md
           - limits: commands/limits.md
@@ -130,11 +141,13 @@ nav:
       - 0001 — Lazy command registration: adr/0001-lazy-command-registration.md
       - 0002 — Dual-format config file: adr/0002-dual-format-config-file.md
       - 0003 — Auth-type auto-detection: adr/0003-auth-type-auto-detection.md
-      - 0004 — No services layer (yet): adr/0004-no-services-layer.md
+      - 0004 — No services layer (superseded by 0007): adr/0004-no-services-layer.md
       - 0005 — Durable token cache: adr/0005-durable-token-cache.md
       - 0006 — Idempotent-only retries: adr/0006-idempotent-only-retries.md
       - 0007 — Incremental services layer: adr/0007-incremental-services-layer.md
       - 0008 — Command naming convention: adr/0008-command-naming-convention.md
+      - 0009 — Server boot mode policy: adr/0009-server-boot-mode-policy.md
+      - 0010 — Static completion script: adr/0010-static-completion-script.md
 
 extra_css:
   - assets/theme.css

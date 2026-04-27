@@ -1,18 +1,14 @@
-# `orca ip` — ip
+# `orca ip`
 
-IP address utilities.
+Resolve / inspect IP addresses (orca-exclusive).
 
----
+The reference below is generated from the live CLI by `mkdocs-click`. It
+always reflects the version installed.
 
-## whois
-
-Find which resource owns a given IP address.
-
-```bash
-orca ip whois [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-
----
+::: mkdocs-click
+    :module: orca_cli.commands.ip_whois
+    :command: ip_cmd
+    :prog_name: orca ip
+    :depth: 2
+    :style: table
+    :list_subcommands: true

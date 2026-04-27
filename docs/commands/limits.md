@@ -1,20 +1,14 @@
-# `orca limits` — limits
+# `orca limits`
 
-Show compute limits and quotas.
+Show absolute / rate quota limits.
 
----
+The reference below is generated from the live CLI by `mkdocs-click`. It
+always reflects the version installed.
 
-## show
-
-Show compute quotas and current usage for this project.
-
-```bash
-orca limits show [OPTIONS]
-```
-
-| Option | Description |
-|--------|-------------|
-| `--project TEXT` | Show limits for a specific project (admin). |
-| `--help` | Show this message and exit. |
-
----
+::: mkdocs-click
+    :module: orca_cli.commands.limits
+    :command: limits
+    :prog_name: orca limits
+    :depth: 2
+    :style: table
+    :list_subcommands: true
