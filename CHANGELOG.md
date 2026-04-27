@@ -4,6 +4,25 @@ All notable changes to orca are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.2] — 2026-04-27
+
+### Fixed
+
+- **`volume upload-to-image` was unusable on older Cinder
+  microversions.** The action body sent `visibility` and `protected`
+  unconditionally, even when the user accepted the Click defaults
+  (`private` / `False`). Older Cinder builds (e.g. some shipping
+  microversions still in production at large public-cloud operators)
+  reject the request with HTTP 400 — *Additional properties are not
+  allowed ('protected', 'visibility' were unexpected)* — because
+  those fields were added in a later microversion. Both flags are
+  now opt-in: omitted from the JSON body unless the user passes one
+  explicitly, in which case the value is forwarded verbatim. Glance
+  applies its own server-side defaults when the keys are absent, so
+  modern clouds see no behavioural change. `--disk-format` and
+  `--container-format` keep their hard-coded defaults — those are
+  stable across every Cinder microversion.
+
 ## [2.1.1] — 2026-04-27
 
 ### Added
