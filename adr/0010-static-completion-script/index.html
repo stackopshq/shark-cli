@@ -10,31 +10,27 @@
       
       
       
-        <link rel="canonical" href="https://stackopshq.github.io/orca-cli/adr/">
+        <link rel="canonical" href="https://stackopshq.github.io/orca-cli/adr/0010-static-completion-script/">
       
       
-        <link rel="prev" href="../commands/completion/">
-      
-      
-        <link rel="next" href="0001-lazy-command-registration/">
       
       
         
       
       
-      <link rel="icon" href="../assets/favicon.png">
+      <link rel="icon" href="../../assets/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>Index - orca</title>
+        <title>ADR-0010: Static completion script for bash/zsh - orca</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -53,9 +49,9 @@
       
     
     
-      <link rel="stylesheet" href="../assets/theme.css">
+      <link rel="stylesheet" href="../../assets/theme.css">
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -80,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#architecture-decision-records" class="md-skip">
+        <a href="#adr-0010-static-completion-script-for-bashzsh" class="md-skip">
           Skip to content
         </a>
       
@@ -96,9 +92,9 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="orca" class="md-header__button md-logo" aria-label="orca" data-md-component="logo">
+    <a href="../.." title="orca" class="md-header__button md-logo" aria-label="orca" data-md-component="logo">
       
-  <img src="../assets/logo.png" alt="logo">
+  <img src="../../assets/logo.png" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -115,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Index
+              ADR-0010: Static completion script for bash/zsh
             
           </span>
         </div>
@@ -233,9 +229,9 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="orca" class="md-nav__button md-logo" aria-label="orca" data-md-component="logo">
+    <a href="../.." title="orca" class="md-nav__button md-logo" aria-label="orca" data-md-component="logo">
       
-  <img src="../assets/logo.png" alt="logo">
+  <img src="../../assets/logo.png" alt="logo">
 
     </a>
     orca
@@ -262,7 +258,7 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -289,7 +285,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/" class="md-nav__link">
+      <a href="../../getting-started/" class="md-nav__link">
         
   
   
@@ -316,7 +312,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/" class="md-nav__link">
+      <a href="../../reference/" class="md-nav__link">
         
   
   
@@ -397,7 +393,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/" class="md-nav__link">
+      <a href="../../commands/" class="md-nav__link">
         
   
   
@@ -476,7 +472,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/overview/" class="md-nav__link">
+      <a href="../../commands/overview/" class="md-nav__link">
         
   
   
@@ -504,7 +500,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/watch/" class="md-nav__link">
+      <a href="../../commands/watch/" class="md-nav__link">
         
   
   
@@ -532,7 +528,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/doctor/" class="md-nav__link">
+      <a href="../../commands/doctor/" class="md-nav__link">
         
   
   
@@ -560,7 +556,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/audit/" class="md-nav__link">
+      <a href="../../commands/audit/" class="md-nav__link">
         
   
   
@@ -588,7 +584,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/cleanup/" class="md-nav__link">
+      <a href="../../commands/cleanup/" class="md-nav__link">
         
   
   
@@ -616,7 +612,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/export/" class="md-nav__link">
+      <a href="../../commands/export/" class="md-nav__link">
         
   
   
@@ -644,7 +640,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/profile/" class="md-nav__link">
+      <a href="../../commands/profile/" class="md-nav__link">
         
   
   
@@ -731,7 +727,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/server/" class="md-nav__link">
+      <a href="../../commands/server/" class="md-nav__link">
         
   
   
@@ -759,7 +755,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/flavor/" class="md-nav__link">
+      <a href="../../commands/flavor/" class="md-nav__link">
         
   
   
@@ -787,7 +783,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/keypair/" class="md-nav__link">
+      <a href="../../commands/keypair/" class="md-nav__link">
         
   
   
@@ -815,7 +811,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/aggregate/" class="md-nav__link">
+      <a href="../../commands/aggregate/" class="md-nav__link">
         
   
   
@@ -843,7 +839,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/availability-zone/" class="md-nav__link">
+      <a href="../../commands/availability-zone/" class="md-nav__link">
         
   
   
@@ -871,7 +867,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/compute-service/" class="md-nav__link">
+      <a href="../../commands/compute-service/" class="md-nav__link">
         
   
   
@@ -899,7 +895,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/hypervisor/" class="md-nav__link">
+      <a href="../../commands/hypervisor/" class="md-nav__link">
         
   
   
@@ -927,7 +923,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/server-group/" class="md-nav__link">
+      <a href="../../commands/server-group/" class="md-nav__link">
         
   
   
@@ -955,7 +951,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/event/" class="md-nav__link">
+      <a href="../../commands/event/" class="md-nav__link">
         
   
   
@@ -983,7 +979,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/usage/" class="md-nav__link">
+      <a href="../../commands/usage/" class="md-nav__link">
         
   
   
@@ -1070,7 +1066,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/image/" class="md-nav__link">
+      <a href="../../commands/image/" class="md-nav__link">
         
   
   
@@ -1157,7 +1153,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/volume/" class="md-nav__link">
+      <a href="../../commands/volume/" class="md-nav__link">
         
   
   
@@ -1185,7 +1181,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/backup/" class="md-nav__link">
+      <a href="../../commands/backup/" class="md-nav__link">
         
   
   
@@ -1272,7 +1268,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/container/" class="md-nav__link">
+      <a href="../../commands/container/" class="md-nav__link">
         
   
   
@@ -1300,7 +1296,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/object/" class="md-nav__link">
+      <a href="../../commands/object/" class="md-nav__link">
         
   
   
@@ -1387,7 +1383,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/network/" class="md-nav__link">
+      <a href="../../commands/network/" class="md-nav__link">
         
   
   
@@ -1415,7 +1411,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/floating-ip/" class="md-nav__link">
+      <a href="../../commands/floating-ip/" class="md-nav__link">
         
   
   
@@ -1443,7 +1439,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/security-group/" class="md-nav__link">
+      <a href="../../commands/security-group/" class="md-nav__link">
         
   
   
@@ -1471,7 +1467,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/qos/" class="md-nav__link">
+      <a href="../../commands/qos/" class="md-nav__link">
         
   
   
@@ -1499,7 +1495,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/subnet-pool/" class="md-nav__link">
+      <a href="../../commands/subnet-pool/" class="md-nav__link">
         
   
   
@@ -1527,7 +1523,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/trunk/" class="md-nav__link">
+      <a href="../../commands/trunk/" class="md-nav__link">
         
   
   
@@ -1614,7 +1610,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/loadbalancer/" class="md-nav__link">
+      <a href="../../commands/loadbalancer/" class="md-nav__link">
         
   
   
@@ -1701,7 +1697,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/zone/" class="md-nav__link">
+      <a href="../../commands/zone/" class="md-nav__link">
         
   
   
@@ -1729,7 +1725,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/recordset/" class="md-nav__link">
+      <a href="../../commands/recordset/" class="md-nav__link">
         
   
   
@@ -1816,7 +1812,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/stack/" class="md-nav__link">
+      <a href="../../commands/stack/" class="md-nav__link">
         
   
   
@@ -1903,7 +1899,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/cluster/" class="md-nav__link">
+      <a href="../../commands/cluster/" class="md-nav__link">
         
   
   
@@ -1990,7 +1986,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/metric/" class="md-nav__link">
+      <a href="../../commands/metric/" class="md-nav__link">
         
   
   
@@ -2018,7 +2014,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/alarm/" class="md-nav__link">
+      <a href="../../commands/alarm/" class="md-nav__link">
         
   
   
@@ -2105,7 +2101,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/placement/" class="md-nav__link">
+      <a href="../../commands/placement/" class="md-nav__link">
         
   
   
@@ -2192,7 +2188,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/secret/" class="md-nav__link">
+      <a href="../../commands/secret/" class="md-nav__link">
         
   
   
@@ -2279,7 +2275,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/user/" class="md-nav__link">
+      <a href="../../commands/user/" class="md-nav__link">
         
   
   
@@ -2307,7 +2303,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/project/" class="md-nav__link">
+      <a href="../../commands/project/" class="md-nav__link">
         
   
   
@@ -2335,7 +2331,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/domain/" class="md-nav__link">
+      <a href="../../commands/domain/" class="md-nav__link">
         
   
   
@@ -2363,7 +2359,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/role/" class="md-nav__link">
+      <a href="../../commands/role/" class="md-nav__link">
         
   
   
@@ -2391,7 +2387,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/group/" class="md-nav__link">
+      <a href="../../commands/group/" class="md-nav__link">
         
   
   
@@ -2419,7 +2415,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/credential/" class="md-nav__link">
+      <a href="../../commands/credential/" class="md-nav__link">
         
   
   
@@ -2447,7 +2443,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/application-credential/" class="md-nav__link">
+      <a href="../../commands/application-credential/" class="md-nav__link">
         
   
   
@@ -2475,7 +2471,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/access-rule/" class="md-nav__link">
+      <a href="../../commands/access-rule/" class="md-nav__link">
         
   
   
@@ -2503,7 +2499,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/trust/" class="md-nav__link">
+      <a href="../../commands/trust/" class="md-nav__link">
         
   
   
@@ -2531,7 +2527,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/token/" class="md-nav__link">
+      <a href="../../commands/token/" class="md-nav__link">
         
   
   
@@ -2559,7 +2555,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/auth/" class="md-nav__link">
+      <a href="../../commands/auth/" class="md-nav__link">
         
   
   
@@ -2587,7 +2583,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/endpoint/" class="md-nav__link">
+      <a href="../../commands/endpoint/" class="md-nav__link">
         
   
   
@@ -2615,7 +2611,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/endpoint-group/" class="md-nav__link">
+      <a href="../../commands/endpoint-group/" class="md-nav__link">
         
   
   
@@ -2643,7 +2639,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/region/" class="md-nav__link">
+      <a href="../../commands/region/" class="md-nav__link">
         
   
   
@@ -2671,7 +2667,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/service/" class="md-nav__link">
+      <a href="../../commands/service/" class="md-nav__link">
         
   
   
@@ -2699,7 +2695,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/limit/" class="md-nav__link">
+      <a href="../../commands/limit/" class="md-nav__link">
         
   
   
@@ -2786,7 +2782,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/ip/" class="md-nav__link">
+      <a href="../../commands/ip/" class="md-nav__link">
         
   
   
@@ -2814,7 +2810,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/limits/" class="md-nav__link">
+      <a href="../../commands/limits/" class="md-nav__link">
         
   
   
@@ -2842,7 +2838,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/quota/" class="md-nav__link">
+      <a href="../../commands/quota/" class="md-nav__link">
         
   
   
@@ -2870,7 +2866,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/catalog/" class="md-nav__link">
+      <a href="../../commands/catalog/" class="md-nav__link">
         
   
   
@@ -2898,7 +2894,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/completion/" class="md-nav__link">
+      <a href="../../commands/completion/" class="md-nav__link">
         
   
   
@@ -2938,8 +2934,6 @@
       
   
   
-    
-  
   
   
     
@@ -2952,11 +2946,13 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
         
           
           <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
@@ -2977,7 +2973,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -2992,37 +2988,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Index
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
         
   
   
@@ -3038,37 +3007,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#index" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Index
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -3081,7 +3019,7 @@
   
   
     <li class="md-nav__item">
-      <a href="0001-lazy-command-registration/" class="md-nav__link">
+      <a href="../0001-lazy-command-registration/" class="md-nav__link">
         
   
   
@@ -3109,7 +3047,7 @@
   
   
     <li class="md-nav__item">
-      <a href="0002-dual-format-config-file/" class="md-nav__link">
+      <a href="../0002-dual-format-config-file/" class="md-nav__link">
         
   
   
@@ -3137,7 +3075,7 @@
   
   
     <li class="md-nav__item">
-      <a href="0003-auth-type-auto-detection/" class="md-nav__link">
+      <a href="../0003-auth-type-auto-detection/" class="md-nav__link">
         
   
   
@@ -3165,7 +3103,7 @@
   
   
     <li class="md-nav__item">
-      <a href="0004-no-services-layer/" class="md-nav__link">
+      <a href="../0004-no-services-layer/" class="md-nav__link">
         
   
   
@@ -3193,7 +3131,7 @@
   
   
     <li class="md-nav__item">
-      <a href="0005-durable-token-cache/" class="md-nav__link">
+      <a href="../0005-durable-token-cache/" class="md-nav__link">
         
   
   
@@ -3221,7 +3159,7 @@
   
   
     <li class="md-nav__item">
-      <a href="0006-idempotent-only-retries/" class="md-nav__link">
+      <a href="../0006-idempotent-only-retries/" class="md-nav__link">
         
   
   
@@ -3249,7 +3187,7 @@
   
   
     <li class="md-nav__item">
-      <a href="0007-incremental-services-layer/" class="md-nav__link">
+      <a href="../0007-incremental-services-layer/" class="md-nav__link">
         
   
   
@@ -3277,7 +3215,7 @@
   
   
     <li class="md-nav__item">
-      <a href="0008-command-naming-convention/" class="md-nav__link">
+      <a href="../0008-command-naming-convention/" class="md-nav__link">
         
   
   
@@ -3332,10 +3270,104 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#index" class="md-nav__link">
+  <a href="#context" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Index
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#consequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Consequences">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#positive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Positive
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#negative" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Negative
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#neutral" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Neutral
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alternatives-considered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alternatives considered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related
       
     </span>
   </a>
@@ -3362,42 +3394,116 @@
   
 
 
-<h1 id="architecture-decision-records">Architecture Decision Records<a class="headerlink" href="#architecture-decision-records" title="Permanent link">&para;</a></h1>
-<p>This folder records the <em>non-obvious</em> design decisions behind orca — the
-choices a future contributor would otherwise have to reverse-engineer from
-the code, and where a casual refactor could silently undo a deliberate
-trade-off.</p>
-<p>ADRs are intentionally short (one page each). Format:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a># ADR-NNNN: Title
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>**Status**: Accepted | Superseded by ADR-MMMM | Deprecated
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>**Date**: YYYY-MM-DD
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>## Context
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>What problem we faced.
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>## Decision
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>What we chose to do.
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>## Consequences
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>- Positive: ...
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>- Negative / trade-off: ...
+<h1 id="adr-0010-static-completion-script-for-bashzsh">ADR-0010: Static completion script for bash/zsh<a class="headerlink" href="#adr-0010-static-completion-script-for-bashzsh" title="Permanent link">&para;</a></h1>
+<p><strong>Status</strong>: Accepted
+<strong>Date</strong>: 2026-04-27</p>
+<h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
+<p>Up to and including v2.0.1, <code>orca completion install bash</code> (and the zsh
+equivalent) appended a single line to the user's rc file:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">eval</span><span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span><span class="nv">_ORCA_COMPLETE</span><span class="o">=</span>bash_source<span class="w"> </span>orca<span class="k">)</span><span class="s2">&quot;</span>
 </code></pre></div>
-<p>When a decision is reversed, <em>don't delete the ADR</em> — mark it
-<code>Superseded by ADR-MMMM</code> and add a new file. The history of choices is part
-of the documentation.</p>
-<h2 id="index">Index<a class="headerlink" href="#index" title="Permanent link">&para;</a></h2>
+<p>This is the canonical Click recipe and works correctly — it asks Click to
+print the bash completion script on stdout, which <code>eval</code> then executes to
+register the completion handler.</p>
+<p>The cost is that <strong>the eval re-runs every time the shell starts</strong>:</p>
 <ul>
-<li><a href="0001-lazy-command-registration/">ADR-0001 — Lazy command registration</a></li>
-<li><a href="0002-dual-format-config-file/">ADR-0002 — Dual-format configuration file</a></li>
-<li><a href="0003-auth-type-auto-detection/">ADR-0003 — Auth-type auto-detection</a></li>
-<li><a href="0004-no-services-layer/">ADR-0004 — No services layer (yet)</a> <em>(superseded by ADR-0007)</em></li>
-<li><a href="0005-durable-token-cache/">ADR-0005 — Durable, atomic token cache</a></li>
-<li><a href="0006-idempotent-only-retries/">ADR-0006 — Idempotent-only HTTP retries</a></li>
-<li><a href="0007-incremental-services-layer/">ADR-0007 — Incremental services layer with typed models</a></li>
-<li><a href="0008-command-naming-convention/">ADR-0008 — Command naming follows openstackclient convention</a></li>
-<li><a href="0009-server-boot-mode-policy/">ADR-0009 — Server boot mode defaults to boot-from-image</a></li>
-<li><a href="0010-static-completion-script/">ADR-0010 — Static completion script for bash/zsh</a></li>
+<li>bash spawns <code>orca</code></li>
+<li><code>orca_cli/main.py</code> does an unconditional <code>pkgutil.iter_modules</code> over
+  <code>orca_cli/commands/</code> (≈60 modules), each pulling in click, rich, httpx,
+  the service layer, the typed models, …</li>
+<li>Click's <code>BashComplete.source()</code> then calls <code>_check_version()</code>, which
+  spawns the shell once more (<code>subprocess.run(["bash", "--version"])</code>) to
+  detect its version</li>
+<li>The generated script is printed and discarded</li>
+</ul>
+<p>The wall-clock cost is 1–3 s per shell startup on a developer laptop, and
+substantially worse under SSH multiplexing, slow disks, or when the user
+hits Enter impatiently. A real incident on 2026-04-27 produced <em>hundreds</em>
+of concurrent <code>orca</code> processes piled up on a single SSH login — every
+process stuck inside <code>_check_version()</code> waiting on its <code>bash --version</code>
+subprocess. The user-visible symptom was a login that hung for tens of
+seconds, then dumped a multi-thousand-line traceback when the user
+finally Ctrl-C'd.</p>
+<h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
+<p><strong>Install bash/zsh completion the same way fish has always worked: as
+a static script generated once at install time, sourced from the rc.</strong></p>
+<p>The install command now:</p>
+<ol>
+<li>Generates the completion script <em>once</em> by spawning
+   <code>_ORCA_COMPLETE=&lt;shell&gt;_source orca</code> with the output captured.</li>
+<li>Writes the script to <code>$XDG_DATA_HOME/orca/completion.&lt;shell&gt;</code>
+   (<code>~/.local/share/orca/completion.&lt;shell&gt;</code> per the XDG Base Directory
+   spec).</li>
+<li>Rewrites the rc file so it sources that static file at login:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># orca-cli shell completion (static script — see ADR 0010)</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="o">[</span><span class="w"> </span>-f<span class="w"> </span>~/.local/share/orca/completion.bash<span class="w"> </span><span class="o">]</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>~/.local/share/orca/completion.bash
+</code></pre></div>
+<ol>
+<li><strong>Migrates</strong> any pre-existing <code>eval "$(_ORCA_COMPLETE=...)"</code> line out
+   of the rc as a side-effect, so a user upgrading from v2.0.x just
+   re-runs <code>orca completion install bash</code> and is silently moved to the
+   fast path. Surrounding rc content is preserved.</li>
+</ol>
+<p><code>source &lt;file&gt;</code> of a ≈100-line bash script is on the order of microseconds.
+<strong>No <code>orca</code> process is spawned at login</strong> under this design.</p>
+<h2 id="consequences">Consequences<a class="headerlink" href="#consequences" title="Permanent link">&para;</a></h2>
+<h3 id="positive">Positive<a class="headerlink" href="#positive" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Login startup is no longer paying for orca import time.</strong> The
+  pile-up failure mode disappears outright — there is no orca process
+  to pile up.</li>
+<li>The install is <strong>idempotent and self-migrating</strong>: re-running
+  <code>orca completion install bash</code> on an old config moves the user to
+  the new pattern without manual intervention.</li>
+<li>The pattern matches what fish already does, so the install layer is
+  more uniform across shells.</li>
+</ul>
+<h3 id="negative">Negative<a class="headerlink" href="#negative" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>The static script goes stale when the orca command tree changes.</strong>
+  Adding/renaming a command requires regenerating the script — but
+  Click's bash/zsh source script delegates the actual completion to
+  <code>_ORCA_COMPLETE=&lt;shell&gt;_complete orca</code> at tab time, so what's frozen
+  is only the registration glue, not the command list. In practice this
+  has never been a problem for fish either.</li>
+<li><strong>Two files are now installed instead of one rc line.</strong> Uninstall
+  needs to remove both. Documented in the install message.</li>
+</ul>
+<h3 id="neutral">Neutral<a class="headerlink" href="#neutral" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The lazy completion callbacks in <code>orca_cli/core/completions.py</code> are
+  unchanged. Tab completion still calls <code>orca</code> on demand to fetch
+  resource IDs/names, with the same per-profile cache and 5-minute TTL
+  introduced in v2.0.1.</li>
+</ul>
+<h2 id="alternatives-considered">Alternatives considered<a class="headerlink" href="#alternatives-considered" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Optimise <code>orca</code>'s import path (lazy command registration).</strong> Possible
+  but the savings are bounded by Click+rich+httpx import cost (~250 ms
+  on a warm cache, more on cold). Even at 100 ms per login this is not
+  free, and it does nothing about Click's <code>_check_version()</code> subprocess.</li>
+<li><strong>Stop calling <code>_check_version()</code>.</strong> Would require monkey-patching
+  Click internals; brittle and breaks if Click changes the contract.</li>
+<li><strong>Precompile orca to a single binary (e.g. PyInstaller).</strong> Solves the
+  import cost but adds a release-engineering burden disproportionate to
+  the problem and doesn't help users who installed via pip.</li>
+</ul>
+<h2 id="migration">Migration<a class="headerlink" href="#migration" title="Permanent link">&para;</a></h2>
+<p>Existing users on v2.0.1 or earlier:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># One command — detects the legacy eval line and replaces it.</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>orca<span class="w"> </span>completion<span class="w"> </span>install<span class="w"> </span>bash<span class="w">    </span><span class="c1"># or zsh</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nb">exec</span><span class="w"> </span><span class="nv">$SHELL</span><span class="w">                     </span><span class="c1"># pick up the new sourced file</span>
+</code></pre></div>
+<p>If they prefer to do it by hand, the manual instructions printed by
+<code>orca completion show bash</code> describe the same two-step flow.</p>
+<h2 id="related">Related<a class="headerlink" href="#related" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>orca_cli/core/shell_completion.py</code> — install logic.</li>
+<li><code>orca_cli/commands/completion.py</code> — user-facing command and
+  instructions.</li>
+<li><code>tests/test_setup.py::TestInstallCompletionBashZsh</code> — covers the
+  rewrite, the idempotency, and the legacy-eval migration.</li>
 </ul>
 
 
@@ -3454,10 +3560,10 @@ of the documentation.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>
