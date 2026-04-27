@@ -31667,7 +31667,10 @@ dimension) so the most-saturated hypervisors surface at the top.</p>
 <p>Examples:
   orca image create my-image
   orca image create my-image --file ubuntu.qcow2
-  orca image create my-image --disk-format raw --file disk.img</p>
+  orca image create my-image --disk-format raw --file disk.img
+  orca image create my-image --property os_distro=ubuntu \
+                             --property os_version=24.04 \
+                             --property hw_qemu_guest_agent=yes</p>
 <p><strong>Usage:</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-184-1" name="__codelineno-184-1" href="#__codelineno-184-1"></a>orca image create [OPTIONS] NAME
 </code></pre></div>
@@ -31716,6 +31719,12 @@ dimension) so the most-saturated hypervisors surface at the top.</p>
 <td><code>--file</code></td>
 <td>path</td>
 <td>Upload image data from file immediately.</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>--property</code></td>
+<td>text</td>
+<td>Custom image property to set on creation (e.g. os_distro=ubuntu). Repeatable. Values may contain '='; only the first '=' splits.</td>
 <td>None</td>
 </tr>
 <tr>
@@ -32177,7 +32186,12 @@ Requires admin credentials or the ability to act on behalf of both projects.</p>
 </tbody>
 </table>
 <h4 id="orca-image-show">orca image show<a class="headerlink" href="#orca-image-show" title="Permanent link">&para;</a></h4>
-<p>Show image details.</p>
+<p>Show image details, including custom properties and integrity hashes.</p>
+<p>Custom properties (anything outside the Glance v2 standard schema, e.g.
+os_distro, os_version, hw_qemu_guest_agent) are surfaced separately:
+  table  →  rendered as a "Properties" sub-table after the main table
+  json   →  nested under a top-level "properties" key
+  value  →  printed after the standard fields, one <code>KEY VALUE</code> per line</p>
 <p><strong>Usage:</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-197-1" name="__codelineno-197-1" href="#__codelineno-197-1"></a>orca image show [OPTIONS] IMAGE_ID
 </code></pre></div>
@@ -32581,9 +32595,16 @@ are excluded from the scan.</p>
 </table>
 <h4 id="orca-image-update">orca image update<a class="headerlink" href="#orca-image-update" title="Permanent link">&para;</a></h4>
 <p>Update image properties (JSON-Patch).</p>
+<p>Builds one atomic JSON-Patch document from all flags. <code>--property</code> emits
+<code>add</code> when the key is absent and <code>replace</code> when it already exists, so
+untouched properties survive. <code>--remove-property</code> is strict by default
+and turns idempotent under <code>--ignore-missing</code>.</p>
 <p>Examples:
   orca image update <id> --name new-name
-  orca image update <id> --visibility shared</p>
+  orca image update <id> --visibility shared
+  orca image update <id> --property os_distro=ubuntu --property os_version=24.04
+  orca image update <id> --remove-property hw_qemu_guest_agent
+  orca image update <id> --remove-property foo --ignore-missing</p>
 <p><strong>Usage:</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-206-1" name="__codelineno-206-1" href="#__codelineno-206-1"></a>orca image update [OPTIONS] IMAGE_ID
 </code></pre></div>
@@ -32621,6 +32642,24 @@ are excluded from the scan.</p>
 <td>choice (<code>private</code> &#x7C; <code>shared</code> &#x7C; <code>community</code> &#x7C; <code>public</code>)</td>
 <td>New visibility.</td>
 <td>None</td>
+</tr>
+<tr>
+<td><code>--property</code></td>
+<td>text</td>
+<td>Set or replace a custom image property (KEY=VALUE). Repeatable. Untouched properties are preserved.</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>--remove-property</code></td>
+<td>text</td>
+<td>Remove a custom image property by key. Repeatable. Errors if the key is absent (use --ignore-missing for idempotent runs).</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>--ignore-missing</code></td>
+<td>boolean</td>
+<td>With --remove-property: silently skip keys that aren't on the image.</td>
+<td><code>False</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>

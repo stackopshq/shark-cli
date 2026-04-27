@@ -4065,7 +4065,7 @@
 <hr />
 <h2 id="create">create<a class="headerlink" href="#create" title="Permanent link">&para;</a></h2>
 <p>Create a new image (and optionally upload data).</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>orca<span class="w"> </span>image<span class="w"> </span>create<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>orca<span class="w"> </span>image<span class="w"> </span>create<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span>NAME
 </code></pre></div>
 <table>
 <thead>
@@ -4100,15 +4100,24 @@
 <td>Upload image data from file immediately.</td>
 </tr>
 <tr>
+<td><code>--property KEY=VALUE</code></td>
+<td>Custom image property to set on creation (repeatable). Values may contain <code>=</code> — only the first <code>=</code> splits. Keys must match <code>^[A-Za-z0-9_:.\-]{1,255}$</code>.</td>
+</tr>
+<tr>
 <td><code>--help</code></td>
 <td>Show this message and exit.</td>
 </tr>
 </tbody>
 </table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>orca<span class="w"> </span>image<span class="w"> </span>create<span class="w"> </span>ubuntu-24.04<span class="w"> </span>--file<span class="w"> </span>ubuntu.qcow2<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span>--property<span class="w"> </span><span class="nv">os_distro</span><span class="o">=</span>ubuntu<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span>--property<span class="w"> </span><span class="nv">os_version</span><span class="o">=</span><span class="m">24</span>.04<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span>--property<span class="w"> </span><span class="nv">hw_qemu_guest_agent</span><span class="o">=</span>yes
+</code></pre></div>
 <hr />
 <h2 id="deactivate">deactivate<a class="headerlink" href="#deactivate" title="Permanent link">&para;</a></h2>
 <p>Deactivate an image (make data unavailable).</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>orca<span class="w"> </span>image<span class="w"> </span>deactivate<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>orca<span class="w"> </span>image<span class="w"> </span>deactivate<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </code></pre></div>
 <table>
 <thead>
@@ -4127,7 +4136,7 @@
 <hr />
 <h2 id="delete">delete<a class="headerlink" href="#delete" title="Permanent link">&para;</a></h2>
 <p>Delete an image.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>orca<span class="w"> </span>image<span class="w"> </span>delete<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>orca<span class="w"> </span>image<span class="w"> </span>delete<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </code></pre></div>
 <table>
 <thead>
@@ -4150,7 +4159,7 @@
 <hr />
 <h2 id="download">download<a class="headerlink" href="#download" title="Permanent link">&para;</a></h2>
 <p>Download image data to a local file.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>orca<span class="w"> </span>image<span class="w"> </span>download<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>orca<span class="w"> </span>image<span class="w"> </span>download<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </code></pre></div>
 <table>
 <thead>
@@ -4173,7 +4182,7 @@
 <hr />
 <h2 id="import">import<a class="headerlink" href="#import" title="Permanent link">&para;</a></h2>
 <p>Import image data using the Glance v2 import API.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>orca<span class="w"> </span>image<span class="w"> </span>import<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>orca<span class="w"> </span>image<span class="w"> </span>import<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </code></pre></div>
 <table>
 <thead>
@@ -4204,7 +4213,7 @@
 <hr />
 <h2 id="list">list<a class="headerlink" href="#list" title="Permanent link">&para;</a></h2>
 <p>List available images.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>orca<span class="w"> </span>image<span class="w"> </span>list<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>orca<span class="w"> </span>image<span class="w"> </span>list<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </code></pre></div>
 <table>
 <thead>
@@ -4243,7 +4252,7 @@
 <hr />
 <h2 id="member-create">member-create<a class="headerlink" href="#member-create" title="Permanent link">&para;</a></h2>
 <p>PROJECT_ID</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>orca<span class="w"> </span>image<span class="w"> </span>member-create<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>orca<span class="w"> </span>image<span class="w"> </span>member-create<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </code></pre></div>
 <table>
 <thead>
@@ -4262,7 +4271,7 @@
 <hr />
 <h2 id="member-delete">member-delete<a class="headerlink" href="#member-delete" title="Permanent link">&para;</a></h2>
 <p>PROJECT_ID</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>orca<span class="w"> </span>image<span class="w"> </span>member-delete<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>orca<span class="w"> </span>image<span class="w"> </span>member-delete<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </code></pre></div>
 <table>
 <thead>
@@ -4285,7 +4294,7 @@
 <hr />
 <h2 id="member-list">member-list<a class="headerlink" href="#member-list" title="Permanent link">&para;</a></h2>
 <p>List all projects that have access to a shared image.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>orca<span class="w"> </span>image<span class="w"> </span>member-list<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>orca<span class="w"> </span>image<span class="w"> </span>member-list<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </code></pre></div>
 <table>
 <thead>
@@ -4324,7 +4333,7 @@
 <hr />
 <h2 id="member-set">member-set<a class="headerlink" href="#member-set" title="Permanent link">&para;</a></h2>
 <p>Accept, reject, or reset a shared image invitation.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>orca<span class="w"> </span>image<span class="w"> </span>member-set<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>orca<span class="w"> </span>image<span class="w"> </span>member-set<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </code></pre></div>
 <table>
 <thead>
@@ -4347,7 +4356,7 @@
 <hr />
 <h2 id="member-show">member-show<a class="headerlink" href="#member-show" title="Permanent link">&para;</a></h2>
 <p>Show a specific project's membership status for a shared image.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>orca<span class="w"> </span>image<span class="w"> </span>member-show<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>orca<span class="w"> </span>image<span class="w"> </span>member-show<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </code></pre></div>
 <table>
 <thead>
@@ -4386,7 +4395,7 @@
 <hr />
 <h2 id="reactivate">reactivate<a class="headerlink" href="#reactivate" title="Permanent link">&para;</a></h2>
 <p>Reactivate a deactivated image.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>orca<span class="w"> </span>image<span class="w"> </span>reactivate<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>orca<span class="w"> </span>image<span class="w"> </span>reactivate<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </code></pre></div>
 <table>
 <thead>
@@ -4405,7 +4414,7 @@
 <hr />
 <h2 id="share-and-accept">share-and-accept<a class="headerlink" href="#share-and-accept" title="Permanent link">&para;</a></h2>
 <p>PROJECT_ID</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>orca<span class="w"> </span>image<span class="w"> </span>share-and-accept<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>orca<span class="w"> </span>image<span class="w"> </span>share-and-accept<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </code></pre></div>
 <table>
 <thead>
@@ -4427,9 +4436,23 @@
 </table>
 <hr />
 <h2 id="show">show<a class="headerlink" href="#show" title="Permanent link">&para;</a></h2>
-<p>Show image details.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>orca<span class="w"> </span>image<span class="w"> </span>show<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<p>Show image details, including custom properties and integrity hashes.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>orca<span class="w"> </span>image<span class="w"> </span>show<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span>IMAGE_ID
 </code></pre></div>
+<p>Custom properties (anything outside the Glance v2 standard schema, e.g.
+<code>os_distro</code>, <code>os_version</code>, <code>hw_qemu_guest_agent</code>, <code>cinder_img_volume_type</code>)
+are surfaced separately:</p>
+<ul>
+<li><strong>table</strong> — rendered as a <code>Properties</code> sub-table after the main table,
+  sorted by key.</li>
+<li><strong>json</strong> — exposed both at the top level (mirroring the raw Glance
+  response shape, so existing scripts using <code>jq .os_distro</code> keep working)
+  and under a new top-level <code>"properties"</code> aggregate so callers can also
+  do <code>orca image show &lt;id&gt; -f json | jq .properties</code>.</li>
+<li><strong>value</strong> — printed after the standard fields, one <code>KEY VALUE</code> per line.</li>
+</ul>
+<p>Integrity fields (<code>checksum</code>, <code>os_hash_algo</code>, <code>os_hash_value</code>, <code>direct_url</code>)
+and <code>tags</code> are always included as standard fields when Glance returns them.</p>
 <table>
 <thead>
 <tr>
@@ -4452,7 +4475,7 @@
 </tr>
 <tr>
 <td><code>-c, --column TEXT</code></td>
-<td>Column to include (repeatable). Shows all if</td>
+<td>Column to include (repeatable). Shows all if omitted.</td>
 </tr>
 <tr>
 <td><code>-f, --format [table|json|value]</code></td>
@@ -4467,7 +4490,7 @@
 <hr />
 <h2 id="shrink">shrink<a class="headerlink" href="#shrink" title="Permanent link">&para;</a></h2>
 <p>Convert a raw image to qcow2 with compression to save space.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>orca<span class="w"> </span>image<span class="w"> </span>shrink<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>orca<span class="w"> </span>image<span class="w"> </span>shrink<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </code></pre></div>
 <table>
 <thead>
@@ -4490,7 +4513,7 @@
 <hr />
 <h2 id="stage">stage<a class="headerlink" href="#stage" title="Permanent link">&para;</a></h2>
 <p>Upload image data to the staging area (interruptible import).</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>orca<span class="w"> </span>image<span class="w"> </span>stage<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>orca<span class="w"> </span>image<span class="w"> </span>stage<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </code></pre></div>
 <table>
 <thead>
@@ -4509,7 +4532,7 @@
 <hr />
 <h2 id="stores-info">stores-info<a class="headerlink" href="#stores-info" title="Permanent link">&para;</a></h2>
 <p>List available Glance storage backends (multi-store only).</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>orca<span class="w"> </span>image<span class="w"> </span>stores-info<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>orca<span class="w"> </span>image<span class="w"> </span>stores-info<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </code></pre></div>
 <table>
 <thead>
@@ -4552,7 +4575,7 @@
 <hr />
 <h2 id="tag-add">tag-add<a class="headerlink" href="#tag-add" title="Permanent link">&para;</a></h2>
 <p>Add a tag to an image.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>orca<span class="w"> </span>image<span class="w"> </span>tag-add<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>orca<span class="w"> </span>image<span class="w"> </span>tag-add<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </code></pre></div>
 <table>
 <thead>
@@ -4571,7 +4594,7 @@
 <hr />
 <h2 id="tag-delete">tag-delete<a class="headerlink" href="#tag-delete" title="Permanent link">&para;</a></h2>
 <p>Remove a tag from an image.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>orca<span class="w"> </span>image<span class="w"> </span>tag-delete<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>orca<span class="w"> </span>image<span class="w"> </span>tag-delete<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </code></pre></div>
 <table>
 <thead>
@@ -4590,7 +4613,7 @@
 <hr />
 <h2 id="task-list">task-list<a class="headerlink" href="#task-list" title="Permanent link">&para;</a></h2>
 <p>List Glance async tasks.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>orca<span class="w"> </span>image<span class="w"> </span>task-list<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>orca<span class="w"> </span>image<span class="w"> </span>task-list<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </code></pre></div>
 <table>
 <thead>
@@ -4637,7 +4660,7 @@
 <hr />
 <h2 id="task-show">task-show<a class="headerlink" href="#task-show" title="Permanent link">&para;</a></h2>
 <p>Show details of a Glance async task.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>orca<span class="w"> </span>image<span class="w"> </span>task-show<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>orca<span class="w"> </span>image<span class="w"> </span>task-show<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </code></pre></div>
 <table>
 <thead>
@@ -4676,7 +4699,7 @@
 <hr />
 <h2 id="unused">unused<a class="headerlink" href="#unused" title="Permanent link">&para;</a></h2>
 <p>Find images not used by any server instance.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>orca<span class="w"> </span>image<span class="w"> </span>unused<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>orca<span class="w"> </span>image<span class="w"> </span>unused<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </code></pre></div>
 <table>
 <thead>
@@ -4707,8 +4730,13 @@
 <hr />
 <h2 id="update">update<a class="headerlink" href="#update" title="Permanent link">&para;</a></h2>
 <p>Update image properties (JSON-Patch).</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>orca<span class="w"> </span>image<span class="w"> </span>update<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>orca<span class="w"> </span>image<span class="w"> </span>update<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span>IMAGE_ID
 </code></pre></div>
+<p>All flags compose into a single atomic JSON-Patch document.
+<code>--property</code> emits <code>add</code> when the key is absent on the image and <code>replace</code> when
+it already exists, so untouched properties survive. <code>--remove-property</code> is
+strict by default (errors if the key is absent) and turns idempotent under
+<code>--ignore-missing</code>.</p>
 <table>
 <thead>
 <tr>
@@ -4734,15 +4762,31 @@
 <td></td>
 </tr>
 <tr>
+<td><code>--property KEY=VALUE</code></td>
+<td>Set or replace a custom image property. Repeatable.</td>
+</tr>
+<tr>
+<td><code>--remove-property KEY</code></td>
+<td>Remove a custom image property by key. Repeatable.</td>
+</tr>
+<tr>
+<td><code>--ignore-missing</code></td>
+<td>With <code>--remove-property</code>: silently skip keys that are not present on the image.</td>
+</tr>
+<tr>
 <td><code>--help</code></td>
 <td>Show this message and exit.</td>
 </tr>
 </tbody>
 </table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>orca<span class="w"> </span>image<span class="w"> </span>update<span class="w"> </span>&lt;id&gt;<span class="w"> </span>--property<span class="w"> </span><span class="nv">os_distro</span><span class="o">=</span>ubuntu<span class="w"> </span>--property<span class="w"> </span><span class="nv">os_version</span><span class="o">=</span><span class="m">24</span>.04
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>orca<span class="w"> </span>image<span class="w"> </span>update<span class="w"> </span>&lt;id&gt;<span class="w"> </span>--remove-property<span class="w"> </span>hw_qemu_guest_agent
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>orca<span class="w"> </span>image<span class="w"> </span>update<span class="w"> </span>&lt;id&gt;<span class="w"> </span>--remove-property<span class="w"> </span>foo<span class="w"> </span>--ignore-missing
+</code></pre></div>
 <hr />
 <h2 id="upload">upload<a class="headerlink" href="#upload" title="Permanent link">&para;</a></h2>
 <p>Upload image data from a local file.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>orca<span class="w"> </span>image<span class="w"> </span>upload<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>orca<span class="w"> </span>image<span class="w"> </span>upload<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </code></pre></div>
 <table>
 <thead>
