@@ -4,6 +4,29 @@ All notable changes to orca are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.1] — 2026-04-27
+
+### Fixed
+
+- **Documentation site overhaul: per-command pages are now generated
+  from the live CLI.** ``docs/commands/*.md`` had silently rotted
+  since the ADR-0008 nesting migration in 2.0.0 — pages still showed
+  the legacy hyphenated forms (``volume attachment-create``,
+  ``server create-image``, …) and ``getting-started.md`` still
+  recommended ``eval "$(_ORCA_COMPLETE=bash_source orca)"`` as the
+  bash completion install (the snippet ADR-0010 made obsolete back in
+  2.1.0). The hand-written layer is replaced by ``mkdocs-click``
+  wrappers, one per top-level command, so the rendered help can no
+  longer drift from ``orca <cmd> --help``. ``scripts/gen-command-docs.py``
+  regenerates the wrapper files on demand. The single-page
+  ``docs/reference.md`` (already auto-generated) is unchanged. The
+  ``docs/index.md``, ``docs/commands/index.md``, ``docs/getting-started.md``
+  and ``README.md`` landing pages were rewritten to advertise the
+  full 2.2.0 surface (federation, CloudKitty rating,
+  ``volume upload-to-image``, the new completion-install flow). The
+  mkdocs nav now lists the previously orphan ADR 0009 (server boot
+  mode policy) and 0010 (static completion script).
+
 ## [2.2.0] — 2026-04-27
 
 ### Fixed
