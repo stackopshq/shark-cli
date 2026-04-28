@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from orca_cli.core.client import OrcaClient
+from orca_cli.core.client import OrcaClient, with_version
 from orca_cli.models.key_manager import Acl, Order, Secret, SecretContainer
 
 
@@ -13,7 +13,7 @@ class KeyManagerService:
 
     def __init__(self, client: OrcaClient) -> None:
         self._client = client
-        self._base = f"{client.key_manager_url}/v1"
+        self._base = with_version(client.key_manager_url, "v1")
 
     # ── secrets ────────────────────────────────────────────────────────
 

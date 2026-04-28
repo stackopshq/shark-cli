@@ -5,7 +5,7 @@ from __future__ import annotations
 import json as _json
 from typing import Any
 
-from orca_cli.core.client import OrcaClient
+from orca_cli.core.client import OrcaClient, with_version
 from orca_cli.models.image import Image, ImageMember, ImageStore, ImageTask
 
 
@@ -20,7 +20,7 @@ class ImageService:
 
     def __init__(self, client: OrcaClient) -> None:
         self._client = client
-        self._base = f"{client.image_url}/v2"
+        self._base = with_version(client.image_url, "v2")
 
     # ── images: reads ──────────────────────────────────────────────────
 

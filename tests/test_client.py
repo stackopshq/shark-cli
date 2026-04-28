@@ -1047,6 +1047,84 @@ class TestTypedEndpointURLs:
         assert client.alarming_url == "https://alarming.example.com"
 
 
+class TestWithVersion:
+    """``with_version`` is the idempotent /vN appender used by services to
+    survive both versionless and pre-versioned catalogue URLs."""
+
+    def test_appends_when_missing(self):
+        from orca_cli.core.client import with_version
+        assert with_version("http://h/identity", "v3") == "http://h/identity/v3"
+
+    def test_strips_trailing_slash_then_appends(self):
+        from orca_cli.core.client import with_version
+        assert with_version("http://h/identity/", "v3") == "http://h/identity/v3"
+
+    def test_returns_unchanged_when_already_versioned(self):
+        from orca_cli.core.client import with_version
+        assert with_version("http://h/identity/v3", "v3") == "http://h/identity/v3"
+
+    def test_returns_unchanged_when_versioned_with_trailing_segment(self):
+        from orca_cli.core.client import with_version
+        # Heat exposes /v1/{tenant_id} — the version segment is still detected.
+        assert (with_version("http://h/heat-api/v1/abc-uuid", "v1")
+                == "http://h/heat-api/v1/abc-uuid")
+
+    def test_does_not_match_partial_segment(self):
+        from orca_cli.core.client import with_version
+        # /v33 is not /v3, must still append.
+        assert with_version("http://h/api/v33", "v3") == "http://h/api/v33/v3"
+
+
+class TestVolumeUrlFallback:
+    """``volume_url`` accepts both the modern ``block-storage`` (Train+) and
+    legacy ``volumev3``/``volumev2`` service types so orca runs against any
+    cloud era."""
+
+    def _client_with_catalog(self, mock_httpx_cls, types):
+        catalog = [
+            {"type": t, "name": t, "endpoints": [
+                {"interface": "public", "url": f"https://{t}.example.com",
+                 "region_id": "RegionOne"},
+            ]}
+            for t in types
+        ]
+        resp = MagicMock()
+        resp.status_code = 201
+        resp.is_success = True
+        resp.headers = {"X-Subject-Token": "tok"}
+        resp.json.return_value = {
+            "token": {**RICH_TOKEN_RESPONSE["token"], "catalog": catalog}
+        }
+        resp.text = ""
+        http = MagicMock()
+        http.post.return_value = resp
+        mock_httpx_cls.return_value = http
+        return OrcaClient(BASE_CFG)
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_prefers_block_storage(self, mock_httpx_cls):
+        client = self._client_with_catalog(
+            mock_httpx_cls, ("block-storage", "volumev3"))
+        assert client.volume_url == "https://block-storage.example.com"
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_falls_back_to_volumev3(self, mock_httpx_cls):
+        client = self._client_with_catalog(mock_httpx_cls, ("volumev3",))
+        assert client.volume_url == "https://volumev3.example.com"
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_falls_back_to_volumev2(self, mock_httpx_cls):
+        client = self._client_with_catalog(mock_httpx_cls, ("volumev2",))
+        assert client.volume_url == "https://volumev2.example.com"
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_raises_when_no_cinder_endpoint(self, mock_httpx_cls):
+        from orca_cli.core.exceptions import APIError
+        client = self._client_with_catalog(mock_httpx_cls, ("identity",))
+        with pytest.raises(APIError, match="Cinder/block-storage"):
+            _ = client.volume_url
+
+
 class TestIsComputeUrlHandlesMissingNova:
     """_is_compute_url() must return False when Nova isn't in the catalog."""
 

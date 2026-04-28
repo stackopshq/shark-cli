@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from orca_cli.core.client import OrcaClient
+from orca_cli.core.client import OrcaClient, with_version
 from orca_cli.models.dns import Recordset, Tld, Zone, ZoneTransferRequest
 
 
@@ -13,7 +13,7 @@ class DnsService:
 
     def __init__(self, client: OrcaClient) -> None:
         self._client = client
-        self._base = f"{client.dns_url}/v2"
+        self._base = with_version(client.dns_url, "v2")
 
     # ── zones ──────────────────────────────────────────────────────────
 

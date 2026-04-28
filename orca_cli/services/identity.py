@@ -1,30 +1,17 @@
 """High-level operations on Keystone v3 identity resources.
 
-.. warning::
-
-   ``client.identity_url`` is inconsistent across the codebase: the
-   service catalog may or may not include the ``/v3`` suffix depending
-   on the deployment. Historically, the Keystone command modules in
-   this project split along two URL-construction patterns:
-
-   * ``projects``/``users``/``roles``/``domains``/``groups``/
-     ``application_credentials``/``endpoint_groups``/``policies``/
-     federation/``tokens``/``access_rules`` → prepend ``/v3`` to
-     ``client.identity_url``.
-   * ``credentials``/``endpoints``/``services``/``regions`` → use
-     ``client.identity_url`` directly (no extra ``/v3``).
-   * trusts → ``/OS-TRUST/trusts`` on ``client.identity_url``.
-
-   IdentityService preserves that split so callers need no changes.
-   A future cleanup could make ``identity_url`` canonical, at which
-   point the two base URLs here would collapse to one.
+All Keystone v3 routes (projects, users, services, endpoints, regions,
+credentials, OS-TRUST trusts, ...) live under ``/v3``. ``with_version``
+ensures the prefix is present whether the catalogue advertises Keystone
+versionless (e.g. DevStack ``http://host/identity``) or already
+versioned (e.g. ``http://host/identity/v3``).
 """
 
 from __future__ import annotations
 
 from typing import Any
 
-from orca_cli.core.client import OrcaClient
+from orca_cli.core.client import OrcaClient, with_version
 from orca_cli.models.identity import (
     AccessRule,
     ApplicationCredential,
@@ -56,10 +43,8 @@ class IdentityService:
 
     def __init__(self, client: OrcaClient) -> None:
         self._client = client
-        # ``_v3`` — for the "add-/v3" half of the existing callers.
-        self._v3 = f"{client.identity_url}/v3"
-        # ``_base`` — for the "don't add /v3" half.
-        self._base = client.identity_url
+        self._v3 = with_version(client.identity_url, "v3")
+        self._base = self._v3
 
     # ── projects ───────────────────────────────────────────────────────
 

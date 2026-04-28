@@ -22,6 +22,7 @@ import hashlib
 import logging
 import os
 import random
+import re
 import stat
 import sys
 import tempfile
@@ -39,6 +40,31 @@ from orca_cli.core.exceptions import (
     ConfigurationError,
     PermissionDeniedError,
 )
+
+
+def with_version(url: str, version: str) -> str:
+    """Append ``/{version}`` to ``url`` if not already present (idempotent).
+
+    OpenStack catalogues are inconsistent: the same service may be advertised
+    versionless (e.g. ``http://host/identity``) or already versioned
+    (``http://host/identity/v3``). Services that need a specific API version
+    use this helper so callers don't have to special-case every cloud.
+
+    The match is anchored on the exact version segment to avoid false
+    positives across versions:
+
+    >>> with_version("http://host/identity", "v3")
+    'http://host/identity/v3'
+    >>> with_version("http://host/identity/v3", "v3")
+    'http://host/identity/v3'
+    >>> with_version("http://host/heat-api/v1/uuid", "v1")
+    'http://host/heat-api/v1/uuid'
+    """
+    stripped = url.rstrip("/")
+    pattern = rf"/{re.escape(version)}(?:/|$)"
+    if re.search(pattern, stripped):
+        return stripped
+    return f"{stripped}/{version}"
 
 # Module logger — silent by default (no handlers attached). The root CLI
 # wires handlers when --debug is passed. Auth payloads are never logged,
@@ -550,8 +576,24 @@ class OrcaClient:
 
     @property
     def volume_url(self) -> str:
-        """Cinder (volume) public endpoint."""
-        return self._endpoint_for("volumev3")
+        """Cinder (block storage) public endpoint.
+
+        The service type was renamed from ``volumev3`` to ``block-storage``
+        in OpenStack Train (2019.2). New deployments (DevStack 2024+, recent
+        public clouds) only advertise ``block-storage``; older ones still
+        ship ``volumev3`` (or ``volumev2``). We try the modern type first
+        and fall back so orca works against both eras of catalogue.
+        """
+        for service_type in ("block-storage", "volumev3", "volumev2"):
+            try:
+                return self._endpoint_for(service_type)
+            except APIError:
+                continue
+        raise APIError(
+            0,
+            "Cinder/block-storage endpoint not found in catalogue. "
+            "Check your OpenStack project configuration.",
+        )
 
     @property
     def container_infra_url(self) -> str:
