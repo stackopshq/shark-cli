@@ -11,6 +11,7 @@ import click
 from rich.progress import BarColumn, DownloadColumn, Progress, TimeRemainingColumn, TransferSpeedColumn
 from rich.table import Table
 
+from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.client import APIError, AuthenticationError
 from orca_cli.core.completions import complete_images
 from orca_cli.core.context import OrcaContext
@@ -480,7 +481,12 @@ def image_reactivate(ctx: click.Context, image_id: str) -> None:
     console.print(f"[green]Image {image_id} reactivated.[/green]")
 
 
-@image.command("tag-add")
+@image.group("tag")
+def image_tag() -> None:
+    """Manage tags on a Glance image."""
+
+
+@image_tag.command("add")
 @click.argument("image_id", shell_complete=complete_images)
 @click.argument("tag")
 @click.pass_context
@@ -490,7 +496,7 @@ def image_tag_add(ctx: click.Context, image_id: str, tag: str) -> None:
     console.print(f"[green]Tag '{tag}' added to image {image_id}.[/green]")
 
 
-@image.command("tag-delete")
+@image_tag.command("delete")
 @click.argument("image_id", shell_complete=complete_images)
 @click.argument("tag")
 @click.pass_context
@@ -745,7 +751,12 @@ def image_unused(ctx: click.Context, do_delete: bool, yes: bool, include_snapsho
 #  Image Member Sharing (Glance v2)
 # ══════════════════════════════════════════════════════════════════════════
 
-@image.command("member-list")
+@image.group("member")
+def image_member() -> None:
+    """Manage Glance image members (sharing)."""
+
+
+@image_member.command("list")
 @click.argument("image_id", shell_complete=complete_images)
 @output_options
 @click.pass_context
@@ -773,7 +784,7 @@ def image_member_list(ctx: click.Context, image_id: str, output_format: str,
     )
 
 
-@image.command("member-show")
+@image_member.command("show")
 @click.argument("image_id", shell_complete=complete_images)
 @click.argument("member_id", metavar="PROJECT_ID")
 @output_options
@@ -795,7 +806,7 @@ def image_member_show(ctx: click.Context, image_id: str, member_id: str,
                  max_width=max_width, noindent=noindent, columns=columns)
 
 
-@image.command("member-create")
+@image_member.command("create")
 @click.argument("image_id", shell_complete=complete_images)
 @click.argument("member_id", metavar="PROJECT_ID")
 @click.pass_context
@@ -819,7 +830,7 @@ def image_member_create(ctx: click.Context, image_id: str, member_id: str) -> No
     )
 
 
-@image.command("member-delete")
+@image_member.command("delete")
 @click.argument("image_id", shell_complete=complete_images)
 @click.argument("member_id", metavar="PROJECT_ID")
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
@@ -832,7 +843,7 @@ def image_member_delete(ctx: click.Context, image_id: str, member_id: str, yes: 
     console.print(f"[green]Project {member_id} access to image {image_id} revoked.[/green]")
 
 
-@image.command("member-set")
+@image_member.command("set")
 @click.argument("image_id", shell_complete=complete_images)
 @click.argument("member_id", metavar="PROJECT_ID")
 @click.option(
@@ -938,7 +949,12 @@ def image_import(ctx: click.Context, image_id: str, import_method: str,
 #  image cache  (Glance v2 cache management — admin)
 # ══════════════════════════════════════════════════════════════════════════
 
-@image.command("cache-list")
+@image.group("cache")
+def image_cache() -> None:
+    """Manage the Glance image cache (admin)."""
+
+
+@image_cache.command("list")
 @output_options
 @click.pass_context
 def image_cache_list(ctx: click.Context, output_format: str, columns: tuple[str, ...],
@@ -963,7 +979,7 @@ def image_cache_list(ctx: click.Context, output_format: str, columns: tuple[str,
     )
 
 
-@image.command("cache-queue")
+@image_cache.command("queue")
 @click.argument("image_id", shell_complete=complete_images)
 @click.pass_context
 def image_cache_queue(ctx: click.Context, image_id: str) -> None:
@@ -972,7 +988,7 @@ def image_cache_queue(ctx: click.Context, image_id: str) -> None:
     console.print(f"[green]Image {image_id} queued for caching.[/green]")
 
 
-@image.command("cache-delete")
+@image_cache.command("delete")
 @click.argument("image_id", shell_complete=complete_images)
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -984,7 +1000,7 @@ def image_cache_delete(ctx: click.Context, image_id: str, yes: bool) -> None:
     console.print(f"[green]Image {image_id} removed from cache.[/green]")
 
 
-@image.command("cache-clear")
+@image_cache.command("clear")
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
 def image_cache_clear(ctx: click.Context, yes: bool) -> None:
@@ -1000,7 +1016,12 @@ def image_cache_clear(ctx: click.Context, yes: bool) -> None:
 # ══════════════════════════════════════════════════════════════════════════
 
 
-@image.command("stores-info")
+@image.group("stores")
+def image_stores() -> None:
+    """Inspect Glance multi-store backends."""
+
+
+@image_stores.command("info")
 @click.option("--detail", is_flag=True, default=False,
               help="Show store properties (admin only, requires Glance ≥ 2.15).")
 @output_options
@@ -1040,7 +1061,12 @@ def image_stores_info(ctx: click.Context, detail: bool, output_format: str,
 # ══════════════════════════════════════════════════════════════════════════
 
 
-@image.command("task-list")
+@image.group("task")
+def image_task() -> None:
+    """Inspect Glance import / task queue."""
+
+
+@image_task.command("list")
 @click.option("--type", "task_type", default=None,
               type=click.Choice(["import", "export", "clone"], case_sensitive=False),
               help="Filter by task type.")
@@ -1074,7 +1100,7 @@ def image_task_list(ctx: click.Context, task_type: str | None, task_status: str 
     )
 
 
-@image.command("task-show")
+@image_task.command("show")
 @click.argument("task_id")
 @output_options
 @click.pass_context
@@ -1507,3 +1533,35 @@ def metadef_rt_assoc_delete(ctx, namespace, resource_type, yes):
     svc = ImageService(ctx.find_object(OrcaContext).ensure_client())
     svc.delete_metadef_resource_type_association(namespace, resource_type)
     console.print(f"[green]Association '{resource_type}' removed.[/green]")
+
+
+# ── ADR-0008 deprecated aliases (backward compatibility) ────────────────
+
+add_command_with_alias(image, image_tag_add,
+                        legacy_name="tag-add", primary_path="image tag add")
+add_command_with_alias(image, image_tag_delete,
+                        legacy_name="tag-delete", primary_path="image tag delete")
+add_command_with_alias(image, image_member_list,
+                        legacy_name="member-list", primary_path="image member list")
+add_command_with_alias(image, image_member_show,
+                        legacy_name="member-show", primary_path="image member show")
+add_command_with_alias(image, image_member_create,
+                        legacy_name="member-create", primary_path="image member create")
+add_command_with_alias(image, image_member_delete,
+                        legacy_name="member-delete", primary_path="image member delete")
+add_command_with_alias(image, image_member_set,
+                        legacy_name="member-set", primary_path="image member set")
+add_command_with_alias(image, image_cache_list,
+                        legacy_name="cache-list", primary_path="image cache list")
+add_command_with_alias(image, image_cache_queue,
+                        legacy_name="cache-queue", primary_path="image cache queue")
+add_command_with_alias(image, image_cache_delete,
+                        legacy_name="cache-delete", primary_path="image cache delete")
+add_command_with_alias(image, image_cache_clear,
+                        legacy_name="cache-clear", primary_path="image cache clear")
+add_command_with_alias(image, image_stores_info,
+                        legacy_name="stores-info", primary_path="image stores info")
+add_command_with_alias(image, image_task_list,
+                        legacy_name="task-list", primary_path="image task list")
+add_command_with_alias(image, image_task_show,
+                        legacy_name="task-show", primary_path="image task show")

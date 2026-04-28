@@ -43,10 +43,9 @@ LEGACY_HYPHENATED_SUBCOMMANDS: dict[str, set[str]] = {
     },
     "floating-ip": {"bulk-release"},
     "image": {
-        "cache-clear", "cache-delete", "cache-list", "cache-queue",
-        "member-create", "member-delete", "member-list", "member-set",
-        "member-show", "share-and-accept", "stores-info",
-        "tag-add", "tag-delete", "task-list", "task-show",
+        # ``share-and-accept`` is a compound verb (orca-specific UX
+        # combining member-create + member-set --status accepted).
+        "share-and-accept",
     },
     "loadbalancer": {
         "amphora-failover", "amphora-list", "amphora-show",
