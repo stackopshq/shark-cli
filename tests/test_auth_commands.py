@@ -66,7 +66,7 @@ class TestWhoami:
     def test_whoami_shows_region_when_set(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("prod", sample_profile)
         set_active_profile("prod")
-        mock_client._region_name = "eu-west-1"
+        mock_client.region_name = "eu-west-1"
 
         result = invoke(["auth", "whoami"])
         assert "eu-west-1" in result.output
@@ -74,7 +74,7 @@ class TestWhoami:
     def test_whoami_no_region_when_none(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("prod", sample_profile)
         set_active_profile("prod")
-        mock_client._region_name = None
+        mock_client.region_name = None
 
         result = invoke(["auth", "whoami"])
         # "Region" row should not appear
@@ -84,8 +84,8 @@ class TestWhoami:
     def test_whoami_expired_token(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("prod", sample_profile)
         set_active_profile("prod")
-        mock_client._token_data = {
-            **mock_client._token_data,
+        mock_client.token_data = {
+            **mock_client.token_data,
             "expires_at": "2020-01-01T00:00:00Z",
         }
 
@@ -96,7 +96,7 @@ class TestWhoami:
     def test_whoami_no_roles(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("prod", sample_profile)
         set_active_profile("prod")
-        mock_client._token_data = {**mock_client._token_data, "roles": []}
+        mock_client.token_data = {**mock_client.token_data, "roles": []}
 
         result = invoke(["auth", "whoami"])
         assert result.exit_code == 0
@@ -105,7 +105,7 @@ class TestWhoami:
     def test_whoami_empty_catalog(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("prod", sample_profile)
         set_active_profile("prod")
-        mock_client._catalog = []
+        mock_client.catalog = []
 
         result = invoke(["auth", "whoami"])
         assert result.exit_code == 0
@@ -114,7 +114,7 @@ class TestWhoami:
     def test_whoami_invalid_expires_at(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("prod", sample_profile)
         set_active_profile("prod")
-        mock_client._token_data = {**mock_client._token_data, "expires_at": "not-a-date"}
+        mock_client.token_data = {**mock_client.token_data, "expires_at": "not-a-date"}
 
         result = invoke(["auth", "whoami"])
         assert result.exit_code == 0
@@ -212,7 +212,7 @@ class TestTokenDebug:
     def test_token_debug_empty_roles(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("prod", sample_profile)
         set_active_profile("prod")
-        mock_client._token_data = {**mock_client._token_data, "roles": []}
+        mock_client.token_data = {**mock_client.token_data, "roles": []}
 
         result = invoke(["auth", "token-debug"])
         assert result.exit_code == 0
@@ -221,7 +221,7 @@ class TestTokenDebug:
     def test_token_debug_empty_catalog(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("prod", sample_profile)
         set_active_profile("prod")
-        mock_client._catalog = []
+        mock_client.catalog = []
 
         result = invoke(["auth", "token-debug"])
         assert result.exit_code == 0
@@ -231,8 +231,8 @@ class TestTokenDebug:
         """Missing issued_at/expires_at should not crash."""
         save_profile("prod", sample_profile)
         set_active_profile("prod")
-        mock_client._token_data = {
-            **mock_client._token_data,
+        mock_client.token_data = {
+            **mock_client.token_data,
             "issued_at": "",
             "expires_at": "",
         }

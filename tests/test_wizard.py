@@ -469,7 +469,7 @@ def _setup_doctor(mock_client, sg_data=None):
     mock_client.network_url = "https://neutron.example.com"
     mock_client.volume_url  = "https://cinder.example.com/v3"
     mock_client.image_url   = "https://glance.example.com"
-    mock_client._token_data = {
+    mock_client.token_data = {
         "user": {"name": "admin"},
         "project": {"name": "demo", "id": PRJ_ID},
     }

@@ -135,12 +135,25 @@ FAKE_TOKEN_DATA = {
 def make_mock_client():
     """Build a mock OrcaClient with realistic token data."""
     client = MagicMock()
-    client._token = "fake-token-abcdef1234567890abcdef1234567890"
-    client._token_data = FAKE_TOKEN_DATA.copy()
+    # Private fields (kept for legacy tests that still poke them) and the
+    # public properties the production code reads.
+    fake_token = "fake-token-abcdef1234567890abcdef1234567890"
+    fake_token_data = FAKE_TOKEN_DATA.copy()
+    client._token = fake_token
+    client._token_data = fake_token_data
     client._catalog = FAKE_TOKEN_DATA["catalog"]
     client._auth_url = "https://keystone.example.com:5000"
     client._interface = "public"
     client._region_name = None
+    client._project_id = "project-uuid-5678"
+    client.token = fake_token
+    client.token_data = fake_token_data
+    client.catalog = list(FAKE_TOKEN_DATA["catalog"])
+    client.auth_url = "https://keystone.example.com:5000"
+    client.interface = "public"
+    client.region_name = None
+    client.project_id = "project-uuid-5678"
+    client.authenticate = MagicMock()
     client.compute_url = "https://nova.example.com/v2.1"
     client.network_url = "https://neutron.example.com"
     client.identity_url = "https://keystone.example.com:5000"
@@ -158,6 +171,54 @@ def make_mock_client():
             return items[:max_items]
         return items
     client.paginate = _paginate
+
+    # Streaming helpers — the real client builds headers from ``_headers()`` and
+    # forwards to ``self._http.<verb>``. Tests mock ``_http`` and ``_headers``,
+    # so the mock's public streaming helpers must delegate to those for the
+    # mocking to behave as before.
+    def _put_stream(url, *, content, content_type="application/octet-stream",
+                    content_length=None, extra_headers=None):
+        headers = dict(client._headers())
+        headers["Content-Type"] = content_type
+        if content_length is not None:
+            headers["Content-Length"] = str(content_length)
+        if extra_headers:
+            headers.update(extra_headers)
+        return client._http.put(url, headers=headers, content=content)
+    client.put_stream = _put_stream
+
+    def _post_no_body(url, *, extra_headers=None):
+        headers = dict(client._headers())
+        if extra_headers:
+            headers.update(extra_headers)
+        return client._http.post(url, headers=headers)
+    client.post_no_body = _post_no_body
+
+    def _post_stream(url, *, content, content_type="application/octet-stream",
+                     content_length=None, extra_headers=None):
+        headers = dict(client._headers())
+        headers["Content-Type"] = content_type
+        if content_length is not None:
+            headers["Content-Length"] = str(content_length)
+        if extra_headers:
+            headers.update(extra_headers)
+        return client._http.post(url, headers=headers, content=content)
+    client.post_stream = _post_stream
+
+    def _head_request(url, *, extra_headers=None):
+        headers = dict(client._headers())
+        if extra_headers:
+            headers.update(extra_headers)
+        return client._http.head(url, headers=headers)
+    client.head_request = _head_request
+
+    def _get_stream(url, *, extra_headers=None):
+        headers = dict(client._headers())
+        if extra_headers:
+            headers.update(extra_headers)
+        return client._http.stream("GET", url, headers=headers)
+    client.get_stream = _get_stream
+
     return client
 
 

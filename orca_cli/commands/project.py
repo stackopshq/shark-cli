@@ -440,7 +440,7 @@ def project_cleanup(ctx, target_project, dry_run, yes, created_before, skip_type
             except Exception as exc:
                 raise OrcaCLIError(f"Project '{target_project}' not found.") from exc
     else:
-        proj_id = client._token_data.get("project", {}).get("id")
+        proj_id = client.token_data.get("project", {}).get("id")
         if not proj_id:
             raise OrcaCLIError(
                 "Could not determine current project. Use --project to specify one."
@@ -463,7 +463,7 @@ def project_cleanup(ctx, target_project, dry_run, yes, created_before, skip_type
             # Heat: auth token already scopes to the project; for other projects
             # pass project_id (requires admin + global_tenant).
             stack_params: dict = {}
-            auth_proj = client._token_data.get("project", {}).get("id")
+            auth_proj = client.token_data.get("project", {}).get("id")
             if proj_id != auth_proj:
                 stack_params = {"project_id": proj_id, "global_tenant": "true"}
             heat_svc = OrchestrationService(client)
@@ -499,7 +499,7 @@ def project_cleanup(ctx, target_project, dry_run, yes, created_before, skip_type
         if "dns-zone" not in skip:
             # Designate scopes zones to the auth token project by default.
             # For a different project, pass X-Auth-All-Projects + project_id.
-            auth_proj = client._token_data.get("project", {}).get("id")
+            auth_proj = client.token_data.get("project", {}).get("id")
             dns_params: dict = {}
             dns_headers: dict = {}
             if proj_id != auth_proj:

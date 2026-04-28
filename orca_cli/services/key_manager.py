@@ -32,6 +32,24 @@ class KeyManagerService:
     def delete_secret(self, secret_id: str) -> None:
         self._client.delete(f"{self._base}/secrets/{secret_id}")
 
+    def get_secret_payload(self, secret_id: str) -> str:
+        """Fetch the raw payload for a secret.
+
+        Barbican returns the payload with whatever ``Content-Type`` matches
+        the original storage (``text/plain``, ``application/octet-stream``,
+        ...) and not as JSON, so the call goes through ``client.get_stream``
+        with an explicit ``Accept: text/plain`` rather than ``client.get``.
+        """
+        url = f"{self._base}/secrets/{secret_id}/payload"
+        with self._client.get_stream(
+            url, extra_headers={"Accept": "text/plain"},
+        ) as resp:
+            resp.read()
+            if resp.status_code != 200:
+                from orca_cli.core.exceptions import APIError
+                raise APIError(resp.status_code, resp.text[:300])
+            return resp.text
+
     # ── secret ACL ─────────────────────────────────────────────────────
 
     def get_secret_acl(self, secret_id: str) -> Acl:

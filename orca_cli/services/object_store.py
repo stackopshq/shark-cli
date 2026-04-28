@@ -1,18 +1,18 @@
 """High-level operations on Swift object-storage resources.
 
-Swift's API is different from the rest of OpenStack: HEAD returns
-metadata in headers, POST updates metadata without a JSON body,
-listing uses ``?format=json`` for parseable output, and object
-up/download is binary streaming. The service therefore:
+Swift's API is unlike the rest of OpenStack:
 
-* returns parsed lists for GET ``?format=json`` endpoints,
-* exposes ``head_*`` methods that return the raw response headers,
-* exposes ``post_metadata`` methods for metadata updates that go
-  through the raw httpx client (``client._http``) — Swift requires
-  no body for these, which ``OrcaClient.post`` does not support.
+* HEAD returns metadata in headers (no JSON body).
+* POST updates metadata via ``X-*-Meta-*`` headers and *must* have an
+  empty body.
+* Listing uses ``?format=json`` for parseable output.
+* Object up/download is binary streaming with explicit
+  ``Content-Length``.
 
-Binary uploads/downloads stay in the command modules for now: they
-need streaming access to the underlying httpx client.
+Streaming I/O therefore goes through the public streaming helpers on
+``OrcaClient`` (``put_stream``, ``get_stream``, ``post_no_body``,
+``head_request``) so command modules never reach into the private
+``client._http`` / ``client._headers()`` surface.
 """
 
 from __future__ import annotations
@@ -25,6 +25,7 @@ from orca_cli.models.object_store import Container, ObjectEntry
 
 
 def _check_status(resp: Any) -> None:
+    """Map Swift response status to the project's exception hierarchy."""
     if resp.status_code == 401:
         raise AuthenticationError()
     if resp.status_code == 403:
@@ -44,10 +45,16 @@ class ObjectStoreService:
 
     def head_account(self) -> dict[str, str]:
         """Account-level headers (x-account-container-count etc.)."""
-        resp = self._client._http.head(self._base,
-                                       headers=self._client._headers())
+        resp = self._client.head_request(self._base)
         _check_status(resp)
         return dict(resp.headers)
+
+    def post_account_metadata(self, metadata: dict[str, str]) -> None:
+        """Set/remove account metadata via ``X-Account-Meta-*`` /
+        ``X-Remove-Account-Meta-*`` headers.
+        """
+        resp = self._client.post_no_body(self._base, extra_headers=metadata)
+        _check_status(resp)
 
     # ── containers ─────────────────────────────────────────────────────
 
@@ -56,19 +63,20 @@ class ObjectStoreService:
         return data if isinstance(data, list) else []
 
     def head_container(self, name: str) -> dict[str, str]:
-        resp = self._client._http.head(f"{self._base}/{name}",
-                                       headers=self._client._headers())
+        resp = self._client.head_request(f"{self._base}/{name}")
         _check_status(resp)
         return dict(resp.headers)
 
     def create_container(
         self, name: str, *, headers: dict[str, str] | None = None,
     ) -> None:
-        req_headers = self._client._headers()
-        if headers:
-            req_headers.update(headers)
-        resp = self._client._http.put(f"{self._base}/{name}",
-                                      headers=req_headers)
+        # PUT with empty body — use the streaming helper with content=b"".
+        resp = self._client.put_stream(
+            f"{self._base}/{name}",
+            content=b"",
+            content_length=0,
+            extra_headers=headers,
+        )
         _check_status(resp)
 
     def delete_container(self, name: str) -> None:
@@ -78,11 +86,9 @@ class ObjectStoreService:
         self, name: str, metadata: dict[str, str],
     ) -> None:
         """Set ``X-Container-Meta-*`` headers on a container."""
-        headers = self._client._headers()
-        for k, v in metadata.items():
-            headers[k] = v
-        resp = self._client._http.post(f"{self._base}/{name}",
-                                       headers=headers)
+        resp = self._client.post_no_body(
+            f"{self._base}/{name}", extra_headers=metadata,
+        )
         _check_status(resp)
 
     # ── objects ────────────────────────────────────────────────────────
@@ -100,10 +106,7 @@ class ObjectStoreService:
         return data if isinstance(data, list) else []
 
     def head_object(self, container: str, name: str) -> dict[str, str]:
-        resp = self._client._http.head(
-            f"{self._base}/{container}/{name}",
-            headers=self._client._headers(),
-        )
+        resp = self._client.head_request(f"{self._base}/{container}/{name}")
         _check_status(resp)
         return dict(resp.headers)
 
@@ -114,15 +117,58 @@ class ObjectStoreService:
         self, container: str, name: str, metadata: dict[str, str],
     ) -> None:
         """Set ``X-Object-Meta-*`` headers on an object."""
-        headers = self._client._headers()
-        for k, v in metadata.items():
-            headers[k] = v
-        resp = self._client._http.post(
-            f"{self._base}/{container}/{name}",
-            headers=headers,
+        resp = self._client.post_no_body(
+            f"{self._base}/{container}/{name}", extra_headers=metadata,
         )
         _check_status(resp)
 
+    # ── streaming I/O ──────────────────────────────────────────────────
+
+    def upload_object(
+        self, container: str, name: str, *,
+        content: Any,
+        content_type: str = "application/octet-stream",
+        content_length: int | None = None,
+        query: str = "",
+    ) -> None:
+        """PUT object data from a file-like or iterable. Raises on non-2xx.
+
+        ``query`` is appended verbatim after ``?`` — used for SLO manifest
+        uploads (``multipart-manifest=put``).
+        """
+        url = f"{self._base}/{container}/{name}"
+        if query:
+            url = f"{url}?{query}"
+        resp = self._client.put_stream(
+            url,
+            content=content,
+            content_type=content_type,
+            content_length=content_length,
+        )
+        _check_status(resp)
+
+    def download_object(self, container: str, name: str):
+        """Open a streaming GET on an object — caller uses it as a context
+        manager and iterates ``resp.iter_bytes(...)``. Status checking is
+        the caller's responsibility (so the chunked stream stays open while
+        the body is consumed).
+        """
+        return self._client.get_stream(f"{self._base}/{container}/{name}")
+
+    def fetch_object_bytes(self, container: str, name: str) -> bytes:
+        """Read a small object fully into memory and return its bytes.
+
+        Raises on non-2xx. For large objects use :meth:`download_object`.
+        """
+        with self.download_object(container, name) as resp:
+            if not resp.is_success:
+                resp.read()
+                _check_status(resp)
+            resp.read()
+            return resp.content
+
     def object_url(self, container: str, name: str) -> str:
-        """Return the raw URL for streaming upload/download."""
+        """Return the raw URL for an object — kept for callers that build
+        their own progress-tracked streams (SLO segment uploads).
+        """
         return f"{self._base}/{container}/{name}"

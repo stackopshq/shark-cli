@@ -40,7 +40,7 @@ def endpoint_list(ctx, service, interface, region,
     # Resolve service_id → name using the in-memory catalog
     svc_names = {
         svc_entry["id"]: svc_entry.get("name", svc_entry["id"])
-        for svc_entry in client._catalog
+        for svc_entry in client.catalog
     } if hasattr(client, "_catalog") else {}
 
     if service:

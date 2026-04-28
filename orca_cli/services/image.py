@@ -64,13 +64,38 @@ class ImageService:
 
     # ── image data: file / stage / download ────────────────────────────
 
-    def upload(self, image_id: str, stream: Any) -> None:
-        """Upload image binary (PUT /v2/images/{id}/file). Caller owns the stream."""
-        self._client.put_stream(f"{self._base}/images/{image_id}/file", stream=stream)
+    def upload(self, image_id: str, *,
+               content: Any, content_length: int | None = None) -> None:
+        """Upload image binary (PUT /v2/images/{id}/file).
 
-    def stage(self, image_id: str, stream: Any) -> None:
+        ``content`` may be a file-like object or an iterable yielding bytes
+        (the latter lets callers wrap the stream with a progress bar).
+        Raises :class:`APIError` / :class:`AuthenticationError` /
+        :class:`PermissionDeniedError` on non-2xx.
+        """
+        self._stream_put(f"{self._base}/images/{image_id}/file",
+                         content=content, content_length=content_length)
+
+    def stage(self, image_id: str, *,
+              content: Any, content_length: int | None = None) -> None:
         """Upload binary into the staging area (PUT /v2/images/{id}/stage)."""
-        self._client.put_stream(f"{self._base}/images/{image_id}/stage", stream=stream)
+        self._stream_put(f"{self._base}/images/{image_id}/stage",
+                         content=content, content_length=content_length)
+
+    def _stream_put(self, url: str, *,
+                    content: Any, content_length: int | None) -> None:
+        from orca_cli.core.exceptions import APIError, AuthenticationError, PermissionDeniedError
+        resp = self._client.put_stream(
+            url, content=content,
+            content_type="application/octet-stream",
+            content_length=content_length,
+        )
+        if resp.status_code == 401:
+            raise AuthenticationError()
+        if resp.status_code == 403:
+            raise PermissionDeniedError()
+        if not resp.is_success:
+            raise APIError(resp.status_code, resp.text[:300])
 
     def download_url(self, image_id: str) -> str:
         """Return the URL to stream image binary from. Use ``client.get_stream``."""

@@ -642,7 +642,7 @@ class TestAccessRule:
     def test_list(self, invoke, mock_client):
         _iam(mock_client)
         mock_client.get.return_value = {"access_rules": [self._ar()]}
-        mock_client._token_data = {"user": {"id": USER_ID}}
+        mock_client.token_data = {"user": {"id": USER_ID}}
         result = invoke(["access-rule", "list", "--user-id", USER_ID])
         assert result.exit_code == 0
         assert "compute" in result.output
@@ -650,27 +650,27 @@ class TestAccessRule:
     def test_list_empty(self, invoke, mock_client):
         _iam(mock_client)
         mock_client.get.return_value = {"access_rules": []}
-        mock_client._token_data = {"user": {"id": USER_ID}}
+        mock_client.token_data = {"user": {"id": USER_ID}}
         result = invoke(["access-rule", "list", "--user-id", USER_ID])
         assert "No access rules" in result.output
 
     def test_show(self, invoke, mock_client):
         _iam(mock_client)
         mock_client.get.return_value = {"access_rule": self._ar()}
-        mock_client._token_data = {"user": {"id": USER_ID}}
+        mock_client.token_data = {"user": {"id": USER_ID}}
         result = invoke(["access-rule", "show", AR_ID, "--user-id", USER_ID])
         assert result.exit_code == 0
 
     def test_delete_yes(self, invoke, mock_client):
         _iam(mock_client)
-        mock_client._token_data = {"user": {"id": USER_ID}}
+        mock_client.token_data = {"user": {"id": USER_ID}}
         result = invoke(["access-rule", "delete", AR_ID, "--user-id", USER_ID, "--yes"])
         assert result.exit_code == 0
         mock_client.delete.assert_called_once()
 
     def test_delete_requires_confirm(self, invoke, mock_client):
         _iam(mock_client)
-        mock_client._token_data = {"user": {"id": USER_ID}}
+        mock_client.token_data = {"user": {"id": USER_ID}}
         result = invoke(["access-rule", "delete", AR_ID, "--user-id", USER_ID], input="n\n")
         assert result.exit_code != 0
         mock_client.delete.assert_not_called()
@@ -688,8 +688,8 @@ class TestToken:
 
     def test_issue(self, invoke, mock_client):
         _iam(mock_client)
-        mock_client._token = "tok-abc"
-        mock_client._token_data = {
+        mock_client.token = "tok-abc"
+        mock_client.token_data = {
             "user": {"id": USER_ID, "name": "admin"},
             "project": {"id": PROJECT_ID, "name": "myproject"},
             "domain": {},

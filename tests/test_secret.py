@@ -14,7 +14,7 @@ CONTAINER_ID = "aaaabbbb-cccc-dddd-eeee-ffffffffffff"
 
 def _setup_mock(mock_client):
     mock_client.key_manager_url = "https://barbican.example.com"
-    mock_client._token = "fake-token"
+    mock_client.token = "fake-token"
 
     http = MagicMock()
     mock_client._http = http
@@ -70,14 +70,20 @@ def _setup_mock(mock_client):
     mock_client.post = _post
     mock_client.delete = _delete
 
-    # For get-payload
-    def _http_get(url, **kwargs):
+    # For get-payload — Barbican returns text/plain, the service uses
+    # ``client.get_stream`` which delegates to ``http.stream(...)`` returning
+    # a context-managed response.
+    def _http_stream(method, url, **kwargs):
         resp = MagicMock()
         resp.status_code = 200
         resp.text = "my-payload-value"
-        return resp
+        resp.read = lambda: None
+        cm = MagicMock()
+        cm.__enter__ = lambda self: resp
+        cm.__exit__ = lambda self, *exc: False
+        return cm
 
-    http.get = _http_get
+    http.stream = _http_stream
 
     return {"posted": posted, "deleted": deleted}
 
@@ -191,7 +197,7 @@ class TestSecretGetPayload:
 
         result = invoke(["secret", "get-payload", SECRET_ID])
         assert result.exit_code == 0
-        assert "my-payload" in result.output
+        assert "my-payload-value" in result.output
 
 
 # ══════════════════════════════════════════════════════════════════════════

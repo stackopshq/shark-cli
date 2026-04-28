@@ -180,14 +180,14 @@ def container_save(ctx: click.Context, container_name: str, output_dir: str) -> 
             continue
         dest.parent.mkdir(parents=True, exist_ok=True)
 
-        url = svc.object_url(container_name, obj_name)
-        resp = client._http.get(url, headers=client._headers())
-        if not resp.is_success:
-            console.print(f"[red]Failed to download '{obj_name}': HTTP {resp.status_code}[/red]")
+        try:
+            data = svc.fetch_object_bytes(container_name, obj_name)
+        except Exception as exc:  # noqa: BLE001 — best-effort batch download
+            console.print(f"[red]Failed to download '{obj_name}': {exc}[/red]")
             continue
 
-        dest.write_bytes(resp.content)
-        console.print(f"  Saved: {dest} ({_human_size(len(resp.content))})")
+        dest.write_bytes(data)
+        console.print(f"  Saved: {dest} ({_human_size(len(data))})")
 
     console.print(f"[green]Downloaded {len(objects)} object(s) to '{out_path}'.[/green]")
 

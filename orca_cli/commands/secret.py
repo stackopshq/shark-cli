@@ -137,14 +137,8 @@ def secret_delete(ctx: click.Context, secret_id: str, yes: bool) -> None:
 @click.pass_context
 def secret_get_payload(ctx: click.Context, secret_id: str) -> None:
     """Retrieve secret payload."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    url = f"{client.key_manager_url}/v1/secrets/{secret_id}/payload"
-    headers = {"X-Auth-Token": client._token or "", "Accept": "text/plain"}
-    resp = client._http.get(url, headers=headers)
-    if resp.status_code == 200:
-        console.print(resp.text)
-    else:
-        console.print(f"[red]Error {resp.status_code}: {resp.text}[/red]")
+    svc = KeyManagerService(ctx.find_object(OrcaContext).ensure_client())
+    console.print(svc.get_secret_payload(secret_id))
 
 
 # ══════════════════════════════════════════════════════════════════════════

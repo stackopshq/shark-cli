@@ -64,9 +64,9 @@ def _maybe_validate_credentials(name: str) -> None:
         client = OrcaClient(cfg)
         # Force a fresh auth to actually hit Keystone (bypasses any cached
         # token that might belong to a prior profile with the same key).
-        client._authenticate()
+        client.authenticate()
         console.print(f"[green]✓ Authentication successful[/green] "
-                      f"(catalog: {len(client._catalog)} services)")
+                      f"(catalog: {len(client.catalog)} services)")
     except AuthenticationError as exc:
         console.print(f"[red]✗ Authentication failed:[/red] {exc.message}")
         console.print("[dim]Re-run 'orca setup' to fix the credentials.[/dim]")

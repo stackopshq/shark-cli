@@ -70,7 +70,7 @@ class TestCurrentUserResolution:
         """If the token genuinely has no user, surface a clean error pointing
         at --user instead of silently sending an invalid 'me' to Keystone."""
         write_config({"active_profile": "p", "profiles": {"p": sample_profile}})
-        mock_client._token_data = {}  # no "user" key
+        mock_client.token_data = {}  # no "user" key
         mock_client.get.return_value = {"application_credentials": []}
 
         result = invoke(["application-credential", "list"])
@@ -147,7 +147,7 @@ class TestCreateSaveProfile:
         assert saved["auth_type"] == "v3applicationcredential"
         assert saved["application_credential_id"] == "ac-saved"
         assert saved["application_credential_secret"] == "topsecret"
-        assert saved["auth_url"] == mock_client._auth_url
+        assert saved["auth_url"] == mock_client.auth_url
         # Must NOT inherit password / project from the current profile —
         # AC profiles are pre-scoped and don't use a password.
         assert "password" not in saved
@@ -157,7 +157,7 @@ class TestCreateSaveProfile:
         self, invoke, mock_client, write_config, sample_profile, config_dir
     ):
         write_config({"active_profile": "p", "profiles": {"p": sample_profile}})
-        mock_client._region_name = "dc3-a"
+        mock_client.region_name = "dc3-a"
         mock_client.post.return_value = {"application_credential": {
             "id": "ac-1", "name": "ci", "secret": "s",
         }}

@@ -47,7 +47,7 @@ class TestCatalogList:
         """Services with multiple interfaces show one row per endpoint."""
         save_profile("prod", sample_profile)
         set_active_profile("prod")
-        mock_client._catalog = [
+        mock_client.catalog = [
             {
                 "type": "compute",
                 "name": "nova",
@@ -69,7 +69,7 @@ class TestCatalogList:
         """Empty catalog shows message."""
         save_profile("prod", sample_profile)
         set_active_profile("prod")
-        mock_client._catalog = []
+        mock_client.catalog = []
 
         result = invoke(["catalog"])
         assert result.exit_code == 0
@@ -79,7 +79,7 @@ class TestCatalogList:
         """Service with no endpoints is not listed."""
         save_profile("prod", sample_profile)
         set_active_profile("prod")
-        mock_client._catalog = [
+        mock_client.catalog = [
             {"type": "compute", "name": "nova", "endpoints": []},
         ]
 
@@ -92,7 +92,7 @@ class TestCatalogList:
         """Multiple services are all listed."""
         save_profile("prod", sample_profile)
         set_active_profile("prod")
-        mock_client._catalog = [
+        mock_client.catalog = [
             {"type": "compute", "name": "nova",
              "endpoints": [{"interface": "public", "url": "https://nova:8774"}]},
             {"type": "network", "name": "neutron",

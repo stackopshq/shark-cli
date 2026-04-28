@@ -239,7 +239,7 @@ def image_create(ctx: click.Context, name: str, disk_format: str, container_form
         total = p.stat().st_size
         console.print(f"  Uploading {file_path} ({total / 1024 / 1024:.1f} MB) ...")
         with open(p, "rb") as f:
-            service.upload(image_id, stream=f)
+            service.upload(image_id, content=f, content_length=total)
         console.print("  [green]Upload complete.[/green]")
 
 
@@ -322,17 +322,17 @@ def image_update(ctx: click.Context, image_id: str, name: str | None,
         console.print(f"  Status: {data.get('status', '')}")
 
 
-def _stream_with_progress(client, *, url: str, path: Path, description: str) -> None:
-    """Stream ``path`` to ``url`` via PUT with a progress bar and error mapping.
+def _stream_upload_with_progress(
+    service: ImageService, *,
+    image_id: str, path: Path, description: str, mode: str,
+) -> None:
+    """Stream ``path`` to Glance with a progress bar.
 
-    Uses the raw httpx client because the Glance upload/stage endpoints
-    need a live generator for the progress bar — ``put_stream`` consumes
-    the file object straight-through without yielding progress events.
+    ``mode`` is ``"upload"`` (PUT /file) or ``"stage"`` (PUT /stage). The
+    service owns URL construction and status mapping; the progress wrapper
+    just yields chunks and advances the bar.
     """
     total = path.stat().st_size
-    headers = client._headers()
-    headers["Content-Type"] = "application/octet-stream"
-    headers["Content-Length"] = str(total)
 
     with Progress(
         "[cyan]{task.description}",
@@ -353,14 +353,10 @@ def _stream_with_progress(client, *, url: str, path: Path, description: str) -> 
                 yield chunk
 
         with open(path, "rb") as f:
-            resp = client._http.put(url, headers=headers, content=_iter(f))
-
-    if resp.status_code == 401:
-        raise AuthenticationError()
-    if resp.status_code == 403:
-        raise PermissionDeniedError()
-    if not resp.is_success:
-        raise APIError(resp.status_code, resp.text[:300])
+            if mode == "upload":
+                service.upload(image_id, content=_iter(f), content_length=total)
+            else:
+                service.stage(image_id, content=_iter(f), content_length=total)
 
 
 @image.command("upload")
@@ -376,11 +372,10 @@ def image_upload(ctx: click.Context, image_id: str, file_path: str) -> None:
     Examples:
       orca image upload <id> /path/to/ubuntu.qcow2
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
-    service = ImageService(client)
+    service = ImageService(ctx.find_object(OrcaContext).ensure_client())
     p = Path(file_path)
-    _stream_with_progress(client, url=service.upload_url(image_id), path=p,
-                          description=f"Uploading {p.name}")
+    _stream_upload_with_progress(service, image_id=image_id, path=p,
+                                 description=f"Uploading {p.name}", mode="upload")
     console.print("[green]Upload complete.[/green]")
 
 
@@ -404,11 +399,10 @@ def image_stage(ctx: click.Context, image_id: str, file_path: str) -> None:
       orca image stage <id> /path/to/ubuntu.qcow2
       orca image import <id> --method glance-direct
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
-    service = ImageService(client)
+    service = ImageService(ctx.find_object(OrcaContext).ensure_client())
     p = Path(file_path)
-    _stream_with_progress(client, url=service.stage_url(image_id), path=p,
-                          description=f"Staging {p.name}")
+    _stream_upload_with_progress(service, image_id=image_id, path=p,
+                                 description=f"Staging {p.name}", mode="stage")
     console.print(f"[green]Staging complete for image {image_id}.[/green]")
     console.print(f"[dim]Run: orca image import {image_id} --method glance-direct[/dim]")
 
@@ -627,7 +621,7 @@ def image_shrink(ctx: click.Context, image_id: str, yes: bool) -> None:
         new_id = new_meta.get("id", "")
 
         with open(qcow2_path, "rb") as f:
-            service.upload(new_id, stream=f)
+            service.upload(new_id, content=f, content_length=new_size)
 
     service.deactivate(image_id)
 

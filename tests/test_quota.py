@@ -12,7 +12,7 @@ def _setup_mock(mock_client, nova=None, cinder=None, neutron_quotas=None,
     mock_client.compute_url = "https://nova.example.com/v2.1"
     mock_client.volume_url = "https://cinder.example.com/v3"
     mock_client.network_url = "https://neutron.example.com"
-    mock_client._project_id = "proj-1"
+    mock_client.project_id = "proj-1"
 
     nova = nova or {
         "limits": {"absolute": {
@@ -139,7 +139,7 @@ class TestQuota:
         mock_client.compute_url = "https://nova.example.com/v2.1"
         mock_client.volume_url = "https://cinder.example.com/v3"
         mock_client.network_url = "https://neutron.example.com"
-        mock_client._project_id = "proj-1"
+        mock_client.project_id = "proj-1"
 
         def _get(url, **kwargs):
             if "nova" in url:

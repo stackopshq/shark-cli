@@ -14,10 +14,10 @@ from orca_cli.services.identity import IdentityService
 def _current_user_id(client) -> str:
     """Resolve the user id from the current token.
 
-    ``client._token_data`` already holds the inner ``token`` object returned by
+    ``client.token_data`` already holds the inner ``token`` object returned by
     Keystone, so ``user`` is at the top level — no extra ``token`` wrapping.
     """
-    user_id = client._token_data.get("user", {}).get("id")
+    user_id = client.token_data.get("user", {}).get("id")
     if not user_id:
         raise OrcaCLIError(
             "Cannot determine current user id from token. "
@@ -121,13 +121,13 @@ def app_credential_create(ctx, name, description, secret, expires_at,
                 "Cannot save profile: Keystone did not return the credential secret."
             )
         profile_cfg = {
-            "auth_url": client._auth_url,
+            "auth_url": client.auth_url,
             "auth_type": "v3applicationcredential",
             "application_credential_id": a["id"],
             "application_credential_secret": a["secret"],
         }
-        if client._region_name:
-            profile_cfg["region_name"] = client._region_name
+        if client.region_name:
+            profile_cfg["region_name"] = client.region_name
         path = save_profile(save_profile_name, profile_cfg)
         console.print(
             f"[green]Saved as orca profile '{save_profile_name}' → {path}[/green]"

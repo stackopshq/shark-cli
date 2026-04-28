@@ -15,12 +15,12 @@ def catalog(ctx: click.Context, output_format: str, columns: tuple[str, ...], fi
     """List available service endpoints from the Keystone catalog."""
     client = ctx.find_object(OrcaContext).ensure_client()
 
-    if not client._catalog:
+    if not client.catalog:
         console.print("[yellow]No service catalog available.[/yellow]")
         return
 
     items = []
-    for svc in client._catalog:
+    for svc in client.catalog:
         for ep in svc.get("endpoints", []):
             items.append({
                 "service": svc.get("name", ""),

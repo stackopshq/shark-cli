@@ -54,7 +54,7 @@ def _setup_happy_path(mock_client, sg_data=None):
     mock_client.network_url = "https://neutron.example.com"
     mock_client.volume_url  = "https://cinder.example.com/v3"
     mock_client.image_url   = "https://glance.example.com"
-    mock_client._token_data = _base_token()
+    mock_client.token_data = _base_token()
 
     def _get(url, **kw):
         if "nova" in url and "limits" in url:
@@ -111,7 +111,7 @@ class TestDoctorAuth:
 
     def test_shows_username(self, invoke, mock_client):
         _setup_happy_path(mock_client)
-        mock_client._token_data = _base_token(user="kevin")
+        mock_client.token_data = _base_token(user="kevin")
         result = invoke(["doctor"])
         assert result.exit_code == 0
         assert "kevin" in result.output
@@ -123,7 +123,7 @@ class TestDoctorAuth:
         mock_client.volume_url  = "https://cinder.example.com/v3"
         mock_client.image_url   = "https://glance.example.com"
         # Simulate missing token data
-        del mock_client._token_data
+        del mock_client.token_data
         result = invoke(["doctor"])
         assert result.exit_code == 0
         # Should report auth error
@@ -136,7 +136,7 @@ class TestDoctorAuth:
         mock_client.network_url = "https://neutron.example.com"
         mock_client.volume_url  = "https://cinder.example.com/v3"
         mock_client.image_url   = "https://glance.example.com"
-        del mock_client._token_data
+        del mock_client.token_data
         result = invoke(["doctor"])
         assert result.exit_code == 0
         assert "Skipped" in result.output or "fix authentication" in result.output.lower()
@@ -154,7 +154,7 @@ class TestDoctorServiceIsolation:
         mock_client.network_url = "https://neutron.example.com"
         mock_client.volume_url  = "https://cinder.example.com/v3"
         mock_client.image_url   = "https://glance.example.com"
-        mock_client._token_data = _base_token()
+        mock_client.token_data = _base_token()
 
         def _get(url, **kw):
             if "nova" in url:
@@ -185,7 +185,7 @@ class TestDoctorServiceIsolation:
         mock_client.network_url = "https://neutron.example.com"
         mock_client.volume_url  = "https://cinder.example.com/v3"
         mock_client.image_url   = "https://glance.example.com"
-        mock_client._token_data = _base_token()
+        mock_client.token_data = _base_token()
 
         def _get(url, **kw):
             if "neutron" in url:
@@ -218,7 +218,7 @@ class TestDoctorQuotaThresholds:
         mock_client.network_url = "https://neutron.example.com"
         mock_client.volume_url  = "https://cinder.example.com/v3"
         mock_client.image_url   = "https://glance.example.com"
-        mock_client._token_data = _base_token()
+        mock_client.token_data = _base_token()
 
         def _get(url, **kw):
             if "nova" in url and "limits" in url:
@@ -300,7 +300,7 @@ class TestDoctorFix:
         mock_client.network_url = "https://neutron.example.com"
         mock_client.volume_url  = "https://cinder.example.com/v3"
         mock_client.image_url   = "https://glance.example.com"
-        mock_client._token_data = _base_token()
+        mock_client.token_data = _base_token()
         mock_client.post.return_value = {}
 
         def _get(url, **kw):

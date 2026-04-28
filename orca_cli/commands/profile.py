@@ -396,7 +396,7 @@ def _complete_regions(ctx: click.Context, param: click.Parameter, incomplete: st
             return []
         client = OrcaClient(config)
         regions: set[str] = set()
-        for svc in client._catalog:
+        for svc in client.catalog:
             for ep in svc.get("endpoints", []):
                 region = ep.get("region_id") or ep.get("region")
                 if region:
@@ -459,7 +459,7 @@ def profile_regions(ctx: click.Context) -> None:
     client = ctx.find_object(OrcaContext).ensure_client()
 
     regions: set[str] = set()
-    for svc in client._catalog:
+    for svc in client.catalog:
         for ep in svc.get("endpoints", []):
             region = ep.get("region_id") or ep.get("region")
             if region:
@@ -469,7 +469,7 @@ def profile_regions(ctx: click.Context) -> None:
         console.print("[yellow]No regions found in the service catalog.[/yellow]")
         return
 
-    current = client._region_name
+    current = client.region_name
     from rich.table import Table
 
     table = Table(title="Available Regions", show_lines=False)

@@ -480,6 +480,55 @@ class OrcaClient:
         )
 
     @property
+    def token(self) -> str:
+        """The current Keystone X-Auth-Token (empty string before auth)."""
+        return self._token or ""
+
+    @property
+    def token_data(self) -> dict:
+        """The full ``token`` object returned by Keystone (user, project,
+        roles, catalog, expires_at, ...). Empty before authentication.
+        """
+        return self._token_data or {}
+
+    @property
+    def catalog(self) -> list[dict]:
+        """The service catalog returned in the active token (read-only view)."""
+        return list(self._catalog)
+
+    @property
+    def auth_url(self) -> str:
+        """The Keystone v3 base URL configured for this client."""
+        return self._auth_url
+
+    @property
+    def region_name(self) -> Optional[str]:
+        """The region used to filter the catalogue, or ``None``."""
+        return self._region_name
+
+    @property
+    def interface(self) -> str:
+        """The interface (``public`` / ``internal`` / ``admin``) used to
+        select endpoints from the catalogue.
+        """
+        return self._interface
+
+    @property
+    def project_id(self) -> Optional[str]:
+        """The project ID this client is scoped to, if any."""
+        return self._project_id
+
+    def authenticate(self) -> None:
+        """Force a fresh Keystone ``/auth/tokens`` round-trip.
+
+        The cached token (if any) is *not* cleared by this call — it is
+        intentional that a successful authentication overwrites the cached
+        token with a fresh one. ``setup`` uses this to verify credentials
+        against the live cloud.
+        """
+        self._authenticate()
+
+    @property
     def compute_url(self) -> str:
         """Nova (compute) public endpoint."""
         return self._endpoint_for("compute")
@@ -819,14 +868,75 @@ class OrcaClient:
             marker = last_id
         return collected
 
-    def put_stream(self, url: str, stream, content_type: str = "application/octet-stream") -> Any:
-        """PUT with a file-like stream body (for large uploads)."""
-        extra = {"Content-Type": content_type}
-        return self._request("put", url, extra_headers=extra, content=stream)
+    def put_stream(self, url: str, *, content: Any,
+                   content_type: str = "application/octet-stream",
+                   content_length: Optional[int] = None,
+                   extra_headers: Optional[Dict[str, str]] = None) -> httpx.Response:
+        """PUT a streaming body (file-like or iterable). Returns the raw httpx response.
 
-    def get_stream(self, url: str):
+        Streamed bodies cannot be replayed, so this path deliberately bypasses
+        ``_request``'s retry loop: a 5xx mid-upload would re-consume the
+        already-drained iterator. Callers must inspect ``resp.status_code`` and
+        raise :class:`APIError` themselves (see ``_check_streaming_response``
+        in services).
+        """
+        headers = self._headers(url=url)
+        headers["Content-Type"] = content_type
+        if content_length is not None:
+            headers["Content-Length"] = str(content_length)
+        if extra_headers:
+            headers.update(extra_headers)
+        return self._http.put(url, headers=headers, content=content)
+
+    def post_stream(self, url: str, *, content: Any,
+                    content_type: str = "application/octet-stream",
+                    content_length: Optional[int] = None,
+                    extra_headers: Optional[Dict[str, str]] = None) -> httpx.Response:
+        """POST a streaming or raw body. Returns the raw httpx response.
+
+        Like :meth:`put_stream`, this bypasses ``_request``'s retry loop so the
+        body iterator is never re-consumed. Use when the server expects a body
+        type other than JSON (Designate ``text/dns`` zone imports, custom raw
+        protocols, etc.).
+        """
+        headers = self._headers(url=url)
+        headers["Content-Type"] = content_type
+        if content_length is not None:
+            headers["Content-Length"] = str(content_length)
+        if extra_headers:
+            headers.update(extra_headers)
+        return self._http.post(url, headers=headers, content=content)
+
+    def post_no_body(self, url: str, *,
+                     extra_headers: Optional[Dict[str, str]] = None) -> httpx.Response:
+        """POST without a JSON body, returning the raw response.
+
+        Used by Swift metadata updates (account/container/object), where the
+        update is conveyed through ``X-*-Meta-*`` headers and the body must be
+        empty.
+        """
+        headers = self._headers(url=url)
+        if extra_headers:
+            headers.update(extra_headers)
+        return self._http.post(url, headers=headers)
+
+    def head_request(self, url: str, *,
+                     extra_headers: Optional[Dict[str, str]] = None) -> httpx.Response:
+        """HEAD request with auth headers — returns the raw response so callers
+        can read metadata from response headers (Swift account/container/object).
+        """
+        headers = self._headers(url=url)
+        if extra_headers:
+            headers.update(extra_headers)
+        return self._http.head(url, headers=headers)
+
+    def get_stream(self, url: str, *,
+                   extra_headers: Optional[Dict[str, str]] = None):
         """GET that returns a streaming response context manager."""
-        return self._http.stream("GET", url, headers=self._headers(url=url))
+        headers = self._headers(url=url)
+        if extra_headers:
+            headers.update(extra_headers)
+        return self._http.stream("GET", url, headers=headers)
 
     def close(self) -> None:
         self._http.close()

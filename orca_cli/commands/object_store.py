@@ -238,14 +238,14 @@ def container_save(ctx: click.Context, container: str, output_dir: str) -> None:
             continue
         dest.parent.mkdir(parents=True, exist_ok=True)
 
-        url = svc.object_url(container, obj_name)
-        resp = client._http.get(url, headers=client._headers())
-        if not resp.is_success:
-            console.print(f"[red]Failed to download '{obj_name}': HTTP {resp.status_code}[/red]")
+        try:
+            data = svc.fetch_object_bytes(container, obj_name)
+        except Exception as exc:  # noqa: BLE001 — best-effort batch download
+            console.print(f"[red]Failed to download '{obj_name}': {exc}[/red]")
             continue
 
-        dest.write_bytes(resp.content)
-        console.print(f"  Saved: {dest} ({_human_size(len(resp.content))})")
+        dest.write_bytes(data)
+        console.print(f"  Saved: {dest} ({_human_size(len(data))})")
 
     console.print(f"[green]Downloaded {len(objects)} object(s) to '{out_path}'.[/green]")
 
@@ -343,11 +343,8 @@ SLO_SEGMENT_SIZE = 4 * 1024 * 1024 * 1024  # 4 GB per segment
 SLO_THRESHOLD = 5 * 1024 * 1024 * 1024     # use SLO above 5 GB
 
 
-def _upload_simple(client, svc, container, obj_name, path, content_type, file_size, progress, task):
+def _upload_simple(svc, container, obj_name, path, content_type, file_size, progress, task):
     """Single-PUT upload for files <= 5 GB."""
-    headers = client._headers()
-    headers["Content-Type"] = content_type
-    headers["Content-Length"] = str(file_size)
 
     def _iter(f, chunk_size=256 * 1024):
         while True:
@@ -358,24 +355,15 @@ def _upload_simple(client, svc, container, obj_name, path, content_type, file_si
             yield chunk
 
     with open(path, "rb") as f:
-        resp = client._http.put(
-            svc.object_url(container, obj_name),
-            headers=headers,
+        svc.upload_object(
+            container, obj_name,
             content=_iter(f),
+            content_type=content_type,
+            content_length=file_size,
         )
 
-    if resp.status_code == 401:
-        from orca_cli.core.exceptions import AuthenticationError
-        raise AuthenticationError()
-    if resp.status_code == 403:
-        from orca_cli.core.exceptions import PermissionDeniedError
-        raise PermissionDeniedError()
-    if not resp.is_success:
-        from orca_cli.core.exceptions import APIError
-        raise APIError(resp.status_code, resp.text[:300])
 
-
-def _upload_slo(client, svc, container, obj_name, path, content_type, file_size, progress, task):
+def _upload_slo(svc, container, obj_name, path, content_type, file_size, progress, task):
     """Segmented upload (SLO) for files > 5 GB."""
     seg_container = f"{container}_segments"
     # Ensure segments container exists
@@ -412,25 +400,11 @@ def _upload_slo(client, svc, container, obj_name, path, content_type, file_size,
                     progress.advance(task, len(data))
                     yield data
 
-            seg_headers = client._headers()
-            seg_headers["Content-Type"] = "application/octet-stream"
-            seg_headers["Content-Length"] = str(seg_size)
-
-            resp = client._http.put(
-                svc.object_url(seg_container, seg_name),
-                headers=seg_headers,
+            svc.upload_object(
+                seg_container, seg_name,
                 content=_seg_iter(),
+                content_length=seg_size,
             )
-
-            if resp.status_code == 401:
-                from orca_cli.core.exceptions import AuthenticationError
-                raise AuthenticationError()
-            if resp.status_code == 403:
-                from orca_cli.core.exceptions import PermissionDeniedError
-                raise PermissionDeniedError()
-            if not resp.is_success:
-                from orca_cli.core.exceptions import APIError
-                raise APIError(resp.status_code, resp.text[:300])
 
             uploaded += seg_uploaded
             manifest.append({
@@ -440,26 +414,14 @@ def _upload_slo(client, svc, container, obj_name, path, content_type, file_size,
             })
 
     # Upload the SLO manifest
-    manifest_headers = client._headers()
-    manifest_headers["Content-Type"] = content_type
     manifest_body = json.dumps(manifest).encode()
-    manifest_headers["Content-Length"] = str(len(manifest_body))
-
-    resp = client._http.put(
-        f"{svc.object_url(container, obj_name)}?multipart-manifest=put",
-        headers=manifest_headers,
+    svc.upload_object(
+        container, obj_name,
         content=manifest_body,
+        content_type=content_type,
+        content_length=len(manifest_body),
+        query="multipart-manifest=put",
     )
-
-    if resp.status_code == 401:
-        from orca_cli.core.exceptions import AuthenticationError
-        raise AuthenticationError()
-    if resp.status_code == 403:
-        from orca_cli.core.exceptions import PermissionDeniedError
-        raise PermissionDeniedError()
-    if not resp.is_success:
-        from orca_cli.core.exceptions import APIError
-        raise APIError(resp.status_code, resp.text[:300])
 
 
 @object_store.command("upload")
@@ -505,11 +467,11 @@ def object_upload(ctx: click.Context, container: str, files: tuple[str, ...],
                 n_segments = (file_size + SLO_SEGMENT_SIZE - 1) // SLO_SEGMENT_SIZE
                 task = progress.add_task(
                     f"Uploading {path.name} ({n_segments} segments)", total=file_size)
-                _upload_slo(client, svc, container, obj_name, path,
+                _upload_slo(svc, container, obj_name, path,
                             content_type, file_size, progress, task)
             else:
                 task = progress.add_task(f"Uploading {path.name}", total=file_size)
-                _upload_simple(client, svc, container, obj_name, path,
+                _upload_simple(svc, container, obj_name, path,
                                content_type, file_size, progress, task)
 
         console.print(f"[green]Uploaded '{path.name}' -> '{container}/{obj_name}' ({_human_size(file_size)})[/green]")
@@ -529,11 +491,10 @@ def object_download(ctx: click.Context, container: str, object_name: str, output
 
     client = ctx.find_object(OrcaContext).ensure_client()
     svc = ObjectStoreService(client)
-    url = svc.object_url(container, object_name)
     dest = safe_output_path(output_file if output_file else object_name.split("/")[-1])
     dest.parent.mkdir(parents=True, exist_ok=True)
 
-    with client._http.stream("GET", url, headers=client._headers()) as resp:
+    with svc.download_object(container, object_name) as resp:
         if resp.status_code == 401:
             from orca_cli.core.exceptions import AuthenticationError
             raise AuthenticationError()
@@ -638,7 +599,7 @@ def object_unset(ctx: click.Context, container: str, object_name: str, propertie
 def object_account_set(ctx: click.Context, properties: tuple[str, ...]) -> None:
     """Set account-level metadata."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    base = client.object_store_url
+    svc = ObjectStoreService(client)
 
     extra_headers: dict[str, str] = {}
     for prop in properties:
@@ -647,18 +608,7 @@ def object_account_set(ctx: click.Context, properties: tuple[str, ...]) -> None:
         key, val = prop.split("=", 1)
         extra_headers[f"X-Account-Meta-{key}"] = val
 
-    headers = client._headers()
-    headers.update(extra_headers)
-    resp = client._http.post(base, headers=headers)
-    if resp.status_code == 401:
-        from orca_cli.core.exceptions import AuthenticationError
-        raise AuthenticationError()
-    if resp.status_code == 403:
-        from orca_cli.core.exceptions import PermissionDeniedError
-        raise PermissionDeniedError()
-    if not resp.is_success:
-        from orca_cli.core.exceptions import APIError
-        raise APIError(resp.status_code, resp.text[:300])
+    svc.post_account_metadata(extra_headers)
     console.print("[green]Account metadata set.[/green]")
 
 
@@ -671,24 +621,13 @@ def object_account_set(ctx: click.Context, properties: tuple[str, ...]) -> None:
 def object_account_unset(ctx: click.Context, properties: tuple[str, ...]) -> None:
     """Remove account-level metadata."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    base = client.object_store_url
+    svc = ObjectStoreService(client)
 
     extra_headers: dict[str, str] = {}
     for key in properties:
         extra_headers[f"X-Remove-Account-Meta-{key}"] = "x"
 
-    headers = client._headers()
-    headers.update(extra_headers)
-    resp = client._http.post(base, headers=headers)
-    if resp.status_code == 401:
-        from orca_cli.core.exceptions import AuthenticationError
-        raise AuthenticationError()
-    if resp.status_code == 403:
-        from orca_cli.core.exceptions import PermissionDeniedError
-        raise PermissionDeniedError()
-    if not resp.is_success:
-        from orca_cli.core.exceptions import APIError
-        raise APIError(resp.status_code, resp.text[:300])
+    svc.post_account_metadata(extra_headers)
     console.print("[green]Account metadata removed.[/green]")
 
 

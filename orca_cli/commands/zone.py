@@ -305,17 +305,7 @@ def zone_export(ctx: click.Context, zone: str, output_file: str | None) -> None:
             console.print("[red]Zone export timed out.[/red]")
             return
 
-    # Fetch the exported zone file content (custom Accept: text/dns — raw
-    # body, not JSON — so we bypass the service layer here).
-    url = f"{client.dns_url}/v2/zones/tasks/exports/{export_id}/export"
-    headers = {"X-Auth-Token": client._token or "", "Accept": "text/dns"}
-    resp = client._http.get(url, headers=headers)
-
-    if resp.status_code != 200:
-        console.print(f"[red]Error fetching export: {resp.status_code} {resp.text}[/red]")
-        return
-
-    zone_content = resp.text
+    zone_content = svc.fetch_export_text(export_id)
     if output_file:
         out = safe_output_path(output_file)
         out.write_text(zone_content)
@@ -341,39 +331,27 @@ def zone_import(ctx: click.Context, input_file: str) -> None:
     with open(input_file) as fh:
         content = fh.read()
 
-    # Import takes a raw BIND-format body with Content-Type: text/dns — no
-    # JSON envelope, so we bypass the service layer here.
-    url = f"{client.dns_url}/v2/zones/tasks/imports"
-    headers = {
-        "X-Auth-Token": client._token or "",
-        "Content-Type": "text/dns",
-    }
-    resp = client._http.post(url, headers=headers, content=content)
+    data = svc.import_zone_text(content)
+    status = data.get("status", "")
+    import_id = data.get("id", "")
+    console.print(f"[green]Zone import initiated (ID: {import_id}, status: {status}).[/green]")
 
-    if resp.status_code in (200, 201, 202):
-        data = resp.json()
-        status = data.get("status", "")
-        import_id = data.get("id", "")
-        console.print(f"[green]Zone import initiated (ID: {import_id}, status: {status}).[/green]")
+    # Poll briefly to report final status
+    with console.status("[bold cyan]Importing zone…[/bold cyan]"):
+        for _ in range(30):
+            check = svc.get_import_task(import_id)
+            s = check.get("status", "")
+            if s == "COMPLETE":
+                zone_id = check.get("zone_id", "?")
+                console.print(f"[green]Zone import complete (zone ID: {zone_id}).[/green]")
+                return
+            if s == "ERROR":
+                msg = check.get("message", "unknown error")
+                console.print(f"[red]Zone import failed: {msg}[/red]")
+                return
+            time.sleep(1)
 
-        # Poll briefly to report final status
-        with console.status("[bold cyan]Importing zone…[/bold cyan]"):
-            for _ in range(30):
-                check = svc.get_import_task(import_id)
-                s = check.get("status", "")
-                if s == "COMPLETE":
-                    zone_id = check.get("zone_id", "?")
-                    console.print(f"[green]Zone import complete (zone ID: {zone_id}).[/green]")
-                    return
-                if s == "ERROR":
-                    msg = check.get("message", "unknown error")
-                    console.print(f"[red]Zone import failed: {msg}[/red]")
-                    return
-                time.sleep(1)
-
-        console.print("[yellow]Zone import still in progress — check status later.[/yellow]")
-    else:
-        console.print(f"[red]Error importing zone: {resp.status_code} {resp.text}[/red]")
+    console.print("[yellow]Zone import still in progress — check status later.[/yellow]")
 
 
 @zone.command("reverse-lookup")

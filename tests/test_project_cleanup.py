@@ -338,7 +338,7 @@ class TestSummaryRendering:
         from orca_cli.main import cli
 
         # Fake token_data so the command can resolve "current project".
-        mock_client._token_data = {"project": {"id": "p-1"}}
+        mock_client.token_data = {"project": {"id": "p-1"}}
 
         # Empty scan except for 4 volumes, one per Outcome.
         def fake_find(self, **kwargs):

@@ -54,7 +54,7 @@ def quota(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_
             if quotas:
                 q = quotas[0]
             else:
-                q = net_svc.get_quota(client._project_id)
+                q = net_svc.get_quota(client.project_id)
 
             # Count current usage
             nets = len(net_svc.find())

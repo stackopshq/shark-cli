@@ -100,6 +100,44 @@ class DnsService:
             f"{self._base}/zones/tasks/exports/{export_id}"
         ) or {}
 
+    def fetch_export_text(self, export_id: str) -> str:
+        """Download the BIND-format zone body for a completed export task.
+
+        The Designate ``/export`` endpoint returns ``text/dns`` rather than
+        JSON, so the standard ``client.get`` helper would mis-parse it. The
+        service uses ``client.get_stream`` and reads the response body.
+        """
+        url = f"{self._base}/zones/tasks/exports/{export_id}/export"
+        with self._client.get_stream(
+            url, extra_headers={"Accept": "text/dns"},
+        ) as resp:
+            if resp.status_code != 200:
+                resp.read()
+                from orca_cli.core.exceptions import APIError
+                raise APIError(resp.status_code, resp.text[:300])
+            resp.read()
+            return resp.text
+
+    def import_zone_text(self, content: str) -> dict:
+        """Submit a BIND-format zone body to the Designate import endpoint.
+
+        Designate expects ``Content-Type: text/dns`` and a raw zone-file body
+        (no JSON envelope). Returns the parsed JSON task descriptor.
+        """
+        url = f"{self._base}/zones/tasks/imports"
+        resp = self._client.post_stream(
+            url,
+            content=content.encode() if isinstance(content, str) else content,
+            content_type="text/dns",
+        )
+        if resp.status_code not in (200, 201, 202):
+            from orca_cli.core.exceptions import APIError
+            raise APIError(resp.status_code, resp.text[:300])
+        try:
+            return resp.json() or {}
+        except ValueError:
+            return {}
+
     def get_import_task(self, import_id: str) -> dict:
         return self._client.get(
             f"{self._base}/zones/tasks/imports/{import_id}"

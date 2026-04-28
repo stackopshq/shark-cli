@@ -41,7 +41,7 @@ def auth_whoami(ctx: click.Context) -> None:
       orca -P staging auth whoami
     """
     client = ctx.find_object(OrcaContext).ensure_client()
-    td = client._token_data
+    td = client.token_data
 
     user = td.get("user", {})
     project = td.get("project", {})
@@ -69,7 +69,7 @@ def auth_whoami(ctx: click.Context) -> None:
     role_names = ", ".join(sorted(r.get("name", r.get("id", "?")) for r in roles))
 
     # Services available
-    service_types = sorted(set(s.get("type", "?") for s in client._catalog))
+    service_types = sorted(set(s.get("type", "?") for s in client.catalog))
 
     console.print()
     from rich.table import Table
@@ -85,10 +85,10 @@ def auth_whoami(ctx: click.Context) -> None:
     table.add_row("Roles", role_names or "[dim]none[/dim]")
     table.add_row("Token Issued", issued.replace("T", " ").replace("Z", " UTC") if issued else "?")
     table.add_row("Token Expires", f"{expires.replace('T', ' ').replace('Z', ' UTC')}  [bold]({remaining})[/bold]" if expires else "?")
-    table.add_row("Auth URL", client._auth_url)
-    table.add_row("Interface", client._interface)
-    if client._region_name:
-        table.add_row("Region", client._region_name)
+    table.add_row("Auth URL", client.auth_url)
+    table.add_row("Interface", client.interface)
+    if client.region_name:
+        table.add_row("Region", client.region_name)
     table.add_row("Services", ", ".join(service_types) if service_types else "[dim]none[/dim]")
 
     console.print(table)
@@ -115,7 +115,7 @@ def auth_token_debug(ctx: click.Context, raw: bool) -> None:
     import json
 
     client = ctx.find_object(OrcaContext).ensure_client()
-    td = client._token_data
+    td = client.token_data
 
     if raw:
         click.echo(json.dumps(td, indent=2, default=str))
@@ -138,7 +138,7 @@ def auth_token_debug(ctx: click.Context, raw: bool) -> None:
     table.add_column("Field", style="bold")
     table.add_column("Value")
 
-    table.add_row("Token (first 32)", (client._token or "")[:32] + "…")
+    table.add_row("Token (first 32)", (client.token or "")[:32] + "…")
     table.add_row("Auth Methods", ", ".join(methods))
     table.add_row("Issued At", issued)
     table.add_row("Expires At", expires)
@@ -178,7 +178,7 @@ def auth_token_debug(ctx: click.Context, raw: bool) -> None:
     # ── Service Catalog ──
     console.print()
     tree = Tree("[bold]Service Catalog[/bold]")
-    for svc in sorted(client._catalog, key=lambda s: s.get("type", "")):
+    for svc in sorted(client.catalog, key=lambda s: s.get("type", "")):
         stype = svc.get("type", "?")
         sname = svc.get("name", "")
         branch = tree.add(f"[bold cyan]{stype}[/bold cyan]  [dim]({sname})[/dim]")

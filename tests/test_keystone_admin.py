@@ -11,7 +11,7 @@ KS  = "https://keystone.example.com:5000/v3"
 
 def _client(mock_client):
     mock_client.identity_url = KS
-    mock_client._catalog = []
+    mock_client.catalog = []
     return mock_client
 
 

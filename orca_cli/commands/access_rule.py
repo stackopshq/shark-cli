@@ -29,7 +29,7 @@ def ar_list(ctx, user_id, service, method, path,
     """List access rules."""
     client = ctx.find_object(OrcaContext).ensure_client()
     svc = IdentityService(client)
-    uid = user_id or client._token_data.get("user", {}).get("id", "")
+    uid = user_id or client.token_data.get("user", {}).get("id", "")
     # ``service``/``method``/``path`` were passed as query params to Keystone
     # in the pre-service implementation. Keystone does not support filtering
     # the access_rules endpoint, so they were silently no-ops; we intentionally
@@ -62,7 +62,7 @@ def ar_show(ctx, access_rule_id, user_id,
     """Show an access rule."""
     client = ctx.find_object(OrcaContext).ensure_client()
     svc = IdentityService(client)
-    uid = user_id or client._token_data.get("user", {}).get("id", "")
+    uid = user_id or client.token_data.get("user", {}).get("id", "")
     ar = svc.get_access_rule(uid, access_rule_id)
     fields = [
         ("ID", ar.get("id", "")),
@@ -85,7 +85,7 @@ def ar_delete(ctx, access_rule_id, user_id, yes):
     """Delete an access rule."""
     client = ctx.find_object(OrcaContext).ensure_client()
     svc = IdentityService(client)
-    uid = user_id or client._token_data.get("user", {}).get("id", "")
+    uid = user_id or client.token_data.get("user", {}).get("id", "")
     if not yes:
         click.confirm(f"Delete access rule {access_rule_id}?", abort=True)
     svc.delete_access_rule(uid, access_rule_id)

@@ -88,7 +88,7 @@ def doctor(ctx: click.Context, fix: bool, cidr: str | None) -> None:  # noqa: C9
 
     # ── 1. Auth check — gates all subsequent checks ────────────────────────
     try:
-        td = client._token_data
+        td = client.token_data
         user = td.get("user", {}).get("name", "unknown")
         project = td.get("project", {}).get("name", "unknown")
         _ok("Authentication", f"Authenticated as [bold]{user}[/bold] in project [bold]{project}[/bold]")
@@ -157,7 +157,7 @@ def doctor(ctx: click.Context, fix: bool, cidr: str | None) -> None:  # noqa: C9
     # ── 5. Network quotas (skip if Neutron is down) ────────────────────────
     if svc_up.get("Neutron (network)", False):
         try:
-            project_id = client._token_data.get("project", {}).get("id", "")
+            project_id = client.token_data.get("project", {}).get("id", "")
             if project_id:
                 nq = (
                     client.get(f"{client.network_url}/v2.0/quotas/{project_id}/details")

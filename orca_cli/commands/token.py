@@ -22,8 +22,8 @@ def token_issue(ctx, output_format, columns, fit_width, max_width, noindent):
     """Issue a token for the current credentials (show token details)."""
     client = ctx.find_object(OrcaContext).ensure_client()
     # Token is already acquired during client init; expose it
-    tok = client._token or ""
-    token_data = client._token_data or {}
+    tok = client.token or ""
+    token_data = client.token_data or {}
     user = token_data.get("user", {})
     catalog = token_data.get("catalog", [])
     expires = token_data.get("expires_at", "")

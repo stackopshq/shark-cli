@@ -1280,11 +1280,42 @@ class TestPutStream:
         client = OrcaClient(BASE_CFG)
         client.put_stream(
             "https://glance.example.com/v2/images/x/file",
-            stream=iter([b"a", b"b"]),
+            content=iter([b"a", b"b"]),
             content_type="application/octet-stream",
         )
         kwargs = http.put.call_args.kwargs
         assert kwargs["headers"]["Content-Type"] == "application/octet-stream"
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_put_stream_sets_content_length_when_provided(self, mock_httpx_cls):
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        http.put.return_value = _resp(204)
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        client.put_stream(
+            "https://glance.example.com/v2/images/x/file",
+            content=b"abc",
+            content_length=3,
+        )
+        kwargs = http.put.call_args.kwargs
+        assert kwargs["headers"]["Content-Length"] == "3"
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_put_stream_skips_retry_on_5xx(self, mock_httpx_cls):
+        """Streamed bodies cannot be replayed; ``put_stream`` must not retry
+        on 5xx the way idempotent ``client.put`` does."""
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        http.put.return_value = _resp(503)
+        mock_httpx_cls.return_value = http
+
+        client = OrcaClient(BASE_CFG)
+        resp = client.put_stream("https://x/file", content=b"abc")
+
+        assert resp.status_code == 503
+        assert http.put.call_count == 1  # no retry
 
 
 class TestClose:
