@@ -118,8 +118,12 @@ def live_name() -> Callable[[str], str]:
 
 
 _ID_RE = re.compile(
-    # Canonical UUID (Nova/Cinder/Neutron/Glance) and bare 32-hex (Keystone).
-    r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|[0-9a-f]{32}",
+    # Canonical UUID (Nova/Cinder/Neutron/Glance), 64-hex SHA-256
+    # (Keystone credentials), and bare 32-hex (most Keystone resources).
+    # 64 must precede 32 so the longer match wins.
+    r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+    r"|[0-9a-f]{64}"
+    r"|[0-9a-f]{32}",
     re.IGNORECASE,
 )
 
