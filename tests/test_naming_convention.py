@@ -62,14 +62,10 @@ LEGACY_HYPHENATED_SUBCOMMANDS: dict[str, set[str]] = {
         "pool-create", "pool-delete", "pool-list", "pool-set", "pool-show",
         "stats-show", "status-show",
     },
-    "metric": {
-        "archive-policy-create", "archive-policy-delete",
-        "archive-policy-list", "archive-policy-show",
-        "measures-add",
-        "resource-list", "resource-show",
-        "resource-type-create", "resource-type-delete",
-        "resource-type-list", "resource-type-show",
-    },
+    # metric — migrated 2026-04-28: archive-policy-* under
+    # ``metric archive-policy``, resource-type-* under ``metric resource-type``,
+    # resource-list/show under ``metric resource``, measures-add under
+    # ``metric measures add``.
     # "network" entry removed — every former hyphenated subcommand is now
     # nested under a sub-group (agent, port, rbac, segment, subnet,
     # auto-allocated-topology, router) or sub-sub-group (router add/remove
@@ -103,11 +99,9 @@ LEGACY_HYPHENATED_SUBCOMMANDS: dict[str, set[str]] = {
     },
     # qos — migrated 2026-04-28: policy-* under ``qos policy``,
     # rule-* under ``qos rule``.
-    "rating": {
-        "metric-list", "metric-show",
-        "module-disable", "module-enable", "module-list",
-        "module-set-priority", "module-show",
-    },
+    # rating — migrated 2026-04-28: metric-* under ``rating metric``,
+    # module-* under ``rating module`` (incl. ``set-priority`` as a
+    # compound-verb leaf).
     "secret": {
         "container-create", "container-delete", "container-list",
         "container-show", "get-payload",

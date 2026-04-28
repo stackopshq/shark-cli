@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import click
 
+from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
@@ -25,7 +26,12 @@ def metric(ctx: click.Context) -> None:
 #  Resource types
 # ══════════════════════════════════════════════════════════════════════════
 
-@metric.command("resource-type-list")
+@metric.group("resource-type")
+def metric_resource_type() -> None:
+    """Inspect Gnocchi resource types (compound noun)."""
+
+
+@metric_resource_type.command("list")
 @output_options
 @click.pass_context
 def resource_type_list(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
@@ -51,7 +57,12 @@ def resource_type_list(ctx: click.Context, output_format: str, columns: tuple[st
 #  Resources
 # ══════════════════════════════════════════════════════════════════════════
 
-@metric.command("resource-list")
+@metric.group("resource")
+def metric_resource() -> None:
+    """Inspect Gnocchi resources."""
+
+
+@metric_resource.command("list")
 @click.option("--type", "resource_type", default="generic", show_default=True, help="Resource type to list.")
 @click.option("--limit", "limit", type=int, default=100, show_default=True,
               help="Max results. Gnocchi can return very large datasets without a limit.")
@@ -81,7 +92,7 @@ def resource_list(ctx: click.Context, resource_type: str, limit: int,
     )
 
 
-@metric.command("resource-show")
+@metric_resource.command("show")
 @click.argument("resource_id", callback=validate_id)
 @click.option("--type", "resource_type", default="generic", show_default=True, help="Resource type.")
 @output_options
@@ -177,7 +188,12 @@ def metric_show(ctx: click.Context, metric_id: str,
 #  Measures
 # ══════════════════════════════════════════════════════════════════════════
 
-@metric.command("measures")
+@metric.group("measures")
+def metric_measures() -> None:
+    """Read or push measures (samples) on a Gnocchi metric."""
+
+
+@metric_measures.command("show")
 @click.argument("metric_id", callback=validate_id)
 @click.option("--start", default=None, help="Start timestamp (ISO 8601 or relative e.g. -1h).")
 @click.option("--stop", default=None, help="Stop timestamp.")
@@ -186,7 +202,7 @@ def metric_show(ctx: click.Context, metric_id: str,
 @click.option("--limit", type=int, default=None, help="Max measures to return.")
 @output_options
 @click.pass_context
-def metric_measures(ctx: click.Context, metric_id: str, start: str | None,
+def metric_measures_show(ctx: click.Context, metric_id: str, start: str | None,
                     stop: str | None, granularity: str | None,
                     aggregation: str, limit: int | None,
                     output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
@@ -233,7 +249,12 @@ def metric_measures(ctx: click.Context, metric_id: str, start: str | None,
 #  Archive Policies
 # ══════════════════════════════════════════════════════════════════════════
 
-@metric.command("archive-policy-list")
+@metric.group("archive-policy")
+def metric_archive_policy() -> None:
+    """Manage Gnocchi archive policies (compound noun)."""
+
+
+@metric_archive_policy.command("list")
 @output_options
 @click.pass_context
 def archive_policy_list(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
@@ -318,7 +339,7 @@ def metric_delete(ctx: click.Context, metric_id: str, yes: bool) -> None:
     console.print(f"[green]Metric {metric_id} deleted.[/green]")
 
 
-@metric.command("measures-add")
+@metric_measures.command("add")
 @click.argument("metric_id")
 @click.option("--measure", "measures", required=True, multiple=True,
               metavar="TIMESTAMP:VALUE",
@@ -348,7 +369,7 @@ def metric_measures_add(ctx: click.Context, metric_id: str,
 #  Archive Policy CRUD
 # ══════════════════════════════════════════════════════════════════════════
 
-@metric.command("archive-policy-show")
+@metric_archive_policy.command("show")
 @click.argument("name")
 @output_options
 @click.pass_context
@@ -368,7 +389,7 @@ def archive_policy_show(ctx: click.Context, name: str, output_format: str,
                  max_width=max_width, noindent=noindent, columns=columns)
 
 
-@metric.command("archive-policy-create")
+@metric_archive_policy.command("create")
 @click.argument("name")
 @click.option("--definition", "definitions", required=True, multiple=True,
               metavar="GRANULARITY:POINTS",
@@ -400,7 +421,7 @@ def archive_policy_create(ctx: click.Context, name: str,
     console.print(f"[green]Archive policy '{name}' created.[/green]")
 
 
-@metric.command("archive-policy-delete")
+@metric_archive_policy.command("delete")
 @click.argument("name")
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -417,7 +438,7 @@ def archive_policy_delete(ctx: click.Context, name: str, yes: bool) -> None:
 #  Resource Type CRUD
 # ══════════════════════════════════════════════════════════════════════════
 
-@metric.command("resource-type-show")
+@metric_resource_type.command("show")
 @click.argument("resource_type")
 @output_options
 @click.pass_context
@@ -435,7 +456,7 @@ def resource_type_show(ctx: click.Context, resource_type: str, output_format: st
                  max_width=max_width, noindent=noindent, columns=columns)
 
 
-@metric.command("resource-type-create")
+@metric_resource_type.command("create")
 @click.argument("name")
 @click.option("--attribute", "attributes", multiple=True, metavar="KEY:TYPE",
               help="Resource attribute key:type (repeatable). E.g. host:string.")
@@ -455,7 +476,7 @@ def resource_type_create(ctx: click.Context, name: str,
     console.print(f"[green]Resource type '{name}' created.[/green]")
 
 
-@metric.command("resource-type-delete")
+@metric_resource_type.command("delete")
 @click.argument("resource_type")
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -466,3 +487,40 @@ def resource_type_delete(ctx: click.Context, resource_type: str, yes: bool) -> N
     client = ctx.find_object(OrcaContext).ensure_client()
     MetricService(client).delete_resource_type(resource_type)
     console.print(f"[green]Resource type '{resource_type}' deleted.[/green]")
+
+
+# ── ADR-0008 deprecated aliases (backward compatibility) ────────────────
+
+add_command_with_alias(metric, resource_type_list,
+                        legacy_name="resource-type-list",
+                        primary_path="metric resource-type list")
+add_command_with_alias(metric, resource_type_show,
+                        legacy_name="resource-type-show",
+                        primary_path="metric resource-type show")
+add_command_with_alias(metric, resource_type_create,
+                        legacy_name="resource-type-create",
+                        primary_path="metric resource-type create")
+add_command_with_alias(metric, resource_type_delete,
+                        legacy_name="resource-type-delete",
+                        primary_path="metric resource-type delete")
+add_command_with_alias(metric, resource_list,
+                        legacy_name="resource-list",
+                        primary_path="metric resource list")
+add_command_with_alias(metric, resource_show,
+                        legacy_name="resource-show",
+                        primary_path="metric resource show")
+add_command_with_alias(metric, metric_measures_add,
+                        legacy_name="measures-add",
+                        primary_path="metric measures add")
+add_command_with_alias(metric, archive_policy_list,
+                        legacy_name="archive-policy-list",
+                        primary_path="metric archive-policy list")
+add_command_with_alias(metric, archive_policy_show,
+                        legacy_name="archive-policy-show",
+                        primary_path="metric archive-policy show")
+add_command_with_alias(metric, archive_policy_create,
+                        legacy_name="archive-policy-create",
+                        primary_path="metric archive-policy create")
+add_command_with_alias(metric, archive_policy_delete,
+                        legacy_name="archive-policy-delete",
+                        primary_path="metric archive-policy delete")

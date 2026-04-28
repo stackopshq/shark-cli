@@ -170,7 +170,7 @@ class TestMeasures:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["metric", "measures", METRIC_ID])
+        result = invoke(["metric", "measures", "show", METRIC_ID])
         assert result.exit_code == 0
         assert "42.5" in result.output
         assert "55.2" in result.output
@@ -181,7 +181,7 @@ class TestMeasures:
         mock_client.metric_url = "https://gnocchi.example.com"
         mock_client.get = lambda url, **kw: [] if "/measures" in url else {}
 
-        result = invoke(["metric", "measures", METRIC_ID])
+        result = invoke(["metric", "measures", "show", METRIC_ID])
         assert result.exit_code == 0
         assert "No measures found" in result.output
 
@@ -236,7 +236,7 @@ class TestMetricHelp:
             assert cmd in result.output
 
     def test_measures_help(self, invoke):
-        result = invoke(["metric", "measures", "--help"])
+        result = invoke(["metric", "measures", "show", "--help"])
         assert result.exit_code == 0
         assert "--start" in result.output
         assert "--granularity" in result.output

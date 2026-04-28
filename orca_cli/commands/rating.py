@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 
 import click
 
+from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
@@ -48,7 +49,12 @@ def rating_info(ctx: click.Context) -> None:
     console.print_json(json.dumps(data, indent=2))
 
 
-@rating.command("metric-list")
+@rating.group("metric")
+def rating_metric() -> None:
+    """Inspect CloudKitty metrics."""
+
+
+@rating_metric.command("list")
 @output_options
 @click.pass_context
 def rating_metric_list(ctx, output_format, columns, fit_width, max_width, noindent):
@@ -66,7 +72,7 @@ def rating_metric_list(ctx, output_format, columns, fit_width, max_width, noinde
                fit_width=fit_width, max_width=max_width, noindent=noindent)
 
 
-@rating.command("metric-show")
+@rating_metric.command("show")
 @click.argument("metric_id")
 @output_options
 @click.pass_context
@@ -220,7 +226,12 @@ def rating_quote(ctx, resources):
 #  rating modules (admin)
 # ══════════════════════════════════════════════════════════════════════════════
 
-@rating.command("module-list")
+@rating.group("module")
+def rating_module() -> None:
+    """Manage CloudKitty rating modules."""
+
+
+@rating_module.command("list")
 @output_options
 @click.pass_context
 def rating_module_list(ctx, output_format, columns, fit_width, max_width, noindent):
@@ -239,7 +250,7 @@ def rating_module_list(ctx, output_format, columns, fit_width, max_width, noinde
                fit_width=fit_width, max_width=max_width, noindent=noindent)
 
 
-@rating.command("module-show")
+@rating_module.command("show")
 @click.argument("module_id")
 @output_options
 @click.pass_context
@@ -270,7 +281,7 @@ def _module_put(svc: RatingService, module_id: str, patch: dict) -> None:
     svc.update_module(module_id, body)
 
 
-@rating.command("module-enable")
+@rating_module.command("enable")
 @click.argument("module_id")
 @click.pass_context
 def rating_module_enable(ctx, module_id):
@@ -281,7 +292,7 @@ def rating_module_enable(ctx, module_id):
     console.print(f"Rating module [bold]{module_id}[/bold] enabled.")
 
 
-@rating.command("module-disable")
+@rating_module.command("disable")
 @click.argument("module_id")
 @click.pass_context
 def rating_module_disable(ctx, module_id):
@@ -292,7 +303,7 @@ def rating_module_disable(ctx, module_id):
     console.print(f"Rating module [bold]{module_id}[/bold] disabled.")
 
 
-@rating.command("module-set-priority")
+@rating_module.command("set-priority")
 @click.argument("module_id")
 @click.argument("priority", type=int)
 @click.pass_context
@@ -619,3 +630,28 @@ def hm_group_delete(ctx, group_id, yes):
     svc = RatingService(client)
     svc.delete_hashmap_group(group_id)
     console.print(f"HashMap group [bold]{group_id}[/bold] deleted.")
+
+
+# ── ADR-0008 deprecated aliases (backward compatibility) ────────────────
+
+add_command_with_alias(rating, rating_metric_list,
+                        legacy_name="metric-list",
+                        primary_path="rating metric list")
+add_command_with_alias(rating, rating_metric_show,
+                        legacy_name="metric-show",
+                        primary_path="rating metric show")
+add_command_with_alias(rating, rating_module_list,
+                        legacy_name="module-list",
+                        primary_path="rating module list")
+add_command_with_alias(rating, rating_module_show,
+                        legacy_name="module-show",
+                        primary_path="rating module show")
+add_command_with_alias(rating, rating_module_enable,
+                        legacy_name="module-enable",
+                        primary_path="rating module enable")
+add_command_with_alias(rating, rating_module_disable,
+                        legacy_name="module-disable",
+                        primary_path="rating module disable")
+add_command_with_alias(rating, rating_module_set_priority,
+                        legacy_name="module-set-priority",
+                        primary_path="rating module set-priority")
