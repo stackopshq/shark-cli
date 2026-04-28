@@ -61,26 +61,13 @@ LEGACY_HYPHENATED_SUBCOMMANDS: dict[str, set[str]] = {
     # for interface/route, router set/unset for gateway).
     # object — migrated 2026-04-28: account-* moved under
     # ``object account``, container-* moved under ``object container``.
-    "placement": {
-        "allocation-candidate-list", "allocation-delete", "allocation-set",
-        "allocation-show",
-        "resource-class-create", "resource-class-delete",
-        "resource-class-list", "resource-class-show",
-        "resource-provider-aggregate-delete",
-        "resource-provider-aggregate-list",
-        "resource-provider-aggregate-set",
-        "resource-provider-create", "resource-provider-delete",
-        "resource-provider-inventory-delete",
-        "resource-provider-inventory-delete-all",
-        "resource-provider-inventory-list",
-        "resource-provider-inventory-set",
-        "resource-provider-inventory-show",
-        "resource-provider-list", "resource-provider-set",
-        "resource-provider-show",
-        "resource-provider-trait-delete", "resource-provider-trait-list",
-        "resource-provider-trait-set", "resource-provider-usage",
-        "trait-create", "trait-delete", "trait-list", "usage-list",
-    },
+    # placement — migrated 2026-04-28: every leaf moved into a sub-group
+    # (resource-provider, resource-class, trait, allocation, usage).
+    # ``resource-provider`` and ``resource-class`` keep their hyphen as
+    # compound-noun sub-group names. Sub-leaves ``inventory-list/set/
+    # show/delete-all``, ``trait-list/set/delete``, ``aggregate-list/
+    # set/delete``, ``candidate-list`` keep their hyphen for the same
+    # reason (sub-resources of resource-provider / allocation).
     "profile": {
         "from-clouds", "from-openrc",
         "set-color", "set-region",

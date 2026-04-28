@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import click
 
+from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
@@ -21,7 +22,12 @@ def placement(ctx: click.Context) -> None:
 #  Resource Providers
 # ══════════════════════════════════════════════════════════════════════════════
 
-@placement.command("resource-provider-list")
+@placement.group("resource-provider")
+def placement_resource_provider() -> None:
+    """Manage Placement resource providers (compound noun)."""
+
+
+@placement_resource_provider.command("list")
 @click.option("--name", default=None, help="Filter by name.")
 @click.option("--uuid", default=None, help="Filter by UUID.")
 @click.option("--in-tree", default=None, metavar="UUID", help="Limit to providers in this tree.")
@@ -53,7 +59,7 @@ def rp_list(ctx, name, uuid, in_tree, output_format, columns, fit_width, max_wid
                fit_width=fit_width, max_width=max_width, noindent=noindent)
 
 
-@placement.command("resource-provider-show")
+@placement_resource_provider.command("show")
 @click.argument("uuid", callback=validate_id)
 @output_options
 @click.pass_context
@@ -74,7 +80,7 @@ def rp_show(ctx, uuid, output_format, columns, fit_width, max_width, noindent):
                  fit_width=fit_width, max_width=max_width, noindent=noindent)
 
 
-@placement.command("resource-provider-create")
+@placement_resource_provider.command("create")
 @click.argument("name")
 @click.option("--uuid", default=None, help="Explicit UUID for the new provider.")
 @click.option("--parent-uuid", default=None,
@@ -101,7 +107,7 @@ def rp_create(ctx, name, uuid, parent_uuid, output_format, columns, fit_width, m
                  fit_width=fit_width, max_width=max_width, noindent=noindent)
 
 
-@placement.command("resource-provider-set")
+@placement_resource_provider.command("set")
 @click.argument("uuid", callback=validate_id)
 @click.option("--name", default=None, help="New name.")
 @click.option("--parent-uuid", default=None, help="New parent provider UUID.")
@@ -122,7 +128,7 @@ def rp_set(ctx, uuid, name, parent_uuid):
     console.print(f"Resource provider [bold]{uuid}[/bold] updated.")
 
 
-@placement.command("resource-provider-delete")
+@placement_resource_provider.command("delete")
 @click.argument("uuid", callback=validate_id)
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -140,7 +146,7 @@ def rp_delete(ctx, uuid, yes):
 #  Inventories
 # ══════════════════════════════════════════════════════════════════════════════
 
-@placement.command("resource-provider-inventory-list")
+@placement_resource_provider.command("inventory-list")
 @click.argument("uuid", callback=validate_id)
 @output_options
 @click.pass_context
@@ -168,7 +174,7 @@ def rp_inventory_list(ctx, uuid, output_format, columns, fit_width, max_width, n
                fit_width=fit_width, max_width=max_width, noindent=noindent)
 
 
-@placement.command("resource-provider-inventory-set")
+@placement_resource_provider.command("inventory-set")
 @click.argument("uuid", callback=validate_id)
 @click.argument("resource_class")
 @click.option("--total", type=int, required=True, help="Total inventory units.")
@@ -198,7 +204,7 @@ def rp_inventory_set(ctx, uuid, resource_class, total, reserved,
     console.print(f"Inventory [bold]{resource_class}[/bold] set for provider [bold]{uuid}[/bold].")
 
 
-@placement.command("resource-provider-inventory-delete")
+@placement_resource_provider.command("inventory-delete")
 @click.argument("uuid", callback=validate_id)
 @click.argument("resource_class")
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
@@ -217,7 +223,7 @@ def rp_inventory_delete(ctx, uuid, resource_class, yes):
 #  Usages
 # ══════════════════════════════════════════════════════════════════════════════
 
-@placement.command("resource-provider-usage")
+@placement_resource_provider.command("usage")
 @click.argument("uuid", callback=validate_id)
 @output_options
 @click.pass_context
@@ -237,7 +243,12 @@ def rp_usage(ctx, uuid, output_format, columns, fit_width, max_width, noindent):
                fit_width=fit_width, max_width=max_width, noindent=noindent)
 
 
-@placement.command("usage-list")
+@placement.group("usage")
+def placement_usage() -> None:
+    """Inspect Placement usage."""
+
+
+@placement_usage.command("list")
 @click.option("--project-id", default=None, help="Filter by project UUID.")
 @click.option("--user-id", default=None, help="Filter by user UUID.")
 @output_options
@@ -267,7 +278,12 @@ def usage_list(ctx, project_id, user_id, output_format, columns, fit_width, max_
 #  Resource Classes
 # ══════════════════════════════════════════════════════════════════════════════
 
-@placement.command("resource-class-list")
+@placement.group("resource-class")
+def placement_resource_class() -> None:
+    """Manage Placement resource classes (compound noun)."""
+
+
+@placement_resource_class.command("list")
 @output_options
 @click.pass_context
 def rc_list(ctx, output_format, columns, fit_width, max_width, noindent):
@@ -284,7 +300,7 @@ def rc_list(ctx, output_format, columns, fit_width, max_width, noindent):
                fit_width=fit_width, max_width=max_width, noindent=noindent)
 
 
-@placement.command("resource-class-show")
+@placement_resource_class.command("show")
 @click.argument("name")
 @click.pass_context
 def rc_show(ctx, name):
@@ -297,7 +313,7 @@ def rc_show(ctx, name):
     console.print(f"Resource class [bold]{name}[/bold] exists.")
 
 
-@placement.command("resource-class-create")
+@placement_resource_class.command("create")
 @click.argument("name")
 @click.pass_context
 def rc_create(ctx, name):
@@ -308,7 +324,7 @@ def rc_create(ctx, name):
     console.print(f"Resource class [bold]{name}[/bold] created.")
 
 
-@placement.command("resource-class-delete")
+@placement_resource_class.command("delete")
 @click.argument("name")
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -326,7 +342,12 @@ def rc_delete(ctx, name, yes):
 #  Traits
 # ══════════════════════════════════════════════════════════════════════════════
 
-@placement.command("trait-list")
+@placement.group("trait")
+def placement_trait() -> None:
+    """Manage Placement traits."""
+
+
+@placement_trait.command("list")
 @click.option("--name", default=None, help="Filter traits by name prefix.")
 @click.option("--associated", is_flag=True, default=False,
               help="Only traits associated with a resource provider.")
@@ -352,7 +373,7 @@ def trait_list(ctx, name, associated, output_format, columns, fit_width, max_wid
                fit_width=fit_width, max_width=max_width, noindent=noindent)
 
 
-@placement.command("trait-create")
+@placement_trait.command("create")
 @click.argument("name")
 @click.pass_context
 def trait_create(ctx, name):
@@ -363,7 +384,7 @@ def trait_create(ctx, name):
     console.print(f"Trait [bold]{name}[/bold] created.")
 
 
-@placement.command("trait-delete")
+@placement_trait.command("delete")
 @click.argument("name")
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -377,7 +398,7 @@ def trait_delete(ctx, name, yes):
     console.print(f"Trait [bold]{name}[/bold] deleted.")
 
 
-@placement.command("resource-provider-trait-list")
+@placement_resource_provider.command("trait-list")
 @click.argument("uuid", callback=validate_id)
 @output_options
 @click.pass_context
@@ -397,7 +418,7 @@ def rp_trait_list(ctx, uuid, output_format, columns, fit_width, max_width, noind
                fit_width=fit_width, max_width=max_width, noindent=noindent)
 
 
-@placement.command("resource-provider-trait-set")
+@placement_resource_provider.command("trait-set")
 @click.argument("uuid", callback=validate_id)
 @click.argument("traits", nargs=-1, required=True)
 @click.pass_context
@@ -414,7 +435,7 @@ def rp_trait_set(ctx, uuid, traits):
     console.print(f"Traits set on [bold]{uuid}[/bold].")
 
 
-@placement.command("resource-provider-trait-delete")
+@placement_resource_provider.command("trait-delete")
 @click.argument("uuid", callback=validate_id)
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -432,7 +453,12 @@ def rp_trait_delete(ctx, uuid, yes):
 #  Allocations
 # ══════════════════════════════════════════════════════════════════════════════
 
-@placement.command("allocation-show")
+@placement.group("allocation")
+def placement_allocation() -> None:
+    """Manage Placement allocations."""
+
+
+@placement_allocation.command("show")
 @click.argument("consumer_uuid", callback=validate_id)
 @output_options
 @click.pass_context
@@ -459,7 +485,7 @@ def allocation_show(ctx, consumer_uuid, output_format, columns, fit_width, max_w
                fit_width=fit_width, max_width=max_width, noindent=noindent)
 
 
-@placement.command("allocation-delete")
+@placement_allocation.command("delete")
 @click.argument("consumer_uuid", callback=validate_id)
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -473,7 +499,7 @@ def allocation_delete(ctx, consumer_uuid, yes):
     console.print(f"Allocations for [bold]{consumer_uuid}[/bold] deleted.")
 
 
-@placement.command("allocation-set")
+@placement_allocation.command("set")
 @click.argument("consumer_uuid", callback=validate_id)
 @click.option("--resource-provider", "rp_uuid", required=True, callback=validate_id,
               help="Resource provider UUID.")
@@ -510,7 +536,7 @@ def allocation_set(ctx, consumer_uuid, rp_uuid, resources, project_id, user_id):
 #  Allocation Candidates
 # ══════════════════════════════════════════════════════════════════════════════
 
-@placement.command("allocation-candidate-list")
+@placement_allocation.command("candidate-list")
 @click.option("--resource", "resources", multiple=True, metavar="CLASS=AMOUNT",
               required=True, help="Requested resource, e.g. VCPU=4. Repeatable.")
 @click.option("--required", "required_traits", multiple=True, metavar="TRAIT",
@@ -570,7 +596,7 @@ def allocation_candidate_list(ctx, resources, required_traits, forbidden_traits,
 #  Resource Provider Aggregates
 # ══════════════════════════════════════════════════════════════════════════════
 
-@placement.command("resource-provider-aggregate-list")
+@placement_resource_provider.command("aggregate-list")
 @click.argument("uuid", callback=validate_id)
 @output_options
 @click.pass_context
@@ -590,7 +616,7 @@ def rp_aggregate_list(ctx, uuid, output_format, columns, fit_width, max_width, n
                fit_width=fit_width, max_width=max_width, noindent=noindent)
 
 
-@placement.command("resource-provider-aggregate-set")
+@placement_resource_provider.command("aggregate-set")
 @click.argument("uuid", callback=validate_id)
 @click.argument("aggregates", nargs=-1, required=True)
 @click.pass_context
@@ -607,7 +633,7 @@ def rp_aggregate_set(ctx, uuid, aggregates):
     console.print(f"Aggregates set on [bold]{uuid}[/bold].")
 
 
-@placement.command("resource-provider-aggregate-delete")
+@placement_resource_provider.command("aggregate-delete")
 @click.argument("uuid", callback=validate_id)
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -630,7 +656,7 @@ def rp_aggregate_delete(ctx, uuid, yes):
 #  Inventory — show single / bulk set / bulk delete
 # ══════════════════════════════════════════════════════════════════════════════
 
-@placement.command("resource-provider-inventory-show")
+@placement_resource_provider.command("inventory-show")
 @click.argument("uuid", callback=validate_id)
 @click.argument("resource_class")
 @output_options
@@ -653,7 +679,7 @@ def rp_inventory_show(ctx, uuid, resource_class, output_format, columns, fit_wid
                  fit_width=fit_width, max_width=max_width, noindent=noindent)
 
 
-@placement.command("resource-provider-inventory-delete-all")
+@placement_resource_provider.command("inventory-delete-all")
 @click.argument("uuid", callback=validate_id)
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -664,3 +690,94 @@ def rp_inventory_delete_all(ctx, uuid, yes):
         click.confirm(f"Delete all inventories for {uuid}?", abort=True)
     PlacementService(client).delete_all_inventories(uuid)
     console.print(f"All inventories deleted for [bold]{uuid}[/bold].")
+
+
+# ── ADR-0008 deprecated aliases (backward compatibility) ──
+
+add_command_with_alias(placement, rp_list,
+                        legacy_name="resource-provider-list",
+                        primary_path="placement resource-provider list")
+add_command_with_alias(placement, rp_show,
+                        legacy_name="resource-provider-show",
+                        primary_path="placement resource-provider show")
+add_command_with_alias(placement, rp_create,
+                        legacy_name="resource-provider-create",
+                        primary_path="placement resource-provider create")
+add_command_with_alias(placement, rp_set,
+                        legacy_name="resource-provider-set",
+                        primary_path="placement resource-provider set")
+add_command_with_alias(placement, rp_delete,
+                        legacy_name="resource-provider-delete",
+                        primary_path="placement resource-provider delete")
+add_command_with_alias(placement, rp_inventory_list,
+                        legacy_name="resource-provider-inventory-list",
+                        primary_path="placement resource-provider inventory-list")
+add_command_with_alias(placement, rp_inventory_set,
+                        legacy_name="resource-provider-inventory-set",
+                        primary_path="placement resource-provider inventory-set")
+add_command_with_alias(placement, rp_inventory_delete,
+                        legacy_name="resource-provider-inventory-delete",
+                        primary_path="placement resource-provider inventory-delete")
+add_command_with_alias(placement, rp_inventory_show,
+                        legacy_name="resource-provider-inventory-show",
+                        primary_path="placement resource-provider inventory-show")
+add_command_with_alias(placement, rp_inventory_delete_all,
+                        legacy_name="resource-provider-inventory-delete-all",
+                        primary_path="placement resource-provider inventory-delete-all")
+add_command_with_alias(placement, rp_usage,
+                        legacy_name="resource-provider-usage",
+                        primary_path="placement resource-provider usage")
+add_command_with_alias(placement, rp_trait_list,
+                        legacy_name="resource-provider-trait-list",
+                        primary_path="placement resource-provider trait-list")
+add_command_with_alias(placement, rp_trait_set,
+                        legacy_name="resource-provider-trait-set",
+                        primary_path="placement resource-provider trait-set")
+add_command_with_alias(placement, rp_trait_delete,
+                        legacy_name="resource-provider-trait-delete",
+                        primary_path="placement resource-provider trait-delete")
+add_command_with_alias(placement, rp_aggregate_list,
+                        legacy_name="resource-provider-aggregate-list",
+                        primary_path="placement resource-provider aggregate-list")
+add_command_with_alias(placement, rp_aggregate_set,
+                        legacy_name="resource-provider-aggregate-set",
+                        primary_path="placement resource-provider aggregate-set")
+add_command_with_alias(placement, rp_aggregate_delete,
+                        legacy_name="resource-provider-aggregate-delete",
+                        primary_path="placement resource-provider aggregate-delete")
+add_command_with_alias(placement, usage_list,
+                        legacy_name="usage-list",
+                        primary_path="placement usage list")
+add_command_with_alias(placement, rc_list,
+                        legacy_name="resource-class-list",
+                        primary_path="placement resource-class list")
+add_command_with_alias(placement, rc_show,
+                        legacy_name="resource-class-show",
+                        primary_path="placement resource-class show")
+add_command_with_alias(placement, rc_create,
+                        legacy_name="resource-class-create",
+                        primary_path="placement resource-class create")
+add_command_with_alias(placement, rc_delete,
+                        legacy_name="resource-class-delete",
+                        primary_path="placement resource-class delete")
+add_command_with_alias(placement, trait_list,
+                        legacy_name="trait-list",
+                        primary_path="placement trait list")
+add_command_with_alias(placement, trait_create,
+                        legacy_name="trait-create",
+                        primary_path="placement trait create")
+add_command_with_alias(placement, trait_delete,
+                        legacy_name="trait-delete",
+                        primary_path="placement trait delete")
+add_command_with_alias(placement, allocation_show,
+                        legacy_name="allocation-show",
+                        primary_path="placement allocation show")
+add_command_with_alias(placement, allocation_delete,
+                        legacy_name="allocation-delete",
+                        primary_path="placement allocation delete")
+add_command_with_alias(placement, allocation_set,
+                        legacy_name="allocation-set",
+                        primary_path="placement allocation set")
+add_command_with_alias(placement, allocation_candidate_list,
+                        legacy_name="allocation-candidate-list",
+                        primary_path="placement allocation candidate-list")
