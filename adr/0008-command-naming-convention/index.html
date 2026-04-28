@@ -3732,6 +3732,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#deprecation-horizon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deprecation horizon
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#migration-tracking" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3917,6 +3928,17 @@
     <span class="md-ellipsis">
       
         Permanent exceptions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deprecation-horizon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deprecation horizon
       
     </span>
   </a>
@@ -4113,7 +4135,7 @@
    refactored, the new (compliant) command becomes primary and the old
    name is registered as an alias on the same callback, with
    <code>[deprecated, use 'X Y' instead]</code> appended to its short help.
-   Aliases are removed in <strong>v2.0</strong>.</p>
+   Aliases are removed in <strong>v3.0.0</strong> — see <em>Deprecation horizon</em> below.</p>
 </li>
 </ol>
 <h3 id="migration-policy">Migration policy<a class="headerlink" href="#migration-policy" title="Permanent link">&para;</a></h3>
@@ -4170,6 +4192,28 @@ re-read.</p>
 </ul>
 <p>Adding to this list requires a deliberate choice and an inline
 comment in the test whitelist explaining why.</p>
+<h2 id="deprecation-horizon">Deprecation horizon<a class="headerlink" href="#deprecation-horizon" title="Permanent link">&para;</a></h2>
+<p>The original ADR (2026-04-20) said aliases would be retired in
+v2.0. In practice the migration finished in 2.3.0 — eleven lots
+between 2026-04-20 and 2026-04-28 — so the v2.0 cut never
+happened. The new target is <strong>v3.0.0</strong>:</p>
+<ul>
+<li><strong>Until 3.0.0</strong> — every deprecated alias keeps working and prints
+  a one-line yellow hint to stderr pointing at the new path.
+  Existing scripts continue to run unchanged.</li>
+<li><strong>3.0.0 (next major)</strong> — every alias registered through
+  <code>add_command_with_alias</code> is dropped. Permanent exceptions
+  (see above) stay. The ratchet test is no longer needed and can
+  be deleted at the same time.</li>
+</ul>
+<p>3.0.0 will also be the version that drops Python 3.9 support
+(already removed from <code>pyproject.toml</code>'s <code>requires-python</code> floor on
+2026-04-28). Bundling the breaking-change debt into a single major
+release keeps the upgrade story coherent.</p>
+<p>Users wanting to audit their own scripts before 3.0.0 can run
+<code>orca doctor</code> — its <em>Deprecated commands</em> section reports how
+many alias entries currently live in the CLI tree and points back
+to this ADR.</p>
 <h2 id="migration-tracking">Migration tracking<a class="headerlink" href="#migration-tracking" title="Permanent link">&para;</a></h2>
 <p>Update this list when a module's hyphenated commands are migrated.</p>
 <ul>
