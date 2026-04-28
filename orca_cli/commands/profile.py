@@ -754,7 +754,7 @@ def profile_from_clouds(cloud_name: str, profile_name: str | None, clouds_file: 
         p = Path(clouds_file)
         if not p.exists():
             raise OrcaCLIError(f"File not found: {clouds_file}")
-        with open(p, "r") as fh:
+        with open(p) as fh:
             data = yaml.safe_load(fh) or {}
         cloud = data.get("clouds", {}).get(cloud_name)
     else:
@@ -764,7 +764,7 @@ def profile_from_clouds(cloud_name: str, profile_name: str | None, clouds_file: 
                 "No clouds.yaml found. Searched: ./clouds.yaml, "
                 "~/.config/openstack/clouds.yaml, /etc/openstack/clouds.yaml"
             )
-        with open(found, "r") as fh:
+        with open(found) as fh:
             data = yaml.safe_load(fh) or {}
         cloud = data.get("clouds", {}).get(cloud_name)
         if not cloud:

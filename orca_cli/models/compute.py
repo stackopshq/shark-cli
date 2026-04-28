@@ -59,33 +59,28 @@ class Aggregate(TypedDict, total=False):
     deleted_at: str
 
 
-Hypervisor = TypedDict(
-    "Hypervisor",
-    {
-        "id": str,
-        "hypervisor_hostname": str,
-        "hypervisor_type": str,
-        "hypervisor_version": int,
-        "host_ip": str,
-        "state": str,
-        "status": str,
-        "vcpus": int,
-        "vcpus_used": int,
-        "memory_mb": int,
-        "memory_mb_used": int,
-        "local_gb": int,
-        "local_gb_used": int,
-        "free_ram_mb": int,
-        "free_disk_gb": int,
-        "running_vms": int,
-        "current_workload": int,
-        "disk_available_least": int,
-        "cpu_info": dict,
-        "service": dict,
-        "uptime": str,
-    },
-    total=False,
-)
+class Hypervisor(TypedDict, total=False):
+    id: str
+    hypervisor_hostname: str
+    hypervisor_type: str
+    hypervisor_version: int
+    host_ip: str
+    state: str
+    status: str
+    vcpus: int
+    vcpus_used: int
+    memory_mb: int
+    memory_mb_used: int
+    local_gb: int
+    local_gb_used: int
+    free_ram_mb: int
+    free_disk_gb: int
+    running_vms: int
+    current_workload: int
+    disk_available_least: int
+    cpu_info: dict
+    service: dict
+    uptime: str
 
 
 class HypervisorStatistics(TypedDict, total=False):
@@ -109,22 +104,17 @@ class AvailabilityZone(TypedDict, total=False):
     hosts: dict
 
 
-ComputeService = TypedDict(
-    "ComputeService",
-    {
-        "id": str,
-        "binary": str,
-        "host": str,
-        "zone": str,
-        "status": str,
-        "state": str,
-        "disabled_reason": str,
-        "forced_down": bool,
-        "updated_at": str,
-        "DEFAULT": str,
-    },
-    total=False,
-)
+class ComputeService(TypedDict, total=False):
+    id: str
+    binary: str
+    host: str
+    zone: str
+    status: str
+    state: str
+    disabled_reason: str
+    forced_down: bool
+    updated_at: str
+    DEFAULT: str
 
 
 class ServerGroup(TypedDict, total=False):

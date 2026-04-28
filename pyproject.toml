@@ -57,7 +57,7 @@ line-length = 120
 target-version = "py310"
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "B", "S", "C901"]
+select = ["E", "F", "W", "I", "B", "S", "C901", "UP"]
 ignore = [
     "E501",  # line-too-long
     "S110",  # try-except-pass — best-effort cache/prefetch/completion paths must never crash the CLI

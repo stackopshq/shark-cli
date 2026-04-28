@@ -238,7 +238,7 @@ def auth_check(ctx: click.Context, check_all: bool, clouds: bool) -> None:
         import yaml
         path = _find_clouds_yaml()
         if path:
-            with open(path, "r") as fh:
+            with open(path) as fh:
                 data = yaml.safe_load(fh) or {}
             for cloud_name in sorted(data.get("clouds", {}).keys()):
                 cfg = _load_clouds_yaml(cloud_name)

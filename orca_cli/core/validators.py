@@ -2,7 +2,6 @@
 
 import re
 from pathlib import Path
-from typing import Union
 
 import click
 
@@ -33,7 +32,7 @@ def validate_id(ctx: click.Context, param: click.Parameter, value: str) -> str:
     return value
 
 
-def safe_output_path(user_path: Union[str, Path]) -> Path:
+def safe_output_path(user_path: str | Path) -> Path:
     """Resolve a user-supplied output path, refusing symlink overwrites.
 
     Accepts any path (absolute or relative); users are root of their own
@@ -52,7 +51,7 @@ def safe_output_path(user_path: Union[str, Path]) -> Path:
     return p
 
 
-def safe_child_path(base: Union[str, Path], child: str) -> Path:
+def safe_child_path(base: str | Path, child: str) -> Path:
     """Join an API-derived name onto a base directory without escaping it.
 
     Used for bulk downloads where the child name (object key, file name,

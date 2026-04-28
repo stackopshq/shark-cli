@@ -34,7 +34,7 @@ import os
 import re
 import stat
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import yaml
 
@@ -106,7 +106,7 @@ _OS_ENV_MAP = {
 }
 
 # clouds.yaml search paths (standard OpenStack order)
-_CLOUDS_YAML_PATHS: List[Path] = [
+_CLOUDS_YAML_PATHS: list[Path] = [
     Path("clouds.yaml"),                           # current directory
     Path.home() / ".config" / "openstack" / "clouds.yaml",
     Path("/etc/openstack/clouds.yaml"),
@@ -124,15 +124,15 @@ DEFAULT_PROFILE = "default"
 
 # ── Raw file I/O ─────────────────────────────────────────────────────────
 
-def _load_raw() -> Dict[str, Any]:
+def _load_raw() -> dict[str, Any]:
     """Load the raw YAML file as-is."""
     if not CONFIG_FILE.exists():
         return {}
-    with open(CONFIG_FILE, "r") as fh:
+    with open(CONFIG_FILE) as fh:
         return yaml.safe_load(fh) or {}
 
 
-def _save_raw(data: Dict[str, Any]) -> Path:
+def _save_raw(data: dict[str, Any]) -> Path:
     """Write *data* to the config file with 0600 permissions."""
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     with open(CONFIG_FILE, "w") as fh:
@@ -143,12 +143,12 @@ def _save_raw(data: Dict[str, Any]) -> Path:
 
 # ── Migration ────────────────────────────────────────────────────────────
 
-def _is_legacy(raw: Dict[str, Any]) -> bool:
+def _is_legacy(raw: dict[str, Any]) -> bool:
     """True if the file uses the old flat format (no ``profiles`` key)."""
     return "profiles" not in raw and any(k in raw for k in REQUIRED_KEYS)
 
 
-def _migrate(raw: Dict[str, Any]) -> Dict[str, Any]:
+def _migrate(raw: dict[str, Any]) -> dict[str, Any]:
     """Convert legacy flat config to multi-profile format in-place."""
     profile_data = {k: v for k, v in raw.items() if k != "profiles" and k != "active_profile"}
     new = {
@@ -161,7 +161,7 @@ def _migrate(raw: Dict[str, Any]) -> Dict[str, Any]:
 
 # ── Profile helpers ──────────────────────────────────────────────────────
 
-def _ensure_structure(raw: Dict[str, Any]) -> Dict[str, Any]:
+def _ensure_structure(raw: dict[str, Any]) -> dict[str, Any]:
     """Migrate if legacy, return normalised structure."""
     if _is_legacy(raw):
         return _migrate(raw)
@@ -181,13 +181,13 @@ def get_active_profile_name(override: str | None = None) -> str:
     return raw.get("active_profile", DEFAULT_PROFILE)
 
 
-def list_profiles() -> Dict[str, Dict[str, Any]]:
+def list_profiles() -> dict[str, dict[str, Any]]:
     """Return all profiles as ``{name: config_dict}``."""
     raw = _ensure_structure(_load_raw())
     return raw.get("profiles", {})
 
 
-def get_profile(name: str) -> Dict[str, Any]:
+def get_profile(name: str) -> dict[str, Any]:
     """Return a single profile by name, or empty dict."""
     return list_profiles().get(name, {})
 
@@ -201,7 +201,7 @@ def set_active_profile(name: str) -> None:
     _save_raw(raw)
 
 
-def save_profile(name: str, data: Dict[str, Any]) -> Path:
+def save_profile(name: str, data: dict[str, Any]) -> Path:
     """Create or update a profile."""
     raw = _ensure_structure(_load_raw())
     raw["profiles"][name] = data
@@ -240,7 +240,7 @@ def rename_profile(old_name: str, new_name: str) -> None:
 
 # ── clouds.yaml support ─────────────────────────────────────────────────
 
-def _find_clouds_yaml() -> Optional[Path]:
+def _find_clouds_yaml() -> Path | None:
     """Locate the first existing clouds.yaml in standard paths."""
     for p in _CLOUDS_YAML_PATHS:
         if p.exists():
@@ -248,12 +248,12 @@ def _find_clouds_yaml() -> Optional[Path]:
     return None
 
 
-def _load_clouds_yaml(cloud_name: str) -> Dict[str, Any]:
+def _load_clouds_yaml(cloud_name: str) -> dict[str, Any]:
     """Load a named cloud from ``clouds.yaml`` and normalise to orca keys."""
     path = _find_clouds_yaml()
     if not path:
         return {}
-    with open(path, "r") as fh:
+    with open(path) as fh:
         data = yaml.safe_load(fh) or {}
     cloud = data.get("clouds", {}).get(cloud_name)
     if not cloud:
@@ -261,10 +261,10 @@ def _load_clouds_yaml(cloud_name: str) -> Dict[str, Any]:
     return _normalise_clouds_yaml(cloud)
 
 
-def _normalise_clouds_yaml(cloud: Dict[str, Any]) -> Dict[str, Any]:
+def _normalise_clouds_yaml(cloud: dict[str, Any]) -> dict[str, Any]:
     """Map clouds.yaml structure to flat orca config keys."""
     auth = cloud.get("auth", {})
-    cfg: Dict[str, Any] = {}
+    cfg: dict[str, Any] = {}
 
     cfg["auth_url"] = auth.get("auth_url", "")
     cfg["username"] = auth.get("username", "")
@@ -322,9 +322,9 @@ def _normalise_clouds_yaml(cloud: Dict[str, Any]) -> Dict[str, Any]:
 
 # ── OS_* env var support ────────────────────────────────────────────────
 
-def _load_os_env() -> Dict[str, Any]:
+def _load_os_env() -> dict[str, Any]:
     """Collect config from standard ``OS_*`` environment variables."""
-    cfg: Dict[str, Any] = {}
+    cfg: dict[str, Any] = {}
     for env_var, key in _OS_ENV_MAP.items():
         value = os.environ.get(env_var)
         if value:
@@ -337,7 +337,7 @@ def _has_os_env() -> bool:
     return bool(os.environ.get("OS_AUTH_URL"))
 
 
-def _is_app_cred(config: Dict[str, Any]) -> bool:
+def _is_app_cred(config: dict[str, Any]) -> bool:
     """True when *config* describes an application-credential auth flow."""
     auth_type = str(config.get("auth_type", "")).lower()
     if auth_type in ("v3applicationcredential", "application_credential"):
@@ -348,7 +348,7 @@ def _is_app_cred(config: Dict[str, Any]) -> bool:
 
 # ── Public API (used by context.py / commands) ───────────────────────────
 
-def load_config(profile_name: str | None = None) -> Dict[str, Any]:
+def load_config(profile_name: str | None = None) -> dict[str, Any]:
     """Load the resolved config with full priority chain.
 
     Priority (first match wins):
@@ -391,7 +391,7 @@ def load_config(profile_name: str | None = None) -> Dict[str, Any]:
     return config
 
 
-def _apply_orca_env(config: Dict[str, Any]) -> None:
+def _apply_orca_env(config: dict[str, Any]) -> None:
     """Overlay ``ORCA_*`` env vars onto *config* in-place."""
     for env_var, key in _ORCA_ENV_MAP.items():
         value = os.environ.get(env_var)
@@ -399,7 +399,7 @@ def _apply_orca_env(config: Dict[str, Any]) -> None:
             config[key] = value
 
 
-def _normalise_legacy_keys(config: Dict[str, Any]) -> None:
+def _normalise_legacy_keys(config: dict[str, Any]) -> None:
     """Reconcile legacy field names with the canonical Keystone v3 ones.
 
     Two distinct rewrites happen here, gated independently:
@@ -441,7 +441,7 @@ def _normalise_legacy_keys(config: Dict[str, Any]) -> None:
         config.pop("domain_id", None)
 
 
-def config_is_complete(config: Optional[Dict[str, Any]] = None) -> bool:
+def config_is_complete(config: dict[str, Any] | None = None) -> bool:
     """Return ``True`` if all required credentials are present.
 
     Application credentials need only ``auth_url`` plus a credential secret
@@ -467,7 +467,7 @@ def config_is_complete(config: Optional[Dict[str, Any]] = None) -> bool:
 
 
 # Legacy compat
-def save_config(data: Dict[str, Any]) -> Path:
+def save_config(data: dict[str, Any]) -> Path:
     """Save to the active profile (backwards compatible)."""
     raw = _ensure_structure(_load_raw())
     name = raw.get("active_profile", DEFAULT_PROFILE)

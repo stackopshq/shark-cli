@@ -29,7 +29,7 @@ import tempfile
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 import httpx
 import yaml
@@ -75,7 +75,7 @@ logger = logging.getLogger(__name__)
 _REDACTED_HEADERS = frozenset({"x-auth-token", "x-subject-token", "authorization"})
 
 
-def _redact_headers(headers: Dict[str, str]) -> Dict[str, str]:
+def _redact_headers(headers: dict[str, str]) -> dict[str, str]:
     """Return a copy of ``headers`` with sensitive values replaced by ``***``."""
     return {k: ("***" if k.lower() in _REDACTED_HEADERS else v)
             for k, v in headers.items()}
@@ -116,7 +116,7 @@ _TRANSIENT_EXCEPTIONS = (
 )
 
 
-def _parse_retry_after(value: str) -> Optional[float]:
+def _parse_retry_after(value: str) -> float | None:
     """Interpret a ``Retry-After`` header per RFC 7231 §7.1.3.
 
     Accepts either delta-seconds (``"5"``) or an HTTP-date (``"Wed, 21 Oct 2015
@@ -528,7 +528,7 @@ class OrcaClient:
         return self._auth_url
 
     @property
-    def region_name(self) -> Optional[str]:
+    def region_name(self) -> str | None:
         """The region used to filter the catalogue, or ``None``."""
         return self._region_name
 
@@ -540,7 +540,7 @@ class OrcaClient:
         return self._interface
 
     @property
-    def project_id(self) -> Optional[str]:
+    def project_id(self) -> str | None:
         """The project ID this client is scoped to, if any."""
         return self._project_id
 
@@ -652,9 +652,9 @@ class OrcaClient:
 
     # ── Generic HTTP helpers ──────────────────────────────────────────────────
 
-    def _headers(self, extra: Optional[Dict[str, str]] = None,
-                 url: Optional[str] = None) -> Dict[str, str]:
-        h: Dict[str, str] = {
+    def _headers(self, extra: dict[str, str] | None = None,
+                 url: str | None = None) -> dict[str, str]:
+        h: dict[str, str] = {
             "X-Auth-Token": self._token or "",
             "Accept": "application/json",
         }
@@ -749,7 +749,7 @@ class OrcaClient:
         return response.json()
 
     def _send(self, method: str, url: str,
-              extra_headers: Optional[Dict[str, str]] = None,
+              extra_headers: dict[str, str] | None = None,
               **kwargs: Any) -> httpx.Response:
         """Single HTTP send with inline 401→re-auth retry (once, cached token only)."""
         started = time.monotonic()
@@ -785,7 +785,7 @@ class OrcaClient:
         return resp
 
     def _request(self, method: str, url: str,
-                 extra_headers: Optional[Dict[str, str]] = None,
+                 extra_headers: dict[str, str] | None = None,
                  **kwargs: Any) -> Any:
         """Execute an HTTP request with three independent recovery mechanisms:
 
@@ -849,31 +849,31 @@ class OrcaClient:
 
     # ── Public HTTP methods ───────────────────────────────────────────────────
 
-    def get(self, url: str, params: Optional[Dict[str, Any]] = None,
-            headers: Optional[Dict[str, str]] = None) -> Any:
+    def get(self, url: str, params: dict[str, Any] | None = None,
+            headers: dict[str, str] | None = None) -> Any:
         return self._request("get", url, extra_headers=headers, params=params)
 
-    def post(self, url: str, json: Optional[Union[Dict[str, Any], list]] = None,
-             headers: Optional[Dict[str, str]] = None) -> Any:
+    def post(self, url: str, json: dict[str, Any] | list | None = None,
+             headers: dict[str, str] | None = None) -> Any:
         return self._request("post", url, extra_headers=headers, json=json)
 
-    def put(self, url: str, json: Optional[Union[Dict[str, Any], list]] = None,
-            headers: Optional[Dict[str, str]] = None) -> Any:
+    def put(self, url: str, json: dict[str, Any] | list | None = None,
+            headers: dict[str, str] | None = None) -> Any:
         return self._request("put", url, extra_headers=headers, json=json)
 
-    def patch(self, url: str, json: Optional[Union[Dict[str, Any], list]] = None,
-              content: Optional[bytes] = None,
-              content_type: Optional[str] = None) -> Any:
-        extra: Dict[str, str] = {}
+    def patch(self, url: str, json: dict[str, Any] | list | None = None,
+              content: bytes | None = None,
+              content_type: str | None = None) -> Any:
+        extra: dict[str, str] = {}
         if content_type:
             extra["Content-Type"] = content_type
         if content is not None:
             return self._request("patch", url, extra_headers=extra or None, content=content)
         return self._request("patch", url, extra_headers=extra or None, json=json)
 
-    def delete(self, url: str, params: Optional[Dict[str, Any]] = None,
-               headers: Optional[Dict[str, str]] = None,
-               json: Optional[Union[Dict[str, Any], list]] = None) -> Any:
+    def delete(self, url: str, params: dict[str, Any] | None = None,
+               headers: dict[str, str] | None = None,
+               json: dict[str, Any] | list | None = None) -> Any:
         # Some OpenStack APIs (e.g. Barbican container consumers) require a
         # JSON body on DELETE — uncommon for HTTP but valid per RFC 7231.
         # Only forward `json` when supplied so httpx's per-method shortcut
@@ -885,8 +885,8 @@ class OrcaClient:
 
     def paginate(self, url: str, key: str, *,
                  page_size: int = 1000,
-                 params: Optional[Dict[str, Any]] = None,
-                 max_items: Optional[int] = None) -> list:
+                 params: dict[str, Any] | None = None,
+                 max_items: int | None = None) -> list:
         """Walk an OpenStack list endpoint using marker-based pagination.
 
         Many services (Nova, Cinder, Neutron with ``allow_pagination``) cap
@@ -908,8 +908,8 @@ class OrcaClient:
             max_items: stop once this many items have been collected.
         """
         collected: list = []
-        marker: Optional[str] = None
-        base_params: Dict[str, Any] = dict(params or {})
+        marker: str | None = None
+        base_params: dict[str, Any] = dict(params or {})
         while True:
             p = dict(base_params)
             p["limit"] = page_size
@@ -932,8 +932,8 @@ class OrcaClient:
 
     def put_stream(self, url: str, *, content: Any,
                    content_type: str = "application/octet-stream",
-                   content_length: Optional[int] = None,
-                   extra_headers: Optional[Dict[str, str]] = None) -> httpx.Response:
+                   content_length: int | None = None,
+                   extra_headers: dict[str, str] | None = None) -> httpx.Response:
         """PUT a streaming body (file-like or iterable). Returns the raw httpx response.
 
         Streamed bodies cannot be replayed, so this path deliberately bypasses
@@ -952,8 +952,8 @@ class OrcaClient:
 
     def post_stream(self, url: str, *, content: Any,
                     content_type: str = "application/octet-stream",
-                    content_length: Optional[int] = None,
-                    extra_headers: Optional[Dict[str, str]] = None) -> httpx.Response:
+                    content_length: int | None = None,
+                    extra_headers: dict[str, str] | None = None) -> httpx.Response:
         """POST a streaming or raw body. Returns the raw httpx response.
 
         Like :meth:`put_stream`, this bypasses ``_request``'s retry loop so the
@@ -970,7 +970,7 @@ class OrcaClient:
         return self._http.post(url, headers=headers, content=content)
 
     def post_no_body(self, url: str, *,
-                     extra_headers: Optional[Dict[str, str]] = None) -> httpx.Response:
+                     extra_headers: dict[str, str] | None = None) -> httpx.Response:
         """POST without a JSON body, returning the raw response.
 
         Used by Swift metadata updates (account/container/object), where the
@@ -983,7 +983,7 @@ class OrcaClient:
         return self._http.post(url, headers=headers)
 
     def head_request(self, url: str, *,
-                     extra_headers: Optional[Dict[str, str]] = None) -> httpx.Response:
+                     extra_headers: dict[str, str] | None = None) -> httpx.Response:
         """HEAD request with auth headers — returns the raw response so callers
         can read metadata from response headers (Swift account/container/object).
         """
@@ -993,7 +993,7 @@ class OrcaClient:
         return self._http.head(url, headers=headers)
 
     def get_stream(self, url: str, *,
-                   extra_headers: Optional[Dict[str, str]] = None):
+                   extra_headers: dict[str, str] | None = None):
         """GET that returns a streaming response context manager."""
         headers = self._headers(url=url)
         if extra_headers:

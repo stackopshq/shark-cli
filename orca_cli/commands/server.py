@@ -5,7 +5,8 @@ from __future__ import annotations
 import fnmatch
 import os
 import time
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 import click
 

@@ -248,26 +248,21 @@ class QosRule(TypedDict, total=False):
     dscp_mark: int
 
 
-Agent = TypedDict(
-    "Agent",
-    {
-        "id": str,
-        "agent_type": str,
-        "binary": str,
-        "host": str,
-        "topic": str,
-        "admin_state_up": bool,
-        "alive": bool,
-        "availability_zone": str,
-        "description": str,
-        "resources_synced": bool,
-        "configurations": dict,
-        "created_at": str,
-        "started_at": str,
-        "heartbeat_timestamp": str,
-    },
-    total=False,
-)
+class Agent(TypedDict, total=False):
+    id: str
+    agent_type: str
+    binary: str
+    host: str
+    topic: str
+    admin_state_up: bool
+    alive: bool
+    availability_zone: str
+    description: str
+    resources_synced: bool
+    configurations: dict
+    created_at: str
+    started_at: str
+    heartbeat_timestamp: str
 
 
 class RbacPolicy(TypedDict, total=False):
