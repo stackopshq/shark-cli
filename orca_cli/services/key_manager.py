@@ -98,3 +98,51 @@ class KeyManagerService:
 
     def delete_order(self, order_id: str) -> None:
         self._client.delete(f"{self._base}/orders/{order_id}")
+
+    # ── consumers (per-container) ──────────────────────────────────────
+    # Consumers register an opaque {service, name, URL} on a container
+    # to indicate "this resource consumes that container". OSC exposes
+    # them as ``secret consumer create/delete/list``.
+
+    def find_consumers(self, container_id: str) -> list[dict[str, Any]]:
+        data = self._client.get(
+            f"{self._base}/containers/{container_id}/consumers"
+        )
+        return data.get("consumers", [])
+
+    def add_consumer(self, container_id: str,
+                     name: str, url: str) -> dict[str, Any]:
+        data = self._client.post(
+            f"{self._base}/containers/{container_id}/consumers",
+            json={"name": name, "URL": url},
+        )
+        return data if data else {}
+
+    def remove_consumer(self, container_id: str,
+                        name: str, url: str) -> None:
+        # Barbican accepts the same body shape on DELETE.
+        self._client.delete(
+            f"{self._base}/containers/{container_id}/consumers",
+            json={"name": name, "URL": url},
+        )
+
+    # ── secret payload upload (after metadata-only secret create) ──────
+
+    def put_secret_payload(self, secret_id: str, payload: bytes,
+                           content_type: str = "application/octet-stream",
+                           content_encoding: str | None = None) -> None:
+        """Upload the data half of a previously-created metadata secret.
+
+        ``orca secret create --no-payload`` returns a 'pending' secret
+        whose payload is uploaded in a second PUT — useful for large
+        secrets or when the payload comes from a separate workflow.
+        """
+        extra = {"Content-Type": content_type}
+        if content_encoding:
+            extra["Content-Encoding"] = content_encoding
+        self._client.put_stream(
+            f"{self._base}/secrets/{secret_id}",
+            content=payload, content_type=content_type,
+            extra_headers=({"Content-Encoding": content_encoding}
+                           if content_encoding else None),
+        )

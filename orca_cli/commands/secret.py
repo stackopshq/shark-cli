@@ -389,3 +389,95 @@ def secret_order_delete(ctx: click.Context, order_id: str, yes: bool) -> None:
     svc = KeyManagerService(ctx.find_object(OrcaContext).ensure_client())
     svc.delete_order(order_id)
     console.print(f"[green]Order {order_id} deleted.[/green]")
+
+
+@secret.group("consumer")
+def secret_consumer() -> None:
+    """Manage consumers registered on Barbican containers."""
+
+
+@secret_consumer.command("list")
+@click.argument("container_id", callback=validate_id)
+@output_options
+@click.pass_context
+def secret_consumer_list(ctx, container_id,
+                          output_format, columns, fit_width, max_width, noindent):
+    """List consumers registered on a container."""
+    svc = KeyManagerService(ctx.find_object(OrcaContext).ensure_client())
+    items = svc.find_consumers(container_id)
+    if not items:
+        console.print("No consumers registered on this container.")
+        return
+    print_list(
+        items,
+        [("Name", "name"), ("URL", "URL"), ("Created", "created"),
+         ("Updated", "updated"), ("Status", "status")],
+        title=f"Consumers of container {container_id}",
+        output_format=output_format, columns=columns,
+        fit_width=fit_width, max_width=max_width, noindent=noindent,
+    )
+
+
+@secret_consumer.command("create")
+@click.argument("container_id", callback=validate_id)
+@click.option("--name", required=True, help="Consumer name (free-form).")
+@click.option("--url", "url", required=True,
+              help="Consumer URL (e.g. the resource that uses the secret).")
+@click.pass_context
+def secret_consumer_create(ctx, container_id, name, url):
+    """Register a consumer on a container."""
+    svc = KeyManagerService(ctx.find_object(OrcaContext).ensure_client())
+    svc.add_consumer(container_id, name, url)
+    console.print(
+        f"[green]Consumer '{name}' registered on container {container_id}.[/green]"
+    )
+
+
+@secret_consumer.command("delete")
+@click.argument("container_id", callback=validate_id)
+@click.option("--name", required=True, help="Consumer name to remove.")
+@click.option("--url", "url", required=True, help="Consumer URL to remove.")
+@click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
+@click.pass_context
+def secret_consumer_delete(ctx, container_id, name, url, yes):
+    """Remove a consumer from a container."""
+    if not yes:
+        click.confirm(
+            f"Remove consumer '{name}' from container {container_id}?",
+            abort=True,
+        )
+    svc = KeyManagerService(ctx.find_object(OrcaContext).ensure_client())
+    svc.remove_consumer(container_id, name, url)
+    console.print(
+        f"[green]Consumer '{name}' removed from container {container_id}.[/green]"
+    )
+
+
+@secret.command("store")
+@click.argument("secret_id", callback=validate_id)
+@click.option("--payload", "payload_str",
+              help="Inline payload (use --payload-file for binary).")
+@click.option("--payload-file", type=click.Path(exists=True, dir_okay=False),
+              help="File containing the payload (binary safe).")
+@click.option("--content-type", default="application/octet-stream",
+              show_default=True, help="Payload MIME type.")
+@click.option("--content-encoding",
+              help="Payload encoding (e.g. base64 for binary inside text).")
+@click.pass_context
+def secret_store(ctx, secret_id, payload_str, payload_file,
+                 content_type, content_encoding):
+    """Upload payload data to an existing metadata-only secret."""
+    if payload_str is None and payload_file is None:
+        raise OrcaCLIError("Either --payload or --payload-file is required.")
+    if payload_str is not None and payload_file is not None:
+        raise OrcaCLIError("--payload and --payload-file are mutually exclusive.")
+    if payload_file is not None:
+        from pathlib import Path
+        data = Path(payload_file).read_bytes()
+    else:
+        data = payload_str.encode()
+    svc = KeyManagerService(ctx.find_object(OrcaContext).ensure_client())
+    svc.put_secret_payload(secret_id, data,
+                           content_type=content_type,
+                           content_encoding=content_encoding)
+    console.print(f"[green]Payload stored on secret {secret_id}.[/green]")

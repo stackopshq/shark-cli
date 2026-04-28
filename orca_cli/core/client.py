@@ -758,7 +758,15 @@ class OrcaClient:
             logger.debug("HTTP %s %s headers=%s params=%s",
                          method.upper(), url,
                          _redact_headers(headers), kwargs.get("params"))
-        resp = getattr(self._http, method)(url, headers=headers, **kwargs)
+        # httpx's per-method shortcuts (.delete, .get, ...) refuse a
+        # `json=` body for methods that don't usually carry one. A handful
+        # of OpenStack endpoints (Barbican container consumers) do, so we
+        # route through ``request()`` whenever a JSON body is present.
+        if "json" in kwargs and method.lower() in ("delete", "get", "head", "options"):
+            resp = self._http.request(method.upper(), url,
+                                       headers=headers, **kwargs)
+        else:
+            resp = getattr(self._http, method)(url, headers=headers, **kwargs)
         if resp.status_code == 401 and self._token_from_cache:
             # Cached token was rejected — clear cache, re-auth, retry once.
             logger.debug("HTTP %s %s → 401 with cached token, re-authenticating",
@@ -766,7 +774,11 @@ class OrcaClient:
             self._clear_token_cache()
             self._authenticate()
             headers = self._headers(extra_headers, url=url)
-            resp = getattr(self._http, method)(url, headers=headers, **kwargs)
+            if "json" in kwargs and method.lower() in ("delete", "get", "head", "options"):
+                resp = self._http.request(method.upper(), url,
+                                           headers=headers, **kwargs)
+            else:
+                resp = getattr(self._http, method)(url, headers=headers, **kwargs)
         logger.debug("HTTP %s %s → %d in %.2fs",
                      method.upper(), url, resp.status_code,
                      time.monotonic() - started)
@@ -860,8 +872,16 @@ class OrcaClient:
         return self._request("patch", url, extra_headers=extra or None, json=json)
 
     def delete(self, url: str, params: Optional[Dict[str, Any]] = None,
-               headers: Optional[Dict[str, str]] = None) -> Any:
-        return self._request("delete", url, extra_headers=headers, params=params)
+               headers: Optional[Dict[str, str]] = None,
+               json: Optional[Union[Dict[str, Any], list]] = None) -> Any:
+        # Some OpenStack APIs (e.g. Barbican container consumers) require a
+        # JSON body on DELETE — uncommon for HTTP but valid per RFC 7231.
+        # Only forward `json` when supplied so httpx's per-method shortcut
+        # isn't tripped up by a None-but-present kwarg.
+        kwargs: dict = {"params": params}
+        if json is not None:
+            kwargs["json"] = json
+        return self._request("delete", url, extra_headers=headers, **kwargs)
 
     def paginate(self, url: str, key: str, *,
                  page_size: int = 1000,

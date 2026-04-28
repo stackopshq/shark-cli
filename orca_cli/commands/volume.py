@@ -2272,3 +2272,63 @@ for _legacy, _primary, _path in [
 ]:
     add_command_with_alias(volume, _primary, legacy_name=_legacy, primary_path=_path)
 del _legacy, _primary, _path
+
+
+@volume.group("pool")
+def volume_pool() -> None:
+    """Inspect Cinder scheduler backend pools (admin)."""
+
+
+@volume_pool.command("list")
+@click.option("--detail", is_flag=True, default=False,
+              help="Include detailed capabilities per pool.")
+@output_options
+@click.pass_context
+def volume_pool_list(ctx: click.Context, detail,
+                      output_format, columns, fit_width, max_width, noindent):
+    """List Cinder scheduler backend pools."""
+    svc = VolumeService(ctx.find_object(OrcaContext).ensure_client())
+    pools = svc.find_pools(detail=detail)
+    if not pools:
+        console.print("No backend pools found.")
+        return
+    col_defs: list[tuple] = [("Name", "name")]
+    if detail:
+        col_defs += [
+            ("Total (GB)",
+             lambda p: p.get("capabilities", {}).get("total_capacity_gb", "")),
+            ("Free (GB)",
+             lambda p: p.get("capabilities", {}).get("free_capacity_gb", "")),
+            ("Backend",
+             lambda p: p.get("capabilities", {}).get("volume_backend_name", "")),
+        ]
+    print_list(pools, col_defs, title="Cinder Backend Pools",
+               output_format=output_format, columns=columns,
+               fit_width=fit_width, max_width=max_width, noindent=noindent)
+
+
+@volume.group("host")
+def volume_host() -> None:
+    """Inspect Cinder hosts (admin)."""
+
+
+@volume_host.command("list")
+@click.option("--zone", default=None, help="Filter by availability zone.")
+@output_options
+@click.pass_context
+def volume_host_list(ctx: click.Context, zone,
+                      output_format, columns, fit_width, max_width, noindent):
+    """List Cinder hosts."""
+    svc = VolumeService(ctx.find_object(OrcaContext).ensure_client())
+    hosts = svc.find_hosts(zone=zone)
+    if not hosts:
+        console.print("No hosts found.")
+        return
+    print_list(
+        hosts,
+        [("Host", "host_name"), ("Service", "service"),
+         ("Zone", "zone")],
+        title="Cinder Hosts",
+        output_format=output_format, columns=columns,
+        fit_width=fit_width, max_width=max_width, noindent=noindent,
+    )

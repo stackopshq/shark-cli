@@ -429,3 +429,18 @@ class VolumeService:
         """Absolute project limits (totalVolumesUsed etc.)."""
         data = self._client.get(f"{self._base}/limits")
         return data.get("limits", {}).get("absolute", {})
+
+    # ── scheduler / pools / hosts (admin) ──────────────────────────────
+
+    def find_pools(self, *, detail: bool = False) -> list[dict]:
+        """List Cinder scheduler backend pools (admin)."""
+        params = {"detail": "true"} if detail else None
+        data = self._client.get(f"{self._base}/scheduler-stats/get_pools",
+                                params=params)
+        return data.get("pools", [])
+
+    def find_hosts(self, *, zone: str | None = None) -> list[dict]:
+        """List Cinder service hosts (admin)."""
+        params = {"zone": zone} if zone else None
+        data = self._client.get(f"{self._base}/os-hosts", params=params)
+        return data.get("hosts", [])

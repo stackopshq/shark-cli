@@ -150,3 +150,57 @@ def endpoint_delete(ctx, endpoint_id, yes):
         click.confirm(f"Delete endpoint {endpoint_id}?", abort=True)
     svc.delete_endpoint(endpoint_id)
     console.print(f"[green]Endpoint {endpoint_id} deleted.[/green]")
+
+
+@endpoint.group("project")
+def endpoint_project() -> None:
+    """Manage endpoint↔project filter (Keystone OS-EP-FILTER extension)."""
+
+
+@endpoint_project.command("add")
+@click.argument("endpoint_id", callback=validate_id)
+@click.argument("project_id", callback=validate_id)
+@click.pass_context
+def endpoint_project_add(ctx, endpoint_id, project_id):
+    """Restrict an endpoint to a project."""
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.add_endpoint_project(project_id, endpoint_id)
+    console.print(f"[green]Endpoint {endpoint_id} bound to project {project_id}.[/green]")
+
+
+@endpoint_project.command("remove")
+@click.argument("endpoint_id", callback=validate_id)
+@click.argument("project_id", callback=validate_id)
+@click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
+@click.pass_context
+def endpoint_project_remove(ctx, endpoint_id, project_id, yes):
+    """Drop an endpoint↔project binding."""
+    if not yes:
+        click.confirm(
+            f"Unbind endpoint {endpoint_id} from project {project_id}?",
+            abort=True,
+        )
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    svc.remove_endpoint_project(project_id, endpoint_id)
+    console.print(f"[green]Endpoint {endpoint_id} unbound from project {project_id}.[/green]")
+
+
+@endpoint_project.command("list")
+@click.argument("endpoint_id", callback=validate_id)
+@output_options
+@click.pass_context
+def endpoint_project_list(ctx, endpoint_id,
+                           output_format, columns, fit_width, max_width, noindent):
+    """List projects an endpoint is bound to."""
+    svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
+    items = svc.list_endpoint_projects(endpoint_id)
+    if not items:
+        console.print("No projects bound to this endpoint.")
+        return
+    print_list(
+        items,
+        [("ID", "id"), ("Name", "name"), ("Domain ID", "domain_id")],
+        title=f"Projects bound to endpoint {endpoint_id}",
+        output_format=output_format, columns=columns,
+        fit_width=fit_width, max_width=max_width, noindent=noindent,
+    )

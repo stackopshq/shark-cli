@@ -352,6 +352,35 @@ class IdentityService:
             f"{self._v3}/OS-EP-FILTER/endpoint_groups/{eg_id}/projects/{project_id}"
         )
 
+    # ── individual endpoint ↔ project filtering (OS-EP-FILTER) ──────────
+    # Independent of endpoint *groups*: this is the per-endpoint filter
+    # that restricts which projects can see a single catalogue endpoint.
+
+    def add_endpoint_project(self, project_id: str, endpoint_id: str) -> None:
+        self._client.put(
+            f"{self._v3}/OS-EP-FILTER/projects/{project_id}"
+            f"/endpoints/{endpoint_id}"
+        )
+
+    def remove_endpoint_project(self, project_id: str,
+                                endpoint_id: str) -> None:
+        self._client.delete(
+            f"{self._v3}/OS-EP-FILTER/projects/{project_id}"
+            f"/endpoints/{endpoint_id}"
+        )
+
+    def list_endpoint_projects(self, endpoint_id: str) -> list[Project]:
+        data = self._client.get(
+            f"{self._v3}/OS-EP-FILTER/endpoints/{endpoint_id}/projects"
+        )
+        return data.get("projects", [])
+
+    def list_project_endpoints(self, project_id: str) -> list[Endpoint]:
+        data = self._client.get(
+            f"{self._v3}/OS-EP-FILTER/projects/{project_id}/endpoints"
+        )
+        return data.get("endpoints", [])
+
     # ── services (no /v3) ──────────────────────────────────────────────
 
     def find_services(
