@@ -47,20 +47,10 @@ LEGACY_HYPHENATED_SUBCOMMANDS: dict[str, set[str]] = {
         # combining member-create + member-set --status accepted).
         "share-and-accept",
     },
-    "loadbalancer": {
-        "amphora-failover", "amphora-list", "amphora-show",
-        "healthmonitor-create", "healthmonitor-delete", "healthmonitor-list",
-        "healthmonitor-set", "healthmonitor-show",
-        "l7policy-create", "l7policy-delete", "l7policy-list",
-        "l7policy-set", "l7policy-show",
-        "l7rule-create", "l7rule-delete", "l7rule-list",
-        "l7rule-set", "l7rule-show",
-        "listener-create", "listener-delete", "listener-list",
-        "listener-set", "listener-show",
-        "member-add", "member-list", "member-remove", "member-set", "member-show",
-        "pool-create", "pool-delete", "pool-list", "pool-set", "pool-show",
-        "stats-show", "status-show",
-    },
+    # loadbalancer — migrated 2026-04-28: every leaf moved to a
+    # sub-group (amphora, healthmonitor, l7policy, l7rule, listener,
+    # member, pool, stats, status). l7policy/l7rule are compound nouns
+    # that keep their hyphen on the sub-group name.
     # metric — migrated 2026-04-28: archive-policy-* under
     # ``metric archive-policy``, resource-type-* under ``metric resource-type``,
     # resource-list/show under ``metric resource``, measures-add under

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import click
 
+from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import APIError, OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
@@ -124,7 +125,12 @@ def lb_delete(ctx: click.Context, lb_id: str, cascade: bool, yes: bool) -> None:
 #  Listeners
 # ══════════════════════════════════════════════════════════════════════════
 
-@loadbalancer.command("listener-list")
+@loadbalancer.group("listener")
+def loadbalancer_listener() -> None:
+    """Manage Octavia listeners."""
+
+
+@loadbalancer_listener.command("list")
 @output_options
 @click.pass_context
 def listener_list(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
@@ -150,7 +156,7 @@ def listener_list(ctx: click.Context, output_format: str, columns: tuple[str, ..
     )
 
 
-@loadbalancer.command("listener-create")
+@loadbalancer_listener.command("create")
 @click.argument("name")
 @click.option("--lb-id", "loadbalancer_id", required=True, help="Load balancer ID.")
 @click.option("--protocol", required=True, type=click.Choice(["HTTP", "HTTPS", "TCP", "UDP", "TERMINATED_HTTPS"]))
@@ -174,7 +180,7 @@ def listener_create(ctx: click.Context, name: str, loadbalancer_id: str,
     console.print(f"[green]Listener '{listener.get('name')}' ({listener.get('id')}) created on port {protocol_port}.[/green]")
 
 
-@loadbalancer.command("listener-show")
+@loadbalancer_listener.command("show")
 @click.argument("listener_id", callback=validate_id)
 @output_options
 @click.pass_context
@@ -195,7 +201,7 @@ def listener_show(ctx: click.Context, listener_id: str, output_format: str, colu
     print_detail(fields, output_format=output_format, fit_width=fit_width, max_width=max_width, noindent=noindent, columns=columns)
 
 
-@loadbalancer.command("listener-delete")
+@loadbalancer_listener.command("delete")
 @click.argument("listener_id", callback=validate_id)
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -212,7 +218,12 @@ def listener_delete(ctx: click.Context, listener_id: str, yes: bool) -> None:
 #  Pools
 # ══════════════════════════════════════════════════════════════════════════
 
-@loadbalancer.command("pool-list")
+@loadbalancer.group("pool")
+def loadbalancer_pool() -> None:
+    """Manage Octavia pools."""
+
+
+@loadbalancer_pool.command("list")
 @output_options
 @click.pass_context
 def pool_list(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
@@ -238,7 +249,7 @@ def pool_list(ctx: click.Context, output_format: str, columns: tuple[str, ...], 
     )
 
 
-@loadbalancer.command("pool-create")
+@loadbalancer_pool.command("create")
 @click.argument("name")
 @click.option("--listener-id", default=None, help="Listener ID to attach to.")
 @click.option("--lb-id", "loadbalancer_id", default=None, help="Load balancer ID (if no listener).")
@@ -261,7 +272,7 @@ def pool_create(ctx: click.Context, name: str, listener_id: str | None,
     console.print(f"[green]Pool '{p.get('name')}' ({p.get('id')}) created.[/green]")
 
 
-@loadbalancer.command("pool-show")
+@loadbalancer_pool.command("show")
 @click.argument("pool_id", callback=validate_id)
 @output_options
 @click.pass_context
@@ -282,7 +293,7 @@ def pool_show(ctx: click.Context, pool_id: str, output_format: str, columns: tup
     print_detail(fields, output_format=output_format, fit_width=fit_width, max_width=max_width, noindent=noindent, columns=columns)
 
 
-@loadbalancer.command("pool-delete")
+@loadbalancer_pool.command("delete")
 @click.argument("pool_id", callback=validate_id)
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -299,7 +310,12 @@ def pool_delete(ctx: click.Context, pool_id: str, yes: bool) -> None:
 #  Members
 # ══════════════════════════════════════════════════════════════════════════
 
-@loadbalancer.command("member-list")
+@loadbalancer.group("member")
+def loadbalancer_member() -> None:
+    """Manage Octavia pool members."""
+
+
+@loadbalancer_member.command("list")
 @click.argument("pool_id", callback=validate_id)
 @output_options
 @click.pass_context
@@ -326,7 +342,7 @@ def member_list(ctx: click.Context, pool_id: str, output_format: str, columns: t
     )
 
 
-@loadbalancer.command("member-add")
+@loadbalancer_member.command("add")
 @click.argument("pool_id", callback=validate_id)
 @click.option("--address", required=True, help="Member IP address.")
 @click.option("--port", "protocol_port", required=True, type=int, help="Member port.")
@@ -348,7 +364,7 @@ def member_add(ctx: click.Context, pool_id: str, address: str, protocol_port: in
     console.print(f"[green]Member {m.get('id')} added — {address}:{protocol_port}.[/green]")
 
 
-@loadbalancer.command("member-remove")
+@loadbalancer_member.command("remove")
 @click.argument("pool_id", callback=validate_id)
 @click.argument("member_id", callback=validate_id)
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
@@ -366,7 +382,12 @@ def member_remove(ctx: click.Context, pool_id: str, member_id: str, yes: bool) -
 #  Health Monitors
 # ══════════════════════════════════════════════════════════════════════════
 
-@loadbalancer.command("healthmonitor-list")
+@loadbalancer.group("healthmonitor")
+def loadbalancer_healthmonitor() -> None:
+    """Manage Octavia health monitors."""
+
+
+@loadbalancer_healthmonitor.command("list")
 @output_options
 @click.pass_context
 def hm_list(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
@@ -393,7 +414,7 @@ def hm_list(ctx: click.Context, output_format: str, columns: tuple[str, ...], fi
     )
 
 
-@loadbalancer.command("healthmonitor-create")
+@loadbalancer_healthmonitor.command("create")
 @click.argument("name")
 @click.option("--pool-id", required=True, help="Pool ID.")
 @click.option("--type", "hm_type", required=True,
@@ -425,7 +446,7 @@ def hm_create(ctx: click.Context, name: str, pool_id: str, hm_type: str,
     console.print(f"[green]Health monitor '{h.get('name')}' ({h.get('id')}) created.[/green]")
 
 
-@loadbalancer.command("healthmonitor-delete")
+@loadbalancer_healthmonitor.command("delete")
 @click.argument("hm_id", callback=validate_id)
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -438,7 +459,7 @@ def hm_delete(ctx: click.Context, hm_id: str, yes: bool) -> None:
     console.print(f"[green]Health monitor {hm_id} deleted.[/green]")
 
 
-@loadbalancer.command("healthmonitor-show")
+@loadbalancer_healthmonitor.command("show")
 @click.argument("hm_id", callback=validate_id)
 @output_options
 @click.pass_context
@@ -455,7 +476,7 @@ def hm_show(ctx: click.Context, hm_id: str, output_format: str, columns: tuple[s
                  max_width=max_width, noindent=noindent, columns=columns)
 
 
-@loadbalancer.command("healthmonitor-set")
+@loadbalancer_healthmonitor.command("set")
 @click.argument("hm_id", callback=validate_id)
 @click.option("--name", default=None, help="New name.")
 @click.option("--delay", type=int, default=None, help="Probe interval (seconds).")
@@ -511,7 +532,12 @@ def lb_set(ctx: click.Context, lb_id: str, name: str | None, description: str | 
     console.print(f"[green]Load balancer {lb_id} updated.[/green]")
 
 
-@loadbalancer.command("stats-show")
+@loadbalancer.group("stats")
+def loadbalancer_stats() -> None:
+    """Inspect Octavia load-balancer stats."""
+
+
+@loadbalancer_stats.command("show")
 @click.argument("lb_id", callback=validate_id)
 @output_options
 @click.pass_context
@@ -528,7 +554,12 @@ def lb_stats_show(ctx: click.Context, lb_id: str, output_format: str,
                  max_width=max_width, noindent=noindent, columns=columns)
 
 
-@loadbalancer.command("status-show")
+@loadbalancer.group("status")
+def loadbalancer_status() -> None:
+    """Inspect Octavia load-balancer status."""
+
+
+@loadbalancer_status.command("show")
 @click.argument("lb_id", callback=validate_id)
 @click.pass_context
 def lb_status_show(ctx: click.Context, lb_id: str) -> None:
@@ -543,7 +574,7 @@ def lb_status_show(ctx: click.Context, lb_id: str) -> None:
 #  Listener set
 # ══════════════════════════════════════════════════════════════════════════
 
-@loadbalancer.command("listener-set")
+@loadbalancer_listener.command("set")
 @click.argument("listener_id", callback=validate_id)
 @click.option("--name", default=None, help="New name.")
 @click.option("--description", default=None, help="New description.")
@@ -576,7 +607,7 @@ def listener_set(ctx: click.Context, listener_id: str, name: str | None,
 #  Pool set
 # ══════════════════════════════════════════════════════════════════════════
 
-@loadbalancer.command("pool-set")
+@loadbalancer_pool.command("set")
 @click.argument("pool_id", callback=validate_id)
 @click.option("--name", default=None, help="New name.")
 @click.option("--description", default=None, help="New description.")
@@ -606,7 +637,7 @@ def pool_set(ctx: click.Context, pool_id: str, name: str | None, description: st
 #  Member show / set
 # ══════════════════════════════════════════════════════════════════════════
 
-@loadbalancer.command("member-show")
+@loadbalancer_member.command("show")
 @click.argument("pool_id", callback=validate_id)
 @click.argument("member_id", callback=validate_id)
 @output_options
@@ -625,7 +656,7 @@ def member_show(ctx: click.Context, pool_id: str, member_id: str,
                  max_width=max_width, noindent=noindent, columns=columns)
 
 
-@loadbalancer.command("member-set")
+@loadbalancer_member.command("set")
 @click.argument("pool_id", callback=validate_id)
 @click.argument("member_id", callback=validate_id)
 @click.option("--name", default=None, help="New name.")
@@ -655,7 +686,12 @@ def member_set(ctx: click.Context, pool_id: str, member_id: str, name: str | Non
 _L7_ACTIONS = ["REDIRECT_TO_POOL", "REDIRECT_TO_URL", "REJECT", "REDIRECT_PREFIX"]
 
 
-@loadbalancer.command("l7policy-list")
+@loadbalancer.group("l7policy")
+def loadbalancer_l7policy() -> None:
+    """Manage Octavia L7 policies (compound noun)."""
+
+
+@loadbalancer_l7policy.command("list")
 @output_options
 @click.pass_context
 def l7policy_list(ctx: click.Context, output_format: str, columns: tuple[str, ...],
@@ -680,7 +716,7 @@ def l7policy_list(ctx: click.Context, output_format: str, columns: tuple[str, ..
     )
 
 
-@loadbalancer.command("l7policy-show")
+@loadbalancer_l7policy.command("show")
 @click.argument("l7policy_id", callback=validate_id)
 @output_options
 @click.pass_context
@@ -698,7 +734,7 @@ def l7policy_show(ctx: click.Context, l7policy_id: str, output_format: str,
                  max_width=max_width, noindent=noindent, columns=columns)
 
 
-@loadbalancer.command("l7policy-create")
+@loadbalancer_l7policy.command("create")
 @click.option("--listener-id", required=True, callback=validate_id,
               help="Listener to attach the policy to.")
 @click.option("--action", required=True, type=click.Choice(_L7_ACTIONS),
@@ -736,7 +772,7 @@ def l7policy_create(ctx: click.Context, listener_id: str, action: str,
     console.print(f"[green]L7 policy '{p.get('name', p.get('id', '?'))}' created: {p.get('id', '?')}[/green]")
 
 
-@loadbalancer.command("l7policy-set")
+@loadbalancer_l7policy.command("set")
 @click.argument("l7policy_id", callback=validate_id)
 @click.option("--name", default=None, help="New name.")
 @click.option("--description", default=None, help="New description.")
@@ -766,7 +802,7 @@ def l7policy_set(ctx: click.Context, l7policy_id: str, name: str | None,
     console.print(f"[green]L7 policy {l7policy_id} updated.[/green]")
 
 
-@loadbalancer.command("l7policy-delete")
+@loadbalancer_l7policy.command("delete")
 @click.argument("l7policy_id", callback=validate_id)
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -788,7 +824,12 @@ _L7_RULE_TYPES = ["COOKIE", "FILE_TYPE", "HEADER", "HOST_NAME", "PATH",
 _L7_RULE_COMPARE = ["CONTAINS", "ENDS_WITH", "EQUAL_TO", "REGEX", "STARTS_WITH"]
 
 
-@loadbalancer.command("l7rule-list")
+@loadbalancer.group("l7rule")
+def loadbalancer_l7rule() -> None:
+    """Manage Octavia L7 rules (compound noun)."""
+
+
+@loadbalancer_l7rule.command("list")
 @click.argument("l7policy_id", callback=validate_id)
 @output_options
 @click.pass_context
@@ -815,7 +856,7 @@ def l7rule_list(ctx: click.Context, l7policy_id: str, output_format: str,
     )
 
 
-@loadbalancer.command("l7rule-show")
+@loadbalancer_l7rule.command("show")
 @click.argument("l7policy_id", callback=validate_id)
 @click.argument("l7rule_id", callback=validate_id)
 @output_options
@@ -833,7 +874,7 @@ def l7rule_show(ctx: click.Context, l7policy_id: str, l7rule_id: str,
                  max_width=max_width, noindent=noindent, columns=columns)
 
 
-@loadbalancer.command("l7rule-create")
+@loadbalancer_l7rule.command("create")
 @click.argument("l7policy_id", callback=validate_id)
 @click.option("--type", "rule_type", required=True,
               type=click.Choice(_L7_RULE_TYPES), help="Rule type.")
@@ -863,7 +904,7 @@ def l7rule_create(ctx: click.Context, l7policy_id: str, rule_type: str,
     console.print(f"[green]L7 rule created: {r.get('id', '?')}[/green]")
 
 
-@loadbalancer.command("l7rule-set")
+@loadbalancer_l7rule.command("set")
 @click.argument("l7policy_id", callback=validate_id)
 @click.argument("l7rule_id", callback=validate_id)
 @click.option("--type", "rule_type", type=click.Choice(_L7_RULE_TYPES),
@@ -894,7 +935,7 @@ def l7rule_set(ctx: click.Context, l7policy_id: str, l7rule_id: str,
     console.print(f"[green]L7 rule {l7rule_id} updated.[/green]")
 
 
-@loadbalancer.command("l7rule-delete")
+@loadbalancer_l7rule.command("delete")
 @click.argument("l7policy_id", callback=validate_id)
 @click.argument("l7rule_id", callback=validate_id)
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
@@ -912,7 +953,12 @@ def l7rule_delete(ctx: click.Context, l7policy_id: str, l7rule_id: str, yes: boo
 #  Amphora (admin)
 # ══════════════════════════════════════════════════════════════════════════
 
-@loadbalancer.command("amphora-list")
+@loadbalancer.group("amphora")
+def loadbalancer_amphora() -> None:
+    """Manage Octavia amphorae (admin)."""
+
+
+@loadbalancer_amphora.command("list")
 @click.option("--lb-id", "loadbalancer_id", default=None,
               help="Filter by load balancer ID.")
 @click.option("--status", default=None, help="Filter by amphora status.")
@@ -946,7 +992,7 @@ def amphora_list(ctx: click.Context, loadbalancer_id: str | None, status: str | 
     )
 
 
-@loadbalancer.command("amphora-show")
+@loadbalancer_amphora.command("show")
 @click.argument("amphora_id", callback=validate_id)
 @output_options
 @click.pass_context
@@ -965,7 +1011,7 @@ def amphora_show(ctx: click.Context, amphora_id: str, output_format: str,
                  max_width=max_width, noindent=noindent, columns=columns)
 
 
-@loadbalancer.command("amphora-failover")
+@loadbalancer_amphora.command("failover")
 @click.argument("amphora_id", callback=validate_id)
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -976,3 +1022,112 @@ def amphora_failover(ctx: click.Context, amphora_id: str, yes: bool) -> None:
     client = ctx.find_object(OrcaContext).ensure_client()
     LoadBalancerService(client).failover_amphora(amphora_id)
     console.print(f"[green]Failover triggered for amphora {amphora_id}.[/green]")
+
+
+# ── ADR-0008 deprecated aliases (backward compatibility) ──
+
+add_command_with_alias(loadbalancer, listener_list,
+                        legacy_name="listener-list",
+                        primary_path="loadbalancer listener list")
+add_command_with_alias(loadbalancer, listener_show,
+                        legacy_name="listener-show",
+                        primary_path="loadbalancer listener show")
+add_command_with_alias(loadbalancer, listener_create,
+                        legacy_name="listener-create",
+                        primary_path="loadbalancer listener create")
+add_command_with_alias(loadbalancer, listener_set,
+                        legacy_name="listener-set",
+                        primary_path="loadbalancer listener set")
+add_command_with_alias(loadbalancer, listener_delete,
+                        legacy_name="listener-delete",
+                        primary_path="loadbalancer listener delete")
+add_command_with_alias(loadbalancer, pool_list,
+                        legacy_name="pool-list",
+                        primary_path="loadbalancer pool list")
+add_command_with_alias(loadbalancer, pool_show,
+                        legacy_name="pool-show",
+                        primary_path="loadbalancer pool show")
+add_command_with_alias(loadbalancer, pool_create,
+                        legacy_name="pool-create",
+                        primary_path="loadbalancer pool create")
+add_command_with_alias(loadbalancer, pool_set,
+                        legacy_name="pool-set",
+                        primary_path="loadbalancer pool set")
+add_command_with_alias(loadbalancer, pool_delete,
+                        legacy_name="pool-delete",
+                        primary_path="loadbalancer pool delete")
+add_command_with_alias(loadbalancer, member_list,
+                        legacy_name="member-list",
+                        primary_path="loadbalancer member list")
+add_command_with_alias(loadbalancer, member_show,
+                        legacy_name="member-show",
+                        primary_path="loadbalancer member show")
+add_command_with_alias(loadbalancer, member_add,
+                        legacy_name="member-add",
+                        primary_path="loadbalancer member add")
+add_command_with_alias(loadbalancer, member_set,
+                        legacy_name="member-set",
+                        primary_path="loadbalancer member set")
+add_command_with_alias(loadbalancer, member_remove,
+                        legacy_name="member-remove",
+                        primary_path="loadbalancer member remove")
+add_command_with_alias(loadbalancer, hm_list,
+                        legacy_name="healthmonitor-list",
+                        primary_path="loadbalancer healthmonitor list")
+add_command_with_alias(loadbalancer, hm_show,
+                        legacy_name="healthmonitor-show",
+                        primary_path="loadbalancer healthmonitor show")
+add_command_with_alias(loadbalancer, hm_create,
+                        legacy_name="healthmonitor-create",
+                        primary_path="loadbalancer healthmonitor create")
+add_command_with_alias(loadbalancer, hm_set,
+                        legacy_name="healthmonitor-set",
+                        primary_path="loadbalancer healthmonitor set")
+add_command_with_alias(loadbalancer, hm_delete,
+                        legacy_name="healthmonitor-delete",
+                        primary_path="loadbalancer healthmonitor delete")
+add_command_with_alias(loadbalancer, l7policy_list,
+                        legacy_name="l7policy-list",
+                        primary_path="loadbalancer l7policy list")
+add_command_with_alias(loadbalancer, l7policy_show,
+                        legacy_name="l7policy-show",
+                        primary_path="loadbalancer l7policy show")
+add_command_with_alias(loadbalancer, l7policy_create,
+                        legacy_name="l7policy-create",
+                        primary_path="loadbalancer l7policy create")
+add_command_with_alias(loadbalancer, l7policy_set,
+                        legacy_name="l7policy-set",
+                        primary_path="loadbalancer l7policy set")
+add_command_with_alias(loadbalancer, l7policy_delete,
+                        legacy_name="l7policy-delete",
+                        primary_path="loadbalancer l7policy delete")
+add_command_with_alias(loadbalancer, l7rule_list,
+                        legacy_name="l7rule-list",
+                        primary_path="loadbalancer l7rule list")
+add_command_with_alias(loadbalancer, l7rule_show,
+                        legacy_name="l7rule-show",
+                        primary_path="loadbalancer l7rule show")
+add_command_with_alias(loadbalancer, l7rule_create,
+                        legacy_name="l7rule-create",
+                        primary_path="loadbalancer l7rule create")
+add_command_with_alias(loadbalancer, l7rule_set,
+                        legacy_name="l7rule-set",
+                        primary_path="loadbalancer l7rule set")
+add_command_with_alias(loadbalancer, l7rule_delete,
+                        legacy_name="l7rule-delete",
+                        primary_path="loadbalancer l7rule delete")
+add_command_with_alias(loadbalancer, lb_stats_show,
+                        legacy_name="stats-show",
+                        primary_path="loadbalancer stats show")
+add_command_with_alias(loadbalancer, lb_status_show,
+                        legacy_name="status-show",
+                        primary_path="loadbalancer status show")
+add_command_with_alias(loadbalancer, amphora_list,
+                        legacy_name="amphora-list",
+                        primary_path="loadbalancer amphora list")
+add_command_with_alias(loadbalancer, amphora_show,
+                        legacy_name="amphora-show",
+                        primary_path="loadbalancer amphora show")
+add_command_with_alias(loadbalancer, amphora_failover,
+                        legacy_name="amphora-failover",
+                        primary_path="loadbalancer amphora failover")
