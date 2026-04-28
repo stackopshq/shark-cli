@@ -638,10 +638,7 @@ def rp_aggregate_delete(ctx, uuid, yes):
 def rp_inventory_show(ctx, uuid, resource_class, output_format, columns, fit_width, max_width, noindent):
     """Show a single inventory for a resource provider."""
     client = ctx.find_object(OrcaContext).ensure_client()
-    # No dedicated service method for a single inventory endpoint.
-    data = client.get(
-        f"{client.placement_url}/resource_providers/{uuid}/inventories/{resource_class}"
-    )
+    data = PlacementService(client).get_inventory(uuid, resource_class)
     fields = [
         ("Resource Class", resource_class),
         ("Total", data.get("total", "")),
@@ -665,6 +662,5 @@ def rp_inventory_delete_all(ctx, uuid, yes):
     client = ctx.find_object(OrcaContext).ensure_client()
     if not yes:
         click.confirm(f"Delete all inventories for {uuid}?", abort=True)
-    # Bulk delete isn't on the service (no separate endpoint for it).
-    client.delete(f"{client.placement_url}/resource_providers/{uuid}/inventories")
+    PlacementService(client).delete_all_inventories(uuid)
     console.print(f"All inventories deleted for [bold]{uuid}[/bold].")

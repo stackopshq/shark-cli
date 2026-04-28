@@ -67,6 +67,12 @@ class PlacementService:
             f"{self._base}/resource_providers/{uuid}/inventories"
         )
 
+    def get_inventory(self, uuid: str, resource_class: str) -> Inventory:
+        return self._client.get(
+            f"{self._base}/resource_providers/{uuid}"
+            f"/inventories/{resource_class}"
+        )
+
     def set_inventory(self, uuid: str, resource_class: str,
                       body: dict[str, Any]) -> Inventory:
         data = self._client.put(
@@ -80,6 +86,11 @@ class PlacementService:
         self._client.delete(
             f"{self._base}/resource_providers/{uuid}"
             f"/inventories/{resource_class}"
+        )
+
+    def delete_all_inventories(self, uuid: str) -> None:
+        self._client.delete(
+            f"{self._base}/resource_providers/{uuid}/inventories"
         )
 
     # ── usages ─────────────────────────────────────────────────────────
