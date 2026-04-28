@@ -171,3 +171,47 @@ Update this list when a module's hyphenated commands are migrated.
   gained the full `metadef/*` catalogue (namespaces, objects,
   properties, resource-type associations). All new commands follow
   ADR-0008 from day one (no aliases needed).
+- 2026-04-28 — **lots 2 + 3** (`zone`, `stack`): zone keeps
+  `reverse-lookup` as a permanent exception (compound verb, no OSC
+  equivalent); `tld-*` and `transfer-*` migrate to `tld {list,create,
+  show,delete}`, `transfer request {list,create,show,delete}`,
+  `transfer accept {list,create,show}`. `stack` migrates every
+  former hyphenated leaf into a sub-group (`event`, `output`,
+  `resource`, `template`, `resource-type`); old names live as
+  deprecated aliases.
+- 2026-04-28 — **lots 4 + 5** (`object`, `qos`): object's
+  `account-*` and `container-*` move under `object account` and
+  `object container`. qos splits into `qos policy` and `qos rule`
+  (every former hyphenated leaf migrated).
+- 2026-04-28 — **lot 6** (`rating`, `metric`): rating splits into
+  `rating metric {list,create,delete}` and `rating module {list,
+  enable,disable,set-priority}` (set-priority is a compound verb
+  whitelisted on the module sub-group). metric migrates `archive-
+  policy-*`, `resource-type-*`, `resource-{list,show}`, and
+  `measures-*` under sub-groups (`archive-policy`, `resource-type`,
+  `resource`, `measures`); `archive-policy` and `resource-type`
+  keep their hyphen as compound-noun sub-group names.
+- 2026-04-28 — **lot 7** (`image`): `cache-*`, `member-*`, `tag-*`,
+  `task-*`, `stores-*` move under `image cache`, `image member`,
+  `image tag`, `image task`, `image stores`. `share-and-accept`
+  remains a permanent exception (orca-specific compound verb that
+  bundles `member-create + member-set --status accepted`).
+- 2026-04-28 — **lot 8** (`loadbalancer`): 35 former hyphenated
+  leaves migrate to nine sub-groups (`amphora`, `healthmonitor`,
+  `l7policy`, `l7rule`, `listener`, `member`, `pool`, `stats`,
+  `status`). `l7policy` and `l7rule` keep their hyphen as
+  compound-noun sub-group names.
+- 2026-04-28 — **lot 9** (`placement`): 29 former hyphenated leaves
+  migrate to five sub-groups (`resource-provider`, `resource-class`,
+  `trait`, `allocation`, `usage`). Sub-leaves of resource-provider
+  (`inventory-list/set/show/delete-all`, `trait-list/set/delete`,
+  `aggregate-list/set/delete`) and `allocation candidate-list` keep
+  their hyphen as compound nouns/verbs that read as one phrase.
+- 2026-04-28 — **lot 10** (`backup`, `cluster`): backup's 21
+  hyphenated leaves migrate to four sub-groups (`action`, `client`,
+  `job`, `session`); `session add-job` and `session remove-job`
+  remain hyphenated as compound verbs nested under the `session`
+  sub-group. cluster's 9 hyphenated leaves migrate to two
+  sub-groups (`nodegroup`, `template`). All 30 old names live as
+  deprecated aliases via `add_command_with_alias`. Whitelists for
+  `backup` and `cluster` cleared.

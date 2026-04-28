@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import click
 
+from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.services.container_infra import ContainerInfraService
 
 # ══════════════════════════════════════════════════════════════════════════
-#  Clusters
+#  Top-level group
 # ══════════════════════════════════════════════════════════════════════════
 
 @click.group()
@@ -18,6 +19,24 @@ def cluster(ctx: click.Context) -> None:
     """Manage Kubernetes clusters & cluster templates (Magnum)."""
     pass
 
+
+# ══════════════════════════════════════════════════════════════════════════
+#  Sub-groups (ADR-0008: noun [subnoun] verb)
+# ══════════════════════════════════════════════════════════════════════════
+
+@cluster.group("nodegroup")
+def cluster_nodegroup() -> None:
+    """Manage node groups in a cluster."""
+
+
+@cluster.group("template")
+def cluster_template() -> None:
+    """Manage cluster templates."""
+
+
+# ══════════════════════════════════════════════════════════════════════════
+#  Clusters (top-level leaves)
+# ══════════════════════════════════════════════════════════════════════════
 
 @cluster.command("list")
 @output_options
@@ -160,11 +179,31 @@ def cluster_kubeconfig(ctx: click.Context, cluster_id: str) -> None:
         console.print("[yellow]No API address available yet.[/yellow]")
 
 
+@cluster.command("upgrade")
+@click.argument("cluster_id")
+@click.option("--template-id", required=True,
+              help="New cluster template ID to upgrade to.")
+@click.option("--max-batch-size", type=int, default=1, show_default=True,
+              help="Max number of nodes to upgrade simultaneously.")
+@click.option("--nodegroup", default=None, help="Specific nodegroup to upgrade.")
+@click.pass_context
+def cluster_upgrade(ctx: click.Context, cluster_id: str, template_id: str,
+                    max_batch_size: int, nodegroup: str | None) -> None:
+    """Upgrade a cluster to a new template version."""
+    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = ContainerInfraService(client)
+    body: dict = {"cluster_template": template_id, "max_batch_size": max_batch_size}
+    if nodegroup:
+        body["nodegroup"] = nodegroup
+    svc.upgrade(cluster_id, body)
+    console.print(f"[green]Cluster {cluster_id} upgrade started.[/green]")
+
+
 # ══════════════════════════════════════════════════════════════════════════
 #  Cluster Templates
 # ══════════════════════════════════════════════════════════════════════════
 
-@cluster.command("template-list")
+@cluster_template.command("list")
 @output_options
 @click.pass_context
 def template_list(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
@@ -190,7 +229,7 @@ def template_list(ctx: click.Context, output_format: str, columns: tuple[str, ..
     )
 
 
-@cluster.command("template-show")
+@cluster_template.command("show")
 @click.argument("template_id")
 @output_options
 @click.pass_context
@@ -212,7 +251,7 @@ def template_show(ctx: click.Context, template_id: str, output_format: str, colu
     print_detail(fields, output_format=output_format, fit_width=fit_width, max_width=max_width, noindent=noindent, columns=columns)
 
 
-@cluster.command("template-create")
+@cluster_template.command("create")
 @click.argument("name")
 @click.option("--image", "image_id", required=True, help="Base image UUID or name.")
 @click.option("--external-network", "external_network_id", required=True, help="External network ID.")
@@ -262,7 +301,7 @@ def template_create(ctx: click.Context, name: str, image_id: str, external_netwo
     console.print(f"[green]Template '{data.get('name')}' ({data.get('uuid')}) created.[/green]")
 
 
-@cluster.command("template-delete")
+@cluster_template.command("delete")
 @click.argument("template_id")
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -277,34 +316,10 @@ def template_delete(ctx: click.Context, template_id: str, yes: bool) -> None:
 
 
 # ══════════════════════════════════════════════════════════════════════════
-#  Cluster upgrade
-# ══════════════════════════════════════════════════════════════════════════
-
-@cluster.command("upgrade")
-@click.argument("cluster_id")
-@click.option("--template-id", required=True,
-              help="New cluster template ID to upgrade to.")
-@click.option("--max-batch-size", type=int, default=1, show_default=True,
-              help="Max number of nodes to upgrade simultaneously.")
-@click.option("--nodegroup", default=None, help="Specific nodegroup to upgrade.")
-@click.pass_context
-def cluster_upgrade(ctx: click.Context, cluster_id: str, template_id: str,
-                    max_batch_size: int, nodegroup: str | None) -> None:
-    """Upgrade a cluster to a new template version."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    svc = ContainerInfraService(client)
-    body: dict = {"cluster_template": template_id, "max_batch_size": max_batch_size}
-    if nodegroup:
-        body["nodegroup"] = nodegroup
-    svc.upgrade(cluster_id, body)
-    console.print(f"[green]Cluster {cluster_id} upgrade started.[/green]")
-
-
-# ══════════════════════════════════════════════════════════════════════════
 #  Node Groups
 # ══════════════════════════════════════════════════════════════════════════
 
-@cluster.command("nodegroup-list")
+@cluster_nodegroup.command("list")
 @click.argument("cluster_id")
 @output_options
 @click.pass_context
@@ -332,7 +347,7 @@ def nodegroup_list(ctx: click.Context, cluster_id: str, output_format: str,
     )
 
 
-@cluster.command("nodegroup-show")
+@cluster_nodegroup.command("show")
 @click.argument("cluster_id")
 @click.argument("nodegroup_id")
 @output_options
@@ -352,7 +367,7 @@ def nodegroup_show(ctx: click.Context, cluster_id: str, nodegroup_id: str,
                  max_width=max_width, noindent=noindent, columns=columns)
 
 
-@cluster.command("nodegroup-create")
+@cluster_nodegroup.command("create")
 @click.argument("cluster_id")
 @click.option("--name", required=True, help="Node group name.")
 @click.option("--flavor-id", required=True, help="Flavor ID for nodes.")
@@ -387,7 +402,7 @@ def nodegroup_create(ctx: click.Context, cluster_id: str, name: str,
     console.print(f"[green]Node group '{name}' created: {ng.get('uuid', '?')}[/green]")
 
 
-@cluster.command("nodegroup-update")
+@cluster_nodegroup.command("update")
 @click.argument("cluster_id")
 @click.argument("nodegroup_id")
 @click.option("--node-count", type=int, default=None, help="New node count.")
@@ -413,7 +428,7 @@ def nodegroup_update(ctx: click.Context, cluster_id: str, nodegroup_id: str,
     console.print(f"[green]Node group {nodegroup_id} updated.[/green]")
 
 
-@cluster.command("nodegroup-delete")
+@cluster_nodegroup.command("delete")
 @click.argument("cluster_id")
 @click.argument("nodegroup_id")
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
@@ -427,3 +442,39 @@ def nodegroup_delete(ctx: click.Context, cluster_id: str, nodegroup_id: str,
     svc = ContainerInfraService(client)
     svc.delete_nodegroup(cluster_id, nodegroup_id)
     console.print(f"[green]Node group {nodegroup_id} deleted.[/green]")
+
+
+# ══════════════════════════════════════════════════════════════════════════
+#  Deprecated hyphenated aliases (ADR-0008 — backwards compatibility)
+# ══════════════════════════════════════════════════════════════════════════
+
+# Nodegroup aliases
+add_command_with_alias(cluster, nodegroup_list,
+                       legacy_name="nodegroup-list",
+                       primary_path="cluster nodegroup list")
+add_command_with_alias(cluster, nodegroup_show,
+                       legacy_name="nodegroup-show",
+                       primary_path="cluster nodegroup show")
+add_command_with_alias(cluster, nodegroup_create,
+                       legacy_name="nodegroup-create",
+                       primary_path="cluster nodegroup create")
+add_command_with_alias(cluster, nodegroup_update,
+                       legacy_name="nodegroup-update",
+                       primary_path="cluster nodegroup update")
+add_command_with_alias(cluster, nodegroup_delete,
+                       legacy_name="nodegroup-delete",
+                       primary_path="cluster nodegroup delete")
+
+# Template aliases
+add_command_with_alias(cluster, template_list,
+                       legacy_name="template-list",
+                       primary_path="cluster template list")
+add_command_with_alias(cluster, template_show,
+                       legacy_name="template-show",
+                       primary_path="cluster template show")
+add_command_with_alias(cluster, template_create,
+                       legacy_name="template-create",
+                       primary_path="cluster template create")
+add_command_with_alias(cluster, template_delete,
+                       legacy_name="template-delete",
+                       primary_path="cluster template delete")

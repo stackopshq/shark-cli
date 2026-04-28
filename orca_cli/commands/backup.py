@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import click
 
+from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.services.backup import BackupService
@@ -27,7 +28,31 @@ def _service(ctx: click.Context) -> BackupService:
 
 
 # ══════════════════════════════════════════════════════════════════════════
-#  Backups
+#  Sub-groups (ADR-0008: noun [subnoun] verb)
+# ══════════════════════════════════════════════════════════════════════════
+
+@backup.group("action")
+def backup_action() -> None:
+    """Manage backup actions."""
+
+
+@backup.group("client")
+def backup_client() -> None:
+    """Manage backup clients (agents)."""
+
+
+@backup.group("job")
+def backup_job() -> None:
+    """Manage backup jobs."""
+
+
+@backup.group("session")
+def backup_session() -> None:
+    """Manage backup sessions."""
+
+
+# ══════════════════════════════════════════════════════════════════════════
+#  Backups (top-level leaves)
 # ══════════════════════════════════════════════════════════════════════════
 
 @backup.command("list")
@@ -106,7 +131,7 @@ def backup_delete(ctx: click.Context, backup_id: str, yes: bool) -> None:
 #  Jobs
 # ══════════════════════════════════════════════════════════════════════════
 
-@backup.command("job-list")
+@backup_job.command("list")
 @click.option("--limit", type=int, default=None, help="Max results.")
 @output_options
 @click.pass_context
@@ -136,7 +161,7 @@ def job_list(ctx: click.Context, limit: int | None, output_format: str,
     )
 
 
-@backup.command("job-show")
+@backup_job.command("show")
 @click.argument("job_id")
 @output_options
 @click.pass_context
@@ -175,7 +200,7 @@ def job_show(ctx: click.Context, job_id: str, output_format: str,
                  max_width=max_width, noindent=noindent, columns=columns)
 
 
-@backup.command("job-create")
+@backup_job.command("create")
 @click.option("--description", default="", help="Job description.")
 @click.option("--client-id", required=True, help="Freezer client ID.")
 @click.option("--action", "action_type", type=click.Choice(["backup", "restore", "admin"]),
@@ -195,9 +220,9 @@ def job_create(ctx: click.Context, description: str, client_id: str,
 
     \b
     Examples:
-      orca backup job-create --client-id <id> --path /var/data --container my-backups
-      orca backup job-create --client-id <id> --path /var/lib/mysql --mode mysql --storage swift
-      orca backup job-create --client-id <id> --action restore --path /var/data --container my-backups
+      orca backup job create --client-id <id> --path /var/data --container my-backups
+      orca backup job create --client-id <id> --path /var/lib/mysql --mode mysql --storage swift
+      orca backup job create --client-id <id> --action restore --path /var/data --container my-backups
     """
     freezer_action: dict = {
         "action": action_type,
@@ -227,7 +252,7 @@ def job_create(ctx: click.Context, description: str, client_id: str,
     console.print(f"[green]Job created ({job_id}).[/green]")
 
 
-@backup.command("job-start")
+@backup_job.command("start")
 @click.argument("job_id")
 @click.pass_context
 def job_start(ctx: click.Context, job_id: str) -> None:
@@ -236,7 +261,7 @@ def job_start(ctx: click.Context, job_id: str) -> None:
     console.print(f"[green]Job {job_id} started.[/green]")
 
 
-@backup.command("job-stop")
+@backup_job.command("stop")
 @click.argument("job_id")
 @click.pass_context
 def job_stop(ctx: click.Context, job_id: str) -> None:
@@ -245,7 +270,7 @@ def job_stop(ctx: click.Context, job_id: str) -> None:
     console.print(f"[green]Job {job_id} stopped.[/green]")
 
 
-@backup.command("job-delete")
+@backup_job.command("delete")
 @click.argument("job_id")
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -261,7 +286,7 @@ def job_delete(ctx: click.Context, job_id: str, yes: bool) -> None:
 #  Sessions
 # ══════════════════════════════════════════════════════════════════════════
 
-@backup.command("session-list")
+@backup_session.command("list")
 @click.option("--limit", type=int, default=None, help="Max results.")
 @output_options
 @click.pass_context
@@ -291,7 +316,7 @@ def session_list(ctx: click.Context, limit: int | None, output_format: str,
     )
 
 
-@backup.command("session-show")
+@backup_session.command("show")
 @click.argument("session_id")
 @output_options
 @click.pass_context
@@ -317,7 +342,7 @@ def session_show(ctx: click.Context, session_id: str, output_format: str,
                  max_width=max_width, noindent=noindent, columns=columns)
 
 
-@backup.command("session-create")
+@backup_session.command("create")
 @click.option("--description", default="", help="Session description.")
 @click.option("--schedule-interval", default=None, help="Schedule interval (e.g. '24 hours').")
 @click.pass_context
@@ -332,7 +357,7 @@ def session_create(ctx: click.Context, description: str, schedule_interval: str 
     console.print(f"[green]Session created ({session_id}).[/green]")
 
 
-@backup.command("session-add-job")
+@backup_session.command("add-job")
 @click.argument("session_id")
 @click.argument("job_id")
 @click.pass_context
@@ -342,7 +367,7 @@ def session_add_job(ctx: click.Context, session_id: str, job_id: str) -> None:
     console.print(f"[green]Job {job_id} added to session {session_id}.[/green]")
 
 
-@backup.command("session-remove-job")
+@backup_session.command("remove-job")
 @click.argument("session_id")
 @click.argument("job_id")
 @click.pass_context
@@ -352,7 +377,7 @@ def session_remove_job(ctx: click.Context, session_id: str, job_id: str) -> None
     console.print(f"[green]Job {job_id} removed from session {session_id}.[/green]")
 
 
-@backup.command("session-start")
+@backup_session.command("start")
 @click.argument("session_id")
 @click.pass_context
 def session_start(ctx: click.Context, session_id: str) -> None:
@@ -361,7 +386,7 @@ def session_start(ctx: click.Context, session_id: str) -> None:
     console.print(f"[green]Session {session_id} started.[/green]")
 
 
-@backup.command("session-delete")
+@backup_session.command("delete")
 @click.argument("session_id")
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -377,7 +402,7 @@ def session_delete(ctx: click.Context, session_id: str, yes: bool) -> None:
 #  Clients
 # ══════════════════════════════════════════════════════════════════════════
 
-@backup.command("client-list")
+@backup_client.command("list")
 @click.option("--limit", type=int, default=None, help="Max results.")
 @output_options
 @click.pass_context
@@ -405,7 +430,7 @@ def client_list(ctx: click.Context, limit: int | None, output_format: str,
     )
 
 
-@backup.command("client-show")
+@backup_client.command("show")
 @click.argument("client_id")
 @output_options
 @click.pass_context
@@ -423,7 +448,7 @@ def client_show(ctx: click.Context, client_id: str, output_format: str,
                  max_width=max_width, noindent=noindent, columns=columns)
 
 
-@backup.command("client-register")
+@backup_client.command("register")
 @click.argument("hostname")
 @click.option("--description", default="", help="Client description.")
 @click.pass_context
@@ -435,7 +460,7 @@ def client_register(ctx: click.Context, hostname: str, description: str) -> None
     console.print(f"[green]Client '{hostname}' registered ({cid}).[/green]")
 
 
-@backup.command("client-delete")
+@backup_client.command("delete")
 @click.argument("client_id")
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -451,7 +476,7 @@ def client_delete(ctx: click.Context, client_id: str, yes: bool) -> None:
 #  Actions
 # ══════════════════════════════════════════════════════════════════════════
 
-@backup.command("action-list")
+@backup_action.command("list")
 @click.option("--limit", type=int, default=None, help="Max results.")
 @output_options
 @click.pass_context
@@ -480,7 +505,7 @@ def action_list(ctx: click.Context, limit: int | None, output_format: str,
     )
 
 
-@backup.command("action-show")
+@backup_action.command("show")
 @click.argument("action_id")
 @output_options
 @click.pass_context
@@ -508,7 +533,7 @@ def action_show(ctx: click.Context, action_id: str, output_format: str,
                  max_width=max_width, noindent=noindent, columns=columns)
 
 
-@backup.command("action-create")
+@backup_action.command("create")
 @click.option("--action", "action_type", type=click.Choice(["backup", "restore", "admin"]),
               default="backup", show_default=True)
 @click.option("--path", "path_to_backup", required=True, help="Path to back up or restore.")
@@ -527,9 +552,9 @@ def action_create(ctx: click.Context, action_type: str, path_to_backup: str,
 
     \b
     Examples:
-      orca backup action-create --path /var/data --container my-backups
-      orca backup action-create --action restore --path /var/data --container my-backups
-      orca backup action-create --path /var/lib/mysql --mode mysql --backup-name daily-mysql
+      orca backup action create --path /var/data --container my-backups
+      orca backup action create --action restore --path /var/data --container my-backups
+      orca backup action create --path /var/lib/mysql --mode mysql --backup-name daily-mysql
     """
     fa: dict = {
         "action": action_type,
@@ -552,7 +577,7 @@ def action_create(ctx: click.Context, action_type: str, path_to_backup: str,
     console.print(f"[green]Action created ({aid}).[/green]")
 
 
-@backup.command("action-delete")
+@backup_action.command("delete")
 @click.argument("action_id")
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -562,3 +587,79 @@ def action_delete(ctx: click.Context, action_id: str, yes: bool) -> None:
         click.confirm(f"Delete action {action_id}?", abort=True)
     _service(ctx).delete_action(action_id)
     console.print(f"[green]Action {action_id} deleted.[/green]")
+
+
+# ══════════════════════════════════════════════════════════════════════════
+#  Deprecated hyphenated aliases (ADR-0008 — backwards compatibility)
+# ══════════════════════════════════════════════════════════════════════════
+
+# Action aliases
+add_command_with_alias(backup, action_list,
+                       legacy_name="action-list",
+                       primary_path="backup action list")
+add_command_with_alias(backup, action_show,
+                       legacy_name="action-show",
+                       primary_path="backup action show")
+add_command_with_alias(backup, action_create,
+                       legacy_name="action-create",
+                       primary_path="backup action create")
+add_command_with_alias(backup, action_delete,
+                       legacy_name="action-delete",
+                       primary_path="backup action delete")
+
+# Client aliases
+add_command_with_alias(backup, client_list,
+                       legacy_name="client-list",
+                       primary_path="backup client list")
+add_command_with_alias(backup, client_show,
+                       legacy_name="client-show",
+                       primary_path="backup client show")
+add_command_with_alias(backup, client_register,
+                       legacy_name="client-register",
+                       primary_path="backup client register")
+add_command_with_alias(backup, client_delete,
+                       legacy_name="client-delete",
+                       primary_path="backup client delete")
+
+# Job aliases
+add_command_with_alias(backup, job_list,
+                       legacy_name="job-list",
+                       primary_path="backup job list")
+add_command_with_alias(backup, job_show,
+                       legacy_name="job-show",
+                       primary_path="backup job show")
+add_command_with_alias(backup, job_create,
+                       legacy_name="job-create",
+                       primary_path="backup job create")
+add_command_with_alias(backup, job_start,
+                       legacy_name="job-start",
+                       primary_path="backup job start")
+add_command_with_alias(backup, job_stop,
+                       legacy_name="job-stop",
+                       primary_path="backup job stop")
+add_command_with_alias(backup, job_delete,
+                       legacy_name="job-delete",
+                       primary_path="backup job delete")
+
+# Session aliases
+add_command_with_alias(backup, session_list,
+                       legacy_name="session-list",
+                       primary_path="backup session list")
+add_command_with_alias(backup, session_show,
+                       legacy_name="session-show",
+                       primary_path="backup session show")
+add_command_with_alias(backup, session_create,
+                       legacy_name="session-create",
+                       primary_path="backup session create")
+add_command_with_alias(backup, session_add_job,
+                       legacy_name="session-add-job",
+                       primary_path="backup session add-job")
+add_command_with_alias(backup, session_remove_job,
+                       legacy_name="session-remove-job",
+                       primary_path="backup session remove-job")
+add_command_with_alias(backup, session_start,
+                       legacy_name="session-start",
+                       primary_path="backup session start")
+add_command_with_alias(backup, session_delete,
+                       legacy_name="session-delete",
+                       primary_path="backup session delete")

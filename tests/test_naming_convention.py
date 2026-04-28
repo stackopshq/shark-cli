@@ -29,18 +29,12 @@ LEGACY_HYPHENATED_SUBCOMMANDS: dict[str, set[str]] = {
     # aliases, excluded from the live tree by the runtime: aggregate,
     # alarm, auth, endpoint-group, flavor, group, role, secret (acl-*),
     # security-group, trunk, user (set-password).
-    "backup": {
-        "action-create", "action-delete", "action-list", "action-show",
-        "client-delete", "client-list", "client-register", "client-show",
-        "job-create", "job-delete", "job-list", "job-show", "job-start",
-        "job-stop", "session-add-job", "session-create", "session-delete",
-        "session-list", "session-remove-job", "session-show", "session-start",
-    },
-    "cluster": {
-        "nodegroup-create", "nodegroup-delete", "nodegroup-list",
-        "nodegroup-show", "nodegroup-update",
-        "template-create", "template-delete", "template-list", "template-show",
-    },
+    # backup — migrated 2026-04-28 (lot 10): action-*, client-*, job-*,
+    # session-* moved under sub-groups (action, client, job, session).
+    # ``session add-job`` and ``session remove-job`` keep the hyphen as
+    # compound-verb leaves under the session sub-group.
+    # cluster — migrated 2026-04-28 (lot 10): nodegroup-* and template-*
+    # moved under sub-groups (nodegroup, template).
     "floating-ip": {"bulk-release"},
     "image": {
         # ``share-and-accept`` is a compound verb (orca-specific UX
