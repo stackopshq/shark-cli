@@ -75,15 +75,15 @@ def test_recordset_full(live_invoke, cleanup):
 
 def test_zone_tld_lifecycle(live_invoke, cleanup):
     tld = f"livetest{uuid.uuid4().hex[:6]}"
-    res = live_invoke("zone", "tld-create", tld,
+    res = live_invoke("zone", "tld", "create", tld,
                       "--description", "live test tld")
     if res.exit_code != 0 and "Forbidden" in res.output:
         pytest.skip("TLD management requires admin role with tld policy")
     assert res.exit_code == 0, res.output
     tld_id = extract_uuid(res.output)
-    cleanup(lambda: live_invoke("zone", "tld-delete", tld_id, "--yes"))
+    cleanup(lambda: live_invoke("zone", "tld", "delete", tld_id, "--yes"))
 
-    res = live_invoke("zone", "tld-list", "-f", "value", "-c", "ID")
+    res = live_invoke("zone", "tld", "list", "-f", "value", "-c", "ID")
     assert res.exit_code == 0
     assert tld_id in res.output
 
@@ -96,19 +96,19 @@ def test_zone_transfer_request(live_invoke, cleanup):
     zone_id = extract_uuid(res.output)
     cleanup(lambda: live_invoke("zone", "delete", zone_id, "--yes"))
 
-    res = live_invoke("zone", "transfer-request-create", zone_id,
+    res = live_invoke("zone", "transfer", "request", "create", zone_id,
                       "--description", "live test")
     if res.exit_code != 0:
         pytest.skip(f"transfer-request not supported: {res.output}")
     req_id = extract_uuid(res.output)
-    cleanup(lambda: live_invoke("zone", "transfer-request-delete",
+    cleanup(lambda: live_invoke("zone", "transfer", "request", "delete",
                                 req_id, "--yes"))
 
-    res = live_invoke("zone", "transfer-request-list",
+    res = live_invoke("zone", "transfer", "request", "list",
                       "-f", "value", "-c", "ID")
     assert res.exit_code == 0
     assert req_id in res.output
 
-    res = live_invoke("zone", "transfer-request-show", req_id,
+    res = live_invoke("zone", "transfer", "request", "show", req_id,
                       "-f", "value", "-c", "zone_id")
     assert res.exit_code == 0

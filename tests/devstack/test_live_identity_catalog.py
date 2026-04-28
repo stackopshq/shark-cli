@@ -108,9 +108,9 @@ def test_identity_catalog_full(live_invoke, cleanup, live_name):
     project_id = extract_uuid(res.output)
     cleanup(lambda: live_invoke("project", "delete", project_id, "--yes"))
 
-    res = live_invoke("endpoint-group", "add-project", eg_id, project_id)
+    res = live_invoke("endpoint-group", "project", "add", eg_id, project_id)
     assert res.exit_code == 0, res.output
 
-    res = live_invoke("endpoint-group", "remove-project",
+    res = live_invoke("endpoint-group", "project", "remove",
                       eg_id, project_id, "--yes")
     assert res.exit_code == 0, res.output

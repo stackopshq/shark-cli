@@ -103,17 +103,17 @@ def test_stack_full(live_invoke, cleanup, live_name, stack_template):
         assert res.exit_code == 0, f"{cmd}: {res.output}"
 
     # template-validate (independent of an existing stack)
-    res = live_invoke("stack", "template-validate",
+    res = live_invoke("stack", "template", "validate",
                       "--template", str(stack_template))
     assert res.exit_code == 0, res.output
 
     # resource-type-list / show — these are global Heat catalog ops
-    res = live_invoke("stack", "resource-type-list",
+    res = live_invoke("stack", "resource-type", "list",
                       "-f", "value", "-c", "Resource Type")
     assert res.exit_code == 0
     assert "OS::Heat::TestResource" in res.output
 
-    res = live_invoke("stack", "resource-type-show", "OS::Heat::TestResource")
+    res = live_invoke("stack", "resource-type", "show", "OS::Heat::TestResource")
     assert res.exit_code == 0, res.output
 
     # actions: suspend, resume, check, cancel (cancel only works on

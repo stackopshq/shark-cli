@@ -123,7 +123,7 @@ def test_resource_provider_aggregate_full(live_invoke, cleanup, live_name):
 
 
 def test_allocation_candidate_list(live_invoke):
-    res = live_invoke("placement", "allocation-candidate-list",
+    res = live_invoke("placement", "allocation", "candidate-list",
                       "--resource", "VCPU=1")
     assert res.exit_code == 0, res.output
 

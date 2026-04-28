@@ -85,11 +85,11 @@ def test_object_upload_download_lifecycle(live_invoke, cleanup, live_name, tmp_p
 
 
 def test_object_account_metadata(live_invoke):
-    res = live_invoke("object", "account-set",
+    res = live_invoke("object", "account", "set",
                       "--property", "X-Live-Account=yes")
     assert res.exit_code == 0, res.output
 
-    res = live_invoke("object", "account-unset",
+    res = live_invoke("object", "account", "unset",
                       "--property", "X-Live-Account")
     assert res.exit_code == 0, res.output
 

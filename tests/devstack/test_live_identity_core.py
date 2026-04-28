@@ -80,7 +80,7 @@ def test_identity_core_full(live_invoke, cleanup, live_name):
     res = live_invoke("user", "set", user_id, "--description", "u-updated")
     assert res.exit_code == 0, res.output
 
-    res = live_invoke("user", "set-password", user_id, "--password", "newpw")
+    res = live_invoke("user", "password", "set", user_id, "--password", "newpw")
     assert res.exit_code == 0, res.output
 
     res = live_invoke("user", "list", "-f", "value", "-c", "ID")
@@ -112,14 +112,14 @@ def test_identity_core_full(live_invoke, cleanup, live_name):
     assert group_name in res.output
 
     # group membership lifecycle
-    res = live_invoke("group", "add-user", group_id, user_id)
+    res = live_invoke("group", "user", "add", group_id, user_id)
     assert res.exit_code == 0, res.output
 
-    res = live_invoke("group", "member-list", group_id, "-f", "value", "-c", "ID")
+    res = live_invoke("group", "member", "list", group_id, "-f", "value", "-c", "ID")
     assert res.exit_code == 0
     assert user_id in res.output
 
-    res = live_invoke("group", "remove-user", group_id, user_id)
+    res = live_invoke("group", "user", "remove", group_id, user_id)
     assert res.exit_code == 0, res.output
 
     # ── ROLE ───────────────────────────────────────────────────────────
@@ -149,7 +149,7 @@ def test_identity_core_full(live_invoke, cleanup, live_name):
     cleanup(lambda: live_invoke("role", "remove", role_id,
                                 "--user", user_id, "--project", project_id))
 
-    res = live_invoke("role", "assignment-list",
+    res = live_invoke("role", "assignment", "list",
                       "--user", user_id, "--project", project_id,
                       "-f", "value", "-c", "Role ID")
     assert res.exit_code == 0, res.output
@@ -162,12 +162,12 @@ def test_identity_core_full(live_invoke, cleanup, live_name):
     role2_id = extract_uuid(res.output)
     cleanup(lambda: live_invoke("role", "delete", role2_id, "--yes"))
 
-    res = live_invoke("role", "implied-create", role_id, role2_id)
+    res = live_invoke("role", "implied", "create", role_id, role2_id)
     assert res.exit_code == 0, res.output
-    cleanup(lambda: live_invoke("role", "implied-delete",
+    cleanup(lambda: live_invoke("role", "implied", "delete",
                                 role_id, role2_id, "--yes"))
 
-    res = live_invoke("role", "implied-list", "-f", "value")
+    res = live_invoke("role", "implied", "list", "-f", "value")
     assert res.exit_code == 0, res.output
     assert role_id in res.output
     assert role2_id in res.output

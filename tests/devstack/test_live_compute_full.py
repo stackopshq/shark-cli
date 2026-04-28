@@ -40,15 +40,15 @@ def test_flavor_full(live_invoke, cleanup, live_name):
     proj_id = extract_uuid(res.output)
     cleanup(lambda: live_invoke("project", "delete", proj_id, "--yes"))
 
-    res = live_invoke("flavor", "access-add", flavor_id, proj_id)
+    res = live_invoke("flavor", "access", "add", flavor_id, proj_id)
     assert res.exit_code == 0, res.output
 
-    res = live_invoke("flavor", "access-list", flavor_id,
+    res = live_invoke("flavor", "access", "list", flavor_id,
                       "-f", "value", "-c", "Project ID")
     assert res.exit_code == 0
     assert proj_id in res.output
 
-    res = live_invoke("flavor", "access-remove",
+    res = live_invoke("flavor", "access", "remove",
                       flavor_id, proj_id, "--yes")
     assert res.exit_code == 0, res.output
 
@@ -140,10 +140,10 @@ def test_aggregate_full(live_invoke, cleanup, live_name):
     assert res.exit_code == 0, res.output
 
     # add-host / remove-host on the local hypervisor (devstack)
-    res = live_invoke("aggregate", "add-host", agg_id, "devstack")
+    res = live_invoke("aggregate", "host", "add", agg_id, "devstack")
     assert res.exit_code == 0, res.output
 
-    res = live_invoke("aggregate", "remove-host", agg_id, "devstack")
+    res = live_invoke("aggregate", "host", "remove", agg_id, "devstack")
     assert res.exit_code == 0, res.output
 
     res = live_invoke("aggregate", "list", "-f", "value", "-c", "ID")

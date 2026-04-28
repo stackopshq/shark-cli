@@ -74,20 +74,20 @@ def test_image_members(live_invoke, cleanup, live_name, cirros_path):
     proj_id = extract_uuid(res.output)
     cleanup(lambda: live_invoke("project", "delete", proj_id, "--yes"))
 
-    res = live_invoke("image", "member-create", image_id, proj_id)
+    res = live_invoke("image", "member", "create", image_id, proj_id)
     assert res.exit_code == 0, res.output
-    cleanup(lambda: live_invoke("image", "member-delete",
+    cleanup(lambda: live_invoke("image", "member", "delete",
                                 image_id, proj_id, "--yes"))
 
-    res = live_invoke("image", "member-list", image_id, "-f", "json")
+    res = live_invoke("image", "member", "list", image_id, "-f", "json")
     assert res.exit_code == 0
     assert proj_id in res.output
 
-    res = live_invoke("image", "member-set", image_id, proj_id,
+    res = live_invoke("image", "member", "set", image_id, proj_id,
                       "--status", "accepted")
     assert res.exit_code == 0, res.output
 
-    res = live_invoke("image", "member-show", image_id, proj_id,
+    res = live_invoke("image", "member", "show", image_id, proj_id,
                       "-f", "value", "-c", "Status")
     assert res.exit_code == 0
     assert "accepted" in res.output
@@ -102,9 +102,9 @@ def test_image_tags(live_invoke, cleanup, live_name, cirros_path):
     image_id = extract_uuid(res.output)
     cleanup(lambda: live_invoke("image", "delete", image_id, "--yes"))
 
-    res = live_invoke("image", "tag-add", image_id, "live-test")
+    res = live_invoke("image", "tag", "add", image_id, "live-test")
     assert res.exit_code == 0, res.output
-    cleanup(lambda: live_invoke("image", "tag-delete",
+    cleanup(lambda: live_invoke("image", "tag", "delete",
                                 image_id, "live-test", "--yes"))
 
     res = live_invoke("image", "show", image_id, "-f", "value", "-c", "Tags")
@@ -123,11 +123,11 @@ def test_image_task_stores_download(live_invoke, cleanup, live_name,
     cleanup(lambda: live_invoke("image", "delete", image_id, "--yes"))
 
     # tasks (Glance v2 API; may be empty)
-    res = live_invoke("image", "task-list")
+    res = live_invoke("image", "task", "list")
     assert res.exit_code == 0, res.output
 
     # stores-info — Glance multi-store API
-    res = live_invoke("image", "stores-info")
+    res = live_invoke("image", "stores", "info")
     if res.exit_code != 0 and "Not found" in res.output:
         pytest.skip("Glance multi-store API not enabled")
     assert res.exit_code == 0, res.output
@@ -142,7 +142,7 @@ def test_image_task_stores_download(live_invoke, cleanup, live_name,
 def test_image_cache_unused(live_invoke):
     # cache-list (Glance image cache status; may need admin and the
     # cache extension enabled — accept clean failure)
-    res = live_invoke("image", "cache-list")
+    res = live_invoke("image", "cache", "list")
     if res.exit_code != 0:
         pytest.skip(f"image cache API not enabled: {res.output}")
 

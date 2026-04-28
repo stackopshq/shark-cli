@@ -98,15 +98,15 @@ def test_secret_acl_full(live_invoke, cleanup, live_name):
         if "admin" in line.split()[1:]
     )
 
-    res = live_invoke("secret", "acl-set", secret_ref,
+    res = live_invoke("secret", "acl", "set", secret_ref,
                       "--user", admin_user, "--operation", "read")
     if res.exit_code != 0:
         pytest.skip(f"ACL not supported: {res.output}")
 
-    res = live_invoke("secret", "acl-get", secret_ref)
+    res = live_invoke("secret", "acl", "get", secret_ref)
     assert res.exit_code == 0, res.output
 
-    res = live_invoke("secret", "acl-delete", secret_ref, "--yes")
+    res = live_invoke("secret", "acl", "delete", secret_ref, "--yes")
     assert res.exit_code == 0, res.output
 
 

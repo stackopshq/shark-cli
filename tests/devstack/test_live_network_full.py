@@ -140,14 +140,14 @@ def test_security_group_full(live_invoke, cleanup, live_name):
     assert res.exit_code == 0, res.output
 
     # rule-add (ingress SSH from anywhere)
-    res = live_invoke("security-group", "rule-add", sg_id,
+    res = live_invoke("security-group", "rule", "add", sg_id,
                       "--direction", "ingress",
                       "--protocol", "tcp",
                       "--port-min", "22", "--port-max", "22",
                       "--remote-ip", "0.0.0.0/0")
     assert res.exit_code == 0, res.output
     rule_id = extract_uuid(res.output)
-    cleanup(lambda: live_invoke("security-group", "rule-delete",
+    cleanup(lambda: live_invoke("security-group", "rule", "delete",
                                 rule_id, "--yes"))
 
     # show / list — both should include the SG
@@ -174,37 +174,37 @@ def test_security_group_full(live_invoke, cleanup, live_name):
 
 def test_qos_full(live_invoke, cleanup, live_name):
     pname = live_name("qos")
-    res = live_invoke("qos", "policy-create",
+    res = live_invoke("qos", "policy", "create",
                       "--name", pname, "--description", "live test qos")
     if res.exit_code != 0 and "Not found" in res.output:
         pytest.skip("Neutron `qos` extension not enabled on this cloud")
     assert res.exit_code == 0, res.output
     policy_id = extract_uuid(res.output)
-    cleanup(lambda: live_invoke("qos", "policy-delete", policy_id, "--yes"))
+    cleanup(lambda: live_invoke("qos", "policy", "delete", policy_id, "--yes"))
 
-    res = live_invoke("qos", "policy-set", policy_id,
+    res = live_invoke("qos", "policy", "set", policy_id,
                       "--description", "updated")
     assert res.exit_code == 0, res.output
 
-    res = live_invoke("qos", "policy-list", "-f", "value", "-c", "ID")
+    res = live_invoke("qos", "policy", "list", "-f", "value", "-c", "ID")
     assert res.exit_code == 0
     assert policy_id in res.output
 
-    res = live_invoke("qos", "policy-show", policy_id,
+    res = live_invoke("qos", "policy", "show", policy_id,
                       "-f", "value", "-c", "Name")
     assert res.exit_code == 0
     assert pname in res.output
 
     # rule-create (bandwidth-limit)
-    res = live_invoke("qos", "rule-create", policy_id,
+    res = live_invoke("qos", "rule", "create", policy_id,
                       "--type", "bandwidth-limit",
                       "--max-kbps", "1000")
     assert res.exit_code == 0, res.output
     rule_id = extract_uuid(res.output)
-    cleanup(lambda: live_invoke("qos", "rule-delete",
+    cleanup(lambda: live_invoke("qos", "rule", "delete",
                                 policy_id, rule_id, "--yes"))
 
-    res = live_invoke("qos", "rule-list", policy_id,
+    res = live_invoke("qos", "rule", "list", policy_id,
                       "-f", "value", "-c", "ID")
     assert res.exit_code == 0
     assert rule_id in res.output
@@ -248,15 +248,15 @@ def test_trunk_full(live_invoke, cleanup, live_name):
     res = live_invoke("trunk", "set", trunk_id, "--name", name + "-renamed")
     assert res.exit_code == 0, res.output
 
-    res = live_invoke("trunk", "add-subport", trunk_id,
+    res = live_invoke("trunk", "subport", "add", trunk_id,
                       "--port", sub_port,
                       "--segmentation-type", "vlan",
                       "--segmentation-id", "100")
     assert res.exit_code == 0, res.output
-    cleanup(lambda: live_invoke("trunk", "remove-subport",
+    cleanup(lambda: live_invoke("trunk", "subport", "remove",
                                 trunk_id, "--port", sub_port))
 
-    res = live_invoke("trunk", "subport-list", trunk_id,
+    res = live_invoke("trunk", "subport", "list", trunk_id,
                       "-f", "value", "-c", "Port ID")
     assert res.exit_code == 0
     assert sub_port in res.output
