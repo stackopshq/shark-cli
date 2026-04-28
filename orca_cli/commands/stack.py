@@ -10,6 +10,7 @@ from pathlib import Path
 import click
 import yaml
 
+from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
@@ -370,7 +371,12 @@ def stack_cancel(ctx: click.Context, stack_name_or_id: str) -> None:
 #  Stack Resources
 # ══════════════════════════════════════════════════════════════════════════
 
-@stack.command("resource-list")
+@stack.group("resource")
+def stack_resource() -> None:
+    """Per-resource actions and inspection on a stack."""
+
+
+@stack_resource.command("list")
 @click.argument("stack_name_or_id")
 @output_options
 @click.pass_context
@@ -398,7 +404,7 @@ def resource_list(ctx: click.Context, stack_name_or_id: str, output_format: str,
     )
 
 
-@stack.command("resource-show")
+@stack_resource.command("show")
 @click.argument("stack_name_or_id")
 @click.argument("resource_name")
 @output_options
@@ -432,7 +438,12 @@ def resource_show(ctx: click.Context, stack_name_or_id: str, resource_name: str,
 #  Stack Events
 # ══════════════════════════════════════════════════════════════════════════
 
-@stack.command("event-list")
+@stack.group("event")
+def stack_event() -> None:
+    """Inspect stack events."""
+
+
+@stack_event.command("list")
 @click.argument("stack_name_or_id")
 @click.option("--resource", "resource_name", default=None, help="Filter by resource name.")
 @click.option("--limit", "limit", type=int, default=None, help="Limit number of events.")
@@ -470,7 +481,7 @@ def event_list(ctx: click.Context, stack_name_or_id: str, resource_name: str | N
     )
 
 
-@stack.command("event-show")
+@stack_event.command("show")
 @click.argument("stack_name_or_id")
 @click.argument("resource_name")
 @click.argument("event_id")
@@ -504,7 +515,12 @@ def event_show(ctx: click.Context, stack_name_or_id: str, resource_name: str, ev
 #  Stack Outputs
 # ══════════════════════════════════════════════════════════════════════════
 
-@stack.command("output-list")
+@stack.group("output")
+def stack_output() -> None:
+    """Inspect stack outputs."""
+
+
+@stack_output.command("list")
 @click.argument("stack_name_or_id")
 @output_options
 @click.pass_context
@@ -530,7 +546,7 @@ def output_list(ctx: click.Context, stack_name_or_id: str, output_format: str, c
     )
 
 
-@stack.command("output-show")
+@stack_output.command("show")
 @click.argument("stack_name_or_id")
 @click.argument("key")
 @output_options
@@ -557,7 +573,12 @@ def output_show(ctx: click.Context, stack_name_or_id: str, key: str, output_form
 #  Stack Template
 # ══════════════════════════════════════════════════════════════════════════
 
-@stack.command("template-show")
+@stack.group("template")
+def stack_template() -> None:
+    """Inspect or validate Heat templates."""
+
+
+@stack_template.command("show")
 @click.argument("stack_name_or_id")
 @click.pass_context
 def template_show(ctx: click.Context, stack_name_or_id: str) -> None:
@@ -574,7 +595,7 @@ def template_show(ctx: click.Context, stack_name_or_id: str) -> None:
     console.print(Syntax(yaml_output, "yaml", theme="monokai"))
 
 
-@stack.command("template-validate")
+@stack_template.command("validate")
 @click.option("--template", "-t", "template", required=True, help="Template file path or URL.")
 @click.option("--environment", "-e", "environment", default=None, help="Environment file path.")
 @click.option("--parameter", "parameters", multiple=True, help="Parameter key=value (repeatable).")
@@ -748,7 +769,12 @@ def stack_abandon(ctx: click.Context, stack_name_or_id: str, yes: bool,
 #  stack resource-type-list / resource-type-show
 # ══════════════════════════════════════════════════════════════════════════
 
-@stack.command("resource-type-list")
+@stack.group("resource-type")
+def stack_resource_type() -> None:
+    """Inspect Heat resource types (compound noun)."""
+
+
+@stack_resource_type.command("list")
 @click.option("--filter", "filter_str", default=None,
               help="Filter resource types by name substring.")
 @output_options
@@ -777,7 +803,7 @@ def stack_resource_type_list(ctx: click.Context, filter_str: str | None,
     )
 
 
-@stack.command("resource-type-show")
+@stack_resource_type.command("show")
 @click.argument("resource_type")
 @click.option("--template-type", type=click.Choice(["cfn", "hot"]),
               default="hot", show_default=True,
@@ -1003,11 +1029,6 @@ def stack_failures_list(ctx, stack_name_or_id):
 # ══════════════════════════════════════════════════════════════════════
 
 
-@stack.group("resource")
-def stack_resource() -> None:
-    """Per-resource actions on a stack (signal, metadata, mark-unhealthy)."""
-
-
 @stack_resource.command("signal")
 @click.argument("stack_name_or_id")
 @click.argument("resource_name")
@@ -1052,3 +1073,37 @@ def stack_resource_metadata(ctx, stack_name_or_id, resource_name):
         stk["stack_name"], stk["id"], resource_name,
     )
     console.print(json.dumps(meta, indent=2))
+
+
+# ── ADR-0008 deprecated aliases (backward compatibility) ────────────────
+
+add_command_with_alias(stack, resource_list,
+                        legacy_name="resource-list",
+                        primary_path="stack resource list")
+add_command_with_alias(stack, resource_show,
+                        legacy_name="resource-show",
+                        primary_path="stack resource show")
+add_command_with_alias(stack, event_list,
+                        legacy_name="event-list",
+                        primary_path="stack event list")
+add_command_with_alias(stack, event_show,
+                        legacy_name="event-show",
+                        primary_path="stack event show")
+add_command_with_alias(stack, output_list,
+                        legacy_name="output-list",
+                        primary_path="stack output list")
+add_command_with_alias(stack, output_show,
+                        legacy_name="output-show",
+                        primary_path="stack output show")
+add_command_with_alias(stack, template_show,
+                        legacy_name="template-show",
+                        primary_path="stack template show")
+add_command_with_alias(stack, template_validate,
+                        legacy_name="template-validate",
+                        primary_path="stack template validate")
+add_command_with_alias(stack, stack_resource_type_list,
+                        legacy_name="resource-type-list",
+                        primary_path="stack resource-type list")
+add_command_with_alias(stack, stack_resource_type_show,
+                        legacy_name="resource-type-show",
+                        primary_path="stack resource-type show")

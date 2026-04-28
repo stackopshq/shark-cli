@@ -6,6 +6,7 @@ import time
 
 import click
 
+from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import safe_output_path, validate_id
@@ -408,7 +409,17 @@ def reverse_lookup(ctx: click.Context, ip: str) -> None:
 #  Zone Transfer Requests
 # ══════════════════════════════════════════════════════════════════════════
 
-@zone.command("transfer-request-create")
+@zone.group("transfer")
+def zone_transfer() -> None:
+    """Manage zone transfer requests and accepts."""
+
+
+@zone_transfer.group("request")
+def zone_transfer_request() -> None:
+    """Manage zone transfer requests (sender side)."""
+
+
+@zone_transfer_request.command("create")
 @click.argument("zone_id")
 @click.option("--target-project-id", default=None,
               help="Restrict transfer to a specific project ID.")
@@ -433,7 +444,7 @@ def zone_transfer_request_create(ctx: click.Context, zone_id: str,
         console.print("  [yellow]Save the key — it is needed to accept the transfer.[/yellow]")
 
 
-@zone.command("transfer-request-list")
+@zone_transfer_request.command("list")
 @output_options
 @click.pass_context
 def zone_transfer_request_list(ctx: click.Context, output_format: str,
@@ -459,7 +470,7 @@ def zone_transfer_request_list(ctx: click.Context, output_format: str,
     )
 
 
-@zone.command("transfer-request-show")
+@zone_transfer_request.command("show")
 @click.argument("transfer_id")
 @output_options
 @click.pass_context
@@ -478,7 +489,7 @@ def zone_transfer_request_show(ctx: click.Context, transfer_id: str,
                  max_width=max_width, noindent=noindent, columns=columns)
 
 
-@zone.command("transfer-request-delete")
+@zone_transfer_request.command("delete")
 @click.argument("transfer_id")
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -496,7 +507,7 @@ def zone_transfer_request_delete(ctx: click.Context, transfer_id: str, yes: bool
 #  Zone Transfer Accepts
 # ══════════════════════════════════════════════════════════════════════════
 
-@zone.command("transfer-accept")
+@zone_transfer.command("accept")
 @click.argument("transfer_id")
 @click.argument("key")
 @click.pass_context
@@ -512,7 +523,12 @@ def zone_transfer_accept(ctx: click.Context, transfer_id: str, key: str) -> None
 #  TLDs (admin)
 # ══════════════════════════════════════════════════════════════════════════
 
-@zone.command("tld-list")
+@zone.group("tld")
+def zone_tld() -> None:
+    """Manage allowed TLDs (admin)."""
+
+
+@zone_tld.command("list")
 @output_options
 @click.pass_context
 def zone_tld_list(ctx: click.Context, output_format: str, columns: tuple[str, ...],
@@ -535,7 +551,7 @@ def zone_tld_list(ctx: click.Context, output_format: str, columns: tuple[str, ..
     )
 
 
-@zone.command("tld-create")
+@zone_tld.command("create")
 @click.argument("name")
 @click.option("--description", default=None, help="Description.")
 @click.pass_context
@@ -550,7 +566,7 @@ def zone_tld_create(ctx: click.Context, name: str, description: str | None) -> N
     console.print(f"[green]TLD '{name}' created: {t.get('id', '?')}[/green]")
 
 
-@zone.command("tld-delete")
+@zone_tld.command("delete")
 @click.argument("tld_id")
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -562,6 +578,31 @@ def zone_tld_delete(ctx: click.Context, tld_id: str, yes: bool) -> None:
     svc = DnsService(client)
     svc.delete_tld(tld_id)
     console.print(f"[green]TLD {tld_id} deleted.[/green]")
+
+
+# ── ADR-0008 deprecated aliases (backward compatibility) ────────────────
+
+add_command_with_alias(zone, zone_tld_list,
+                        legacy_name="tld-list", primary_path="zone tld list")
+add_command_with_alias(zone, zone_tld_create,
+                        legacy_name="tld-create", primary_path="zone tld create")
+add_command_with_alias(zone, zone_tld_delete,
+                        legacy_name="tld-delete", primary_path="zone tld delete")
+add_command_with_alias(zone, zone_transfer_request_create,
+                        legacy_name="transfer-request-create",
+                        primary_path="zone transfer request create")
+add_command_with_alias(zone, zone_transfer_request_list,
+                        legacy_name="transfer-request-list",
+                        primary_path="zone transfer request list")
+add_command_with_alias(zone, zone_transfer_request_show,
+                        legacy_name="transfer-request-show",
+                        primary_path="zone transfer request show")
+add_command_with_alias(zone, zone_transfer_request_delete,
+                        legacy_name="transfer-request-delete",
+                        primary_path="zone transfer request delete")
+add_command_with_alias(zone, zone_transfer_accept,
+                        legacy_name="transfer-accept",
+                        primary_path="zone transfer accept")
 
 
 # ══════════════════════════════════════════════════════════════════════

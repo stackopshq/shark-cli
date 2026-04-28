@@ -133,12 +133,9 @@ LEGACY_HYPHENATED_SUBCOMMANDS: dict[str, set[str]] = {
         "port-forward",
         "revert-resize",
     },
-    "stack": {
-        "event-list", "event-show", "output-list", "output-show",
-        "resource-list", "resource-show",
-        "resource-type-list", "resource-type-show",
-        "template-show", "template-validate",
-    },
+    # stack — migrated 2026-04-28: every leaf moved into a sub-group
+    # (event/output/resource/resource-type/template); old hyphenated
+    # names live as deprecated aliases.
     "volume": {
         # Deliberate exception (compound verb, no openstack equivalent):
         # ``upload-to-image`` mirrors the Cinder action name
@@ -150,11 +147,11 @@ LEGACY_HYPHENATED_SUBCOMMANDS: dict[str, set[str]] = {
         "upload-to-image",
     },
     "zone": {
+        # ``reverse-lookup`` is a compound verb (orca-specific UX, no
+        # OSC equivalent) — kept on purpose. Other tld-* and
+        # transfer-* names are deprecated aliases excluded by the
+        # runtime.
         "reverse-lookup",
-        "tld-create", "tld-delete", "tld-list",
-        "transfer-accept",
-        "transfer-request-create", "transfer-request-delete",
-        "transfer-request-list", "transfer-request-show",
     },
 }
 
