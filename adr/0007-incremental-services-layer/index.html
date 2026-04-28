@@ -3855,7 +3855,7 @@
 
 
 <h1 id="adr-0007-incremental-services-layer-with-typed-models">ADR-0007: Incremental services layer with typed models<a class="headerlink" href="#adr-0007-incremental-services-layer-with-typed-models" title="Permanent link">&para;</a></h1>
-<p><strong>Status</strong>: Accepted
+<p><strong>Status</strong>: Accepted (migration complete 2026-04-28)
 <strong>Date</strong>: 2026-04-20
 <strong>Supersedes</strong>: <a href="../0004-no-services-layer/">ADR-0004</a></p>
 <h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
@@ -4103,6 +4103,43 @@ readers can see how far along the work is.</p>
   callers (Nova os-keypairs, Cinder, Heat, Octavia, Swift, Designate,
   Barbican) keep direct <code>client.*</code> calls until their respective
   services land.</li>
+<li>2026-04-28 — Final migration sweep, ADR-0007 reaches 100 %:</li>
+<li><code>auth.token-revoke</code> routed through the existing
+    <code>IdentityService.revoke_token</code>.</li>
+<li>PlacementService gains <code>get_inventory</code> (single resource_class
+    GET) and <code>delete_all_inventories</code> (bulk DELETE); the two
+    remaining holdouts in <code>commands/placement.py</code> are gone.</li>
+<li>Streaming I/O is now expressed in services. <code>OrcaClient</code> exposes
+    <code>put_stream</code> (rewritten — explicit <code>content_length</code>, no retry
+    because streamed bodies cannot be replayed), <code>post_stream</code>,
+    <code>post_no_body</code>, <code>head_request</code>, and <code>get_stream</code> with
+    <code>extra_headers</code>. ObjectStoreService gains <code>upload_object</code> /
+    <code>download_object</code> / <code>fetch_object_bytes</code> /
+    <code>post_account_metadata</code>. ImageService.upload/stage now take a
+    <code>content</code> iterable and an optional <code>content_length</code>.
+    DnsService gains <code>fetch_export_text</code> /
+    <code>import_zone_text</code> for the Designate text/dns endpoints.
+    KeyManagerService gains <code>get_secret_payload</code> for the Barbican
+    text/plain endpoint.</li>
+<li>The auth-state attributes commands previously read off the client
+    (<code>_token</code>, <code>_token_data</code>, <code>_catalog</code>, <code>_auth_url</code>,
+    <code>_region_name</code>, <code>_interface</code>, <code>_project_id</code>) are now public
+    properties on <code>OrcaClient</code>. <code>_authenticate()</code> is exposed as
+    <code>authenticate()</code>.</li>
+<li><code>orca doctor</code> reachability probes and quota checks route through
+    Compute / Volume / Network / Image services.
+    <code>NetworkService.get_quota_details</code> covers the
+    <code>/quotas/{id}/details</code> endpoint that was missing.</li>
+<li><strong>BackupService + models/backup.py introduced</strong>: 24 Freezer
+    operations (backups, jobs, sessions, clients, actions) finally
+    have a service. <code>commands/backup.py</code> no longer issues raw HTTP.</li>
+<li>A ratchet test
+    (<code>tests/test_no_private_client_api_in_commands.py</code>) walks every
+    command module and fails if a future change reintroduces
+    <code>client._&lt;anything&gt;</code>.</li>
+<li>Result: zero <code>client.get/post/put/patch/delete</code> and zero
+    <code>client._*</code> accesses remain in <code>orca_cli/commands/</code>. Every
+    command module is service-only.</li>
 </ul>
 
 
