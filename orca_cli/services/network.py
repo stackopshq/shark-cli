@@ -493,3 +493,12 @@ class NetworkService:
     def get_quota(self, project_id: str) -> dict:
         data = self._client.get(f"{self._base}/quotas/{project_id}")
         return data.get("quota", data)
+
+    def get_quota_details(self, project_id: str) -> dict:
+        """Quota with ``used`` / ``reserved`` / ``limit`` per resource.
+
+        Exposes the ``/quotas/{id}/details`` endpoint that ``find_quotas`` /
+        ``get_quota`` do not — needed by ``orca doctor`` to report headroom.
+        """
+        data = self._client.get(f"{self._base}/quotas/{project_id}/details")
+        return data.get("quota", data)

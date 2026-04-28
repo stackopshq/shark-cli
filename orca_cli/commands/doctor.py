@@ -6,6 +6,10 @@ import click
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console
+from orca_cli.services.compute import ComputeService
+from orca_cli.services.image import ImageService
+from orca_cli.services.network import NetworkService
+from orca_cli.services.volume import VolumeService
 
 
 @click.command()
@@ -39,6 +43,10 @@ def doctor(ctx: click.Context, fix: bool, cidr: str | None) -> None:  # noqa: C9
 
     orca_ctx = ctx.find_object(OrcaContext)
     client = orca_ctx.ensure_client()
+    compute = ComputeService(client)
+    network = NetworkService(client)
+    volume = VolumeService(client)
+    image = ImageService(client)
 
     issues: list[tuple[str, str, str]] = []  # (level, check, message)
     # Levels: OK | WARN | ERROR | INFO
@@ -99,16 +107,17 @@ def doctor(ctx: click.Context, fix: bool, cidr: str | None) -> None:  # noqa: C9
         return
 
     # ── 2. Service reachability (independent — one failure ≠ abort) ────────
+    # Each probe issues a small read through the corresponding service.
     svc_up: dict[str, bool] = {}
-    _SVC = {
-        "Nova (compute)":    (client.compute_url,  f"{client.compute_url}/limits"),
-        "Neutron (network)": (client.network_url,  f"{client.network_url}/v2.0/networks?limit=1"),
-        "Cinder (volume)":   (client.volume_url,   f"{client.volume_url}/limits"),
-        "Glance (image)":    (client.image_url,    f"{client.image_url}/v2/images?limit=1"),
-    }
-    for svc_name, (_, test_url) in _SVC.items():
+    _PROBES = [
+        ("Nova (compute)",    lambda: compute.get_limits()),
+        ("Neutron (network)", lambda: network.find(params={"limit": 1})),
+        ("Cinder (volume)",   lambda: volume.get_limits()),
+        ("Glance (image)",    lambda: image.find(params={"limit": 1})),
+    ]
+    for svc_name, probe in _PROBES:
         try:
-            client.get(test_url)
+            probe()
             _ok(f"Service: {svc_name}", "Reachable")
             svc_up[svc_name] = True
         except Exception as exc:
@@ -118,11 +127,7 @@ def doctor(ctx: click.Context, fix: bool, cidr: str | None) -> None:  # noqa: C9
     # ── 3. Compute quotas (skip if Nova is down) ───────────────────────────
     if svc_up.get("Nova (compute)", False):
         try:
-            q = (
-                client.get(f"{client.compute_url}/limits")
-                .get("limits", {})
-                .get("absolute", {})
-            )
+            q = compute.get_limits()
             _quota("Compute: instances",
                    q.get("totalInstancesUsed", 0), q.get("maxTotalInstances", -1))
             _quota("Compute: vCPUs",
@@ -139,11 +144,7 @@ def doctor(ctx: click.Context, fix: bool, cidr: str | None) -> None:  # noqa: C9
     # ── 4. Volume quotas (skip if Cinder is down) ─────────────────────────
     if svc_up.get("Cinder (volume)", False):
         try:
-            vq = (
-                client.get(f"{client.volume_url}/limits")
-                .get("limits", {})
-                .get("absolute", {})
-            )
+            vq = volume.get_limits().get("limits", {}).get("absolute", {})
             _quota("Volume: count",
                    vq.get("totalVolumesUsed", 0), vq.get("maxTotalVolumes", -1))
             _quota("Volume: GB",
@@ -159,10 +160,7 @@ def doctor(ctx: click.Context, fix: bool, cidr: str | None) -> None:  # noqa: C9
         try:
             project_id = client.token_data.get("project", {}).get("id", "")
             if project_id:
-                nq = (
-                    client.get(f"{client.network_url}/v2.0/quotas/{project_id}/details")
-                    .get("quota", {})
-                )
+                nq = network.get_quota_details(project_id)
                 fip_used  = nq.get("floatingip", {}).get("used", 0)
                 fip_limit = nq.get("floatingip", {}).get("limit", -1)
                 sg_used   = nq.get("security_group", {}).get("used", 0)
@@ -177,10 +175,7 @@ def doctor(ctx: click.Context, fix: bool, cidr: str | None) -> None:  # noqa: C9
     # ── 6. Default security group SSH/ICMP (skip if Neutron is down) ───────
     if svc_up.get("Neutron (network)", False):
         try:
-            sgs = client.get(
-                f"{client.network_url}/v2.0/security-groups",
-                params={"name": "default"},
-            ).get("security_groups", [])
+            sgs = network.find_security_groups(params={"name": "default"})
 
             if not sgs:
                 _info("Security: default SG", "No 'default' security group found")
@@ -207,16 +202,13 @@ def doctor(ctx: click.Context, fix: bool, cidr: str | None) -> None:  # noqa: C9
                         "Not open in 'default' SG — new VMs unreachable via SSH",
                     )
                     if fix:
-                        client.post(
-                            f"{client.network_url}/v2.0/security-group-rules",
-                            json={"security_group_rule": {
-                                "security_group_id": default_sg["id"],
-                                "direction": "ingress", "protocol": "tcp",
-                                "port_range_min": 22, "port_range_max": 22,
-                                "ethertype": "IPv4",
-                                "remote_ip_prefix": _fix_cidr,
-                            }},
-                        )
+                        network.create_security_group_rule({
+                            "security_group_id": default_sg["id"],
+                            "direction": "ingress", "protocol": "tcp",
+                            "port_range_min": 22, "port_range_max": 22,
+                            "ethertype": "IPv4",
+                            "remote_ip_prefix": _fix_cidr,
+                        })
                         console.print(f"[green]  → SSH rule added ({_fix_cidr}) to 'default' security group.[/green]")
 
                 if has_icmp:
@@ -224,15 +216,12 @@ def doctor(ctx: click.Context, fix: bool, cidr: str | None) -> None:  # noqa: C9
                 else:
                     _warn("Security: ICMP (ping)", "Not open in 'default' SG — ping will fail")
                     if fix:
-                        client.post(
-                            f"{client.network_url}/v2.0/security-group-rules",
-                            json={"security_group_rule": {
-                                "security_group_id": default_sg["id"],
-                                "direction": "ingress", "protocol": "icmp",
-                                "ethertype": "IPv4",
-                                "remote_ip_prefix": _fix_cidr,
-                            }},
-                        )
+                        network.create_security_group_rule({
+                            "security_group_id": default_sg["id"],
+                            "direction": "ingress", "protocol": "icmp",
+                            "ethertype": "IPv4",
+                            "remote_ip_prefix": _fix_cidr,
+                        })
                         console.print(f"[green]  → ICMP rule added ({_fix_cidr}) to 'default' security group.[/green]")
 
         except Exception as exc:
