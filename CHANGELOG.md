@@ -4,6 +4,90 @@ All notable changes to orca are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] — 2026-04-28
+
+### Added
+
+- **OpenStackClient parity push: every command now follows the
+  ``noun [subnoun] verb`` convention from ADR-0008.** Eleven
+  refactor lots migrated ~190 hyphenated leaves into nested
+  sub-groups across the live CLI tree:
+
+    - **Lot 1** (modules with ≤ 4 leaves): `aggregate host/image`,
+      `alarm state/quota`, `auth token`, `endpoint-group project`,
+      `flavor access`, `group user/member`, `role assignment/implied`,
+      `secret acl`, `security-group rule`, `trunk subport`,
+      `user password`.
+    - **Lots 2–3**: `zone tld/transfer`, `stack event/output/
+      resource/template/resource-type`.
+    - **Lots 4–5**: `object account/container`, `qos policy/rule`.
+    - **Lot 6**: `rating metric/module`, `metric archive-policy/
+      resource-type/resource/measures`.
+    - **Lot 7**: `image cache/member/tag/task/stores`.
+    - **Lot 8**: `loadbalancer amphora/healthmonitor/l7policy/
+      l7rule/listener/member/pool/stats/status` (35 leaves).
+    - **Lot 9**: `placement resource-provider/resource-class/
+      trait/allocation/usage` (29 leaves).
+    - **Lot 10**: `backup action/client/job/session` (21 leaves),
+      `cluster nodegroup/template` (9 leaves).
+    - **Lot 11** (final): `profile color/region/import/export`.
+
+  Every legacy hyphenated name lives on as a `deprecated=True`
+  alias — running `orca volume attachment-create …` still works
+  but prints a one-line yellow hint pointing at the new path.
+  The ratchet test `tests/test_naming_convention.py` is now
+  whitelist-clean apart from documented compound-verb exceptions
+  (`server confirm-resize`, `volume upload-to-image`, etc.).
+- **Coverage gap-closure with python-openstackclient.** Several
+  services gained the resources OSC exposed but orca didn't:
+
+    - `stack` — Heat snapshots (`snapshot {create,delete,list,
+      show,restore}`), `adopt`, `environment show`, `failures
+      list`, `file list`, `resource {signal,metadata,
+      mark-unhealthy}`, `breakpoints`.
+    - `zone` — Designate `abandon`, `axfr`, `share/*`,
+      `blacklist/*`, `import`, `export`.
+    - `image` — full Glance metadef catalogue (`metadef
+      namespace/object/property/resource-type` — 15 commands).
+    - `secret` — Barbican consumers (`consumer add/remove/list`),
+      `store list`.
+    - `volume` — Cinder admin pools (`pool list`) and hosts
+      (`host list/show/{enable,disable,thaw,freeze}`).
+    - `key-manager` — Barbican `put-payload` for binary secrets.
+- **DevStack live e2e test harness.** `tests/devstack/` now ships
+  a 16-file pytest suite covering ~510 commands across all 17
+  service modules, run against a real DevStack on
+  `192.168.1.65`. Marked `@pytest.mark.live` and excluded from
+  the default run; opt in with `pytest -m live`.
+
+### Fixed
+
+- **OrcaClient** — `volume_url` falls back through
+  `volumev3 → block-storage` (Cinder service-type rename),
+  `validate_id` accepts 64-hex Keystone credential IDs, `delete()`
+  forwards `json=` kwargs through `_http.request("DELETE", ...)`.
+  Added `with_version(url, version)` idempotent helper for
+  catalog URL versioning.
+- **Identity service** — federation paths now correctly include
+  the `OS-FEDERATION` prefix (20 occurrences fixed); endpoint
+  groups use `OS-EP-FILTER`; `role implied` uses
+  `/v3/roles/{prior}/implies/{implied}` (was: incorrect
+  `/role_inferences/...` shape).
+- **Compute service** — `os-extra-specs` → `os-extra_specs`
+  (Nova path is underscored). Server-group create now sends
+  `policy: <single>` per Nova v2.64 (was rejected as
+  `policies: [<single>]`).
+- **Placement service** — pinned to microversion 1.20;
+  `set_inventory` tries POST first and falls back to PUT on 409
+  to handle the create-vs-update split cleanly.
+- **Orchestration service** — `_resolve_stack` now falls back
+  to ID-filtered listing when name lookup fails (Heat
+  stack-by-UUID quirk).
+- **Volume service** — Cinder QoS body shape: specs are flattened
+  on the `qos_specs` payload root, not nested under `specs`.
+- **Designate** — text/dns body streaming via
+  `OrcaClient.put_stream`/`get_stream` for zone import/export.
+
 ## [2.2.1] — 2026-04-27
 
 ### Fixed
