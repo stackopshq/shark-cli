@@ -139,7 +139,7 @@ def rating_summary(ctx, begin, end, groupby, filters,
         console.print("No rating data for the given window.")
         return
 
-    items = [dict(zip(cols, row)) for row in results]
+    items = [dict(zip(cols, row, strict=False)) for row in results]
     col_defs = [(c.title(), c) for c in cols]
     print_list(items, col_defs, title=f"Rating summary ({data.get('total', len(results))} row(s))",
                output_format=output_format, columns=columns,
