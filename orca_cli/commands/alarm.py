@@ -6,6 +6,7 @@ import json
 
 import click
 
+from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
@@ -251,21 +252,25 @@ def alarm_delete(ctx, alarm_id, yes):
 #  Alarm State
 # ══════════════════════════════════════════════════════════════════════════════
 
-@alarm.command("state-get")
+@alarm.group("state")
+def alarm_state() -> None:
+    """Inspect or override an alarm's evaluation state."""
+
+
+@alarm_state.command("get")
 @click.argument("alarm_id", callback=validate_id)
 @click.pass_context
 def alarm_state_get(ctx, alarm_id):
     """Get the current state of an alarm."""
     client = ctx.find_object(OrcaContext).ensure_client()
     state = AlarmService(client).get_state(alarm_id)
-    # Aodh returns the state as a quoted JSON string, e.g. '"ok"'
     if isinstance(state, str):
         state = state.strip('"')
     style = _state_style(state)
     console.print(f"[{style}]{state}[/{style}]")
 
 
-@alarm.command("state-set")
+@alarm_state.command("set")
 @click.argument("alarm_id", callback=validate_id)
 @click.argument("state", type=click.Choice(["ok", "alarm", "insufficient_data"]))
 @click.pass_context
@@ -274,6 +279,12 @@ def alarm_state_set(ctx, alarm_id, state):
     client = ctx.find_object(OrcaContext).ensure_client()
     AlarmService(client).set_state(alarm_id, state)
     console.print(f"Alarm [bold]{alarm_id}[/bold] state set to [bold]{state}[/bold].")
+
+
+add_command_with_alias(alarm, alarm_state_get,
+                        legacy_name="state-get", primary_path="alarm state get")
+add_command_with_alias(alarm, alarm_state_set,
+                        legacy_name="state-set", primary_path="alarm state set")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -323,17 +334,26 @@ def alarm_capabilities(ctx):
 #  Quotas
 # ══════════════════════════════════════════════════════════════════════════════
 
-@alarm.command("quota-set")
+@alarm.group("quota")
+def alarm_quota() -> None:
+    """Inspect or set Aodh per-project alarm quota."""
+
+
+@alarm_quota.command("set")
 @click.argument("project_id", callback=validate_id)
-@click.option("--alarms", "alarm_quota", type=int, required=True,
+@click.option("--alarms", "alarm_quota_value", type=int, required=True,
               help="Maximum number of alarms for the project.")
 @click.pass_context
-def alarm_quota_set(ctx, project_id, alarm_quota):
+def alarm_quota_set(ctx, project_id, alarm_quota_value):
     """Set alarm quota for a project."""
     client = ctx.find_object(OrcaContext).ensure_client()
     body = {
         "project_id": project_id,
-        "quotas": [{"resource": "alarms", "limit": alarm_quota}],
+        "quotas": [{"resource": "alarms", "limit": alarm_quota_value}],
     }
     AlarmService(client).update_quota(body)
-    console.print(f"Quota for project [bold]{project_id}[/bold] set to [bold]{alarm_quota}[/bold] alarms.")
+    console.print(f"Quota for project [bold]{project_id}[/bold] set to [bold]{alarm_quota_value}[/bold] alarms.")
+
+
+add_command_with_alias(alarm, alarm_quota_set,
+                        legacy_name="quota-set", primary_path="alarm quota set")

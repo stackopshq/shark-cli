@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import click
 
+from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
@@ -127,11 +128,16 @@ def eg_delete(ctx, endpoint_group_id, yes):
     console.print(f"Endpoint group [bold]{endpoint_group_id}[/bold] deleted.")
 
 
-@endpoint_group.command("add-project")
+@endpoint_group.group("project")
+def endpoint_group_project() -> None:
+    """Manage project membership of an endpoint group."""
+
+
+@endpoint_group_project.command("add")
 @click.argument("endpoint_group_id", callback=validate_id)
 @click.argument("project_id", callback=validate_id)
 @click.pass_context
-def eg_add_project(ctx, endpoint_group_id, project_id):
+def eg_project_add(ctx, endpoint_group_id, project_id):
     """Associate a project with an endpoint group."""
     svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     svc.add_endpoint_group_project(endpoint_group_id, project_id)
@@ -140,12 +146,12 @@ def eg_add_project(ctx, endpoint_group_id, project_id):
     )
 
 
-@endpoint_group.command("remove-project")
+@endpoint_group_project.command("remove")
 @click.argument("endpoint_group_id", callback=validate_id)
 @click.argument("project_id", callback=validate_id)
 @click.option("--yes", "-y", is_flag=True)
 @click.pass_context
-def eg_remove_project(ctx, endpoint_group_id, project_id, yes):
+def eg_project_remove(ctx, endpoint_group_id, project_id, yes):
     """Remove a project from an endpoint group."""
     svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     if not yes:
@@ -156,3 +162,11 @@ def eg_remove_project(ctx, endpoint_group_id, project_id, yes):
     console.print(
         f"Project [bold]{project_id}[/bold] removed from endpoint group [bold]{endpoint_group_id}[/bold]."
     )
+
+
+add_command_with_alias(endpoint_group, eg_project_add,
+                        legacy_name="add-project",
+                        primary_path="endpoint-group project add")
+add_command_with_alias(endpoint_group, eg_project_remove,
+                        legacy_name="remove-project",
+                        primary_path="endpoint-group project remove")

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import click
 
+from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.services.identity import IdentityService
@@ -149,13 +150,23 @@ def user_delete(ctx, user_id, yes):
     console.print(f"[green]User {user_id} deleted.[/green]")
 
 
-@user.command("set-password")
+@user.group("password")
+def user_password() -> None:
+    """Manage a user's password (admin)."""
+
+
+@user_password.command("set")
 @click.argument("user_id")
 @click.option("--password", prompt=True, hide_input=True, confirmation_prompt=True,
               help="New password.")
 @click.pass_context
-def user_set_password(ctx, user_id, password):
+def user_password_set(ctx, user_id, password):
     """Set a user's password (admin)."""
     svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     svc.update_user(user_id, {"password": password})
     console.print(f"[green]Password updated for user {user_id}.[/green]")
+
+
+add_command_with_alias(user, user_password_set,
+                        legacy_name="set-password",
+                        primary_path="user password set")

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import click
 
+from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.completions import complete_flavors
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
@@ -193,7 +194,12 @@ def flavor_unset(ctx: click.Context, flavor_id: str, properties: tuple[str, ...]
 
 # ── flavor access (private flavors) ───────────────────────────────────────
 
-@flavor.command("access-list")
+@flavor.group("access")
+def flavor_access() -> None:
+    """Manage per-project access on private flavors."""
+
+
+@flavor_access.command("list")
 @click.argument("flavor_id", callback=validate_id, shell_complete=complete_flavors)
 @output_options
 @click.pass_context
@@ -217,7 +223,7 @@ def flavor_access_list(ctx: click.Context, flavor_id: str,
     )
 
 
-@flavor.command("access-add")
+@flavor_access.command("add")
 @click.argument("flavor_id", callback=validate_id, shell_complete=complete_flavors)
 @click.argument("project_id", callback=validate_id)
 @click.pass_context
@@ -228,7 +234,7 @@ def flavor_access_add(ctx: click.Context, flavor_id: str, project_id: str) -> No
     console.print(f"[green]Project {project_id} now has access to flavor {flavor_id}.[/green]")
 
 
-@flavor.command("access-remove")
+@flavor_access.command("remove")
 @click.argument("flavor_id", callback=validate_id, shell_complete=complete_flavors)
 @click.argument("project_id", callback=validate_id)
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
@@ -240,3 +246,11 @@ def flavor_access_remove(ctx: click.Context, flavor_id: str, project_id: str, ye
         click.confirm(f"Remove project {project_id} from flavor {flavor_id}?", abort=True)
     svc.remove_flavor_access(flavor_id, project_id)
     console.print(f"[green]Project {project_id} access to flavor {flavor_id} revoked.[/green]")
+
+
+add_command_with_alias(flavor, flavor_access_list,
+                        legacy_name="access-list", primary_path="flavor access list")
+add_command_with_alias(flavor, flavor_access_add,
+                        legacy_name="access-add", primary_path="flavor access add")
+add_command_with_alias(flavor, flavor_access_remove,
+                        legacy_name="access-remove", primary_path="flavor access remove")

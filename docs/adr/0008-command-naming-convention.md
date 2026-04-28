@@ -153,3 +153,21 @@ Update this list when a module's hyphenated commands are migrated.
   excludes sub-groups whose name is itself a compound noun, in
   line with the ADR's "compound nouns keep their hyphen" rule.
   Whitelist for `network` is empty — no permanent exceptions.
+- 2026-04-28 — **lot 1** (modules with ≤ 4 hyphenated leaves):
+  `aggregate`, `alarm`, `auth`, `endpoint-group`, `flavor`, `group`,
+  `role`, `secret` (acl-*), `security-group`, `trunk`, `user`
+  (`set-password`). 26 commands moved to 12 new sub-groups
+  (`aggregate host`, `aggregate image`, `alarm state`, `alarm quota`,
+  `auth token`, `endpoint-group project`, `flavor access`, `group user`,
+  `group member`, `role assignment`, `role implied`, `secret acl`,
+  `security-group rule`, `trunk subport`, `user password`). All old
+  hyphenated names live on as deprecated aliases via
+  `add_command_with_alias`. Whitelists for these modules cleared.
+- 2026-04-28 — **stack/zone/image admin** (gap-closure with OSC):
+  `stack` gained `snapshot/{create,delete,list,show,restore}`,
+  `adopt`, `environment show`, `failures list`, `file list`, and
+  three `resource` actions (`signal`, `metadata`, `mark-unhealthy`).
+  `zone` gained `abandon`, `axfr`, `share/*`, `blacklist/*`. `image`
+  gained the full `metadef/*` catalogue (namespaces, objects,
+  properties, resource-type associations). All new commands follow
+  ADR-0008 from day one (no aliases needed).

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import click
 
+from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
@@ -244,7 +245,12 @@ def container_create(ctx: click.Context, name: str | None, container_type: str,
 #  Secret ACLs
 # ══════════════════════════════════════════════════════════════════════════
 
-@secret.command("acl-get")
+@secret.group("acl")
+def secret_acl() -> None:
+    """Manage per-secret ACLs (read access)."""
+
+
+@secret_acl.command("get")
 @click.argument("secret_id", callback=validate_id)
 @output_options
 @click.pass_context
@@ -265,7 +271,7 @@ def secret_acl_get(ctx: click.Context, secret_id: str, output_format: str,
                  max_width=max_width, noindent=noindent, columns=columns)
 
 
-@secret.command("acl-set")
+@secret_acl.command("set")
 @click.argument("secret_id", callback=validate_id)
 @click.option("--user", "users", multiple=True,
               help="User ID to grant read access to (repeatable).")
@@ -281,7 +287,7 @@ def secret_acl_set(ctx: click.Context, secret_id: str, users: tuple[str, ...],
     console.print(f"[green]ACL updated for secret {secret_id}.[/green]")
 
 
-@secret.command("acl-delete")
+@secret_acl.command("delete")
 @click.argument("secret_id", callback=validate_id)
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -292,6 +298,14 @@ def secret_acl_delete(ctx: click.Context, secret_id: str, yes: bool) -> None:
     svc = KeyManagerService(ctx.find_object(OrcaContext).ensure_client())
     svc.delete_secret_acl(secret_id)
     console.print(f"[green]ACL deleted for secret {secret_id}.[/green]")
+
+
+add_command_with_alias(secret, secret_acl_get,
+                        legacy_name="acl-get", primary_path="secret acl get")
+add_command_with_alias(secret, secret_acl_set,
+                        legacy_name="acl-set", primary_path="secret acl set")
+add_command_with_alias(secret, secret_acl_delete,
+                        legacy_name="acl-delete", primary_path="secret acl delete")
 
 
 # ══════════════════════════════════════════════════════════════════════════

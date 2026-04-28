@@ -25,9 +25,10 @@ import click
 from orca_cli.main import cli
 
 LEGACY_HYPHENATED_SUBCOMMANDS: dict[str, set[str]] = {
-    "aggregate": {"add-host", "cache-image", "remove-host"},
-    "alarm": {"quota-set", "state-get", "state-set"},
-    "auth": {"token-debug", "token-revoke"},
+    # Modules migrated 2026-04 (lot 1) — old names live on as deprecated
+    # aliases, excluded from the live tree by the runtime: aggregate,
+    # alarm, auth, endpoint-group, flavor, group, role, secret (acl-*),
+    # security-group, trunk, user (set-password).
     "backup": {
         "action-create", "action-delete", "action-list", "action-show",
         "client-delete", "client-list", "client-register", "client-show",
@@ -40,10 +41,7 @@ LEGACY_HYPHENATED_SUBCOMMANDS: dict[str, set[str]] = {
         "nodegroup-show", "nodegroup-update",
         "template-create", "template-delete", "template-list", "template-show",
     },
-    "endpoint-group": {"add-project", "remove-project"},
-    "flavor": {"access-add", "access-list", "access-remove"},
     "floating-ip": {"bulk-release"},
-    "group": {"add-user", "member-list", "remove-user"},
     "image": {
         "cache-clear", "cache-delete", "cache-list", "cache-queue",
         "member-create", "member-delete", "member-list", "member-set",
@@ -116,17 +114,11 @@ LEGACY_HYPHENATED_SUBCOMMANDS: dict[str, set[str]] = {
         "module-disable", "module-enable", "module-list",
         "module-set-priority", "module-show",
     },
-    "role": {
-        "assignment-list",
-        "implied-create", "implied-delete", "implied-list",
-    },
     "secret": {
-        "acl-delete", "acl-get", "acl-set",
         "container-create", "container-delete", "container-list",
         "container-show", "get-payload",
         "order-create", "order-delete", "order-list", "order-show",
     },
-    "security-group": {"rule-add", "rule-delete"},
     "server": {
         # Decided exceptions (arbitrated, kept on purpose):
         # - confirm-resize / revert-resize: `resize` is both an action
@@ -147,8 +139,6 @@ LEGACY_HYPHENATED_SUBCOMMANDS: dict[str, set[str]] = {
         "resource-type-list", "resource-type-show",
         "template-show", "template-validate",
     },
-    "trunk": {"add-subport", "remove-subport", "subport-list"},
-    "user": {"set-password"},
     "volume": {
         # Deliberate exception (compound verb, no openstack equivalent):
         # ``upload-to-image`` mirrors the Cinder action name

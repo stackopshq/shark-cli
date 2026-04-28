@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import click
 
+from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
@@ -89,26 +90,37 @@ def aggregate_delete(ctx, aggregate_id, yes):
     console.print(f"[green]Aggregate {aggregate_id} deleted.[/green]")
 
 
-@aggregate.command("add-host")
+@aggregate.group("host")
+def aggregate_host() -> None:
+    """Manage hosts inside an aggregate."""
+
+
+@aggregate_host.command("add")
 @click.argument("aggregate_id")
 @click.argument("host")
 @click.pass_context
-def aggregate_add_host(ctx, aggregate_id, host):
+def aggregate_host_add(ctx, aggregate_id, host):
     """Add a host to an aggregate."""
     svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
     svc.add_aggregate_host(aggregate_id, host)
     console.print(f"[green]Host '{host}' added to aggregate {aggregate_id}.[/green]")
 
 
-@aggregate.command("remove-host")
+@aggregate_host.command("remove")
 @click.argument("aggregate_id")
 @click.argument("host")
 @click.pass_context
-def aggregate_remove_host(ctx, aggregate_id, host):
+def aggregate_host_remove(ctx, aggregate_id, host):
     """Remove a host from an aggregate."""
     svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
     svc.remove_aggregate_host(aggregate_id, host)
     console.print(f"[green]Host '{host}' removed from aggregate {aggregate_id}.[/green]")
+
+
+add_command_with_alias(aggregate, aggregate_host_add,
+                        legacy_name="add-host", primary_path="aggregate host add")
+add_command_with_alias(aggregate, aggregate_host_remove,
+                        legacy_name="remove-host", primary_path="aggregate host remove")
 
 
 @aggregate.command("set")
@@ -162,18 +174,28 @@ def aggregate_unset(ctx, aggregate_id, properties):
     console.print(f"[green]Aggregate {aggregate_id} properties removed.[/green]")
 
 
-@aggregate.command("cache-image")
+@aggregate.group("image")
+def aggregate_image() -> None:
+    """Manage image caching on aggregates."""
+
+
+@aggregate_image.command("cache")
 @click.argument("aggregate_id")
 @click.argument("image_ids", nargs=-1, required=True)
 @click.pass_context
-def aggregate_cache_image(ctx, aggregate_id, image_ids):
+def aggregate_image_cache(ctx, aggregate_id, image_ids):
     """Request that images be cached on hosts in an aggregate.
 
     \b
     Examples:
-      orca aggregate cache-image <agg-id> <image-id>
-      orca aggregate cache-image <agg-id> <img1> <img2>
+      orca aggregate image cache <agg-id> <image-id>
+      orca aggregate image cache <agg-id> <img1> <img2>
     """
     svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
     svc.cache_aggregate_images(aggregate_id, [{"id": iid} for iid in image_ids])
     console.print(f"[green]Image caching requested on aggregate {aggregate_id}.[/green]")
+
+
+add_command_with_alias(aggregate, aggregate_image_cache,
+                        legacy_name="cache-image",
+                        primary_path="aggregate image cache")

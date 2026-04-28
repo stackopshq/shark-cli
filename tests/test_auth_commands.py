@@ -163,7 +163,9 @@ class TestTokenDebug:
         save_profile("prod", sample_profile)
         set_active_profile("prod")
 
-        result = invoke(["auth", "token-debug", "--raw"])
+        # Use the new ADR-0008 path; the legacy ``token-debug`` alias
+        # prepends a deprecation warning that breaks json.loads().
+        result = invoke(["auth", "token", "debug", "--raw"])
         assert result.exit_code == 0
         data = json.loads(result.output)
         assert data["user"]["name"] == "admin"

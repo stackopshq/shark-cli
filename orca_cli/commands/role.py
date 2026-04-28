@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import click
 
+from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
@@ -152,7 +153,12 @@ def role_remove(ctx, user_id, group_id, project_id, domain_id, role_id):
     console.print(f"[green]Role {role_id} revoked.[/green]")
 
 
-@role.command("assignment-list")
+@role.group("assignment")
+def role_assignment() -> None:
+    """Inspect role assignments (user/group on project/domain)."""
+
+
+@role_assignment.command("list")
 @click.option("--user", "user_id", default=None)
 @click.option("--group", "group_id", default=None)
 @click.option("--project", "project_id", default=None)
@@ -215,7 +221,12 @@ def role_assignment_list(ctx, user_id, group_id, project_id, domain_id, role_id,
 #  Implied Roles
 # ══════════════════════════════════════════════════════════════════════════════
 
-@role.command("implied-list")
+@role.group("implied")
+def role_implied() -> None:
+    """Manage role inference (one role implies another)."""
+
+
+@role_implied.command("list")
 @output_options
 @click.pass_context
 def role_implied_list(ctx, output_format, columns, fit_width, max_width, noindent):
@@ -246,7 +257,7 @@ def role_implied_list(ctx, output_format, columns, fit_width, max_width, noinden
                fit_width=fit_width, max_width=max_width, noindent=noindent)
 
 
-@role.command("implied-create")
+@role_implied.command("create")
 @click.argument("prior_role_id", callback=validate_id)
 @click.argument("implied_role_id", callback=validate_id)
 @click.pass_context
@@ -259,7 +270,7 @@ def role_implied_create(ctx, prior_role_id, implied_role_id):
     )
 
 
-@role.command("implied-delete")
+@role_implied.command("delete")
 @click.argument("prior_role_id", callback=validate_id)
 @click.argument("implied_role_id", callback=validate_id)
 @click.option("--yes", "-y", is_flag=True)
@@ -273,6 +284,20 @@ def role_implied_delete(ctx, prior_role_id, implied_role_id, yes):
     svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     svc.delete_role_inference(prior_role_id, implied_role_id)
     console.print("Implied role relationship deleted.")
+
+
+add_command_with_alias(role, role_assignment_list,
+                        legacy_name="assignment-list",
+                        primary_path="role assignment list")
+add_command_with_alias(role, role_implied_list,
+                        legacy_name="implied-list",
+                        primary_path="role implied list")
+add_command_with_alias(role, role_implied_create,
+                        legacy_name="implied-create",
+                        primary_path="role implied create")
+add_command_with_alias(role, role_implied_delete,
+                        legacy_name="implied-delete",
+                        primary_path="role implied delete")
 
 
 # ── set ───────────────────────────────────────────────────────────────────

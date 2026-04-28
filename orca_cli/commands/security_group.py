@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import click
 
+from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_list
 from orca_cli.core.validators import validate_id
@@ -121,7 +122,12 @@ def sg_delete(ctx: click.Context, group_id: str, yes: bool) -> None:
     console.print(f"[green]Security group {group_id} deleted.[/green]")
 
 
-@security_group.command("rule-add")
+@security_group.group("rule")
+def security_group_rule() -> None:
+    """Manage security group rules."""
+
+
+@security_group_rule.command("add")
 @click.argument("group_id", callback=validate_id)
 @click.option("--direction", type=click.Choice(["ingress", "egress"]), required=True)
 @click.option("--protocol", default=None, help="Protocol (tcp, udp, icmp, or number).")
@@ -222,7 +228,7 @@ def sg_clone(ctx: click.Context, source_id: str, new_name: str, description: str
     console.print(f"[green]{copied}/{len(rules)} rules copied from '{src_name}' → '{new_name}'.[/green]")
 
 
-@security_group.command("rule-delete")
+@security_group_rule.command("delete")
 @click.argument("rule_id", callback=validate_id)
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -233,6 +239,14 @@ def sg_rule_delete(ctx: click.Context, rule_id: str, yes: bool) -> None:
     svc = NetworkService(ctx.find_object(OrcaContext).ensure_client())
     svc.delete_security_group_rule(rule_id)
     console.print(f"[green]Rule {rule_id} deleted.[/green]")
+
+
+add_command_with_alias(security_group, sg_rule_add,
+                        legacy_name="rule-add",
+                        primary_path="security-group rule add")
+add_command_with_alias(security_group, sg_rule_delete,
+                        legacy_name="rule-delete",
+                        primary_path="security-group rule delete")
 
 
 # ── cleanup ──────────────────────────────────────────────────────────────

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import click
 
+from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
@@ -114,7 +115,12 @@ def trunk_delete(ctx, trunk_id, yes):
 
 # ── Sub-ports ──────────────────────────────────────────────────────────────
 
-@trunk.command("subport-list")
+@trunk.group("subport")
+def trunk_subport() -> None:
+    """Manage sub-ports on a trunk."""
+
+
+@trunk_subport.command("list")
 @click.argument("trunk_id", callback=validate_id)
 @output_options
 @click.pass_context
@@ -135,7 +141,7 @@ def trunk_subport_list(ctx, trunk_id, output_format, columns, fit_width, max_wid
     )
 
 
-@trunk.command("add-subport")
+@trunk_subport.command("add")
 @click.argument("trunk_id", callback=validate_id)
 @click.option("--port", "port_id", required=True, callback=validate_id,
               help="Sub-port port ID.")
@@ -156,7 +162,7 @@ def trunk_add_subport(ctx, trunk_id, port_id, segmentation_type, segmentation_id
     console.print(f"[green]Sub-port {port_id} added to trunk {trunk_id}.[/green]")
 
 
-@trunk.command("remove-subport")
+@trunk_subport.command("remove")
 @click.argument("trunk_id", callback=validate_id)
 @click.option("--port", "port_id", required=True, callback=validate_id,
               help="Sub-port port ID to remove.")
@@ -169,3 +175,14 @@ def trunk_remove_subport(ctx, trunk_id, port_id, yes):
         click.confirm(f"Remove sub-port {port_id} from trunk {trunk_id}?", abort=True)
     svc.remove_trunk_subports(trunk_id, [{"port_id": port_id}])
     console.print(f"[green]Sub-port {port_id} removed from trunk {trunk_id}.[/green]")
+
+
+add_command_with_alias(trunk, trunk_subport_list,
+                        legacy_name="subport-list",
+                        primary_path="trunk subport list")
+add_command_with_alias(trunk, trunk_add_subport,
+                        legacy_name="add-subport",
+                        primary_path="trunk subport add")
+add_command_with_alias(trunk, trunk_remove_subport,
+                        legacy_name="remove-subport",
+                        primary_path="trunk subport remove")
