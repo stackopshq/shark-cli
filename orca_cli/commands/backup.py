@@ -6,11 +6,7 @@ import click
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
-
-
-def _freezer(client) -> str:
-    return client.backup_url
-
+from orca_cli.services.backup import BackupService
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Top-level group
@@ -26,6 +22,10 @@ def backup(ctx: click.Context) -> None:
     pass
 
 
+def _service(ctx: click.Context) -> BackupService:
+    return BackupService(ctx.find_object(OrcaContext).ensure_client())
+
+
 # ══════════════════════════════════════════════════════════════════════════
 #  Backups
 # ══════════════════════════════════════════════════════════════════════════
@@ -39,15 +39,12 @@ def backup_list(ctx: click.Context, limit: int | None, offset: int | None,
                 output_format: str, columns: tuple[str, ...], fit_width: bool,
                 max_width: int | None, noindent: bool) -> None:
     """List backups."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     params: dict = {}
     if limit:
         params["limit"] = limit
     if offset:
         params["offset"] = offset
-    data = client.get(f"{_freezer(client)}/v2/backups", params=params)
-
-    backups = data.get("backups", []) if isinstance(data, dict) else data
+    backups = _service(ctx).find_backups(params=params or None)
 
     print_list(
         backups,
@@ -74,8 +71,7 @@ def backup_show(ctx: click.Context, backup_id: str, output_format: str,
                 columns: tuple[str, ...], fit_width: bool, max_width: int | None,
                 noindent: bool) -> None:
     """Show backup details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_freezer(client)}/v2/backups/{backup_id}")
+    data = _service(ctx).get_backup(backup_id)
 
     fields = [(key, str(data.get(key, "") or "")) for key in
               ["backup_id", "backup_name", "container", "status",
@@ -102,8 +98,7 @@ def backup_delete(ctx: click.Context, backup_id: str, yes: bool) -> None:
     """Delete a backup."""
     if not yes:
         click.confirm(f"Delete backup {backup_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{_freezer(client)}/v2/backups/{backup_id}")
+    _service(ctx).delete_backup(backup_id)
     console.print(f"[green]Backup {backup_id} deleted.[/green]")
 
 
@@ -119,13 +114,10 @@ def job_list(ctx: click.Context, limit: int | None, output_format: str,
              columns: tuple[str, ...], fit_width: bool, max_width: int | None,
              noindent: bool) -> None:
     """List backup jobs."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     params: dict = {}
     if limit:
         params["limit"] = limit
-    data = client.get(f"{_freezer(client)}/v2/jobs", params=params)
-
-    jobs = data.get("jobs", []) if isinstance(data, dict) else data
+    jobs = _service(ctx).find_jobs(params=params or None)
 
     print_list(
         jobs,
@@ -152,8 +144,7 @@ def job_show(ctx: click.Context, job_id: str, output_format: str,
              columns: tuple[str, ...], fit_width: bool, max_width: int | None,
              noindent: bool) -> None:
     """Show backup job details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_freezer(client)}/v2/jobs/{job_id}")
+    data = _service(ctx).get_job(job_id)
 
     sched = data.get("job_schedule", {})
     fields = [
@@ -208,8 +199,6 @@ def job_create(ctx: click.Context, description: str, client_id: str,
       orca backup job-create --client-id <id> --path /var/lib/mysql --mode mysql --storage swift
       orca backup job-create --client-id <id> --action restore --path /var/data --container my-backups
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
-
     freezer_action: dict = {
         "action": action_type,
         "mode": mode,
@@ -233,8 +222,8 @@ def job_create(ctx: click.Context, description: str, client_id: str,
     if schedule_interval:
         body["job_schedule"]["schedule_interval"] = schedule_interval
 
-    data = client.post(f"{_freezer(client)}/v2/jobs", json=body)
-    job_id = data.get("job_id", "") if data else ""
+    data = _service(ctx).create_job(body)
+    job_id = data.get("job_id", "")
     console.print(f"[green]Job created ({job_id}).[/green]")
 
 
@@ -243,8 +232,7 @@ def job_create(ctx: click.Context, description: str, client_id: str,
 @click.pass_context
 def job_start(ctx: click.Context, job_id: str) -> None:
     """Start (trigger) a backup job."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.post(f"{_freezer(client)}/v2/jobs/{job_id}/event", json={"event": "start"})
+    _service(ctx).start_job(job_id)
     console.print(f"[green]Job {job_id} started.[/green]")
 
 
@@ -253,8 +241,7 @@ def job_start(ctx: click.Context, job_id: str) -> None:
 @click.pass_context
 def job_stop(ctx: click.Context, job_id: str) -> None:
     """Stop a running backup job."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.post(f"{_freezer(client)}/v2/jobs/{job_id}/event", json={"event": "stop"})
+    _service(ctx).stop_job(job_id)
     console.print(f"[green]Job {job_id} stopped.[/green]")
 
 
@@ -266,8 +253,7 @@ def job_delete(ctx: click.Context, job_id: str, yes: bool) -> None:
     """Delete a backup job."""
     if not yes:
         click.confirm(f"Delete job {job_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{_freezer(client)}/v2/jobs/{job_id}")
+    _service(ctx).delete_job(job_id)
     console.print(f"[green]Job {job_id} deleted.[/green]")
 
 
@@ -283,13 +269,10 @@ def session_list(ctx: click.Context, limit: int | None, output_format: str,
                  columns: tuple[str, ...], fit_width: bool, max_width: int | None,
                  noindent: bool) -> None:
     """List backup sessions."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     params: dict = {}
     if limit:
         params["limit"] = limit
-    data = client.get(f"{_freezer(client)}/v2/sessions", params=params)
-
-    sessions = data.get("sessions", []) if isinstance(data, dict) else data
+    sessions = _service(ctx).find_sessions(params=params or None)
 
     print_list(
         sessions,
@@ -316,8 +299,7 @@ def session_show(ctx: click.Context, session_id: str, output_format: str,
                  columns: tuple[str, ...], fit_width: bool, max_width: int | None,
                  noindent: bool) -> None:
     """Show backup session details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_freezer(client)}/v2/sessions/{session_id}")
+    data = _service(ctx).get_session(session_id)
 
     fields = [(key, str(data.get(key, "") or "")) for key in
               ["session_id", "description", "status", "user_id", "project_id",
@@ -341,13 +323,12 @@ def session_show(ctx: click.Context, session_id: str, output_format: str,
 @click.pass_context
 def session_create(ctx: click.Context, description: str, schedule_interval: str | None) -> None:
     """Create a backup session."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     body: dict = {"description": description}
     if schedule_interval:
         body["schedule"] = {"schedule_interval": schedule_interval}
 
-    data = client.post(f"{_freezer(client)}/v2/sessions", json=body)
-    session_id = data.get("session_id", "") if data else ""
+    data = _service(ctx).create_session(body)
+    session_id = data.get("session_id", "")
     console.print(f"[green]Session created ({session_id}).[/green]")
 
 
@@ -357,8 +338,7 @@ def session_create(ctx: click.Context, description: str, schedule_interval: str 
 @click.pass_context
 def session_add_job(ctx: click.Context, session_id: str, job_id: str) -> None:
     """Add a job to a session."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.put(f"{_freezer(client)}/v2/sessions/{session_id}/jobs/{job_id}")
+    _service(ctx).add_job_to_session(session_id, job_id)
     console.print(f"[green]Job {job_id} added to session {session_id}.[/green]")
 
 
@@ -368,8 +348,7 @@ def session_add_job(ctx: click.Context, session_id: str, job_id: str) -> None:
 @click.pass_context
 def session_remove_job(ctx: click.Context, session_id: str, job_id: str) -> None:
     """Remove a job from a session."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{_freezer(client)}/v2/sessions/{session_id}/jobs/{job_id}")
+    _service(ctx).remove_job_from_session(session_id, job_id)
     console.print(f"[green]Job {job_id} removed from session {session_id}.[/green]")
 
 
@@ -378,8 +357,7 @@ def session_remove_job(ctx: click.Context, session_id: str, job_id: str) -> None
 @click.pass_context
 def session_start(ctx: click.Context, session_id: str) -> None:
     """Start a backup session (triggers all its jobs)."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.post(f"{_freezer(client)}/v2/sessions/{session_id}/action", json={"start": None})
+    _service(ctx).start_session(session_id)
     console.print(f"[green]Session {session_id} started.[/green]")
 
 
@@ -391,8 +369,7 @@ def session_delete(ctx: click.Context, session_id: str, yes: bool) -> None:
     """Delete a backup session."""
     if not yes:
         click.confirm(f"Delete session {session_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{_freezer(client)}/v2/sessions/{session_id}")
+    _service(ctx).delete_session(session_id)
     console.print(f"[green]Session {session_id} deleted.[/green]")
 
 
@@ -408,13 +385,10 @@ def client_list(ctx: click.Context, limit: int | None, output_format: str,
                 columns: tuple[str, ...], fit_width: bool, max_width: int | None,
                 noindent: bool) -> None:
     """List registered backup clients (agents)."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     params: dict = {}
     if limit:
         params["limit"] = limit
-    data = client.get(f"{_freezer(client)}/v2/clients", params=params)
-
-    clients = data.get("clients", []) if isinstance(data, dict) else data
+    clients = _service(ctx).find_clients(params=params or None)
 
     print_list(
         clients,
@@ -439,8 +413,7 @@ def client_show(ctx: click.Context, client_id: str, output_format: str,
                 columns: tuple[str, ...], fit_width: bool, max_width: int | None,
                 noindent: bool) -> None:
     """Show backup client details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_freezer(client)}/v2/clients/{client_id}")
+    data = _service(ctx).get_client(client_id)
 
     fields = [(key, str(data.get(key, "") or "")) for key in
               ["client_id", "hostname", "description", "uuid",
@@ -456,10 +429,9 @@ def client_show(ctx: click.Context, client_id: str, output_format: str,
 @click.pass_context
 def client_register(ctx: click.Context, hostname: str, description: str) -> None:
     """Register a new backup client."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     body = {"client_id": hostname, "hostname": hostname, "description": description}
-    data = client.post(f"{_freezer(client)}/v2/clients", json=body)
-    cid = data.get("client_id", "") if data else ""
+    data = _service(ctx).register_client(body)
+    cid = data.get("client_id", "")
     console.print(f"[green]Client '{hostname}' registered ({cid}).[/green]")
 
 
@@ -471,8 +443,7 @@ def client_delete(ctx: click.Context, client_id: str, yes: bool) -> None:
     """Unregister a backup client."""
     if not yes:
         click.confirm(f"Delete client {client_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{_freezer(client)}/v2/clients/{client_id}")
+    _service(ctx).delete_client(client_id)
     console.print(f"[green]Client {client_id} deleted.[/green]")
 
 
@@ -488,13 +459,10 @@ def action_list(ctx: click.Context, limit: int | None, output_format: str,
                 columns: tuple[str, ...], fit_width: bool, max_width: int | None,
                 noindent: bool) -> None:
     """List backup actions."""
-    client = ctx.find_object(OrcaContext).ensure_client()
     params: dict = {}
     if limit:
         params["limit"] = limit
-    data = client.get(f"{_freezer(client)}/v2/actions", params=params)
-
-    actions = data.get("actions", []) if isinstance(data, dict) else data
+    actions = _service(ctx).find_actions(params=params or None)
 
     print_list(
         actions,
@@ -520,8 +488,7 @@ def action_show(ctx: click.Context, action_id: str, output_format: str,
                 columns: tuple[str, ...], fit_width: bool, max_width: int | None,
                 noindent: bool) -> None:
     """Show backup action details."""
-    client = ctx.find_object(OrcaContext).ensure_client()
-    data = client.get(f"{_freezer(client)}/v2/actions/{action_id}")
+    data = _service(ctx).get_action(action_id)
 
     fa = data.get("freezer_action", {})
     fields = [
@@ -564,8 +531,6 @@ def action_create(ctx: click.Context, action_type: str, path_to_backup: str,
       orca backup action-create --action restore --path /var/data --container my-backups
       orca backup action-create --path /var/lib/mysql --mode mysql --backup-name daily-mysql
     """
-    client = ctx.find_object(OrcaContext).ensure_client()
-
     fa: dict = {
         "action": action_type,
         "mode": mode,
@@ -582,8 +547,8 @@ def action_create(ctx: click.Context, action_type: str, path_to_backup: str,
     if max_level is not None:
         fa["max_level"] = max_level
 
-    data = client.post(f"{_freezer(client)}/v2/actions", json={"freezer_action": fa})
-    aid = data.get("action_id", "") if data else ""
+    data = _service(ctx).create_action(fa)
+    aid = data.get("action_id", "")
     console.print(f"[green]Action created ({aid}).[/green]")
 
 
@@ -595,6 +560,5 @@ def action_delete(ctx: click.Context, action_id: str, yes: bool) -> None:
     """Delete a backup action."""
     if not yes:
         click.confirm(f"Delete action {action_id}?", abort=True)
-    client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(f"{_freezer(client)}/v2/actions/{action_id}")
+    _service(ctx).delete_action(action_id)
     console.print(f"[green]Action {action_id} deleted.[/green]")
