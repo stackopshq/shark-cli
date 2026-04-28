@@ -31,6 +31,7 @@ Legacy flat format (auto-migrated on first load)::
 from __future__ import annotations
 
 import os
+import re
 import stat
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -38,6 +39,25 @@ from typing import Any, Dict, List, Optional
 import yaml
 
 from orca_cli.core.exceptions import ProfileConflictError, ProfileNotFoundError
+
+# OpenStack project / domain IDs are either canonical UUIDs (Keystone v3
+# default) or 32-hex slugs (some older deployments). The legacy-key
+# normaliser uses this to distinguish "this is genuinely an ID" from
+# "this is a name stored under the wrong key in a pre-multi-profile
+# orca config".
+_UUID_LIKE = re.compile(
+    r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    r"|^[0-9a-f]{32}$",
+    re.IGNORECASE,
+)
+
+
+def _looks_like_id(value: Any) -> bool:
+    """True when *value* matches the UUID / 32-hex shape Keystone uses for
+    domain and project IDs. Used to tell a real ID from a legacy-formatted
+    name that historically lived in the wrong field.
+    """
+    return isinstance(value, str) and bool(_UUID_LIKE.match(value))
 
 CONFIG_DIR = Path.home() / ".orca"
 CONFIG_FILE = CONFIG_DIR / "config.yaml"
@@ -47,8 +67,16 @@ _ORCA_ENV_MAP = {
     "ORCA_AUTH_URL": "auth_url",
     "ORCA_USERNAME": "username",
     "ORCA_PASSWORD": "password",
-    "ORCA_DOMAIN_ID": "domain_id",
+    "ORCA_DOMAIN_ID": "domain_id",  # legacy, kept for backwards compat
+    "ORCA_USER_DOMAIN_NAME": "user_domain_name",
+    "ORCA_USER_DOMAIN_ID": "user_domain_id",
+    "ORCA_PROJECT_DOMAIN_NAME": "project_domain_name",
+    "ORCA_PROJECT_DOMAIN_ID": "project_domain_id",
+    "ORCA_PROJECT_NAME": "project_name",
     "ORCA_PROJECT_ID": "project_id",
+    "ORCA_REGION_NAME": "region_name",
+    "ORCA_INTERFACE": "interface",
+    "ORCA_CACERT": "cacert",
     "ORCA_INSECURE": "insecure",
     "ORCA_AUTH_TYPE": "auth_type",
     "ORCA_APPLICATION_CREDENTIAL_ID": "application_credential_id",
@@ -372,13 +400,27 @@ def _apply_orca_env(config: Dict[str, Any]) -> None:
 
 
 def _normalise_legacy_keys(config: Dict[str, Any]) -> None:
-    """Map legacy orca config keys (``domain_id``, ``project_id``) to the
-    canonical name-based fields when the new keys are absent.
+    """Reconcile legacy field names with the canonical Keystone v3 ones.
 
-    Legacy orca profiles stored the domain *name* under ``domain_id`` and the
-    project *name* under ``project_id``.  This helper ensures those values are
-    available under the correct canonical keys so the client can build the
-    right auth payload.
+    Two distinct rewrites happen here, gated independently:
+
+    * ``domain_id`` (the deprecated catch-all from the pre-v3-split format)
+      is copied into ``user_domain_name`` / ``project_domain_name`` when no
+      explicit user/project domain is set, and then removed.
+    * Legacy orca profiles stored the project *name* under the
+      ``project_id`` key. Modern profiles store the actual UUID. We tell
+      them apart by shape: anything that matches
+      ``xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`` (or a 32-hex slug) is left
+      alone as a real ID; anything else is treated as a misplaced name,
+      copied to ``project_name``, and removed from ``project_id`` so the
+      client builds a name-scoped auth payload.
+
+    Without the UUID heuristic, profiles configured with a real
+    ``project_id`` (e.g. clouds that only expose project UUIDs at signup
+    time) had their UUID rewritten into ``project_name`` and the
+    ``project_id`` field deleted, so Keystone was asked to find a project
+    *named* ``<uuid-string>`` and rightly returned 401 — the regression
+    Sharktech-style profiles hit.
     """
     if not config.get("user_domain_name") and not config.get("user_domain_id"):
         if config.get("domain_id"):
@@ -386,17 +428,17 @@ def _normalise_legacy_keys(config: Dict[str, Any]) -> None:
     if not config.get("project_domain_name") and not config.get("project_domain_id"):
         if config.get("domain_id"):
             config["project_domain_name"] = config["domain_id"]
-    if not config.get("project_name") and config.get("project_id"):
-        # Legacy profiles stored the project *name* under "project_id".
-        # Copy it to project_name so the client can use name-based scoping.
-        config["project_name"] = config["project_id"]
 
-    # Legacy keys (domain_id, project_id) were actually names, not UUIDs.
-    # Remove them so the client doesn't mistakenly use ID-based scoping.
+    pid = config.get("project_id")
+    if pid and not config.get("project_name") and not _looks_like_id(pid):
+        # Legacy: the value stored in project_id is actually a name.
+        config["project_name"] = pid
+        config.pop("project_id", None)
+
+    # Legacy ``domain_id`` was a name, not an ID — drop it now that it has
+    # been promoted to the canonical user/project domain fields above.
     if config.get("domain_id"):
         config.pop("domain_id", None)
-    if config.get("project_id") and config.get("project_name") == config.get("project_id"):
-        config.pop("project_id", None)
 
 
 def config_is_complete(config: Optional[Dict[str, Any]] = None) -> bool:

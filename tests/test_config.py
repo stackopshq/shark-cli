@@ -116,6 +116,47 @@ class TestLegacyMigration:
         assert cfg["user_domain_name"] == "NewDomain"
         assert cfg["project_name"] == "explicit"
 
+    def test_normalise_legacy_keys_preserves_uuid_project_id(self):
+        """A real Keystone project UUID must survive normalisation untouched.
+
+        Regression: the legacy-key rewrite copied any value in ``project_id``
+        into ``project_name`` and then deleted ``project_id``, which broke
+        clouds (e.g. Sharktech) where users are issued a project UUID rather
+        than a project name. Keystone then received ``{"name": "<uuid>"}``
+        and rejected the auth.
+        """
+        uuid = "abcdef01-2345-6789-abcd-ef0123456789"
+        cfg = {
+            "auth_url": "https://ks:5000",
+            "username": "u",
+            "password": "p",
+            "user_domain_name": "Default",
+            "project_id": uuid,
+        }
+        _normalise_legacy_keys(cfg)
+        assert cfg["project_id"] == uuid
+        assert "project_name" not in cfg
+
+    def test_normalise_legacy_keys_preserves_32hex_project_id(self):
+        """Some older Keystone deployments use a 32-hex slug instead of the
+        canonical 8-4-4-4-12 UUID. The normaliser should recognise both.
+        """
+        slug = "0123456789abcdef0123456789abcdef"
+        cfg = {"project_id": slug}
+        _normalise_legacy_keys(cfg)
+        assert cfg["project_id"] == slug
+        assert "project_name" not in cfg
+
+    def test_normalise_legacy_keys_treats_non_uuid_as_legacy_name(self):
+        """The historical pre-multi-profile orca format stored the project
+        *name* under ``project_id``. Anything that doesn't look like an ID
+        must keep being rewritten so those old configs still load.
+        """
+        cfg = {"project_id": "production"}
+        _normalise_legacy_keys(cfg)
+        assert cfg["project_name"] == "production"
+        assert "project_id" not in cfg
+
 
 # ── config_is_complete ──────────────────────────────────────────────────
 
