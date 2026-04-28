@@ -22,7 +22,6 @@ def _no_real_cache(tmp_path):
     with patch("orca_cli.core.client.TOKEN_CACHE_PATH", tmp_path / "token_cache.yaml"):
         yield
 
-
 FAKE_CATALOG = [
     {
         "type": "compute",
@@ -54,7 +53,6 @@ FAKE_TOKEN_RESPONSE = {
     }
 }
 
-
 def _make_auth_response(status_code=201, token="fake-token"):
     """Build a mock httpx response for Keystone auth."""
     resp = MagicMock()
@@ -64,7 +62,6 @@ def _make_auth_response(status_code=201, token="fake-token"):
     resp.json.return_value = FAKE_TOKEN_RESPONSE
     resp.text = ""
     return resp
-
 
 class TestOrcaClientInit:
 
@@ -228,7 +225,6 @@ class TestOrcaClientInit:
         captured = capsys.readouterr()
         assert "TLS certificate verification is disabled" in captured.err
 
-
 class TestEndpointResolution:
 
     @patch("orca_cli.core.client.httpx.Client")
@@ -275,7 +271,6 @@ class TestEndpointResolution:
     def test_domain_ref_fallback(self):
         assert OrcaClient._domain_ref(None, None) == {"name": "Default"}
 
-
 # ── Token caching ─────────────────────────────────────────────────────────────
 
 BASE_CFG = {
@@ -290,14 +285,12 @@ FUTURE_EXPIRY = (datetime.now(timezone.utc) + timedelta(hours=12)).isoformat()
 PAST_EXPIRY = (datetime.now(timezone.utc) - timedelta(seconds=1)).isoformat()
 NEAR_EXPIRY = (datetime.now(timezone.utc) + timedelta(seconds=TOKEN_EXPIRY_BUFFER - 1)).isoformat()
 
-
 def _make_client_with_http(mock_httpx_cls, cfg=None, token="tok"):
     http = MagicMock()
     http.post.return_value = _make_auth_response(token=token)
     mock_httpx_cls.return_value = http
     client = OrcaClient(cfg or BASE_CFG)
     return client, http
-
 
 class TestTokenCaching:
     """Disk-based token cache: write on auth, read on next init, invalidate on expiry/401."""
@@ -471,7 +464,6 @@ class TestTokenCaching:
 
         assert ca._cache_key != cb._cache_key
 
-
 class TestRequestRetryOn401:
     """_request() clears cache and re-auths transparently on 401 with cached token."""
 
@@ -590,7 +582,6 @@ class TestRequestRetryOn401:
         new_data = yaml.safe_load(self._cache_path.read_text())
         assert new_data["token"] == "new-token"
 
-
 # ── Transient-error retry ─────────────────────────────────────────────────────
 
 def _resp(status_code: int, body: Any = None, headers: dict | None = None) -> MagicMock:
@@ -603,7 +594,6 @@ def _resp(status_code: int, body: Any = None, headers: dict | None = None) -> Ma
     r.text = "" if body is None else str(body)
     r.headers = headers or {}
     return r
-
 
 class TestRequestRetryOnTransient:
     """_request() retries idempotent methods on 5xx and network errors."""
@@ -758,7 +748,6 @@ class TestRequestRetryOnTransient:
         assert http.post.call_count == 2
         _no_sleep.assert_not_called()
 
-
 # ── 429 rate-limit retry ────────────────────────────────────────────────────
 
 class TestRateLimitRetry:
@@ -857,7 +846,6 @@ class TestRateLimitRetry:
         # Parsed delta is ~2s; allow for sub-second parsing drift and jitter.
         assert 0.0 <= waited <= 3.0
 
-
 # ── paginate() helper ────────────────────────────────────────────────────────
 
 class TestPaginate:
@@ -936,7 +924,6 @@ class TestPaginate:
         assert len(items) >= 1000  # at least one full page collected
         assert http.get.call_count <= 3
 
-
 # ── Nova microversion header scoping ─────────────────────────────────────────
 
 class TestNovaMicroversionHeader:
@@ -981,7 +968,6 @@ class TestNovaMicroversionHeader:
         headers = http.stream.call_args.kwargs["headers"]
         assert "X-OpenStack-Nova-API-Version" not in headers
 
-
 # ── Typed endpoint URL properties ─────────────────────────────────────────────
 
 RICH_CATALOG = [
@@ -1008,7 +994,6 @@ RICH_TOKEN_RESPONSE = {
     }
 }
 
-
 def _rich_auth_response():
     resp = MagicMock()
     resp.status_code = 201
@@ -1017,7 +1002,6 @@ def _rich_auth_response():
     resp.json.return_value = RICH_TOKEN_RESPONSE
     resp.text = ""
     return resp
-
 
 class TestTypedEndpointURLs:
     """Every typed URL property must resolve via _endpoint_for against the catalogue."""
@@ -1046,7 +1030,6 @@ class TestTypedEndpointURLs:
         assert client.placement_url == "https://placement.example.com"
         assert client.alarming_url == "https://alarming.example.com"
 
-
 class TestWithVersion:
     """``with_version`` is the idempotent /vN appender used by services to
     survive both versionless and pre-versioned catalogue URLs."""
@@ -1073,7 +1056,6 @@ class TestWithVersion:
         from orca_cli.core.client import with_version
         # /v33 is not /v3, must still append.
         assert with_version("http://h/api/v33", "v3") == "http://h/api/v33/v3"
-
 
 class TestVolumeUrlFallback:
     """``volume_url`` accepts both the modern ``block-storage`` (Train+) and
@@ -1124,7 +1106,6 @@ class TestVolumeUrlFallback:
         with pytest.raises(APIError, match="Cinder/block-storage"):
             _ = client.volume_url
 
-
 class TestIsComputeUrlHandlesMissingNova:
     """_is_compute_url() must return False when Nova isn't in the catalog."""
 
@@ -1150,7 +1131,6 @@ class TestIsComputeUrlHandlesMissingNova:
 
         headers = http.get.call_args.kwargs["headers"]
         assert "X-OpenStack-Nova-API-Version" not in headers
-
 
 class TestExtractErrorMessage:
     """_extract_error_message unwraps OpenStack's inconsistent error shapes."""
@@ -1178,7 +1158,6 @@ class TestExtractErrorMessage:
         body = {"random": "data"}
         result = OrcaClient._extract_error_message(body)
         assert "random" in result
-
 
 class TestForbiddenAndHtmlResponses:
     """403 must surface as PermissionDeniedError (not AuthenticationError) so users
@@ -1235,7 +1214,6 @@ class TestForbiddenAndHtmlResponses:
         resp.headers = {}
         resp.text = "<!doctype html><html>boom</html>"
         assert OrcaClient._is_html_response(resp) is True
-
 
 class TestRequestIdPropagation:
     """OpenStack request-id headers must reach the user via APIError."""
@@ -1300,7 +1278,6 @@ class TestRequestIdPropagation:
         assert exc_info.value.request_id == ""
         assert "request-id" not in str(exc_info.value)
 
-
 class TestHandleResponseNonJson:
     """When the error body isn't JSON, fall back to raw text (truncated)."""
 
@@ -1324,7 +1301,6 @@ class TestHandleResponseNonJson:
 
         assert "Internal" in str(exc_info.value) or "Internal" in exc_info.value.message
 
-
 class TestPatchWithContent:
     """PATCH with content + content_type takes the content branch."""
 
@@ -1344,7 +1320,6 @@ class TestPatchWithContent:
         kwargs = http.patch.call_args.kwargs
         assert kwargs["content"] == b"binary"
         assert kwargs["headers"]["Content-Type"] == "application/octet-stream"
-
 
 class TestPutStream:
 
@@ -1395,7 +1370,6 @@ class TestPutStream:
         assert resp.status_code == 503
         assert http.put.call_count == 1  # no retry
 
-
 class TestClose:
 
     @patch("orca_cli.core.client.httpx.Client")
@@ -1407,7 +1381,6 @@ class TestClose:
         client = OrcaClient(BASE_CFG)
         client.close()
         http.close.assert_called_once()
-
 
 # ════════════════════════════════════════════════════════════════════════════
 #  Project scoping — concrete cloud configurations
@@ -1427,13 +1400,11 @@ class TestClose:
 # These tests pin all four shapes, plus the way config flows through profile
 # / env / clouds.yaml.
 
-
 def _scope(http: MagicMock) -> dict:
     """Return the ``auth.scope`` block from the most recent POST sent to
     the mocked Keystone client."""
     payload = http.post.call_args.kwargs["json"]
     return payload["auth"].get("scope")
-
 
 class TestPasswordAuthScoping:
     """``OrcaClient(cfg)`` produces the right Keystone scope block for each
@@ -1585,7 +1556,6 @@ class TestPasswordAuthScoping:
         scope = payload["auth"]["scope"]["project"]
         assert scope == {"name": "demo", "domain": {"id": "default"}}
 
-
 class TestAppCredentialAuthScoping:
     """Application credentials are pre-scoped at creation time. The client
     must emit the ``v3applicationcredential`` identity method and *not* a
@@ -1634,7 +1604,6 @@ class TestAppCredentialAuthScoping:
         assert ac["secret"] == "sssecret"
         assert ac["user"] == {"name": "alice", "domain": {"name": "Default"}}
         assert "scope" not in payload["auth"]
-
 
 class TestEndToEndProjectScoping:
     """Full resolution chain: profile / OS_* env / clouds.yaml all converge

@@ -8,7 +8,6 @@ from unittest.mock import patch
 #  completion — print instructions (legacy behavior)
 # ══════════════════════════════════════════════════════════════════════════
 
-
 class TestCompletion:
 
     def test_bash(self, invoke):
@@ -46,11 +45,9 @@ class TestCompletion:
         assert result.exit_code == 1
         assert "auto-detect" in result.output.lower()
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  completion install — auto-install
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestCompletionInstall:
 
@@ -80,11 +77,9 @@ class TestCompletionInstall:
         result = invoke(["completion", "install", "powershell"])
         assert result.exit_code != 0
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestCompletionHelp:
 

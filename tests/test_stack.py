@@ -8,7 +8,6 @@ from orca_cli.core.config import save_profile, set_active_profile
 
 STACK_ID = "11112222-3333-4444-5555-666677778888"
 
-
 def _stack(stack_id=STACK_ID, name="my-stack", status="CREATE_COMPLETE"):
     return {
         "id": stack_id, "stack_name": name, "stack_status": status,
@@ -20,7 +19,6 @@ def _stack(stack_id=STACK_ID, name="my-stack", status="CREATE_COMPLETE"):
         "outputs": [{"output_key": "url", "output_value": "http://example.com"}],
         "parameters": {"param1": "value1"},
     }
-
 
 def _setup_mock(mock_client):
     mock_client.orchestration_url = "https://heat.example.com/v1/proj"
@@ -108,11 +106,9 @@ def _setup_mock(mock_client):
 
     return {"posted": posted, "put_data": put_data, "deleted": deleted}
 
-
 # ═══════════════════════════════════════════════════════════════════════��══
 #  list
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestStackList:
 
@@ -135,11 +131,9 @@ class TestStackList:
         assert result.exit_code == 0
         assert "No stacks found" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  show
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestStackShow:
 
@@ -152,11 +146,9 @@ class TestStackShow:
         assert result.exit_code == 0
         assert "my-stack" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  delete
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestStackDelete:
 
@@ -170,11 +162,9 @@ class TestStackDelete:
         assert "deletion" in result.output.lower()
         assert len(state["deleted"]) == 1
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  actions: check, suspend, resume, cancel
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestStackActions:
 
@@ -214,11 +204,9 @@ class TestStackActions:
         assert result.exit_code == 0
         assert "Cancel" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  resource-list / resource-show
 # ═════════════════════════════════════════════════════════════════════════��
-
 
 class TestStackResources:
 
@@ -227,15 +215,13 @@ class TestStackResources:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["stack", "resource-list", "my-stack"])
+        result = invoke(["stack", "resource", "list", "my-stack"])
         assert result.exit_code == 0
         assert "my-ser" in result.output
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  event-list
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestStackEvents:
 
@@ -244,15 +230,13 @@ class TestStackEvents:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["stack", "event-list", "my-stack"])
+        result = invoke(["stack", "event", "list", "my-stack"])
         assert result.exit_code == 0
         assert "my-ser" in result.output
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  output-list / output-show
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestStackOutputs:
 
@@ -261,7 +245,7 @@ class TestStackOutputs:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["stack", "output-list", "my-stack"])
+        result = invoke(["stack", "output", "list", "my-stack"])
         assert result.exit_code == 0
         assert "url" in result.output
 
@@ -270,15 +254,13 @@ class TestStackOutputs:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["stack", "output-show", "my-stack", "url"])
+        result = invoke(["stack", "output", "show", "my-stack", "url"])
         assert result.exit_code == 0
         assert "example.com" in result.output
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  template-show
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestStackTemplate:
 
@@ -287,16 +269,14 @@ class TestStackTemplate:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["stack", "template-show", "my-stack"])
+        result = invoke(["stack", "template", "show", "my-stack"])
         assert result.exit_code == 0
         # Rich Syntax output — check for key terms
         assert "heat_template" in result.output or "Server" in result.output or "server" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  topology
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestStackTopology:
 
@@ -310,11 +290,9 @@ class TestStackTopology:
         assert "my-stack" in result.output
         assert "my-ser" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Helpers
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestHelpers:
 
@@ -342,11 +320,9 @@ class TestHelpers:
         with pytest.raises(Exception):
             _parse_params(("badformat",))
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestStackHelp:
 
@@ -355,13 +331,8 @@ class TestStackHelp:
         assert result.exit_code == 0
         for cmd in ("list", "show", "create", "update", "delete",
                     "check", "suspend", "resume", "cancel",
-                    "resource-list", "resource-show",
-                    "event-list", "event-show",
-                    "output-list", "output-show",
-                    "template-show", "template-validate",
                     "topology", "diff"):
             assert cmd in result.output
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  stack abandon / resource-type-list / resource-type-show
@@ -386,33 +357,31 @@ class TestStackAbandon:
     def test_help(self, invoke):
         assert invoke(["stack", "abandon", "--help"]).exit_code == 0
 
-
 class TestStackResourceTypeList:
 
     def test_list(self, invoke, mock_client):
         mock_client.orchestration_url = "https://heat.example.com/v1/proj"
         mock_client.get.return_value = {"resource_types": ["OS::Nova::Server", "OS::Neutron::Net"]}
-        result = invoke(["stack", "resource-type-list"])
+        result = invoke(["stack", "resource-type", "list"])
         assert result.exit_code == 0
         assert "Nova" in result.output
 
     def test_filter(self, invoke, mock_client):
         mock_client.orchestration_url = "https://heat.example.com/v1/proj"
         mock_client.get.return_value = {"resource_types": []}
-        invoke(["stack", "resource-type-list", "--filter", "Nova"])
+        invoke(["stack", "resource-type", "list", "--filter", "Nova"])
         assert mock_client.get.call_args[1]["params"]["name"] == "Nova"
 
     def test_help(self, invoke):
-        assert invoke(["stack", "resource-type-list", "--help"]).exit_code == 0
-
+        assert invoke(["stack", "resource-type", "list", "--help"]).exit_code == 0
 
 class TestStackResourceTypeShow:
 
     def test_show(self, invoke, mock_client):
         mock_client.orchestration_url = "https://heat.example.com/v1/proj"
         mock_client.get.return_value = {"heat_template_version": "2021-04-06"}
-        result = invoke(["stack", "resource-type-show", "OS::Nova::Server"])
+        result = invoke(["stack", "resource-type", "show", "OS::Nova::Server"])
         assert result.exit_code == 0
 
     def test_help(self, invoke):
-        assert invoke(["stack", "resource-type-show", "--help"]).exit_code == 0
+        assert invoke(["stack", "resource-type", "show", "--help"]).exit_code == 0

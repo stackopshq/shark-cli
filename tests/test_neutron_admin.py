@@ -15,11 +15,9 @@ TRUNK  = "11111111-1111-1111-1111-111111111111"
 PORT   = "22222222-2222-2222-2222-222222222222"
 PORT2  = "33333333-3333-3333-3333-333333333333"
 
-
 def _net(mock_client):
     mock_client.network_url = NET
     return mock_client
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  network subnet-update
@@ -29,14 +27,14 @@ class TestSubnetUpdate:
 
     def test_update_name(self, invoke, mock_client):
         _net(mock_client)
-        result = invoke(["network", "subnet-update", SUBNET, "--name", "new-name"])
+        result = invoke(["network", "subnet", "update", SUBNET, "--name", "new-name"])
         assert result.exit_code == 0
         body = mock_client.put.call_args[1]["json"]["subnet"]
         assert body["name"] == "new-name"
 
     def test_update_dns(self, invoke, mock_client):
         _net(mock_client)
-        result = invoke(["network", "subnet-update", SUBNET,
+        result = invoke(["network", "subnet", "update", SUBNET,
                          "--dns-nameserver", "8.8.8.8",
                          "--dns-nameserver", "1.1.1.1"])
         assert result.exit_code == 0
@@ -46,31 +44,30 @@ class TestSubnetUpdate:
 
     def test_enable_dhcp(self, invoke, mock_client):
         _net(mock_client)
-        invoke(["network", "subnet-update", SUBNET, "--enable-dhcp"])
+        invoke(["network", "subnet", "update", SUBNET, "--enable-dhcp"])
         body = mock_client.put.call_args[1]["json"]["subnet"]
         assert body["enable_dhcp"] is True
 
     def test_disable_dhcp(self, invoke, mock_client):
         _net(mock_client)
-        invoke(["network", "subnet-update", SUBNET, "--disable-dhcp"])
+        invoke(["network", "subnet", "update", SUBNET, "--disable-dhcp"])
         body = mock_client.put.call_args[1]["json"]["subnet"]
         assert body["enable_dhcp"] is False
 
     def test_nothing_to_update(self, invoke, mock_client):
         _net(mock_client)
-        result = invoke(["network", "subnet-update", SUBNET])
+        result = invoke(["network", "subnet", "update", SUBNET])
         assert result.exit_code == 0
         mock_client.put.assert_not_called()
 
     def test_calls_correct_url(self, invoke, mock_client):
         _net(mock_client)
-        invoke(["network", "subnet-update", SUBNET, "--name", "x"])
+        invoke(["network", "subnet", "update", SUBNET, "--name", "x"])
         url = mock_client.put.call_args[0][0]
         assert f"/v2.0/subnets/{SUBNET}" in url
 
     def test_help(self, invoke):
-        assert invoke(["network", "subnet-update", "--help"]).exit_code == 0
-
+        assert invoke(["network", "subnet", "update", "--help"]).exit_code == 0
 
 # ══════════════════════════════════════════════════════════════════════════
 #  network agent-list / show / set / delete
@@ -85,19 +82,18 @@ class TestNetworkAgentList:
     def test_list(self, invoke, mock_client):
         _net(mock_client)
         mock_client.get.return_value = {"agents": [self._agent()]}
-        result = invoke(["network", "agent-list"])
+        result = invoke(["network", "agent", "list"])
         assert result.exit_code == 0
         assert "L3" in result.output
 
     def test_list_empty(self, invoke, mock_client):
         _net(mock_client)
         mock_client.get.return_value = {"agents": []}
-        result = invoke(["network", "agent-list"])
+        result = invoke(["network", "agent", "list"])
         assert "No agents" in result.output
 
     def test_help(self, invoke):
-        assert invoke(["network", "agent-list", "--help"]).exit_code == 0
-
+        assert invoke(["network", "agent", "list", "--help"]).exit_code == 0
 
 class TestNetworkAgentShow:
 
@@ -107,58 +103,55 @@ class TestNetworkAgentShow:
             "id": AGENT, "agent_type": "L3 agent", "host": "ctrl1",
             "alive": True, "admin_state_up": True, "topic": "l3_agent",
         }}
-        result = invoke(["network", "agent-show", AGENT])
+        result = invoke(["network", "agent", "show", AGENT])
         assert result.exit_code == 0
         assert "L3" in result.output
 
     def test_calls_correct_url(self, invoke, mock_client):
         _net(mock_client)
         mock_client.get.return_value = {"agent": {}}
-        invoke(["network", "agent-show", AGENT])
+        invoke(["network", "agent", "show", AGENT])
         url = mock_client.get.call_args[0][0]
         assert f"/v2.0/agents/{AGENT}" in url
 
     def test_help(self, invoke):
-        assert invoke(["network", "agent-show", "--help"]).exit_code == 0
-
+        assert invoke(["network", "agent", "show", "--help"]).exit_code == 0
 
 class TestNetworkAgentSet:
 
     def test_disable(self, invoke, mock_client):
         _net(mock_client)
-        result = invoke(["network", "agent-set", AGENT, "--disable"])
+        result = invoke(["network", "agent", "set", AGENT, "--disable"])
         assert result.exit_code == 0
         body = mock_client.put.call_args[1]["json"]["agent"]
         assert body["admin_state_up"] is False
 
     def test_enable(self, invoke, mock_client):
         _net(mock_client)
-        invoke(["network", "agent-set", AGENT, "--enable"])
+        invoke(["network", "agent", "set", AGENT, "--enable"])
         body = mock_client.put.call_args[1]["json"]["agent"]
         assert body["admin_state_up"] is True
 
     def test_help(self, invoke):
-        assert invoke(["network", "agent-set", "--help"]).exit_code == 0
-
+        assert invoke(["network", "agent", "set", "--help"]).exit_code == 0
 
 class TestNetworkAgentDelete:
 
     def test_delete_yes(self, invoke, mock_client):
         _net(mock_client)
-        result = invoke(["network", "agent-delete", AGENT, "--yes"])
+        result = invoke(["network", "agent", "delete", AGENT, "--yes"])
         assert result.exit_code == 0
         mock_client.delete.assert_called_once()
         assert f"/v2.0/agents/{AGENT}" in mock_client.delete.call_args[0][0]
 
     def test_delete_requires_confirm(self, invoke, mock_client):
         _net(mock_client)
-        result = invoke(["network", "agent-delete", AGENT], input="n\n")
+        result = invoke(["network", "agent", "delete", AGENT], input="n\n")
         assert result.exit_code != 0
         mock_client.delete.assert_not_called()
 
     def test_help(self, invoke):
-        assert invoke(["network", "agent-delete", "--help"]).exit_code == 0
-
+        assert invoke(["network", "agent", "delete", "--help"]).exit_code == 0
 
 # ══════════════════════════════════════════════════════════════════════════
 #  network rbac-list / show / create / delete
@@ -173,19 +166,18 @@ class TestNetworkRbacList:
     def test_list(self, invoke, mock_client):
         _net(mock_client)
         mock_client.get.return_value = {"rbac_policies": [self._rbac()]}
-        result = invoke(["network", "rbac-list"])
+        result = invoke(["network", "rbac", "list"])
         assert result.exit_code == 0
         assert "network" in result.output
 
     def test_list_empty(self, invoke, mock_client):
         _net(mock_client)
         mock_client.get.return_value = {"rbac_policies": []}
-        result = invoke(["network", "rbac-list"])
+        result = invoke(["network", "rbac", "list"])
         assert "No RBAC" in result.output
 
     def test_help(self, invoke):
-        assert invoke(["network", "rbac-list", "--help"]).exit_code == 0
-
+        assert invoke(["network", "rbac", "list", "--help"]).exit_code == 0
 
 class TestNetworkRbacShow:
 
@@ -195,20 +187,19 @@ class TestNetworkRbacShow:
             "id": RBAC, "object_type": "network", "object_id": PORT,
             "action": "access_as_shared", "target_project_id": "*",
         }}
-        result = invoke(["network", "rbac-show", RBAC])
+        result = invoke(["network", "rbac", "show", RBAC])
         assert result.exit_code == 0
         assert "network" in result.output
 
     def test_help(self, invoke):
-        assert invoke(["network", "rbac-show", "--help"]).exit_code == 0
-
+        assert invoke(["network", "rbac", "show", "--help"]).exit_code == 0
 
 class TestNetworkRbacCreate:
 
     def test_create(self, invoke, mock_client):
         _net(mock_client)
         mock_client.post.return_value = {"rbac_policy": {"id": RBAC}}
-        result = invoke(["network", "rbac-create",
+        result = invoke(["network", "rbac", "create",
                          "--object-type", "network",
                          "--object", PORT,
                          "--target-project", "*",
@@ -221,7 +212,7 @@ class TestNetworkRbacCreate:
     def test_calls_correct_url(self, invoke, mock_client):
         _net(mock_client)
         mock_client.post.return_value = {"rbac_policy": {"id": RBAC}}
-        invoke(["network", "rbac-create",
+        invoke(["network", "rbac", "create",
                 "--object-type", "network",
                 "--object", PORT,
                 "--target-project", "*",
@@ -230,26 +221,24 @@ class TestNetworkRbacCreate:
         assert "/v2.0/rbac-policies" in url
 
     def test_help(self, invoke):
-        assert invoke(["network", "rbac-create", "--help"]).exit_code == 0
-
+        assert invoke(["network", "rbac", "create", "--help"]).exit_code == 0
 
 class TestNetworkRbacDelete:
 
     def test_delete_yes(self, invoke, mock_client):
         _net(mock_client)
-        result = invoke(["network", "rbac-delete", RBAC, "--yes"])
+        result = invoke(["network", "rbac", "delete", RBAC, "--yes"])
         assert result.exit_code == 0
         mock_client.delete.assert_called_once()
 
     def test_delete_requires_confirm(self, invoke, mock_client):
         _net(mock_client)
-        result = invoke(["network", "rbac-delete", RBAC], input="n\n")
+        result = invoke(["network", "rbac", "delete", RBAC], input="n\n")
         assert result.exit_code != 0
         mock_client.delete.assert_not_called()
 
     def test_help(self, invoke):
-        assert invoke(["network", "rbac-delete", "--help"]).exit_code == 0
-
+        assert invoke(["network", "rbac", "delete", "--help"]).exit_code == 0
 
 # ══════════════════════════════════════════════════════════════════════════
 #  subnet-pool
@@ -290,7 +279,6 @@ class TestSubnetPoolList:
     def test_help(self, invoke):
         assert invoke(["subnet-pool", "list", "--help"]).exit_code == 0
 
-
 class TestSubnetPoolShow:
 
     def test_show(self, invoke, mock_client):
@@ -306,7 +294,6 @@ class TestSubnetPoolShow:
 
     def test_help(self, invoke):
         assert invoke(["subnet-pool", "show", "--help"]).exit_code == 0
-
 
 class TestSubnetPoolCreate:
 
@@ -335,7 +322,6 @@ class TestSubnetPoolCreate:
     def test_help(self, invoke):
         assert invoke(["subnet-pool", "create", "--help"]).exit_code == 0
 
-
 class TestSubnetPoolSet:
 
     def test_set_name(self, invoke, mock_client):
@@ -354,7 +340,6 @@ class TestSubnetPoolSet:
     def test_help(self, invoke):
         assert invoke(["subnet-pool", "set", "--help"]).exit_code == 0
 
-
 class TestSubnetPoolDelete:
 
     def test_delete_yes(self, invoke, mock_client):
@@ -372,7 +357,6 @@ class TestSubnetPoolDelete:
     def test_help(self, invoke):
         assert invoke(["subnet-pool", "delete", "--help"]).exit_code == 0
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  qos policy CRUD
 # ══════════════════════════════════════════════════════════════════════════
@@ -386,25 +370,24 @@ class TestQosPolicyList:
     def test_list(self, invoke, mock_client):
         _net(mock_client)
         mock_client.get.return_value = {"policies": [self._policy()]}
-        result = invoke(["qos", "policy-list"])
+        result = invoke(["qos", "policy", "list"])
         assert result.exit_code == 0
         assert "my-qos" in result.output
 
     def test_list_shared_filter(self, invoke, mock_client):
         _net(mock_client)
         mock_client.get.return_value = {"policies": []}
-        invoke(["qos", "policy-list", "--shared"])
+        invoke(["qos", "policy", "list", "--shared"])
         assert mock_client.get.call_args[1]["params"].get("shared") is True
 
     def test_list_empty(self, invoke, mock_client):
         _net(mock_client)
         mock_client.get.return_value = {"policies": []}
-        result = invoke(["qos", "policy-list"])
+        result = invoke(["qos", "policy", "list"])
         assert "No QoS" in result.output
 
     def test_help(self, invoke):
-        assert invoke(["qos", "policy-list", "--help"]).exit_code == 0
-
+        assert invoke(["qos", "policy", "list", "--help"]).exit_code == 0
 
 class TestQosPolicyShow:
 
@@ -414,20 +397,19 @@ class TestQosPolicyShow:
             "id": POLICY, "name": "my-qos", "shared": False,
             "is_default": False, "description": "", "project_id": "abc",
         }}
-        result = invoke(["qos", "policy-show", POLICY])
+        result = invoke(["qos", "policy", "show", POLICY])
         assert result.exit_code == 0
         assert "my-qos" in result.output
 
     def test_help(self, invoke):
-        assert invoke(["qos", "policy-show", "--help"]).exit_code == 0
-
+        assert invoke(["qos", "policy", "show", "--help"]).exit_code == 0
 
 class TestQosPolicyCreate:
 
     def test_create(self, invoke, mock_client):
         _net(mock_client)
         mock_client.post.return_value = {"policy": {"id": POLICY}}
-        result = invoke(["qos", "policy-create", "--name", "my-qos"])
+        result = invoke(["qos", "policy", "create", "--name", "my-qos"])
         assert result.exit_code == 0
         body = mock_client.post.call_args[1]["json"]["policy"]
         assert body["name"] == "my-qos"
@@ -435,50 +417,47 @@ class TestQosPolicyCreate:
     def test_create_shared(self, invoke, mock_client):
         _net(mock_client)
         mock_client.post.return_value = {"policy": {"id": POLICY}}
-        invoke(["qos", "policy-create", "--name", "q", "--shared"])
+        invoke(["qos", "policy", "create", "--name", "q", "--shared"])
         body = mock_client.post.call_args[1]["json"]["policy"]
         assert body["shared"] is True
 
     def test_help(self, invoke):
-        assert invoke(["qos", "policy-create", "--help"]).exit_code == 0
-
+        assert invoke(["qos", "policy", "create", "--help"]).exit_code == 0
 
 class TestQosPolicySet:
 
     def test_set_name(self, invoke, mock_client):
         _net(mock_client)
-        result = invoke(["qos", "policy-set", POLICY, "--name", "renamed"])
+        result = invoke(["qos", "policy", "set", POLICY, "--name", "renamed"])
         assert result.exit_code == 0
         body = mock_client.put.call_args[1]["json"]["policy"]
         assert body["name"] == "renamed"
 
     def test_set_nothing(self, invoke, mock_client):
         _net(mock_client)
-        result = invoke(["qos", "policy-set", POLICY])
+        result = invoke(["qos", "policy", "set", POLICY])
         assert result.exit_code == 0
         mock_client.put.assert_not_called()
 
     def test_help(self, invoke):
-        assert invoke(["qos", "policy-set", "--help"]).exit_code == 0
-
+        assert invoke(["qos", "policy", "set", "--help"]).exit_code == 0
 
 class TestQosPolicyDelete:
 
     def test_delete_yes(self, invoke, mock_client):
         _net(mock_client)
-        result = invoke(["qos", "policy-delete", POLICY, "--yes"])
+        result = invoke(["qos", "policy", "delete", POLICY, "--yes"])
         assert result.exit_code == 0
         mock_client.delete.assert_called_once()
 
     def test_delete_requires_confirm(self, invoke, mock_client):
         _net(mock_client)
-        result = invoke(["qos", "policy-delete", POLICY], input="n\n")
+        result = invoke(["qos", "policy", "delete", POLICY], input="n\n")
         assert result.exit_code != 0
         mock_client.delete.assert_not_called()
 
     def test_help(self, invoke):
-        assert invoke(["qos", "policy-delete", "--help"]).exit_code == 0
-
+        assert invoke(["qos", "policy", "delete", "--help"]).exit_code == 0
 
 # ══════════════════════════════════════════════════════════════════════════
 #  qos rules
@@ -491,14 +470,14 @@ class TestQosRuleList:
         mock_client.get.return_value = {"bandwidth_limit_rules": [
             {"id": RULE, "max_kbps": 1000, "max_burst_kbps": 200, "direction": "egress"}
         ]}
-        result = invoke(["qos", "rule-list", POLICY])
+        result = invoke(["qos", "rule", "list", POLICY])
         assert result.exit_code == 0
         assert "1000" in result.output
 
     def test_list_empty(self, invoke, mock_client):
         _net(mock_client)
         mock_client.get.return_value = {"bandwidth_limit_rules": []}
-        result = invoke(["qos", "rule-list", POLICY])
+        result = invoke(["qos", "rule", "list", POLICY])
         assert result.exit_code == 0
 
     def test_list_dscp(self, invoke, mock_client):
@@ -506,19 +485,18 @@ class TestQosRuleList:
         mock_client.get.return_value = {"dscp_marking_rules": [
             {"id": RULE, "dscp_mark": 14}
         ]}
-        result = invoke(["qos", "rule-list", POLICY, "--type", "dscp-marking"])
+        result = invoke(["qos", "rule", "list", POLICY, "--type", "dscp-marking"])
         assert result.exit_code == 0
 
     def test_help(self, invoke):
-        assert invoke(["qos", "rule-list", "--help"]).exit_code == 0
-
+        assert invoke(["qos", "rule", "list", "--help"]).exit_code == 0
 
 class TestQosRuleCreate:
 
     def test_create_bandwidth_limit(self, invoke, mock_client):
         _net(mock_client)
         mock_client.post.return_value = {"bandwidth_limit_rule": {"id": RULE}}
-        result = invoke(["qos", "rule-create", POLICY,
+        result = invoke(["qos", "rule", "create", POLICY,
                          "--type", "bandwidth-limit",
                          "--max-kbps", "1000"])
         assert result.exit_code == 0
@@ -527,13 +505,13 @@ class TestQosRuleCreate:
 
     def test_create_bandwidth_requires_max_kbps(self, invoke, mock_client):
         _net(mock_client)
-        result = invoke(["qos", "rule-create", POLICY, "--type", "bandwidth-limit"])
+        result = invoke(["qos", "rule", "create", POLICY, "--type", "bandwidth-limit"])
         assert result.exit_code != 0
 
     def test_create_dscp_marking(self, invoke, mock_client):
         _net(mock_client)
         mock_client.post.return_value = {"dscp_marking_rule": {"id": RULE}}
-        result = invoke(["qos", "rule-create", POLICY,
+        result = invoke(["qos", "rule", "create", POLICY,
                          "--type", "dscp-marking", "--dscp-mark", "14"])
         assert result.exit_code == 0
         body = mock_client.post.call_args[1]["json"]["dscp_marking_rule"]
@@ -541,46 +519,44 @@ class TestQosRuleCreate:
 
     def test_create_dscp_requires_mark(self, invoke, mock_client):
         _net(mock_client)
-        result = invoke(["qos", "rule-create", POLICY, "--type", "dscp-marking"])
+        result = invoke(["qos", "rule", "create", POLICY, "--type", "dscp-marking"])
         assert result.exit_code != 0
 
     def test_create_minimum_bandwidth(self, invoke, mock_client):
         _net(mock_client)
         mock_client.post.return_value = {"minimum_bandwidth_rule": {"id": RULE}}
-        result = invoke(["qos", "rule-create", POLICY,
+        result = invoke(["qos", "rule", "create", POLICY,
                          "--type", "minimum-bandwidth", "--min-kbps", "500"])
         assert result.exit_code == 0
         body = mock_client.post.call_args[1]["json"]["minimum_bandwidth_rule"]
         assert body["min_kbps"] == 500
 
     def test_help(self, invoke):
-        assert invoke(["qos", "rule-create", "--help"]).exit_code == 0
-
+        assert invoke(["qos", "rule", "create", "--help"]).exit_code == 0
 
 class TestQosRuleDelete:
 
     def test_delete_yes(self, invoke, mock_client):
         _net(mock_client)
-        result = invoke(["qos", "rule-delete", POLICY, RULE, "--yes"])
+        result = invoke(["qos", "rule", "delete", POLICY, RULE, "--yes"])
         assert result.exit_code == 0
         mock_client.delete.assert_called_once()
 
     def test_delete_requires_confirm(self, invoke, mock_client):
         _net(mock_client)
-        result = invoke(["qos", "rule-delete", POLICY, RULE], input="n\n")
+        result = invoke(["qos", "rule", "delete", POLICY, RULE], input="n\n")
         assert result.exit_code != 0
         mock_client.delete.assert_not_called()
 
     def test_calls_correct_url(self, invoke, mock_client):
         _net(mock_client)
-        invoke(["qos", "rule-delete", POLICY, RULE, "--yes"])
+        invoke(["qos", "rule", "delete", POLICY, RULE, "--yes"])
         url = mock_client.delete.call_args[0][0]
         assert f"/qos/policies/{POLICY}" in url
         assert RULE in url
 
     def test_help(self, invoke):
-        assert invoke(["qos", "rule-delete", "--help"]).exit_code == 0
-
+        assert invoke(["qos", "rule", "delete", "--help"]).exit_code == 0
 
 # ══════════════════════════════════════════════════════════════════════════
 #  trunk
@@ -608,7 +584,6 @@ class TestTrunkList:
     def test_help(self, invoke):
         assert invoke(["trunk", "list", "--help"]).exit_code == 0
 
-
 class TestTrunkShow:
 
     def test_show(self, invoke, mock_client):
@@ -624,7 +599,6 @@ class TestTrunkShow:
 
     def test_help(self, invoke):
         assert invoke(["trunk", "show", "--help"]).exit_code == 0
-
 
 class TestTrunkCreate:
 
@@ -647,7 +621,6 @@ class TestTrunkCreate:
     def test_help(self, invoke):
         assert invoke(["trunk", "create", "--help"]).exit_code == 0
 
-
 class TestTrunkSet:
 
     def test_set_name(self, invoke, mock_client):
@@ -666,7 +639,6 @@ class TestTrunkSet:
     def test_help(self, invoke):
         assert invoke(["trunk", "set", "--help"]).exit_code == 0
 
-
 class TestTrunkDelete:
 
     def test_delete_yes(self, invoke, mock_client):
@@ -684,7 +656,6 @@ class TestTrunkDelete:
     def test_help(self, invoke):
         assert invoke(["trunk", "delete", "--help"]).exit_code == 0
 
-
 class TestTrunkSubportList:
 
     def test_list(self, invoke, mock_client):
@@ -692,7 +663,7 @@ class TestTrunkSubportList:
         mock_client.get.return_value = {"sub_ports": [
             {"port_id": PORT2, "segmentation_type": "vlan", "segmentation_id": 100}
         ]}
-        result = invoke(["trunk", "subport-list", TRUNK])
+        result = invoke(["trunk", "subport", "list", TRUNK])
         assert result.exit_code == 0
         assert "vlan" in result.output
         assert "100" in result.output
@@ -700,25 +671,24 @@ class TestTrunkSubportList:
     def test_list_empty(self, invoke, mock_client):
         _net(mock_client)
         mock_client.get.return_value = {"sub_ports": []}
-        result = invoke(["trunk", "subport-list", TRUNK])
+        result = invoke(["trunk", "subport", "list", TRUNK])
         assert "No sub-ports" in result.output
 
     def test_calls_correct_url(self, invoke, mock_client):
         _net(mock_client)
         mock_client.get.return_value = {"sub_ports": []}
-        invoke(["trunk", "subport-list", TRUNK])
+        invoke(["trunk", "subport", "list", TRUNK])
         url = mock_client.get.call_args[0][0]
         assert f"/v2.0/trunks/{TRUNK}/get_subports" in url
 
     def test_help(self, invoke):
-        assert invoke(["trunk", "subport-list", "--help"]).exit_code == 0
-
+        assert invoke(["trunk", "subport", "list", "--help"]).exit_code == 0
 
 class TestTrunkAddSubport:
 
     def test_add(self, invoke, mock_client):
         _net(mock_client)
-        result = invoke(["trunk", "add-subport", TRUNK,
+        result = invoke(["trunk", "subport", "add", TRUNK,
                          "--port", PORT2,
                          "--segmentation-id", "100"])
         assert result.exit_code == 0
@@ -728,39 +698,37 @@ class TestTrunkAddSubport:
 
     def test_add_calls_correct_url(self, invoke, mock_client):
         _net(mock_client)
-        invoke(["trunk", "add-subport", TRUNK,
+        invoke(["trunk", "subport", "add", TRUNK,
                 "--port", PORT2, "--segmentation-id", "100"])
         url = mock_client.put.call_args[0][0]
         assert f"/v2.0/trunks/{TRUNK}/add_subports" in url
 
     def test_help(self, invoke):
-        assert invoke(["trunk", "add-subport", "--help"]).exit_code == 0
-
+        assert invoke(["trunk", "subport", "add", "--help"]).exit_code == 0
 
 class TestTrunkRemoveSubport:
 
     def test_remove_yes(self, invoke, mock_client):
         _net(mock_client)
-        result = invoke(["trunk", "remove-subport", TRUNK, "--port", PORT2, "--yes"])
+        result = invoke(["trunk", "subport", "remove", TRUNK, "--port", PORT2, "--yes"])
         assert result.exit_code == 0
         body = mock_client.put.call_args[1]["json"]["sub_ports"][0]
         assert body["port_id"] == PORT2
 
     def test_remove_requires_confirm(self, invoke, mock_client):
         _net(mock_client)
-        result = invoke(["trunk", "remove-subport", TRUNK, "--port", PORT2], input="n\n")
+        result = invoke(["trunk", "subport", "remove", TRUNK, "--port", PORT2], input="n\n")
         assert result.exit_code != 0
         mock_client.put.assert_not_called()
 
     def test_calls_correct_url(self, invoke, mock_client):
         _net(mock_client)
-        invoke(["trunk", "remove-subport", TRUNK, "--port", PORT2, "--yes"])
+        invoke(["trunk", "subport", "remove", TRUNK, "--port", PORT2, "--yes"])
         url = mock_client.put.call_args[0][0]
         assert f"/v2.0/trunks/{TRUNK}/remove_subports" in url
 
     def test_help(self, invoke):
-        assert invoke(["trunk", "remove-subport", "--help"]).exit_code == 0
-
+        assert invoke(["trunk", "subport", "remove", "--help"]).exit_code == 0
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Registration
@@ -778,29 +746,26 @@ class TestRegistration:
     def test_qos_registered(self, invoke):
         assert invoke(["qos", "--help"]).exit_code == 0
 
-    @pytest.mark.parametrize("sub", ["policy-list", "policy-show", "policy-create",
-                                     "policy-set", "policy-delete",
-                                     "rule-list", "rule-create", "rule-delete"])
-    def test_qos_subcommands(self, invoke, sub):
-        assert invoke(["qos", sub, "--help"]).exit_code == 0
+    def test_qos_subcommands(self, invoke):
+        for cmd in (["qos", "policy", "--help"], ["qos", "rule", "--help"]):
+            assert invoke(cmd).exit_code == 0
 
     def test_trunk_registered(self, invoke):
         assert invoke(["trunk", "--help"]).exit_code == 0
 
-    @pytest.mark.parametrize("sub", ["list", "show", "create", "set", "delete",
-                                     "subport-list", "add-subport", "remove-subport"])
+    @pytest.mark.parametrize("sub", ["list", "show", "create", "set", "delete"])
     def test_trunk_subcommands(self, invoke, sub):
         assert invoke(["trunk", sub, "--help"]).exit_code == 0
 
     def test_network_agent_subcommands(self, invoke):
-        for sub in ["agent-list", "agent-show", "agent-set", "agent-delete"]:
-            result = invoke(["network", sub, "--help"])
-            assert result.exit_code == 0, f"network {sub} --help failed"
+        for sub in ["list", "show", "set", "delete"]:
+            result = invoke(["network", "agent", sub, "--help"])
+            assert result.exit_code == 0, f"network agent {sub} --help failed"
 
     def test_network_rbac_subcommands(self, invoke):
-        for sub in ["rbac-list", "rbac-show", "rbac-create", "rbac-delete"]:
-            result = invoke(["network", sub, "--help"])
-            assert result.exit_code == 0, f"network {sub} --help failed"
+        for sub in ["list", "show", "create", "delete"]:
+            result = invoke(["network", "rbac", sub, "--help"])
+            assert result.exit_code == 0, f"network rbac {sub} --help failed"
 
     def test_network_subnet_update(self, invoke):
-        assert invoke(["network", "subnet-update", "--help"]).exit_code == 0
+        assert invoke(["network", "subnet", "update", "--help"]).exit_code == 0

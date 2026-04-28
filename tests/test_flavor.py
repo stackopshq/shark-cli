@@ -6,21 +6,17 @@ from orca_cli.core.config import save_profile, set_active_profile
 
 # ── Helpers ────────────────────────────────────────────────────────────────
 
-
 def _flavor(fid="flv-1", name="m1.small", vcpus=2, ram=2048, disk=20):
     return {"id": fid, "name": name, "vcpus": vcpus, "ram": ram, "disk": disk}
-
 
 def _setup_mock(mock_client, flavors=None):
     flavors = flavors if flavors is not None else []
     mock_client.compute_url = "https://nova.example.com/v2.1"
     mock_client.get = lambda url, **kw: {"flavors": flavors}
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  flavor list
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestFlavorList:
 
@@ -84,11 +80,9 @@ class TestFlavorList:
         assert "m1.x1" in result.output
         assert "m1.x10" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestFlavorHelp:
 

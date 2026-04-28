@@ -11,7 +11,6 @@ VOL_ID = "22223333-4444-5555-6666-777788889999"
 FLAVOR_WITH_DISK = "flav-disk-20"
 FLAVOR_DISKLESS = "flav-disk-0"
 
-
 def _mock_clone_environment(mock_client, flavor_id, flavor_disk):
     """Wire a mock_client that serves the GETs needed by `server clone`."""
     mock_client.compute_url = "https://nova.example.com/v2.1"
@@ -54,7 +53,6 @@ def _mock_clone_environment(mock_client, flavor_id, flavor_disk):
     mock_client.post = _post
     return state
 
-
 class TestCloneAutoDetect:
 
     def test_flavor_with_disk_defaults_to_boot_from_image(
@@ -85,7 +83,6 @@ class TestCloneAutoDetect:
         body = state["posted"]["body"]
         assert "block_device_mapping_v2" in body
         assert "imageRef" not in body
-
 
 class TestCloneExplicitFlags:
 

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import click
 
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
@@ -117,10 +116,6 @@ def aggregate_host_remove(ctx, aggregate_id, host):
     console.print(f"[green]Host '{host}' removed from aggregate {aggregate_id}.[/green]")
 
 
-add_command_with_alias(aggregate, aggregate_host_add,
-                        legacy_name="add-host", primary_path="aggregate host add")
-add_command_with_alias(aggregate, aggregate_host_remove,
-                        legacy_name="remove-host", primary_path="aggregate host remove")
 
 
 @aggregate.command("set")
@@ -194,8 +189,3 @@ def aggregate_image_cache(ctx, aggregate_id, image_ids):
     svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
     svc.cache_aggregate_images(aggregate_id, [{"id": iid} for iid in image_ids])
     console.print(f"[green]Image caching requested on aggregate {aggregate_id}.[/green]")
-
-
-add_command_with_alias(aggregate, aggregate_image_cache,
-                        legacy_name="cache-image",
-                        primary_path="aggregate image cache")

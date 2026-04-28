@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import click
 
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
@@ -300,12 +299,6 @@ def secret_acl_delete(ctx: click.Context, secret_id: str, yes: bool) -> None:
     console.print(f"[green]ACL deleted for secret {secret_id}.[/green]")
 
 
-add_command_with_alias(secret, secret_acl_get,
-                        legacy_name="acl-get", primary_path="secret acl get")
-add_command_with_alias(secret, secret_acl_set,
-                        legacy_name="acl-set", primary_path="secret acl set")
-add_command_with_alias(secret, secret_acl_delete,
-                        legacy_name="acl-delete", primary_path="secret acl delete")
 
 
 # ══════════════════════════════════════════════════════════════════════════

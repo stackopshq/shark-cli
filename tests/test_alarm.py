@@ -23,11 +23,9 @@ _RULE = json.dumps({
     "evaluation_periods": 1,
 })
 
-
 def _aodh(mc):
     mc.alarming_url = BASE
     return mc
-
 
 def _alarm(**kw):
     return {
@@ -49,7 +47,6 @@ def _alarm(**kw):
         "state_timestamp": "2026-01-01T00:00:00",
         **kw,
     }
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  alarm list
@@ -97,7 +94,6 @@ class TestAlarmList:
     def test_help(self, invoke):
         assert invoke(["alarm", "list", "--help"]).exit_code == 0
 
-
 # ══════════════════════════════════════════════════════════════════════════════
 #  alarm show
 # ══════════════════════════════════════════════════════════════════════════════
@@ -113,7 +109,6 @@ class TestAlarmShow:
 
     def test_help(self, invoke):
         assert invoke(["alarm", "show", "--help"]).exit_code == 0
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  alarm create
@@ -195,7 +190,6 @@ class TestAlarmCreate:
     def test_help(self, invoke):
         assert invoke(["alarm", "create", "--help"]).exit_code == 0
 
-
 # ══════════════════════════════════════════════════════════════════════════════
 #  alarm set
 # ══════════════════════════════════════════════════════════════════════════════
@@ -253,7 +247,6 @@ class TestAlarmSet:
     def test_help(self, invoke):
         assert invoke(["alarm", "set", "--help"]).exit_code == 0
 
-
 # ══════════════════════════════════════════════════════════════════════════════
 #  alarm delete
 # ══════════════════════════════════════════════════════════════════════════════
@@ -275,7 +268,6 @@ class TestAlarmDelete:
     def test_help(self, invoke):
         assert invoke(["alarm", "delete", "--help"]).exit_code == 0
 
-
 # ══════════════════════════════════════════════════════════════════════════════
 #  alarm state-get / state-set
 # ══════════════════════════════════════════════════════════════════════════════
@@ -285,41 +277,40 @@ class TestAlarmState:
     def test_state_get_ok(self, invoke, mock_client):
         _aodh(mock_client)
         mock_client.get.return_value = '"ok"'
-        result = invoke(["alarm", "state-get", ALARM_ID])
+        result = invoke(["alarm", "state", "get", ALARM_ID])
         assert result.exit_code == 0
         assert "ok" in result.output
 
     def test_state_get_alarm(self, invoke, mock_client):
         _aodh(mock_client)
         mock_client.get.return_value = "alarm"
-        result = invoke(["alarm", "state-get", ALARM_ID])
+        result = invoke(["alarm", "state", "get", ALARM_ID])
         assert result.exit_code == 0
         assert "alarm" in result.output
 
     def test_state_set_ok(self, invoke, mock_client):
         _aodh(mock_client)
-        result = invoke(["alarm", "state-set", ALARM_ID, "ok"])
+        result = invoke(["alarm", "state", "set", ALARM_ID, "ok"])
         assert result.exit_code == 0
         body = mock_client.put.call_args[1]["json"]
         assert body == "ok"
 
     def test_state_set_alarm(self, invoke, mock_client):
         _aodh(mock_client)
-        result = invoke(["alarm", "state-set", ALARM_ID, "alarm"])
+        result = invoke(["alarm", "state", "set", ALARM_ID, "alarm"])
         assert result.exit_code == 0
         mock_client.put.assert_called_once()
 
     def test_state_set_invalid(self, invoke, mock_client):
         _aodh(mock_client)
-        result = invoke(["alarm", "state-set", ALARM_ID, "bad_state"])
+        result = invoke(["alarm", "state", "set", ALARM_ID, "bad_state"])
         assert result.exit_code != 0
 
     def test_help_get(self, invoke):
-        assert invoke(["alarm", "state-get", "--help"]).exit_code == 0
+        assert invoke(["alarm", "state", "get", "--help"]).exit_code == 0
 
     def test_help_set(self, invoke):
-        assert invoke(["alarm", "state-set", "--help"]).exit_code == 0
-
+        assert invoke(["alarm", "state", "set", "--help"]).exit_code == 0
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  alarm history
@@ -356,7 +347,6 @@ class TestAlarmHistory:
     def test_help(self, invoke):
         assert invoke(["alarm", "history", "--help"]).exit_code == 0
 
-
 # ══════════════════════════════════════════════════════════════════════════════
 #  alarm capabilities
 # ══════════════════════════════════════════════════════════════════════════════
@@ -375,7 +365,6 @@ class TestAlarmCapabilities:
     def test_help(self, invoke):
         assert invoke(["alarm", "capabilities", "--help"]).exit_code == 0
 
-
 # ══════════════════════════════════════════════════════════════════════════════
 #  alarm quota-set
 # ══════════════════════════════════════════════════════════════════════════════
@@ -384,7 +373,7 @@ class TestAlarmQuotaSet:
 
     def test_quota_set(self, invoke, mock_client):
         _aodh(mock_client)
-        result = invoke(["alarm", "quota-set", PROJECT_ID, "--alarms", "50"])
+        result = invoke(["alarm", "quota", "set", PROJECT_ID, "--alarms", "50"])
         assert result.exit_code == 0
         body = mock_client.post.call_args[1]["json"]
         assert body["project_id"] == PROJECT_ID
@@ -392,8 +381,7 @@ class TestAlarmQuotaSet:
         assert body["quotas"][0]["limit"] == 50
 
     def test_help(self, invoke):
-        assert invoke(["alarm", "quota-set", "--help"]).exit_code == 0
-
+        assert invoke(["alarm", "quota", "set", "--help"]).exit_code == 0
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  Registration
@@ -403,8 +391,7 @@ class TestRegistration:
 
     @pytest.mark.parametrize("sub", [
         "list", "show", "create", "set", "delete",
-        "state-get", "state-set",
-        "history", "capabilities", "quota-set",
+        "history", "capabilities",
     ])
     def test_subcommand_help(self, invoke, sub):
         assert invoke(["alarm", sub, "--help"]).exit_code == 0

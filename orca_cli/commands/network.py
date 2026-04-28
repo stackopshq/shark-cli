@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import click
 
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.completions import complete_networks
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
@@ -1318,62 +1317,3 @@ def network_auto_allocated_topology_delete(ctx, project_id, yes):
 
 
 # ── Deprecated aliases (ADR-0008) ─────────────────────────────────────────
-
-for _legacy, _primary, _path in [
-    ("agent-delete",       network_agent.commands["delete"],  "network agent delete"),
-    ("agent-list",         network_agent.commands["list"],    "network agent list"),
-    ("agent-set",          network_agent.commands["set"],     "network agent set"),
-    ("agent-show",         network_agent.commands["show"],    "network agent show"),
-    ("auto-allocated-topology-delete",
-        network_auto_allocated_topology.commands["delete"],
-        "network auto-allocated-topology delete"),
-    ("auto-allocated-topology-show",
-        network_auto_allocated_topology.commands["show"],
-        "network auto-allocated-topology show"),
-    ("port-create",        network_port.commands["create"],   "network port create"),
-    ("port-delete",        network_port.commands["delete"],   "network port delete"),
-    ("port-list",          network_port.commands["list"],     "network port list"),
-    ("port-show",          network_port.commands["show"],     "network port show"),
-    ("port-unset",         network_port.commands["unset"],    "network port unset"),
-    ("port-update",        network_port.commands["update"],   "network port update"),
-    ("rbac-create",        network_rbac.commands["create"],   "network rbac create"),
-    ("rbac-delete",        network_rbac.commands["delete"],   "network rbac delete"),
-    ("rbac-list",          network_rbac.commands["list"],     "network rbac list"),
-    ("rbac-show",          network_rbac.commands["show"],     "network rbac show"),
-    ("rbac-update",        network_rbac.commands["update"],   "network rbac update"),
-    ("router-create",      network_router.commands["create"], "network router create"),
-    ("router-delete",      network_router.commands["delete"], "network router delete"),
-    ("router-list",        network_router.commands["list"],   "network router list"),
-    ("router-show",        network_router.commands["show"],   "network router show"),
-    ("router-update",      network_router.commands["update"], "network router update"),
-    ("router-add-interface",
-        network_router_add.commands["interface"],
-        "network router add interface"),
-    ("router-add-route",
-        network_router_add.commands["route"],
-        "network router add route"),
-    ("router-remove-interface",
-        network_router_remove.commands["interface"],
-        "network router remove interface"),
-    ("router-remove-route",
-        network_router_remove.commands["route"],
-        "network router remove route"),
-    ("router-set-gateway",
-        network_router_set.commands["gateway"],
-        "network router set gateway"),
-    ("router-unset-gateway",
-        network_router_unset.commands["gateway"],
-        "network router unset gateway"),
-    ("segment-create",     network_segment.commands["create"], "network segment create"),
-    ("segment-delete",     network_segment.commands["delete"], "network segment delete"),
-    ("segment-list",       network_segment.commands["list"],   "network segment list"),
-    ("segment-set",        network_segment.commands["set"],    "network segment set"),
-    ("segment-show",       network_segment.commands["show"],   "network segment show"),
-    ("subnet-create",      network_subnet.commands["create"],  "network subnet create"),
-    ("subnet-delete",      network_subnet.commands["delete"],  "network subnet delete"),
-    ("subnet-list",        network_subnet.commands["list"],    "network subnet list"),
-    ("subnet-show",        network_subnet.commands["show"],    "network subnet show"),
-    ("subnet-update",      network_subnet.commands["update"],  "network subnet update"),
-]:
-    add_command_with_alias(network, _primary, legacy_name=_legacy, primary_path=_path)
-del _legacy, _primary, _path

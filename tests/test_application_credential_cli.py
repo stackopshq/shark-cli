@@ -8,7 +8,6 @@ import yaml
 #  --user resolution: must use real token user id, never the literal "me"
 # ══════════════════════════════════════════════════════════════════════════
 
-
 class TestCurrentUserResolution:
     """Regression: --user default was always falling back to "me", which is
     not a valid Keystone user id. It now reads from the token data."""
@@ -78,11 +77,9 @@ class TestCurrentUserResolution:
         assert "current user id" in result.output
         assert "--user" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  create
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestCreate:
 
@@ -119,11 +116,9 @@ class TestCreate:
         assert body["expires_at"] == "2027-01-01T00:00:00"
         assert body["unrestricted"] is True
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  --save-profile: chains AC creation into a ready-to-use orca profile
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestCreateSaveProfile:
 
@@ -186,11 +181,9 @@ class TestCreateSaveProfile:
         assert result.exit_code != 0
         assert "secret" in result.output.lower()
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  list / show / delete smoke tests
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestListShowDelete:
 

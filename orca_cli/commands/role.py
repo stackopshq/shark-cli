@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import click
 
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
@@ -286,18 +285,6 @@ def role_implied_delete(ctx, prior_role_id, implied_role_id, yes):
     console.print("Implied role relationship deleted.")
 
 
-add_command_with_alias(role, role_assignment_list,
-                        legacy_name="assignment-list",
-                        primary_path="role assignment list")
-add_command_with_alias(role, role_implied_list,
-                        legacy_name="implied-list",
-                        primary_path="role implied list")
-add_command_with_alias(role, role_implied_create,
-                        legacy_name="implied-create",
-                        primary_path="role implied create")
-add_command_with_alias(role, role_implied_delete,
-                        legacy_name="implied-delete",
-                        primary_path="role implied delete")
 
 
 # ── set ───────────────────────────────────────────────────────────────────

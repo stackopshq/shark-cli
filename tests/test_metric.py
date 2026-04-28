@@ -9,7 +9,6 @@ from orca_cli.core.config import save_profile, set_active_profile
 METRIC_ID = "11112222-3333-4444-5555-666677778888"
 RESOURCE_ID = "aaaabbbb-cccc-dddd-eeee-ffffffffffff"
 
-
 def _setup_mock(mock_client):
     mock_client.metric_url = "https://gnocchi.example.com"
 
@@ -78,11 +77,9 @@ def _setup_mock(mock_client):
 
     mock_client.get = _get
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  resource-type-list
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestResourceTypes:
 
@@ -91,16 +88,14 @@ class TestResourceTypes:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["metric", "resource-type-list"])
+        result = invoke(["metric", "resource-type", "list"])
         assert result.exit_code == 0
         assert "generic" in result.output
         assert "instance" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  resource-list / resource-show
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestResources:
 
@@ -109,7 +104,7 @@ class TestResources:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["metric", "resource-list"])
+        result = invoke(["metric", "resource", "list"])
         assert result.exit_code == 0
         assert "generic" in result.output
 
@@ -118,7 +113,7 @@ class TestResources:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["metric", "resource-list", "--type", "instance"])
+        result = invoke(["metric", "resource", "list", "--type", "instance"])
         assert result.exit_code == 0
 
     def test_resource_show(self, invoke, config_dir, mock_client, sample_profile):
@@ -126,15 +121,13 @@ class TestResources:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["metric", "resource-show", RESOURCE_ID])
+        result = invoke(["metric", "resource", "show", RESOURCE_ID])
         assert result.exit_code == 0
         assert "cpu_util" in result.output
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  metric list / show
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestMetrics:
 
@@ -157,11 +150,9 @@ class TestMetrics:
         assert "cpu_util" in result.output
         assert "high" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  measures
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestMeasures:
 
@@ -185,11 +176,9 @@ class TestMeasures:
         assert result.exit_code == 0
         assert "No measures found" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  archive-policy-list
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestArchivePolicies:
 
@@ -198,15 +187,13 @@ class TestArchivePolicies:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["metric", "archive-policy-list"])
+        result = invoke(["metric", "archive-policy", "list"])
         assert result.exit_code == 0
         assert "high" in result.output
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  status
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestMetricStatus:
 
@@ -219,20 +206,16 @@ class TestMetricStatus:
         assert result.exit_code == 0
         assert "42" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestMetricHelp:
 
     def test_metric_help(self, invoke):
         result = invoke(["metric", "--help"])
         assert result.exit_code == 0
-        for cmd in ("list", "show", "measures", "resource-list",
-                    "resource-show", "resource-type-list",
-                    "archive-policy-list", "status"):
+        for cmd in ("list", "show", "measures", "status"):
             assert cmd in result.output
 
     def test_measures_help(self, invoke):
@@ -241,13 +224,11 @@ class TestMetricHelp:
         assert "--start" in result.output
         assert "--granularity" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  metric create/delete / measures-add / archive-policy / resource-type
 # ══════════════════════════════════════════════════════════════════════════
 
 _GNOCCHI = "https://gnocchi.example.com"
-
 
 class TestMetricCreate:
 
@@ -263,7 +244,6 @@ class TestMetricCreate:
 
     def test_help(self, invoke):
         assert invoke(["metric", "create", "--help"]).exit_code == 0
-
 
 class TestMetricDelete:
 
@@ -282,12 +262,11 @@ class TestMetricDelete:
     def test_help(self, invoke):
         assert invoke(["metric", "delete", "--help"]).exit_code == 0
 
-
 class TestMeasuresAdd:
 
     def test_add(self, invoke, mock_client):
         mock_client.metric_url = _GNOCCHI
-        result = invoke(["metric", "measures-add", METRIC_ID,
+        result = invoke(["metric", "measures", "add", METRIC_ID,
                          "--measure", "2026-01-01T00:00:00:42.5"])
         assert result.exit_code == 0
         payload = mock_client.post.call_args[1]["json"]
@@ -296,13 +275,12 @@ class TestMeasuresAdd:
 
     def test_add_invalid_format(self, invoke, mock_client):
         mock_client.metric_url = _GNOCCHI
-        result = invoke(["metric", "measures-add", METRIC_ID,
+        result = invoke(["metric", "measures", "add", METRIC_ID,
                          "--measure", "badformat"])
         assert result.exit_code != 0
 
     def test_help(self, invoke):
-        assert invoke(["metric", "measures-add", "--help"]).exit_code == 0
-
+        assert invoke(["metric", "measures", "add", "--help"]).exit_code == 0
 
 class TestArchivePolicy:
 
@@ -311,13 +289,13 @@ class TestArchivePolicy:
         mock_client.get.return_value = {
             "name": "low", "definition": [], "aggregation_methods": ["mean"], "back_window": 0
         }
-        result = invoke(["metric", "archive-policy-show", "low"])
+        result = invoke(["metric", "archive-policy", "show", "low"])
         assert result.exit_code == 0
         assert "low" in result.output
 
     def test_create(self, invoke, mock_client):
         mock_client.metric_url = _GNOCCHI
-        result = invoke(["metric", "archive-policy-create", "my-policy",
+        result = invoke(["metric", "archive-policy", "create", "my-policy",
                          "--definition", "1m:1440",
                          "--definition", "1h:720"])
         assert result.exit_code == 0
@@ -327,39 +305,38 @@ class TestArchivePolicy:
 
     def test_create_invalid_definition(self, invoke, mock_client):
         mock_client.metric_url = _GNOCCHI
-        result = invoke(["metric", "archive-policy-create", "p",
+        result = invoke(["metric", "archive-policy", "create", "p",
                          "--definition", "bad"])
         assert result.exit_code != 0
 
     def test_delete_yes(self, invoke, mock_client):
         mock_client.metric_url = _GNOCCHI
-        result = invoke(["metric", "archive-policy-delete", "my-policy", "--yes"])
+        result = invoke(["metric", "archive-policy", "delete", "my-policy", "--yes"])
         assert result.exit_code == 0
         mock_client.delete.assert_called_once()
 
     def test_delete_requires_confirm(self, invoke, mock_client):
         mock_client.metric_url = _GNOCCHI
-        result = invoke(["metric", "archive-policy-delete", "my-policy"], input="n\n")
+        result = invoke(["metric", "archive-policy", "delete", "my-policy"], input="n\n")
         assert result.exit_code != 0
 
     def test_help_show(self, invoke):
-        assert invoke(["metric", "archive-policy-show", "--help"]).exit_code == 0
+        assert invoke(["metric", "archive-policy", "show", "--help"]).exit_code == 0
 
     def test_help_create(self, invoke):
-        assert invoke(["metric", "archive-policy-create", "--help"]).exit_code == 0
-
+        assert invoke(["metric", "archive-policy", "create", "--help"]).exit_code == 0
 
 class TestResourceType:
 
     def test_show(self, invoke, mock_client):
         mock_client.metric_url = _GNOCCHI
         mock_client.get.return_value = {"name": "instance", "attributes": {}}
-        result = invoke(["metric", "resource-type-show", "instance"])
+        result = invoke(["metric", "resource-type", "show", "instance"])
         assert result.exit_code == 0
 
     def test_create(self, invoke, mock_client):
         mock_client.metric_url = _GNOCCHI
-        result = invoke(["metric", "resource-type-create", "my-type",
+        result = invoke(["metric", "resource-type", "create", "my-type",
                          "--attribute", "host:string"])
         assert result.exit_code == 0
         body = mock_client.post.call_args[1]["json"]
@@ -368,12 +345,12 @@ class TestResourceType:
 
     def test_delete_yes(self, invoke, mock_client):
         mock_client.metric_url = _GNOCCHI
-        result = invoke(["metric", "resource-type-delete", "my-type", "--yes"])
+        result = invoke(["metric", "resource-type", "delete", "my-type", "--yes"])
         assert result.exit_code == 0
         mock_client.delete.assert_called_once()
 
     def test_help_show(self, invoke):
-        assert invoke(["metric", "resource-type-show", "--help"]).exit_code == 0
+        assert invoke(["metric", "resource-type", "show", "--help"]).exit_code == 0
 
     def test_help_create(self, invoke):
-        assert invoke(["metric", "resource-type-create", "--help"]).exit_code == 0
+        assert invoke(["metric", "resource-type", "create", "--help"]).exit_code == 0

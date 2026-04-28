@@ -17,14 +17,12 @@ def runner():
     """Click CLI test runner."""
     return CliRunner()
 
-
 @pytest.fixture
 def invoke(runner):
     """Shortcut: runner.invoke bound to the orca CLI group."""
     def _invoke(*args, **kwargs):
         return runner.invoke(cli, *args, catch_exceptions=False, **kwargs)
     return _invoke
-
 
 # ── Fake config directory ───────────────────────────────────────────────
 
@@ -36,7 +34,6 @@ def config_dir(tmp_path, monkeypatch):
     monkeypatch.setattr("orca_cli.core.config.CONFIG_DIR", cfg_dir)
     monkeypatch.setattr("orca_cli.core.config.CONFIG_FILE", cfg_dir / "config.yaml")
     return cfg_dir
-
 
 @pytest.fixture
 def sample_profile():
@@ -50,7 +47,6 @@ def sample_profile():
         "insecure": "true",
     }
 
-
 @pytest.fixture
 def legacy_profile():
     """A legacy orca profile dict (old domain_id / project_id keys)."""
@@ -63,7 +59,6 @@ def legacy_profile():
         "insecure": "true",
     }
 
-
 @pytest.fixture
 def write_config(config_dir):
     """Helper to write an orca config.yaml."""
@@ -74,7 +69,6 @@ def write_config(config_dir):
         return path
     return _write
 
-
 @pytest.fixture
 def clouds_yaml(tmp_path):
     """Write a clouds.yaml and return its path."""
@@ -84,7 +78,6 @@ def clouds_yaml(tmp_path):
             yaml.dump(data, fh)
         return path
     return _write
-
 
 # ── Mock OrcaClient ─────────────────────────────────────────────────────
 
@@ -130,7 +123,6 @@ FAKE_TOKEN_DATA = {
     "expires_at": "2099-12-31T23:59:59Z",
     "issued_at": "2099-12-31T22:59:59Z",
 }
-
 
 def make_mock_client():
     """Build a mock OrcaClient with realistic token data."""
@@ -221,7 +213,6 @@ def make_mock_client():
 
     return client
 
-
 @pytest.fixture
 def mock_client(monkeypatch):
     """Patch OrcaContext.ensure_client to return a mock client."""
@@ -233,7 +224,6 @@ def mock_client(monkeypatch):
 
     monkeypatch.setattr("orca_cli.core.context.OrcaContext.ensure_client", _ensure_client)
     return client
-
 
 @pytest.fixture(autouse=True)
 def clean_env(monkeypatch):

@@ -4,6 +4,57 @@ All notable changes to orca are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] — unreleased
+
+### Removed (breaking)
+
+- **Every ADR-0008 deprecated alias is gone.** The 314 hyphenated
+  legacy command names that 2.0.x → 2.3.x kept registering as
+  ``deprecated=True`` aliases (each printing a yellow warning to
+  stderr before forwarding to the new path) are now removed
+  outright. Scripts that still call e.g. ``orca server attach-volume``,
+  ``orca placement resource-provider-list``, or
+  ``orca profile to-openrc`` must switch to the openstackclient
+  forms (``orca server volume add``, ``orca placement resource-provider list``,
+  ``orca profile export openrc``). See ADR-0008 for the full mapping;
+  ``orca doctor --list-deprecated`` on 2.3.x prints the table.
+- **``orca_cli/core/aliases``** (private module) is dropped. Its
+  three exports (``add_command_with_alias``,
+  ``count_deprecated_aliases``, ``list_deprecated_aliases``) had no
+  external consumers — the module existed solely to power the
+  alias-and-deprecate migration, which is now complete.
+- **``orca doctor``** loses ``--list-deprecated`` and the
+  ``ADR-0008: deprecated aliases`` row in its output. Both became
+  meaningless once the aliases were dropped.
+- **Python 3.9 is no longer supported.** Already announced in 2.3.0
+  (``build!:`` commit), formally cuts in 3.0.0. Minimum is 3.10.
+- **Two ratchet tests removed:** ``tests/test_naming_convention.py``
+  and ``tests/test_aliases.py``. The naming-convention check has no
+  legacy-name whitelist left to ratchet against; the alias-count
+  sanity check no longer applies.
+
+### Migration guide
+
+For ~95 % of legacy invocations the rule is mechanical:
+``orca <top> <leaf-name-with-hyphen>`` becomes
+``orca <top> <leaf> <name>`` (e.g. ``server list-volumes`` →
+``server volume list``). A handful of compound-verb leaves keep
+their hyphen by design — ``server confirm-resize``,
+``server port-forward``, ``volume upload-to-image``,
+``zone reverse-lookup``, ``image share-and-accept``,
+``floating-ip bulk-release`` (full list in
+``docs/adr/0008-command-naming-convention.md`` — *Permanent
+exceptions*).
+
+To audit a script before upgrading, run on 2.3.x:
+
+```
+orca doctor --list-deprecated
+```
+
+The table shows the legacy invocation alongside its 3.0.0
+replacement.
+
 ## [2.3.0] — 2026-04-28
 
 ### Added

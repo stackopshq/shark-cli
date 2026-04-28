@@ -58,7 +58,6 @@ class TestToOpenrc:
         result = invoke(["profile", "export", "openrc", "nope"])
         assert result.exit_code != 0
 
-
 class TestToClouds:
 
     def test_export_as_clouds_yaml(self, invoke, config_dir, sample_profile, mock_client):
@@ -108,7 +107,6 @@ class TestToClouds:
         result = invoke(["profile", "export", "clouds"])
         data = yaml.safe_load(result.output)
         assert data["clouds"]["prod"].get("verify") is False
-
 
 class TestFromOpenrc:
 
@@ -185,7 +183,6 @@ class TestFromOpenrc:
         assert cfg["auth_url"] == "https://ks:5000"
         assert cfg["password"] == "secret with spaces"
 
-
 class TestFromClouds:
 
     def test_import_from_clouds_yaml(self, invoke, config_dir, mock_client, tmp_path, monkeypatch):
@@ -252,7 +249,6 @@ class TestFromClouds:
 
         from orca_cli.core.config import get_profile
         assert get_profile("other")["auth_url"] == "https://other:5000"
-
 
 class TestRoundTrip:
     """Export then import should preserve data."""

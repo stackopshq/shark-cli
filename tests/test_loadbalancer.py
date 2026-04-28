@@ -13,7 +13,6 @@ MEMBER_ID = "33334444-5555-6666-7777-888899990000"
 HM_ID = "44445555-6666-7777-8888-999900001111"
 SUBNET_ID = "55556666-7777-8888-9999-000011112222"
 
-
 def _lb(lb_id=LB_ID, name="my-lb", vip="10.0.0.100"):
     return {
         "id": lb_id, "name": name, "vip_address": vip,
@@ -24,7 +23,6 @@ def _lb(lb_id=LB_ID, name="my-lb", vip="10.0.0.100"):
         "created_at": "2025-01-01", "updated_at": "2025-01-02",
     }
 
-
 def _listener(lid=LISTENER_ID, name="http-listener", protocol="HTTP", port=80):
     return {
         "id": lid, "name": name, "protocol": protocol, "protocol_port": port,
@@ -33,7 +31,6 @@ def _listener(lid=LISTENER_ID, name="http-listener", protocol="HTTP", port=80):
         "connection_limit": -1, "admin_state_up": True,
         "created_at": "2025-01-01", "updated_at": "2025-01-02",
     }
-
 
 def _pool(pid=POOL_ID, name="web-pool"):
     return {
@@ -44,7 +41,6 @@ def _pool(pid=POOL_ID, name="web-pool"):
         "admin_state_up": True, "created_at": "2025-01-01", "updated_at": "2025-01-02",
     }
 
-
 def _member(mid=MEMBER_ID, addr="10.0.0.10", port=8080):
     return {
         "id": mid, "name": "backend-1", "address": addr,
@@ -52,14 +48,12 @@ def _member(mid=MEMBER_ID, addr="10.0.0.10", port=8080):
         "operating_status": "ONLINE",
     }
 
-
 def _hm(hid=HM_ID, name="http-check"):
     return {
         "id": hid, "name": name, "type": "HTTP",
         "delay": 5, "timeout": 3, "pool_id": POOL_ID,
         "provisioning_status": "ACTIVE",
     }
-
 
 def _setup_mock(mock_client):
     mock_client.load_balancer_url = "https://octavia.example.com"
@@ -110,11 +104,9 @@ def _setup_mock(mock_client):
 
     return {"posted": posted, "deleted": deleted}
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  loadbalancer list / show / create / delete
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestLBCore:
 
@@ -175,11 +167,9 @@ class TestLBCore:
         result = invoke(["loadbalancer", "delete", LB_ID, "--cascade", "-y"])
         assert result.exit_code == 0
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Listeners
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestListeners:
 
@@ -188,7 +178,7 @@ class TestListeners:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["loadbalancer", "listener-list"])
+        result = invoke(["loadbalancer", "listener", "list"])
         assert result.exit_code == 0
         assert "HTTP" in result.output
         assert "80" in result.output
@@ -198,7 +188,7 @@ class TestListeners:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["loadbalancer", "listener-show", LISTENER_ID])
+        result = invoke(["loadbalancer", "listener", "show", LISTENER_ID])
         assert result.exit_code == 0
         assert "HTTP" in result.output
 
@@ -207,7 +197,7 @@ class TestListeners:
         set_active_profile("p")
         _ = _setup_mock(mock_client)
 
-        result = invoke(["loadbalancer", "listener-create", "lis-1",
+        result = invoke(["loadbalancer", "listener", "create", "lis-1",
                          "--lb-id", LB_ID, "--protocol", "HTTP", "--port", "80"])
         assert result.exit_code == 0
         assert "created" in result.output.lower()
@@ -217,15 +207,13 @@ class TestListeners:
         set_active_profile("p")
         _ = _setup_mock(mock_client)
 
-        result = invoke(["loadbalancer", "listener-delete", LISTENER_ID, "-y"])
+        result = invoke(["loadbalancer", "listener", "delete", LISTENER_ID, "-y"])
         assert result.exit_code == 0
         assert "deleted" in result.output.lower()
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Pools
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestPools:
 
@@ -234,7 +222,7 @@ class TestPools:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["loadbalancer", "pool-list"])
+        result = invoke(["loadbalancer", "pool", "list"])
         assert result.exit_code == 0
         assert "web-" in result.output
 
@@ -243,7 +231,7 @@ class TestPools:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["loadbalancer", "pool-show", POOL_ID])
+        result = invoke(["loadbalancer", "pool", "show", POOL_ID])
         assert result.exit_code == 0
         assert "ROUND_ROBIN" in result.output
 
@@ -252,7 +240,7 @@ class TestPools:
         set_active_profile("p")
         _ = _setup_mock(mock_client)
 
-        result = invoke(["loadbalancer", "pool-create", "my-pool",
+        result = invoke(["loadbalancer", "pool", "create", "my-pool",
                          "--lb-id", LB_ID, "--protocol", "HTTP",
                          "--algorithm", "ROUND_ROBIN"])
         assert result.exit_code == 0
@@ -263,15 +251,13 @@ class TestPools:
         set_active_profile("p")
         _ = _setup_mock(mock_client)
 
-        result = invoke(["loadbalancer", "pool-delete", POOL_ID, "-y"])
+        result = invoke(["loadbalancer", "pool", "delete", POOL_ID, "-y"])
         assert result.exit_code == 0
         assert "deleted" in result.output.lower()
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Members
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestMembers:
 
@@ -280,7 +266,7 @@ class TestMembers:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["loadbalancer", "member-list", POOL_ID])
+        result = invoke(["loadbalancer", "member", "list", POOL_ID])
         assert result.exit_code == 0
         assert "10.0" in result.output
         assert "8080" in result.output
@@ -290,7 +276,7 @@ class TestMembers:
         set_active_profile("p")
         _ = _setup_mock(mock_client)
 
-        result = invoke(["loadbalancer", "member-add", POOL_ID,
+        result = invoke(["loadbalancer", "member", "add", POOL_ID,
                          "--address", "10.0.0.20", "--port", "8080"])
         assert result.exit_code == 0
         assert "added" in result.output.lower()
@@ -300,15 +286,13 @@ class TestMembers:
         set_active_profile("p")
         _ = _setup_mock(mock_client)
 
-        result = invoke(["loadbalancer", "member-remove", POOL_ID, MEMBER_ID, "-y"])
+        result = invoke(["loadbalancer", "member", "remove", POOL_ID, MEMBER_ID, "-y"])
         assert result.exit_code == 0
         assert "removed" in result.output.lower()
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Health Monitors
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestHealthMonitors:
 
@@ -317,7 +301,7 @@ class TestHealthMonitors:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["loadbalancer", "healthmonitor-list"])
+        result = invoke(["loadbalancer", "healthmonitor", "list"])
         assert result.exit_code == 0
         assert "HTTP" in result.output
 
@@ -326,7 +310,7 @@ class TestHealthMonitors:
         set_active_profile("p")
         _ = _setup_mock(mock_client)
 
-        result = invoke(["loadbalancer", "healthmonitor-create", "hm-1",
+        result = invoke(["loadbalancer", "healthmonitor", "create", "hm-1",
                          "--pool-id", POOL_ID, "--type", "HTTP",
                          "--delay", "5", "--timeout", "3"])
         assert result.exit_code == 0
@@ -337,30 +321,24 @@ class TestHealthMonitors:
         set_active_profile("p")
         _ = _setup_mock(mock_client)
 
-        result = invoke(["loadbalancer", "healthmonitor-delete", HM_ID, "-y"])
+        result = invoke(["loadbalancer", "healthmonitor", "delete", HM_ID, "-y"])
         assert result.exit_code == 0
         assert "deleted" in result.output.lower()
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestLBHelp:
 
     def test_lb_help(self, invoke):
         result = invoke(["loadbalancer", "--help"])
         assert result.exit_code == 0
-        for cmd in ("list", "show", "create", "delete",
-                    "listener-list", "listener-create",
-                    "pool-list", "pool-create",
-                    "member-list", "member-add",
-                    "healthmonitor-list", "healthmonitor-create"):
+        for cmd in ("list", "show", "create", "delete"):
             assert cmd in result.output
 
     def test_member_add_help(self, invoke):
-        result = invoke(["loadbalancer", "member-add", "--help"])
+        result = invoke(["loadbalancer", "member", "add", "--help"])
         assert result.exit_code == 0
         assert "--address" in result.output
         assert "--port" in result.output

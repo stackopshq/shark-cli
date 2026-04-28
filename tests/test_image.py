@@ -12,7 +12,6 @@ from orca_cli.core.config import save_profile, set_active_profile
 IMG_ID = "11112222-3333-4444-5555-666677778888"
 IMG_ID2 = "aaaabbbb-cccc-dddd-eeee-ffffffffffff"
 
-
 def _image(img_id=IMG_ID, name="Ubuntu 22.04", status="active",
            size=2147483648, disk_format="qcow2", visibility="private",
            image_type=None, min_disk=20, min_ram=512):
@@ -33,14 +32,12 @@ def _image(img_id=IMG_ID, name="Ubuntu 22.04", status="active",
         img["image_type"] = image_type
     return img
 
-
 def _server(srv_id="srv-1", name="web-1", image_id=IMG_ID):
     return {
         "id": srv_id,
         "name": name,
         "image": {"id": image_id},
     }
-
 
 def _setup_mock(mock_client, images=None, image_detail=None, servers=None):
     images = images if images is not None else []
@@ -87,11 +84,9 @@ def _setup_mock(mock_client, images=None, image_detail=None, servers=None):
 
     return {"posted": posted, "patched": patched, "deleted": deleted, "put_urls": put_urls}
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  image list
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestImageList:
 
@@ -138,11 +133,9 @@ class TestImageList:
         result = invoke(["image", "list"])
         assert "100" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  image show
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestImageShow:
 
@@ -163,11 +156,9 @@ class TestImageShow:
         result = invoke(["image", "show", IMG_ID])
         assert "1024 MB" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  image create
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestImageCreate:
 
@@ -196,11 +187,9 @@ class TestImageCreate:
         assert state["posted"]["min_ram"] == 512
         assert state["posted"]["visibility"] == "shared"
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  image update
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestImageUpdate:
 
@@ -222,17 +211,14 @@ class TestImageUpdate:
         assert result.exit_code == 0
         assert "No changes requested" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  image create / update / show — custom property lifecycle
 # ══════════════════════════════════════════════════════════════════════════
-
 
 def _patch_ops(state) -> list[dict]:
     """Decode the JSON-Patch body captured by ``_setup_mock``."""
     raw = state["patched"].get("content", b"")
     return _json.loads(raw.decode()) if raw else []
-
 
 class TestImageCreateProperty:
 
@@ -300,7 +286,6 @@ class TestImageCreateProperty:
 
         assert result.exit_code != 0
         assert state["posted"] == {}
-
 
 class TestImageUpdateProperty:
 
@@ -409,7 +394,6 @@ class TestImageUpdateProperty:
         assert "content" not in state["patched"]
         assert "invalid property key" in result.output.lower()
 
-
 class TestImageShowProperty:
 
     def _image_with_props(self):
@@ -509,11 +493,9 @@ class TestImageShowProperty:
         assert result.exit_code == 0, result.output
         assert "Properties" not in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  image deactivate / reactivate
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestImageActivation:
 
@@ -535,11 +517,9 @@ class TestImageActivation:
         assert result.exit_code == 0
         assert "reactivated" in result.output.lower()
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  image tag-add / tag-delete
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestImageTags:
 
@@ -548,7 +528,7 @@ class TestImageTags:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["image", "tag-add", IMG_ID, "prod"])
+        result = invoke(["image", "tag", "add", IMG_ID, "prod"])
         assert result.exit_code == 0
         assert "prod" in result.output
         assert any("tags/prod" in u for u in state["put_urls"])
@@ -558,16 +538,14 @@ class TestImageTags:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["image", "tag-delete", IMG_ID, "old-tag"])
+        result = invoke(["image", "tag", "delete", IMG_ID, "old-tag"])
         assert result.exit_code == 0
         assert "old-tag" in result.output
         assert any("tags/old-tag" in u for u in state["deleted"])
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  image delete
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestImageDelete:
 
@@ -589,11 +567,9 @@ class TestImageDelete:
         _ = invoke(["image", "delete", IMG_ID], input="n\n")
         assert len(state["deleted"]) == 0
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  image unused
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestImageUnused:
 
@@ -677,11 +653,9 @@ class TestImageUnused:
         _ = invoke(["image", "unused", "--delete"], input="n\n")
         assert len(state["deleted"]) == 0
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestImageHelp:
 
@@ -689,7 +663,7 @@ class TestImageHelp:
         result = invoke(["image", "--help"])
         assert result.exit_code == 0
         for cmd in ("list", "show", "create", "update", "upload", "download",
-                    "delete", "deactivate", "reactivate", "tag-add", "tag-delete",
+                    "delete", "deactivate", "reactivate",
                     "shrink", "unused"):
             assert cmd in result.output
 
@@ -707,13 +681,11 @@ class TestImageHelp:
         result = invoke(["image", "shrink", "--help"])
         assert result.exit_code == 0
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  image upload — streaming chunked PUT to /v2/images/{id}/file
 # ══════════════════════════════════════════════════════════════════════════
 
 GL = "https://glance.example.com"
-
 
 class TestImageUpload:
     """`orca image upload` streams the file in 256 KB chunks via PUT."""

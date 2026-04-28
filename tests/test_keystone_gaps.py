@@ -23,11 +23,9 @@ AR_ID       = "33333333-3333-3333-3333-333333333333"
 USER_ID     = "44444444-4444-4444-4444-444444444444"
 BASE        = "https://keystone.example.com"
 
-
 def _iam(mc):
     mc.identity_url = BASE
     return mc
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  Policy
@@ -100,7 +98,6 @@ class TestPolicy:
     def test_help(self, invoke, sub):
         assert invoke(["policy", sub, "--help"]).exit_code == 0
 
-
 # ══════════════════════════════════════════════════════════════════════════════
 #  Identity Provider
 # ══════════════════════════════════════════════════════════════════════════════
@@ -162,7 +159,6 @@ class TestIdentityProvider:
     def test_help(self, invoke, sub):
         assert invoke(["identity-provider", sub, "--help"]).exit_code == 0
 
-
 # ══════════════════════════════════════════════════════════════════════════════
 #  Federation Protocol
 # ══════════════════════════════════════════════════════════════════════════════
@@ -217,14 +213,12 @@ class TestFederationProtocol:
     def test_help(self, invoke, sub):
         assert invoke(["federation-protocol", sub, "--help"]).exit_code == 0
 
-
 # ══════════════════════════════════════════════════════════════════════════════
 #  Mapping
 # ══════════════════════════════════════════════════════════════════════════════
 
 _RULES = [{"local": [{"user": {"name": "{0}"}}],
            "remote": [{"type": "REMOTE_USER"}]}]
-
 
 class TestMapping:
 
@@ -280,7 +274,6 @@ class TestMapping:
     @pytest.mark.parametrize("sub", ["list", "show", "create", "set", "delete"])
     def test_help(self, invoke, sub):
         assert invoke(["mapping", sub, "--help"]).exit_code == 0
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  Service Provider
@@ -345,7 +338,6 @@ class TestServiceProvider:
     @pytest.mark.parametrize("sub", ["list", "show", "create", "set", "delete"])
     def test_help(self, invoke, sub):
         assert invoke(["service-provider", sub, "--help"]).exit_code == 0
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  Registered Limits
@@ -416,7 +408,6 @@ class TestRegisteredLimit:
     @pytest.mark.parametrize("sub", ["list", "show", "create", "set", "delete"])
     def test_help(self, invoke, sub):
         assert invoke(["registered-limit", sub, "--help"]).exit_code == 0
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  Limits
@@ -489,7 +480,6 @@ class TestLimit:
     def test_help(self, invoke, sub):
         assert invoke(["limit", sub, "--help"]).exit_code == 0
 
-
 # ══════════════════════════════════════════════════════════════════════════════
 #  Implied Roles
 # ══════════════════════════════════════════════════════════════════════════════
@@ -504,39 +494,37 @@ class TestImpliedRole:
                  "implies": [{"id": ROLE_B, "name": "member"}]}
             ]
         }
-        result = invoke(["role", "implied-list"])
+        result = invoke(["role", "implied", "list"])
         assert result.exit_code == 0
         assert "admin" in result.output
 
     def test_list_empty(self, invoke, mock_client):
         _iam(mock_client)
         mock_client.get.return_value = {"role_inferences": []}
-        result = invoke(["role", "implied-list"])
+        result = invoke(["role", "implied", "list"])
         assert "No implied roles" in result.output
 
     def test_create(self, invoke, mock_client):
         _iam(mock_client)
-        result = invoke(["role", "implied-create", ROLE_A, ROLE_B])
+        result = invoke(["role", "implied", "create", ROLE_A, ROLE_B])
         assert result.exit_code == 0
         url = mock_client.put.call_args[0][0]
         assert f"roles/{ROLE_A}/implies/{ROLE_B}" in url
 
     def test_delete_yes(self, invoke, mock_client):
         _iam(mock_client)
-        result = invoke(["role", "implied-delete", ROLE_A, ROLE_B, "--yes"])
+        result = invoke(["role", "implied", "delete", ROLE_A, ROLE_B, "--yes"])
         assert result.exit_code == 0
         mock_client.delete.assert_called_once()
 
     def test_delete_requires_confirm(self, invoke, mock_client):
         _iam(mock_client)
-        result = invoke(["role", "implied-delete", ROLE_A, ROLE_B], input="n\n")
+        result = invoke(["role", "implied", "delete", ROLE_A, ROLE_B], input="n\n")
         assert result.exit_code != 0
         mock_client.delete.assert_not_called()
 
-    @pytest.mark.parametrize("sub", ["implied-list", "implied-create", "implied-delete"])
-    def test_help(self, invoke, sub):
-        assert invoke(["role", sub, "--help"]).exit_code == 0
-
+    def test_help(self, invoke):
+        assert invoke(["role", "implied", "create", "--help"]).exit_code == 0
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  Endpoint Group
@@ -610,24 +598,23 @@ class TestEndpointGroup:
 
     def test_add_project(self, invoke, mock_client):
         _iam(mock_client)
-        result = invoke(["endpoint-group", "add-project", EG_ID, PROJECT_ID])
+        result = invoke(["endpoint-group", "project", "add", EG_ID, PROJECT_ID])
         assert result.exit_code == 0
         url = mock_client.put.call_args[0][0]
         assert f"endpoint_groups/{EG_ID}/projects/{PROJECT_ID}" in url
 
     def test_remove_project_yes(self, invoke, mock_client):
         _iam(mock_client)
-        result = invoke(["endpoint-group", "remove-project", EG_ID, PROJECT_ID, "--yes"])
+        result = invoke(["endpoint-group", "project", "remove", EG_ID, PROJECT_ID, "--yes"])
         assert result.exit_code == 0
         url = mock_client.delete.call_args[0][0]
         assert f"endpoint_groups/{EG_ID}/projects/{PROJECT_ID}" in url
 
     @pytest.mark.parametrize("sub", [
-        "list", "show", "create", "set", "delete", "add-project", "remove-project",
+        "list", "show", "create", "set", "delete",
     ])
     def test_help(self, invoke, sub):
         assert invoke(["endpoint-group", sub, "--help"]).exit_code == 0
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  Access Rule
@@ -678,7 +665,6 @@ class TestAccessRule:
     @pytest.mark.parametrize("sub", ["list", "show", "delete"])
     def test_help(self, invoke, sub):
         assert invoke(["access-rule", sub, "--help"]).exit_code == 0
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  Token

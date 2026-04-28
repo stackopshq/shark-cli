@@ -13,7 +13,6 @@ PORT_ID = "33334444-5555-6666-7777-888899990000"
 NET_ID = "44445555-6666-7777-8888-999900001111"
 IMG_ID = "55556666-7777-8888-9999-000011112222"
 
-
 def _srv(srv_id=SRV_ID, name="web-1", status="ACTIVE"):
     return {
         "id": srv_id, "name": name, "status": status,
@@ -34,7 +33,6 @@ def _srv(srv_id=SRV_ID, name="web-1", status="ACTIVE"):
         "metadata": {},
         "os-extended-volumes:volumes_attached": [{"id": VOL_ID}],
     }
-
 
 def _setup_mock(mock_client):
     mock_client.compute_url = "https://nova.example.com/v2.1"
@@ -109,11 +107,9 @@ def _setup_mock(mock_client):
 
     return {"posted": posted, "put_data": put_data, "deleted": deleted}
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  list
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerList:
 
@@ -136,11 +132,9 @@ class TestServerList:
         assert result.exit_code == 0
         assert "No servers found" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  show
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerShow:
 
@@ -154,11 +148,9 @@ class TestServerShow:
         assert "web-1" in result.output
         assert "ACTIVE" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  create
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerCreate:
 
@@ -195,11 +187,9 @@ class TestServerCreate:
         assert body["networks"] == [{"uuid": NET_ID}]
         assert body["key_name"] == "my-key"
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  delete
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerDelete:
 
@@ -213,11 +203,9 @@ class TestServerDelete:
         assert "deleted" in result.output.lower()
         assert len(state["deleted"]) == 1
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Actions: start, stop, reboot, pause, unpause, suspend, resume, etc.
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerActions:
 
@@ -347,11 +335,9 @@ class TestServerActions:
         assert result.exit_code == 0
         assert "Unrescue" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  resize / confirm / revert
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerResize:
 
@@ -382,11 +368,9 @@ class TestServerResize:
         assert result.exit_code == 0
         assert "Revert" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  rebuild
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerRebuild:
 
@@ -399,11 +383,9 @@ class TestServerRebuild:
         assert result.exit_code == 0
         assert "Rebuild" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  rename
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerRename:
 
@@ -416,11 +398,9 @@ class TestServerRename:
         assert result.exit_code == 0
         assert "renamed" in result.output.lower()
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  create-image
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerCreateImage:
 
@@ -429,15 +409,13 @@ class TestServerCreateImage:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["server", "create-image", SRV_ID, "my-snapshot"])
+        result = invoke(["server", "image", "create", SRV_ID, "my-snapshot"])
         assert result.exit_code == 0
         assert "my-snapshot" in result.output
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Volume attachments
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerVolumes:
 
@@ -446,7 +424,7 @@ class TestServerVolumes:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["server", "attach-volume", SRV_ID, VOL_ID])
+        result = invoke(["server", "add", "volume", SRV_ID, VOL_ID])
         assert result.exit_code == 0
         assert "attached" in result.output.lower()
 
@@ -455,7 +433,7 @@ class TestServerVolumes:
         set_active_profile("p")
         _ = _setup_mock(mock_client)
 
-        result = invoke(["server", "detach-volume", SRV_ID, VOL_ID])
+        result = invoke(["server", "remove", "volume", SRV_ID, VOL_ID])
         assert result.exit_code == 0
         assert "detached" in result.output.lower()
 
@@ -464,15 +442,13 @@ class TestServerVolumes:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["server", "list-volumes", SRV_ID])
+        result = invoke(["server", "volume", "list", SRV_ID])
         assert result.exit_code == 0
         assert "/dev/vda" in result.output
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Interface attachments
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerInterfaces:
 
@@ -498,7 +474,7 @@ class TestServerInterfaces:
         set_active_profile("p")
         _ = _setup_mock(mock_client)
 
-        result = invoke(["server", "detach-interface", SRV_ID, PORT_ID])
+        result = invoke(["server", "remove", "interface", SRV_ID, PORT_ID])
         assert result.exit_code == 0
         assert "detached" in result.output.lower()
 
@@ -507,15 +483,13 @@ class TestServerInterfaces:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["server", "list-interfaces", SRV_ID])
+        result = invoke(["server", "interface", "list", SRV_ID])
         assert result.exit_code == 0
         assert "10.0" in result.output
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  console-log
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerConsoleLog:
 
@@ -524,7 +498,7 @@ class TestServerConsoleLog:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["server", "console-log", SRV_ID])
+        result = invoke(["server", "console", "log", SRV_ID])
         assert result.exit_code == 0
         assert "Boot log" in result.output
 
@@ -534,15 +508,13 @@ class TestServerConsoleLog:
         mock_client.compute_url = "https://nova.example.com/v2.1"
         mock_client.post = lambda url, **kw: {"output": ""}
 
-        result = invoke(["server", "console-log", SRV_ID])
+        result = invoke(["server", "console", "log", SRV_ID])
         assert result.exit_code == 0
         assert "No console output" in result.output
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  console-url
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerConsoleUrl:
 
@@ -551,15 +523,13 @@ class TestServerConsoleUrl:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["server", "console-url", SRV_ID])
+        result = invoke(["server", "console", "url", SRV_ID])
         assert result.exit_code == 0
         assert "vnc.example.com" in result.output
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  snapshot (server + volumes)
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerSnapshot:
 
@@ -582,11 +552,9 @@ class TestServerSnapshot:
         assert result.exit_code == 0
         assert "backup-image" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  diff
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerDiff:
 
@@ -601,11 +569,9 @@ class TestServerDiff:
         assert "web-2" in result.output
         assert "difference" in result.output.lower()
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  bulk
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerBulk:
 
@@ -635,11 +601,9 @@ class TestServerBulk:
         assert result.exit_code == 0
         assert "No servers match" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  clone
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerClone:
 
@@ -653,16 +617,13 @@ class TestServerClone:
         assert "web-clone" in result.output
         assert "creation started" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  evacuate / dump-create / restore
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerEvacuate:
 
@@ -687,20 +648,18 @@ class TestServerEvacuate:
         body = state["posted"]["last_body"]["evacuate"]
         assert body["onSharedStorage"] is True
 
-
 class TestServerDumpCreate:
 
     def test_dump_create(self, invoke, mock_client):
         state = _setup_mock(mock_client)
-        result = invoke(["server", "dump-create", SRV_ID])
+        result = invoke(["server", "dump", "create", SRV_ID])
         assert result.exit_code == 0
         assert "trigger_crash_dump" in state["posted"]["last_body"]
         assert "triggered" in result.output
 
     def test_dump_create_help(self, invoke):
-        result = invoke(["server", "dump-create", "--help"])
+        result = invoke(["server", "dump", "create", "--help"])
         assert result.exit_code == 0
-
 
 class TestServerRestore:
 
@@ -711,17 +670,15 @@ class TestServerRestore:
         assert "restore" in state["posted"]["last_body"]
         assert "restored" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  fixed-ip add/remove
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerFixedIP:
 
     def test_add_fixed_ip(self, invoke, mock_client):
         state = _setup_mock(mock_client)
-        result = invoke(["server", "add-fixed-ip", SRV_ID, NET_ID])
+        result = invoke(["server", "add", "fixed-ip", SRV_ID, NET_ID])
         assert result.exit_code == 0
         body = state["posted"]["last_body"]
         assert "addFixedIp" in body
@@ -729,23 +686,21 @@ class TestServerFixedIP:
 
     def test_remove_fixed_ip(self, invoke, mock_client):
         state = _setup_mock(mock_client)
-        result = invoke(["server", "remove-fixed-ip", SRV_ID, "10.0.0.5"])
+        result = invoke(["server", "remove", "fixed-ip", SRV_ID, "10.0.0.5"])
         assert result.exit_code == 0
         body = state["posted"]["last_body"]
         assert "removeFixedIp" in body
         assert body["removeFixedIp"]["address"] == "10.0.0.5"
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  port / network add/remove
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerPortNetwork:
 
     def test_add_port(self, invoke, mock_client):
         state = _setup_mock(mock_client)
-        result = invoke(["server", "add-port", SRV_ID, PORT_ID])
+        result = invoke(["server", "add", "port", SRV_ID, PORT_ID])
         assert result.exit_code == 0
         assert "attached" in result.output or "port" in result.output.lower()
         body = state["posted"]["last_body"]
@@ -753,20 +708,20 @@ class TestServerPortNetwork:
 
     def test_remove_port(self, invoke, mock_client):
         state = _setup_mock(mock_client)
-        result = invoke(["server", "remove-port", SRV_ID, PORT_ID])
+        result = invoke(["server", "remove", "port", SRV_ID, PORT_ID])
         assert result.exit_code == 0
         assert any(PORT_ID in u for u in state["deleted"])
 
     def test_add_network(self, invoke, mock_client):
         state = _setup_mock(mock_client)
-        result = invoke(["server", "add-network", SRV_ID, NET_ID])
+        result = invoke(["server", "add", "network", SRV_ID, NET_ID])
         assert result.exit_code == 0
         body = state["posted"]["last_body"]
         assert body["interfaceAttachment"]["net_id"] == NET_ID
 
     def test_remove_network_found(self, invoke, mock_client):
         state = _setup_mock(mock_client)
-        result = invoke(["server", "remove-network", SRV_ID, NET_ID])
+        result = invoke(["server", "remove", "network", SRV_ID, NET_ID])
         assert result.exit_code == 0
         # Should delete the interface with matching net_id
         assert any("os-interface" in u for u in state["deleted"])
@@ -774,15 +729,13 @@ class TestServerPortNetwork:
 
     def test_remove_network_not_found(self, invoke, mock_client):
         _ = _setup_mock(mock_client)
-        result = invoke(["server", "remove-network", SRV_ID, "no-such-net"])
+        result = invoke(["server", "remove", "network", SRV_ID, "no-such-net"])
         assert result.exit_code == 0
         assert "No interfaces found" in result.output
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  unset
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerUnset:
 
@@ -821,11 +774,9 @@ class TestServerUnset:
         assert any("metadata/env" in u for u in state["deleted"])
         assert any("tags/frontend" in u for u in state["deleted"])
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerHelp:
 
@@ -835,15 +786,9 @@ class TestServerHelp:
         for cmd in ("list", "show", "create", "delete", "start", "stop",
                     "reboot", "pause", "unpause", "suspend", "resume",
                     "lock", "unlock", "rescue", "unrescue",
-                    "shelve", "unshelve", "resize", "rebuild", "rename",
-                    "create-image", "attach-volume", "detach-volume",
-                    "list-volumes", "attach-interface", "detach-interface",
-                    "list-interfaces", "console-log", "console-url",
+                    "shelve", "unshelve", "resize", "rebuild", "rename", "attach-interface",
                     "snapshot", "wait", "bulk", "clone", "diff",
                     "ssh", "port-forward", "password",
-                    "evacuate", "dump-create", "restore",
-                    "add-fixed-ip", "remove-fixed-ip",
-                    "add-port", "remove-port",
-                    "add-network", "remove-network",
+                    "evacuate", "restore",
                     "unset"):
             assert cmd in result.output

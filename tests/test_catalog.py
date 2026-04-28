@@ -110,7 +110,6 @@ class TestCatalogList:
         for name in ("nova", "neutron", "glance", "cinder", "swift"):
             assert name in result.output
 
-
 class TestCatalogOutputFormats:
 
     def test_catalog_json_format(self, invoke, config_dir, mock_client, sample_profile):
@@ -143,7 +142,6 @@ class TestCatalogOutputFormats:
         assert "nova" in result.output
         # Type column should not appear when filtered out
         # (can't assert absence since "compute" might appear in URL)
-
 
 class TestCatalogHelp:
 

@@ -13,36 +13,29 @@ GROUP_ID   = "gggg0000-1111-2222-3333-444455556666"
 ROLE_ID    = "rrrr0000-1111-2222-3333-444455556666"
 CRED_ID    = "cccc0000-1111-2222-3333-444455556666"
 
-
 def _user(uid=USER_ID):
     return {"id": uid, "name": "alice", "domain_id": DOMAIN_ID,
             "email": "alice@example.com", "enabled": True,
             "default_project_id": PROJECT_ID, "password_expires_at": None,
             "created_at": "2025-01-01", "updated_at": None}
 
-
 def _project(pid=PROJECT_ID):
     return {"id": pid, "name": "my-project", "domain_id": DOMAIN_ID,
             "description": "A test project", "enabled": True, "parent_id": None, "tags": []}
 
-
 def _domain(did=DOMAIN_ID):
     return {"id": did, "name": "my-domain", "description": "Test domain", "enabled": True}
-
 
 def _group(gid=GROUP_ID):
     return {"id": gid, "name": "my-group", "domain_id": DOMAIN_ID, "description": "Test group"}
 
-
 def _role(rid=ROLE_ID):
     return {"id": rid, "name": "member", "domain_id": None, "description": "Member role"}
-
 
 def _appcred(cid=CRED_ID):
     return {"id": cid, "name": "my-cred", "description": "CI token",
             "project_id": PROJECT_ID, "expires_at": None,
             "unrestricted": False, "secret": "s3cr3t"}
-
 
 def _setup_mock(mock_client):
     mock_client.identity_url = "https://keystone.example.com"
@@ -122,11 +115,9 @@ def _setup_mock(mock_client):
 
     return {"posted": posted, "patched": patched, "deleted": deleted, "put_urls": put_urls}
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Users
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestUserList:
 
@@ -149,7 +140,6 @@ class TestUserList:
         assert result.exit_code == 0
         assert "No users found" in result.output
 
-
 class TestUserShow:
 
     def test_show(self, invoke, config_dir, mock_client, sample_profile):
@@ -160,7 +150,6 @@ class TestUserShow:
         result = invoke(["user", "show", USER_ID])
         assert result.exit_code == 0
         assert "alice" in result.output
-
 
 class TestUserCreate:
 
@@ -173,7 +162,6 @@ class TestUserCreate:
                          "--password", "secret", "--email", "alice@example.com"])
         assert result.exit_code == 0
         assert "created" in result.output
-
 
 class TestUserUpdate:
 
@@ -195,7 +183,6 @@ class TestUserUpdate:
         assert result.exit_code == 0
         assert "Nothing" in result.output
 
-
 class TestUserDelete:
 
     def test_delete(self, invoke, config_dir, mock_client, sample_profile):
@@ -208,7 +195,6 @@ class TestUserDelete:
         assert "deleted" in result.output
         assert len(state["deleted"]) == 1
 
-
 class TestUserSetPassword:
 
     def test_set_password(self, invoke, config_dir, mock_client, sample_profile):
@@ -216,15 +202,13 @@ class TestUserSetPassword:
         set_active_profile("p")
         _ = _setup_mock(mock_client)
 
-        result = invoke(["user", "set-password", USER_ID, "--password", "newpass"])
+        result = invoke(["user", "password", "set", USER_ID, "--password", "newpass"])
         assert result.exit_code == 0
         assert "Password updated" in result.output
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Projects
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestProjectList:
 
@@ -247,7 +231,6 @@ class TestProjectList:
         assert result.exit_code == 0
         assert "No projects found" in result.output
 
-
 class TestProjectShow:
 
     def test_show(self, invoke, config_dir, mock_client, sample_profile):
@@ -258,7 +241,6 @@ class TestProjectShow:
         result = invoke(["project", "show", PROJECT_ID])
         assert result.exit_code == 0
         assert "my-project" in result.output
-
 
 class TestProjectCreate:
 
@@ -271,7 +253,6 @@ class TestProjectCreate:
                          "--description", "A new project"])
         assert result.exit_code == 0
         assert "created" in result.output
-
 
 class TestProjectUpdate:
 
@@ -293,7 +274,6 @@ class TestProjectUpdate:
         assert result.exit_code == 0
         assert "Nothing" in result.output
 
-
 class TestProjectDelete:
 
     def test_delete(self, invoke, config_dir, mock_client, sample_profile):
@@ -305,11 +285,9 @@ class TestProjectDelete:
         assert result.exit_code == 0
         assert "deleted" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Domains
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestDomainList:
 
@@ -322,7 +300,6 @@ class TestDomainList:
         assert result.exit_code == 0
         assert "my-domain" in result.output
 
-
 class TestDomainShow:
 
     def test_show(self, invoke, config_dir, mock_client, sample_profile):
@@ -334,7 +311,6 @@ class TestDomainShow:
         assert result.exit_code == 0
         assert "my-domain" in result.output
 
-
 class TestDomainCreate:
 
     def test_create(self, invoke, config_dir, mock_client, sample_profile):
@@ -345,7 +321,6 @@ class TestDomainCreate:
         result = invoke(["domain", "create", "new-domain"])
         assert result.exit_code == 0
         assert "created" in result.output
-
 
 class TestDomainUpdate:
 
@@ -367,7 +342,6 @@ class TestDomainUpdate:
         assert result.exit_code == 0
         assert "Nothing" in result.output
 
-
 class TestDomainDelete:
 
     def test_delete(self, invoke, config_dir, mock_client, sample_profile):
@@ -379,11 +353,9 @@ class TestDomainDelete:
         assert result.exit_code == 0
         assert "deleted" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Roles
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestRoleList:
 
@@ -396,7 +368,6 @@ class TestRoleList:
         assert result.exit_code == 0
         assert "member" in result.output
 
-
 class TestRoleShow:
 
     def test_show(self, invoke, config_dir, mock_client, sample_profile):
@@ -407,7 +378,6 @@ class TestRoleShow:
         result = invoke(["role", "show", ROLE_ID])
         assert result.exit_code == 0
         assert "member" in result.output
-
 
 class TestRoleCreate:
 
@@ -420,7 +390,6 @@ class TestRoleCreate:
         assert result.exit_code == 0
         assert "created" in result.output
 
-
 class TestRoleDelete:
 
     def test_delete(self, invoke, config_dir, mock_client, sample_profile):
@@ -431,7 +400,6 @@ class TestRoleDelete:
         result = invoke(["role", "delete", ROLE_ID, "-y"])
         assert result.exit_code == 0
         assert "deleted" in result.output
-
 
 class TestRoleAdd:
 
@@ -472,7 +440,6 @@ class TestRoleAdd:
         result = invoke(["role", "add", "--user", USER_ID, ROLE_ID])
         assert result.exit_code != 0
 
-
 class TestRoleAssignmentList:
 
     def test_list(self, invoke, config_dir, mock_client, sample_profile):
@@ -480,15 +447,13 @@ class TestRoleAssignmentList:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["role", "assignment-list"])
+        result = invoke(["role", "assignment", "list"])
         assert result.exit_code == 0
         assert ROLE_ID[:8] in result.output
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Groups
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestGroupList:
 
@@ -501,7 +466,6 @@ class TestGroupList:
         assert result.exit_code == 0
         assert "my-group" in result.output
 
-
 class TestGroupShow:
 
     def test_show(self, invoke, config_dir, mock_client, sample_profile):
@@ -513,7 +477,6 @@ class TestGroupShow:
         assert result.exit_code == 0
         assert "my-group" in result.output
 
-
 class TestGroupCreate:
 
     def test_create(self, invoke, config_dir, mock_client, sample_profile):
@@ -524,7 +487,6 @@ class TestGroupCreate:
         result = invoke(["group", "create", "devs"])
         assert result.exit_code == 0
         assert "created" in result.output
-
 
 class TestGroupUpdate:
 
@@ -546,7 +508,6 @@ class TestGroupUpdate:
         assert result.exit_code == 0
         assert "Nothing" in result.output
 
-
 class TestGroupDelete:
 
     def test_delete(self, invoke, config_dir, mock_client, sample_profile):
@@ -558,7 +519,6 @@ class TestGroupDelete:
         assert result.exit_code == 0
         assert "deleted" in result.output
 
-
 class TestGroupUsers:
 
     def test_add_user(self, invoke, config_dir, mock_client, sample_profile):
@@ -566,7 +526,7 @@ class TestGroupUsers:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["group", "add-user", GROUP_ID, USER_ID])
+        result = invoke(["group", "user", "add", GROUP_ID, USER_ID])
         assert result.exit_code == 0
         assert "added" in result.output
         assert len(state["put_urls"]) == 1
@@ -576,7 +536,7 @@ class TestGroupUsers:
         set_active_profile("p")
         _ = _setup_mock(mock_client)
 
-        result = invoke(["group", "remove-user", GROUP_ID, USER_ID])
+        result = invoke(["group", "user", "remove", GROUP_ID, USER_ID])
         assert result.exit_code == 0
         assert "removed" in result.output
 
@@ -585,15 +545,13 @@ class TestGroupUsers:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["group", "member-list", GROUP_ID])
+        result = invoke(["group", "member", "list", GROUP_ID])
         assert result.exit_code == 0
         assert "alice" in result.output
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Application Credentials
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestApplicationCredentials:
 
@@ -634,18 +592,16 @@ class TestApplicationCredentials:
         assert result.exit_code == 0
         assert "deleted" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestIdentityHelp:
 
     def test_user_help(self, invoke):
         result = invoke(["user", "--help"])
         assert result.exit_code == 0
-        for cmd in ("list", "show", "create", "set", "delete", "set-password"):
+        for cmd in ("list", "show", "create", "set", "delete"):
             assert cmd in result.output
 
     def test_project_help(self, invoke):
@@ -663,14 +619,13 @@ class TestIdentityHelp:
     def test_role_help(self, invoke):
         result = invoke(["role", "--help"])
         assert result.exit_code == 0
-        for cmd in ("list", "show", "create", "delete", "add", "remove", "assignment-list"):
+        for cmd in ("list", "show", "create", "delete", "add", "remove"):
             assert cmd in result.output
 
     def test_group_help(self, invoke):
         result = invoke(["group", "--help"])
         assert result.exit_code == 0
-        for cmd in ("list", "show", "create", "set", "delete",
-                    "add-user", "remove-user", "member-list"):
+        for cmd in ("list", "show", "create", "set", "delete"):
             assert cmd in result.output
 
     def test_application_credential_help(self, invoke):

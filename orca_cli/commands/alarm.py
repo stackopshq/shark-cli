@@ -6,7 +6,6 @@ import json
 
 import click
 
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
@@ -281,10 +280,6 @@ def alarm_state_set(ctx, alarm_id, state):
     console.print(f"Alarm [bold]{alarm_id}[/bold] state set to [bold]{state}[/bold].")
 
 
-add_command_with_alias(alarm, alarm_state_get,
-                        legacy_name="state-get", primary_path="alarm state get")
-add_command_with_alias(alarm, alarm_state_set,
-                        legacy_name="state-set", primary_path="alarm state set")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -353,7 +348,3 @@ def alarm_quota_set(ctx, project_id, alarm_quota_value):
     }
     AlarmService(client).update_quota(body)
     console.print(f"Quota for project [bold]{project_id}[/bold] set to [bold]{alarm_quota_value}[/bold] alarms.")
-
-
-add_command_with_alias(alarm, alarm_quota_set,
-                        legacy_name="quota-set", primary_path="alarm quota set")

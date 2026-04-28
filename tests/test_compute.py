@@ -10,7 +10,6 @@ AGG_ID      = "11"
 HV_ID       = "21"
 SG_GROUP_ID = "gggg0000-1111-2222-3333-444455556666"
 
-
 # ── helpers ────────────────────────────────────────────────────────────────
 
 def _flavor(fid=FLAVOR_ID):
@@ -20,7 +19,6 @@ def _flavor(fid=FLAVOR_ID):
         "rxtx_factor": 1.0, "os-flavor-access:is_public": True,
         "extra_specs": {"hw:cpu_policy": "shared"},
     }
-
 
 def _hypervisor(hid=HV_ID):
     return {
@@ -32,7 +30,6 @@ def _hypervisor(hid=HV_ID):
         "running_vms": 4, "current_workload": 0, "host_ip": "10.0.0.1",
     }
 
-
 def _aggregate(aid=AGG_ID):
     return {
         "id": aid, "name": "ssd-hosts", "availability_zone": "az1",
@@ -41,14 +38,12 @@ def _aggregate(aid=AGG_ID):
         "created_at": "2025-01-01", "updated_at": None,
     }
 
-
 def _server_group(gid=SG_GROUP_ID):
     return {
         "id": gid, "name": "no-same-host",
         "policies": ["anti-affinity"],
         "members": [], "project_id": "proj-1", "user_id": "user-1",
     }
-
 
 def _server(sid=SERVER_ID):
     return {
@@ -62,7 +57,6 @@ def _server(sid=SERVER_ID):
         "OS-EXT-STS:power_state": 1,
         "created": "2025-01-01", "updated": "2025-01-01",
     }
-
 
 def _setup_compute_mock(mock_client):
     mock_client.compute_url = "https://nova.example.com/v2.1"
@@ -133,11 +127,9 @@ def _setup_compute_mock(mock_client):
 
     return {"posted": posted, "put_data": put_data, "deleted": deleted}
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Flavor (extended)
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestFlavorExtended:
 
@@ -197,11 +189,9 @@ class TestFlavorExtended:
         assert result.exit_code == 0
         assert "removed" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Hypervisors
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestHypervisor:
 
@@ -232,11 +222,9 @@ class TestHypervisor:
         assert result.exit_code == 0
         assert "vcpus" in result.output.lower()
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Aggregates
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestAggregate:
 
@@ -281,7 +269,7 @@ class TestAggregate:
         set_active_profile("p")
         _setup_compute_mock(mock_client)
 
-        result = invoke(["aggregate", "add-host", AGG_ID, "compute-03"])
+        result = invoke(["aggregate", "host", "add", AGG_ID, "compute-03"])
         assert result.exit_code == 0
         assert "added" in result.output
 
@@ -290,7 +278,7 @@ class TestAggregate:
         set_active_profile("p")
         _setup_compute_mock(mock_client)
 
-        result = invoke(["aggregate", "remove-host", AGG_ID, "compute-01"])
+        result = invoke(["aggregate", "host", "remove", AGG_ID, "compute-01"])
         assert result.exit_code == 0
         assert "removed" in result.output
 
@@ -313,11 +301,9 @@ class TestAggregate:
         assert result.exit_code == 0
         assert "Nothing" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Availability Zones
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestAvailabilityZones:
 
@@ -331,11 +317,9 @@ class TestAvailabilityZones:
         assert "az1" in result.output
         assert "az2" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Limits
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestLimits:
 
@@ -349,11 +333,9 @@ class TestLimits:
         assert "Instances" in result.output
         assert "10" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Server Groups
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerGroups:
 
@@ -394,11 +376,9 @@ class TestServerGroups:
         assert result.exit_code == 0
         assert "deleted" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Server: migrate, live-migrate, sg add/remove, set, metadata, tags
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerNewCommands:
 
@@ -425,7 +405,7 @@ class TestServerNewCommands:
         set_active_profile("p")
         _setup_compute_mock(mock_client)
 
-        result = invoke(["server", "add-security-group", SERVER_ID, "allow-ssh"])
+        result = invoke(["server", "add", "security-group", SERVER_ID, "allow-ssh"])
         assert result.exit_code == 0
         assert "added" in result.output
 
@@ -434,7 +414,7 @@ class TestServerNewCommands:
         set_active_profile("p")
         _setup_compute_mock(mock_client)
 
-        result = invoke(["server", "remove-security-group", SERVER_ID, "allow-ssh"])
+        result = invoke(["server", "remove", "security-group", SERVER_ID, "allow-ssh"])
         assert result.exit_code == 0
         assert "removed" in result.output
 
@@ -479,7 +459,7 @@ class TestServerNewCommands:
         set_active_profile("p")
         _setup_compute_mock(mock_client)
 
-        result = invoke(["server", "metadata-list", SERVER_ID])
+        result = invoke(["server", "metadata", "list", SERVER_ID])
         assert result.exit_code == 0
         assert "env" in result.output
 
@@ -488,15 +468,13 @@ class TestServerNewCommands:
         set_active_profile("p")
         _setup_compute_mock(mock_client)
 
-        result = invoke(["server", "tag-list", SERVER_ID])
+        result = invoke(["server", "tag", "list", SERVER_ID])
         assert result.exit_code == 0
         assert "web" in result.output
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestComputeHelp:
 
@@ -509,7 +487,7 @@ class TestComputeHelp:
     def test_aggregate_help(self, invoke):
         result = invoke(["aggregate", "--help"])
         assert result.exit_code == 0
-        for cmd in ("list", "show", "create", "delete", "add-host", "remove-host", "set"):
+        for cmd in ("list", "show", "create", "delete", "set"):
             assert cmd in result.output
 
     def test_availability_zone_help(self, invoke):

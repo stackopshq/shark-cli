@@ -112,7 +112,6 @@ class TestOrcaContextEnsureClient:
         assert c1 is c2
         assert calls["n"] == 1
 
-
 # ── E2E: the global --region flag on the root CLI ───────────────────────────
 
 class TestGlobalRegionFlag:

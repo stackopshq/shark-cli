@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import click
 
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.services.backup import BackupService
@@ -594,72 +593,9 @@ def action_delete(ctx: click.Context, action_id: str, yes: bool) -> None:
 # ══════════════════════════════════════════════════════════════════════════
 
 # Action aliases
-add_command_with_alias(backup, action_list,
-                       legacy_name="action-list",
-                       primary_path="backup action list")
-add_command_with_alias(backup, action_show,
-                       legacy_name="action-show",
-                       primary_path="backup action show")
-add_command_with_alias(backup, action_create,
-                       legacy_name="action-create",
-                       primary_path="backup action create")
-add_command_with_alias(backup, action_delete,
-                       legacy_name="action-delete",
-                       primary_path="backup action delete")
 
 # Client aliases
-add_command_with_alias(backup, client_list,
-                       legacy_name="client-list",
-                       primary_path="backup client list")
-add_command_with_alias(backup, client_show,
-                       legacy_name="client-show",
-                       primary_path="backup client show")
-add_command_with_alias(backup, client_register,
-                       legacy_name="client-register",
-                       primary_path="backup client register")
-add_command_with_alias(backup, client_delete,
-                       legacy_name="client-delete",
-                       primary_path="backup client delete")
 
 # Job aliases
-add_command_with_alias(backup, job_list,
-                       legacy_name="job-list",
-                       primary_path="backup job list")
-add_command_with_alias(backup, job_show,
-                       legacy_name="job-show",
-                       primary_path="backup job show")
-add_command_with_alias(backup, job_create,
-                       legacy_name="job-create",
-                       primary_path="backup job create")
-add_command_with_alias(backup, job_start,
-                       legacy_name="job-start",
-                       primary_path="backup job start")
-add_command_with_alias(backup, job_stop,
-                       legacy_name="job-stop",
-                       primary_path="backup job stop")
-add_command_with_alias(backup, job_delete,
-                       legacy_name="job-delete",
-                       primary_path="backup job delete")
 
 # Session aliases
-add_command_with_alias(backup, session_list,
-                       legacy_name="session-list",
-                       primary_path="backup session list")
-add_command_with_alias(backup, session_show,
-                       legacy_name="session-show",
-                       primary_path="backup session show")
-add_command_with_alias(backup, session_create,
-                       legacy_name="session-create",
-                       primary_path="backup session create")
-add_command_with_alias(backup, session_add_job,
-                       legacy_name="session-add-job",
-                       primary_path="backup session add-job")
-add_command_with_alias(backup, session_remove_job,
-                       legacy_name="session-remove-job",
-                       primary_path="backup session remove-job")
-add_command_with_alias(backup, session_start,
-                       legacy_name="session-start",
-                       primary_path="backup session start")
-add_command_with_alias(backup, session_delete,
-                       legacy_name="session-delete",
-                       primary_path="backup session delete")

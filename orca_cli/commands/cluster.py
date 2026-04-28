@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import click
 
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.services.container_infra import ContainerInfraService
@@ -449,32 +448,5 @@ def nodegroup_delete(ctx: click.Context, cluster_id: str, nodegroup_id: str,
 # ══════════════════════════════════════════════════════════════════════════
 
 # Nodegroup aliases
-add_command_with_alias(cluster, nodegroup_list,
-                       legacy_name="nodegroup-list",
-                       primary_path="cluster nodegroup list")
-add_command_with_alias(cluster, nodegroup_show,
-                       legacy_name="nodegroup-show",
-                       primary_path="cluster nodegroup show")
-add_command_with_alias(cluster, nodegroup_create,
-                       legacy_name="nodegroup-create",
-                       primary_path="cluster nodegroup create")
-add_command_with_alias(cluster, nodegroup_update,
-                       legacy_name="nodegroup-update",
-                       primary_path="cluster nodegroup update")
-add_command_with_alias(cluster, nodegroup_delete,
-                       legacy_name="nodegroup-delete",
-                       primary_path="cluster nodegroup delete")
 
 # Template aliases
-add_command_with_alias(cluster, template_list,
-                       legacy_name="template-list",
-                       primary_path="cluster template list")
-add_command_with_alias(cluster, template_show,
-                       legacy_name="template-show",
-                       primary_path="cluster template show")
-add_command_with_alias(cluster, template_create,
-                       legacy_name="template-create",
-                       primary_path="cluster template create")
-add_command_with_alias(cluster, template_delete,
-                       legacy_name="template-delete",
-                       primary_path="cluster template delete")

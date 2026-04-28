@@ -6,7 +6,6 @@ from orca_cli.core.config import save_profile, set_active_profile
 
 # ── Helpers ────────────────────────────────────────────────────────────────
 
-
 def _setup_mock(mock_client, servers=None, volumes=None, fips=None,
                 nets=None, subnets=None, routers=None, sgs=None,
                 kps=None, images=None):
@@ -48,11 +47,9 @@ def _setup_mock(mock_client, servers=None, volumes=None, fips=None,
 
     mock_client.get = _get
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  overview
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestOverview:
 
@@ -134,11 +131,9 @@ class TestOverview:
         result = invoke(["overview"])
         assert "200 GB" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestOverviewHelp:
 

@@ -15,7 +15,6 @@ from orca_cli.core.waiter import wait_for_resource
 SRV = "11111111-1111-1111-1111-111111111111"
 VOL = "22222222-2222-2222-2222-222222222222"
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Cache module
 # ══════════════════════════════════════════════════════════════════════════
@@ -58,7 +57,6 @@ class TestCache:
         cache.save("dev", "servers", [{"id": "dev-vm"}])
         assert cache.load("prod", "servers") == [{"id": "prod-vm"}]
         assert cache.load("dev", "servers") == [{"id": "dev-vm"}]
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Waiter module
@@ -177,7 +175,6 @@ class TestWaitForResource:
         for call in sleep_mock.call_args_list:
             assert call.args[0] == 7
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  server delete --dry-run
 # ══════════════════════════════════════════════════════════════════════════
@@ -203,7 +200,6 @@ class TestServerDeleteDryRun:
         assert result.exit_code == 0
         mock_client.delete.assert_not_called()
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  server delete --wait
 # ══════════════════════════════════════════════════════════════════════════
@@ -217,7 +213,6 @@ class TestServerDeleteWait:
         mock_wait.assert_called_once()
         _, kwargs = mock_wait.call_args
         assert kwargs.get("delete_mode") is True
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  server create --wait
@@ -251,7 +246,6 @@ class TestServerCreateWait:
         mock_wait.assert_called_once()
         _, kwargs = mock_wait.call_args
         assert kwargs.get("target_status") == "ACTIVE" or "ACTIVE" in str(mock_wait.call_args)
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  server start/stop/reboot --wait
@@ -289,7 +283,6 @@ class TestServerActionWait:
         mock_wait.assert_called_once()
         assert "ACTIVE" in str(mock_wait.call_args)
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  volume create --wait / volume delete --dry-run / --wait
 # ══════════════════════════════════════════════════════════════════════════
@@ -309,7 +302,6 @@ class TestVolumeCreateWait:
         assert result.exit_code == 0
         mock_wait.assert_called_once()
         assert "available" in str(mock_wait.call_args)
-
 
 class TestVolumeDeleteDryRun:
 

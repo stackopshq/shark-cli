@@ -48,7 +48,6 @@ class TestMainEntrypoint:
         for expected in ("server", "volume", "network", "profile", "doctor"):
             assert expected in names, f"missing {expected} in {sorted(names)}"
 
-
 class TestLazyResolution:
     """The LazyOrcaGroup must resolve commands on demand without bulk-importing."""
 
@@ -74,7 +73,6 @@ class TestLazyResolution:
 
     def test_get_command_returns_none_for_unknown(self):
         assert main_module.cli.get_command(None, "this-command-does-not-exist") is None
-
 
 class TestDebugFlag:
     """--debug attaches a stderr handler to the orca_cli logger."""

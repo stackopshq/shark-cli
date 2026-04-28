@@ -11,7 +11,6 @@ from typing import Any, cast
 import click
 from rich.tree import Tree
 
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
@@ -708,28 +707,3 @@ def object_tree(ctx: click.Context, container: str | None, delimiter: str) -> No
 
 
 # ── ADR-0008 deprecated aliases (backward compatibility) ────────────────
-
-add_command_with_alias(object_store, container_list,
-                        legacy_name="container-list",
-                        primary_path="object container list")
-add_command_with_alias(object_store, container_show,
-                        legacy_name="container-show",
-                        primary_path="object container show")
-add_command_with_alias(object_store, container_create,
-                        legacy_name="container-create",
-                        primary_path="object container create")
-add_command_with_alias(object_store, container_delete,
-                        legacy_name="container-delete",
-                        primary_path="object container delete")
-add_command_with_alias(object_store, container_set,
-                        legacy_name="container-set",
-                        primary_path="object container set")
-add_command_with_alias(object_store, container_save,
-                        legacy_name="container-save",
-                        primary_path="object container save")
-add_command_with_alias(object_store, object_account_set,
-                        legacy_name="account-set",
-                        primary_path="object account set")
-add_command_with_alias(object_store, object_account_unset,
-                        legacy_name="account-unset",
-                        primary_path="object account unset")

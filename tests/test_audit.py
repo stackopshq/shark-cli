@@ -13,7 +13,6 @@ def _make_sg(name, sg_id, rules=None):
         "security_group_rules": rules or [],
     }
 
-
 def _ingress_rule(port_min=None, port_max=None, protocol="tcp",
                   remote="0.0.0.0/0", ethertype="IPv4"):
     rule = {
@@ -26,11 +25,9 @@ def _ingress_rule(port_min=None, port_max=None, protocol="tcp",
     }
     return rule
 
-
 def _egress_rule():
     return {"direction": "egress", "ethertype": "IPv4", "protocol": None,
             "remote_ip_prefix": None, "port_range_min": None, "port_range_max": None}
-
 
 def _server(name, srv_id, key_name="my-key", status="ACTIVE", floating=False):
     addrs = {"private": [{"addr": "10.0.0.5", "OS-EXT-IPS:type": "fixed"}]}
@@ -44,14 +41,11 @@ def _server(name, srv_id, key_name="my-key", status="ACTIVE", floating=False):
         "addresses": addrs,
     }
 
-
 def _volume(vol_id, encrypted=False):
     return {"id": vol_id, "encrypted": encrypted}
 
-
 def _fip(fip_id, port_id=None):
     return {"id": fip_id, "floating_ip_address": "203.0.113.1", "port_id": port_id}
-
 
 def _setup_mock(mock_client, sgs=None, servers=None, volumes=None, fips=None):
     """Configure mock_client.get to return appropriate data per URL."""
@@ -76,9 +70,7 @@ def _setup_mock(mock_client, sgs=None, servers=None, volumes=None, fips=None):
     mock_client.network_url = "https://neutron.example.com"
     mock_client.volume_url = "https://cinder.example.com/v3"
 
-
 # ── Tests ──────────────────────────────────────────────────────────────────
-
 
 class TestAuditClean:
     """No findings at all."""
@@ -98,7 +90,6 @@ class TestAuditClean:
         result = invoke(["audit"])
         assert result.exit_code == 0
         assert "No security issues found" in result.output
-
 
 class TestAuditSecurityGroups:
 
@@ -225,7 +216,6 @@ class TestAuditSecurityGroups:
         assert "MySQL" in result.output
         assert "Redis" in result.output
 
-
 class TestAuditServers:
 
     def test_no_keypair(self, invoke, config_dir, mock_client, sample_profile):
@@ -277,7 +267,6 @@ class TestAuditServers:
         assert result.exit_code == 0
         assert "No security issues found" in result.output
 
-
 class TestAuditVolumes:
 
     def test_unencrypted_volumes(self, invoke, config_dir, mock_client, sample_profile):
@@ -310,7 +299,6 @@ class TestAuditVolumes:
         assert result.exit_code == 0
         assert "No security issues found" in result.output
 
-
 class TestAuditFloatingIPs:
 
     def test_unused_fips(self, invoke, config_dir, mock_client, sample_profile):
@@ -340,7 +328,6 @@ class TestAuditFloatingIPs:
         assert result.exit_code == 0
         assert "No security issues found" in result.output
 
-
 class TestAuditSeveritySorting:
 
     def test_findings_sorted_by_severity(self, invoke, config_dir, mock_client, sample_profile):
@@ -366,7 +353,6 @@ class TestAuditSeveritySorting:
         medium_pos = output.index("MEDIUM")
         low_pos = output.index("LOW")
         assert crit_pos < high_pos < medium_pos < low_pos
-
 
 class TestAuditCombined:
 
@@ -398,7 +384,6 @@ class TestAuditCombined:
         assert "Unassociated" in result.output
         # Summary line with count
         assert "finding" in result.output
-
 
 class TestAuditHelp:
 

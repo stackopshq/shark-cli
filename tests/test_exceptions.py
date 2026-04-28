@@ -40,7 +40,6 @@ class TestAPIError:
         assert "request-id" not in err.message
         assert err.request_id == ""
 
-
 class TestAuthenticationError:
 
     def test_default_message_suggests_setup(self):
@@ -51,7 +50,6 @@ class TestAuthenticationError:
         err = AuthenticationError("token expired")
         assert err.message == "token expired"
 
-
 class TestConfigurationError:
 
     def test_default_message_suggests_setup(self):
@@ -61,7 +59,6 @@ class TestConfigurationError:
     def test_custom_message(self):
         err = ConfigurationError("missing auth_url")
         assert err.message == "missing auth_url"
-
 
 class TestHierarchy:
 

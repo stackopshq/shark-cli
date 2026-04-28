@@ -6,7 +6,6 @@ from __future__ import annotations
 #  _styled_status
 # ══════════════════════════════════════════════════════════════════════════
 
-
 class TestStyledStatus:
 
     def test_active(self):
@@ -26,11 +25,9 @@ class TestStyledStatus:
         t = _styled_status("WEIRD")
         assert t.plain == "WEIRD"
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  _extract_ip
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestExtractIp:
 
@@ -57,11 +54,9 @@ class TestExtractIp:
         from orca_cli.commands.watch import _extract_ip
         assert _extract_ip({}) == "—"
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestWatchHelp:
 
@@ -70,7 +65,6 @@ class TestWatchHelp:
         assert result.exit_code == 0
         assert "--interval" in result.output
         assert "dashboard" in result.output.lower()
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Safe fetchers — each swallows exceptions to an empty list
@@ -159,7 +153,6 @@ class TestFetchers:
         out = watch_mod._fetch_recent_events(c, servers)
         assert len(out) == 1
         assert out[0]["_server_name"] == "db"
-
 
 class TestBuildDashboard:
 

@@ -36,7 +36,6 @@ FAKE_TOKEN_RESPONSE = {
     }
 }
 
-
 def _auth_response(status=201, token="fake-token"):
     resp = MagicMock()
     resp.status_code = status
@@ -46,13 +45,11 @@ def _auth_response(status=201, token="fake-token"):
     resp.text = ""
     return resp
 
-
 @pytest.fixture(autouse=True)
 def _no_real_cache(tmp_path):
     """Redirect on-disk token cache to a temp dir."""
     with patch("orca_cli.core.client.TOKEN_CACHE_PATH", tmp_path / "token_cache.yaml"):
         yield
-
 
 # ── Client: auth payload ────────────────────────────────────────────────
 
@@ -166,7 +163,6 @@ class TestAppCredAuthPayload:
                 # username missing
             })
 
-
 # ── Client: cache key isolation ─────────────────────────────────────────
 
 class TestAppCredCacheKey:
@@ -206,7 +202,6 @@ class TestAppCredCacheKey:
                          "application_credential_id": "ac-2",
                          "application_credential_secret": "s"})
         assert c1._cache_key != c2._cache_key
-
 
 # ── config.py ───────────────────────────────────────────────────────────
 
@@ -257,7 +252,6 @@ class TestConfigIsComplete:
         assert "project_name" not in cfg
         assert config_is_complete(cfg) is True
 
-
 class TestIsAppCred:
 
     def test_explicit_v3applicationcredential(self):
@@ -274,7 +268,6 @@ class TestIsAppCred:
 
     def test_password_flow(self):
         assert _is_app_cred({"username": "admin", "password": "x"}) is False
-
 
 class TestCloudsYamlNormalisation:
 
@@ -299,7 +292,6 @@ class TestCloudsYamlNormalisation:
         assert "password" not in cfg
         assert "project_name" not in cfg
 
-
 class TestOSEnvVarsLoaded:
 
     def test_app_cred_env_vars(self, monkeypatch, config_dir):
@@ -312,7 +304,6 @@ class TestOSEnvVarsLoaded:
         assert cfg["application_credential_id"] == "ac-1"
         assert cfg["application_credential_secret"] == "topsecret"
         assert config_is_complete(cfg) is True
-
 
 # ── Profile import/export ───────────────────────────────────────────────
 
@@ -341,7 +332,6 @@ class TestProfileFromClouds:
         assert cfg["application_credential_id"] == "ac-1"
         assert cfg["application_credential_secret"] == "topsecret"
 
-
 class TestProfileFromOpenrc:
 
     def test_imports_app_cred_openrc(self, invoke, config_dir, tmp_path):
@@ -360,7 +350,6 @@ class TestProfileFromOpenrc:
         assert cfg["auth_type"] == "v3applicationcredential"
         assert cfg["application_credential_id"] == "ac-1"
         assert cfg["application_credential_secret"] == "topsecret"
-
 
 class TestProfileToOpenrc:
 
@@ -384,7 +373,6 @@ class TestProfileToOpenrc:
         assert "OS_PASSWORD" not in out
         assert "OS_PROJECT_NAME" not in out
 
-
 class TestProfileToClouds:
 
     def test_emits_app_cred_section(self, invoke, config_dir, write_config):
@@ -406,7 +394,6 @@ class TestProfileToClouds:
         assert cloud["auth"]["application_credential_secret"] == "topsecret"
         assert "password" not in cloud["auth"]
         assert "project_name" not in cloud["auth"]
-
 
 class TestRoundTrip:
 

@@ -31,7 +31,6 @@ COMMANDS_DIR = Path(__file__).resolve().parents[1] / "orca_cli" / "commands"
 # Stripped: ``self._foo`` (services are allowed), ``cls._foo``, ``mock_client._foo``.
 _PRIVATE_ACCESS = re.compile(r"\bclient\._[A-Za-z]")
 
-
 def test_no_private_client_attribute_access_in_commands() -> None:
     """Walk every command module and reject ``client._<anything>`` access.
 

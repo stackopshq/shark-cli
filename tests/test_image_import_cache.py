@@ -5,10 +5,8 @@ from __future__ import annotations
 IMG = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
 GL  = "https://glance.example.com"
 
-
 def _setup(mock_client):
     mock_client.image_url = GL
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  image import
@@ -78,7 +76,6 @@ class TestImageImport:
         assert result.exit_code == 0
         assert "web-download" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  image cache-list
 # ══════════════════════════════════════════════════════════════════════════
@@ -91,7 +88,7 @@ class TestImageCacheList:
             "cached_images": [IMG],
             "queued_images": ["bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"],
         }
-        result = invoke(["image", "cache-list"])
+        result = invoke(["image", "cache", "list"])
         assert result.exit_code == 0
         assert "cached" in result.output
         assert "queued" in result.output
@@ -99,20 +96,19 @@ class TestImageCacheList:
     def test_list_calls_correct_url(self, invoke, mock_client):
         _setup(mock_client)
         mock_client.get.return_value = {"cached_images": [], "queued_images": []}
-        invoke(["image", "cache-list"])
+        invoke(["image", "cache", "list"])
         url = mock_client.get.call_args[0][0]
         assert "/v2/cache" in url
 
     def test_list_empty(self, invoke, mock_client):
         _setup(mock_client)
         mock_client.get.return_value = {"cached_images": [], "queued_images": []}
-        result = invoke(["image", "cache-list"])
+        result = invoke(["image", "cache", "list"])
         assert result.exit_code == 0
         assert "empty" in result.output.lower() or "Cache" in result.output
 
     def test_help(self, invoke):
-        assert invoke(["image", "cache-list", "--help"]).exit_code == 0
-
+        assert invoke(["image", "cache", "list", "--help"]).exit_code == 0
 
 # ══════════════════════════════════════════════════════════════════════════
 #  image cache-queue
@@ -122,7 +118,7 @@ class TestImageCacheQueue:
 
     def test_queue(self, invoke, mock_client):
         _setup(mock_client)
-        result = invoke(["image", "cache-queue", IMG])
+        result = invoke(["image", "cache", "queue", IMG])
         assert result.exit_code == 0
         assert mock_client.put.called
         url = mock_client.put.call_args[0][0]
@@ -130,12 +126,11 @@ class TestImageCacheQueue:
 
     def test_shows_confirmation(self, invoke, mock_client):
         _setup(mock_client)
-        result = invoke(["image", "cache-queue", IMG])
+        result = invoke(["image", "cache", "queue", IMG])
         assert "queue" in result.output.lower() or IMG[:8] in result.output
 
     def test_help(self, invoke):
-        assert invoke(["image", "cache-queue", "--help"]).exit_code == 0
-
+        assert invoke(["image", "cache", "queue", "--help"]).exit_code == 0
 
 # ══════════════════════════════════════════════════════════════════════════
 #  image cache-delete
@@ -145,7 +140,7 @@ class TestImageCacheDelete:
 
     def test_delete_yes(self, invoke, mock_client):
         _setup(mock_client)
-        result = invoke(["image", "cache-delete", IMG, "--yes"])
+        result = invoke(["image", "cache", "delete", IMG, "--yes"])
         assert result.exit_code == 0
         mock_client.delete.assert_called_once()
         url = mock_client.delete.call_args[0][0]
@@ -153,13 +148,12 @@ class TestImageCacheDelete:
 
     def test_delete_requires_confirm(self, invoke, mock_client):
         _setup(mock_client)
-        result = invoke(["image", "cache-delete", IMG], input="n\n")
+        result = invoke(["image", "cache", "delete", IMG], input="n\n")
         assert result.exit_code != 0
         mock_client.delete.assert_not_called()
 
     def test_help(self, invoke):
-        assert invoke(["image", "cache-delete", "--help"]).exit_code == 0
-
+        assert invoke(["image", "cache", "delete", "--help"]).exit_code == 0
 
 # ══════════════════════════════════════════════════════════════════════════
 #  image cache-clear
@@ -169,7 +163,7 @@ class TestImageCacheClear:
 
     def test_clear_yes(self, invoke, mock_client):
         _setup(mock_client)
-        result = invoke(["image", "cache-clear", "--yes"])
+        result = invoke(["image", "cache", "clear", "--yes"])
         assert result.exit_code == 0
         mock_client.delete.assert_called_once()
         url = mock_client.delete.call_args[0][0]
@@ -177,15 +171,15 @@ class TestImageCacheClear:
 
     def test_clear_requires_confirm(self, invoke, mock_client):
         _setup(mock_client)
-        result = invoke(["image", "cache-clear"], input="n\n")
+        result = invoke(["image", "cache", "clear"], input="n\n")
         assert result.exit_code != 0
         mock_client.delete.assert_not_called()
 
     def test_clear_confirm_yes(self, invoke, mock_client):
         _setup(mock_client)
-        result = invoke(["image", "cache-clear"], input="y\n")
+        result = invoke(["image", "cache", "clear"], input="y\n")
         assert result.exit_code == 0
         assert mock_client.delete.called
 
     def test_help(self, invoke):
-        assert invoke(["image", "cache-clear", "--help"]).exit_code == 0
+        assert invoke(["image", "cache", "clear", "--help"]).exit_code == 0

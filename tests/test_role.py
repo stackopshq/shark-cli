@@ -12,11 +12,9 @@ USER_ID = "99998888-7777-6666-5555-444433332222"
 PROJECT_ID = "abcdabcd-1234-5678-9abc-def012345678"
 DOMAIN_ID = "ddddeeee-ffff-0000-1111-222233334444"
 
-
 def _role(role_id=ROLE_ID, name="my-role"):
     return {"id": role_id, "name": name, "description": "test role",
             "domain_id": None}
-
 
 def _setup_mock(mock_client):
     mock_client.identity_url = "https://keystone.example.com:5000"
@@ -60,11 +58,9 @@ def _setup_mock(mock_client):
 
     return {"patched": patched, "posted": posted, "deleted": deleted}
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  role set
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestRoleSet:
 
@@ -108,18 +104,14 @@ class TestRoleSet:
         assert result.exit_code == 0
         assert "Nothing" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestRoleHelp:
 
     def test_role_help(self, invoke):
         result = invoke(["role", "--help"])
         assert result.exit_code == 0
-        for cmd in ("list", "show", "create", "delete", "add", "remove",
-                    "assignment-list", "implied-list", "implied-create",
-                    "implied-delete", "set"):
+        for cmd in ("list", "show", "create", "delete", "add", "remove", "set"):
             assert cmd in result.output

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import click
 
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
@@ -229,7 +228,7 @@ def metric_measures_show(ctx: click.Context, metric_id: str, start: str | None,
     measures = data if isinstance(data, list) else []
 
     # Filter to valid measure entries only
-    measures = [m for m in measures if isinstance(m, (list, tuple)) and len(m) >= 3]
+    measures = [m for m in measures if isinstance(m, list | tuple) and len(m) >= 3]
 
     print_list(
         measures,
@@ -490,37 +489,3 @@ def resource_type_delete(ctx: click.Context, resource_type: str, yes: bool) -> N
 
 
 # ── ADR-0008 deprecated aliases (backward compatibility) ────────────────
-
-add_command_with_alias(metric, resource_type_list,
-                        legacy_name="resource-type-list",
-                        primary_path="metric resource-type list")
-add_command_with_alias(metric, resource_type_show,
-                        legacy_name="resource-type-show",
-                        primary_path="metric resource-type show")
-add_command_with_alias(metric, resource_type_create,
-                        legacy_name="resource-type-create",
-                        primary_path="metric resource-type create")
-add_command_with_alias(metric, resource_type_delete,
-                        legacy_name="resource-type-delete",
-                        primary_path="metric resource-type delete")
-add_command_with_alias(metric, resource_list,
-                        legacy_name="resource-list",
-                        primary_path="metric resource list")
-add_command_with_alias(metric, resource_show,
-                        legacy_name="resource-show",
-                        primary_path="metric resource show")
-add_command_with_alias(metric, metric_measures_add,
-                        legacy_name="measures-add",
-                        primary_path="metric measures add")
-add_command_with_alias(metric, archive_policy_list,
-                        legacy_name="archive-policy-list",
-                        primary_path="metric archive-policy list")
-add_command_with_alias(metric, archive_policy_show,
-                        legacy_name="archive-policy-show",
-                        primary_path="metric archive-policy show")
-add_command_with_alias(metric, archive_policy_create,
-                        legacy_name="archive-policy-create",
-                        primary_path="metric archive-policy create")
-add_command_with_alias(metric, archive_policy_delete,
-                        legacy_name="archive-policy-delete",
-                        primary_path="metric archive-policy delete")

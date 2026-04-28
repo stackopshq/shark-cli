@@ -11,7 +11,6 @@ from typing import Any
 import click
 
 from orca_cli.core import cache
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.completions import (
     complete_flavors,
     complete_images,
@@ -2279,32 +2278,3 @@ def server_unset(ctx: click.Context, server_id: str,
 # existing scripts keep working. The aliases are tagged ``deprecated``
 # in --help and emit a stderr warning pointing at the new path.
 # Targeted for removal in v2.0.
-
-for _legacy, _primary, _path in [
-    ("add-fixed-ip",          server_add_fixed_ip,          "server add fixed-ip"),
-    ("remove-fixed-ip",       server_remove_fixed_ip,       "server remove fixed-ip"),
-    ("add-port",              server_add_port,              "server add port"),
-    ("remove-port",           server_remove_port,           "server remove port"),
-    ("add-network",           server_add_network,           "server add network"),
-    ("remove-network",        server_remove_network,        "server remove network"),
-    ("add-security-group",    server_add_security_group,    "server add security-group"),
-    ("remove-security-group", server_remove_security_group, "server remove security-group"),
-    ("attach-volume",         server_attach_volume,         "server add volume"),
-    ("detach-volume",         server_detach_volume,         "server remove volume"),
-    ("detach-interface",      server_detach_interface,      "server remove interface"),
-    ("list-volumes",          server_list_volumes,          "server volume list"),
-    ("list-interfaces",       server_list_interfaces,       "server interface list"),
-    ("console-log",           server_console_log,           "server console log"),
-    ("console-url",           server_console_url,           "server console url"),
-    ("create-image",          server_create_image,          "server image create"),
-    ("metadata-list",         server_metadata_list,         "server metadata list"),
-    ("tag-list",              server_tag_list,              "server tag list"),
-    ("migration-list",        server_migration_list,        "server migration list"),
-    ("migration-show",        server_migration_show,        "server migration show"),
-    ("migration-abort",       server_migration_abort,       "server migration abort"),
-    ("migration-force-complete", server_migration_force_complete,
-                              "server migration force-complete"),
-    ("dump-create",           server_dump_create,           "server dump create"),
-]:
-    add_command_with_alias(server, _primary, legacy_name=_legacy, primary_path=_path)
-del _legacy, _primary, _path

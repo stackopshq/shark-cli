@@ -8,7 +8,6 @@ from orca_cli.core.config import save_profile, set_active_profile
 
 # ── Helpers ────────────────────────────────────────────────────────────────
 
-
 def _fake_response(status_code=200, content=b"data", headers=None):
     resp = MagicMock()
     resp.status_code = status_code
@@ -17,7 +16,6 @@ def _fake_response(status_code=200, content=b"data", headers=None):
     resp.text = content.decode() if isinstance(content, bytes) else str(content)
     resp.headers = headers or {}
     return resp
-
 
 def _setup_mock(mock_client):
     mock_client.object_store_url = "https://swift.example.com/v1/AUTH_proj"
@@ -99,11 +97,9 @@ def _setup_mock(mock_client):
 
     return {"deleted": deleted}
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  stats
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestObjectStats:
 
@@ -117,11 +113,9 @@ class TestObjectStats:
         assert "42" in result.output
         assert "3" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  container list
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestContainerList:
 
@@ -145,11 +139,9 @@ class TestContainerList:
         assert result.exit_code == 0
         assert "No containers found" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  container show
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestContainerShow:
 
@@ -163,11 +155,9 @@ class TestContainerShow:
         assert "docs" in result.output
         assert "5" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  container create
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestContainerCreate:
 
@@ -180,11 +170,9 @@ class TestContainerCreate:
         assert result.exit_code == 0
         assert "created" in result.output.lower()
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  container delete
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestContainerDelete:
 
@@ -225,11 +213,9 @@ class TestContainerDelete:
         assert "deleted" not in result.output.lower()
         assert state["deleted"] == []
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  list (objects)
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestObjectList:
 
@@ -252,11 +238,9 @@ class TestObjectList:
         assert result.exit_code == 0
         assert "No objects found" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  show (object)
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestObjectShow:
 
@@ -270,11 +254,9 @@ class TestObjectShow:
         assert "readme.txt" in result.output
         assert "1024" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  delete (objects)
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestObjectDelete:
 
@@ -288,11 +270,9 @@ class TestObjectDelete:
         assert "2 object(s)" in result.output
         assert len(state["deleted"]) == 2
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  container-set
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestContainerSet:
 
@@ -313,11 +293,9 @@ class TestContainerSet:
         result = invoke(["container", "set", "docs", "--property", "badformat"])
         assert result.exit_code != 0
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  container unset
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestContainerUnset:
 
@@ -357,11 +335,9 @@ class TestContainerUnset:
         assert any("X-Remove-Container-Meta-env" in k for k in posted_headers)
         assert any("X-Remove-Container-Meta-owner" in k for k in posted_headers)
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  object unset
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestObjectUnset:
 
@@ -402,11 +378,9 @@ class TestObjectUnset:
         assert any("X-Remove-Object-Meta-author" in k for k in posted_headers)
         assert any("X-Remove-Object-Meta-version" in k for k in posted_headers)
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  account-set / account-unset
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestAccountSet:
 
@@ -423,7 +397,7 @@ class TestAccountSet:
 
         mock_client._http.post = _post
 
-        result = invoke(["object", "account-set", "--property", "quota=100GB"])
+        result = invoke(["object", "account", "set", "--property", "quota=100GB"])
         assert result.exit_code == 0
         assert "set" in result.output.lower()
         assert any("X-Account-Meta-quota" in k for k in posted_headers)
@@ -433,7 +407,7 @@ class TestAccountSet:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["object", "account-set", "--property", "badformat"])
+        result = invoke(["object", "account", "set", "--property", "badformat"])
         assert result.exit_code != 0
 
     def test_account_unset(self, invoke, config_dir, mock_client, sample_profile):
@@ -449,7 +423,7 @@ class TestAccountSet:
 
         mock_client._http.post = _post
 
-        result = invoke(["object", "account-unset", "--property", "quota"])
+        result = invoke(["object", "account", "unset", "--property", "quota"])
         assert result.exit_code == 0
         assert "removed" in result.output.lower()
         assert any("X-Remove-Account-Meta-quota" in k for k in posted_headers)
@@ -467,16 +441,14 @@ class TestAccountSet:
 
         mock_client._http.post = _post
 
-        result = invoke(["object", "account-unset", "--property", "quota", "--property", "tier"])
+        result = invoke(["object", "account", "unset", "--property", "quota", "--property", "tier"])
         assert result.exit_code == 0
         assert any("X-Remove-Account-Meta-quota" in k for k in posted_headers)
         assert any("X-Remove-Account-Meta-tier" in k for k in posted_headers)
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  tree
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestObjectTree:
 
@@ -499,11 +471,9 @@ class TestObjectTree:
         assert result.exit_code == 0
         assert "readme" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  _human_size
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestHumanSize:
 
@@ -527,19 +497,16 @@ class TestHumanSize:
         from orca_cli.commands.object_store import _human_size
         assert _human_size("") == "—"
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestObjectHelp:
 
     def test_object_help(self, invoke):
         result = invoke(["object", "--help"])
         assert result.exit_code == 0
-        for cmd in ("list", "show", "upload", "download", "delete", "unset", "tree",
-                    "account-set", "account-unset"):
+        for cmd in ("list", "show", "upload", "download", "delete", "unset", "tree"):
             assert cmd in result.output
 
     def test_container_help(self, invoke):

@@ -11,13 +11,11 @@ from orca_cli.core.config import save_profile, set_active_profile
 VOL_ID = "11112222-3333-4444-5555-666677778888"
 IMG_ID = "aaaa1111-bbbb-2222-cccc-333333333333"
 
-
 def _vol(status="available", name="src-vol"):
     return {
         "id": VOL_ID, "name": name, "status": status, "size": 10,
         "bootable": "true", "attachments": [],
     }
-
 
 def _img(status="queued", size=None, **extra):
     img = {"id": IMG_ID, "name": "my-image", "status": status,
@@ -27,7 +25,6 @@ def _img(status="queued", size=None, **extra):
         img["size"] = size
     img.update(extra)
     return img
-
 
 class _Recorder:
     """Capture HTTP-shaped calls made through the mock OrcaClient."""
@@ -99,16 +96,13 @@ class _Recorder:
         mock_client.patch = _patch
         return self
 
-
 @pytest.fixture
 def setup(mock_client, sample_profile, config_dir):
     save_profile("p", sample_profile)
     set_active_profile("p")
     return mock_client
 
-
 # ── happy path ────────────────────────────────────────────────────────────
-
 
 def test_happy_path_with_property_and_wait(monkeypatch, invoke, setup):
     """Available volume → POST action, PATCH property, poll to active."""
@@ -161,9 +155,7 @@ def test_happy_path_with_property_and_wait(monkeypatch, invoke, setup):
     assert IMG_ID in result.output
     assert "active" in result.output.lower()
 
-
 # ── in-use volume guards ──────────────────────────────────────────────────
-
 
 def test_in_use_without_force_aborts_before_post(invoke, setup):
     rec = _Recorder().install(setup, vol_status="in-use")
@@ -177,7 +169,6 @@ def test_in_use_without_force_aborts_before_post(invoke, setup):
     assert "in-use" in out
     assert "--force" in out
 
-
 def test_in_use_with_force_sends_force_true(invoke, setup):
     rec = _Recorder().install(setup, vol_status="in-use")
 
@@ -189,9 +180,7 @@ def test_in_use_with_force_sends_force_true(invoke, setup):
     body = action_posts[0][1]
     assert body["os-volume_upload_image"]["force"] is True
 
-
 # ── failure during --wait ────────────────────────────────────────────────
-
 
 def test_killed_during_wait_exits_nonzero(monkeypatch, invoke, setup):
     rec = _Recorder().install(
@@ -214,9 +203,7 @@ def test_killed_during_wait_exits_nonzero(monkeypatch, invoke, setup):
     # No PATCH because no --property.
     assert rec.patches == []
 
-
 # ── property validation ──────────────────────────────────────────────────
-
 
 def test_invalid_property_key_aborts_before_any_call(invoke, setup):
     rec = _Recorder().install(setup)
@@ -229,7 +216,6 @@ def test_invalid_property_key_aborts_before_any_call(invoke, setup):
     assert result.exit_code != 0
     assert rec.posts == []
     assert rec.patches == []
-
 
 def test_property_value_with_special_chars_forwarded_intact(invoke, setup):
     rec = _Recorder().install(setup)
@@ -245,9 +231,7 @@ def test_property_value_with_special_chars_forwarded_intact(invoke, setup):
     ops = _json.loads(rec.patches[0][1])
     assert ops == [{"op": "add", "path": "/url", "value": url_value}]
 
-
 # ── defensive: missing image_id in Cinder response ───────────────────────
-
 
 def test_missing_image_id_in_response_aborts(invoke, setup):
     """If Cinder accepts the action but doesn't return an image_id, fail loudly."""
@@ -261,9 +245,7 @@ def test_missing_image_id_in_response_aborts(invoke, setup):
     # No PATCH should be attempted without an image to target.
     assert rec.patches == []
 
-
 # ── older-microversion compatibility ────────────────────────────────────
-
 
 def test_default_omits_visibility_and_protected(invoke, setup):
     """Without explicit flags, the body must not carry visibility/protected.
@@ -280,7 +262,6 @@ def test_default_omits_visibility_and_protected(invoke, setup):
     assert "visibility" not in payload
     assert "protected" not in payload
 
-
 def test_explicit_visibility_is_forwarded(invoke, setup):
     rec = _Recorder().install(setup)
 
@@ -294,7 +275,6 @@ def test_explicit_visibility_is_forwarded(invoke, setup):
     assert payload["visibility"] == "shared"
     assert "protected" not in payload
 
-
 def test_explicit_protected_is_forwarded(invoke, setup):
     rec = _Recorder().install(setup)
 
@@ -307,7 +287,6 @@ def test_explicit_protected_is_forwarded(invoke, setup):
     payload = next(b for u, b in rec.posts if "/action" in u)["os-volume_upload_image"]
     assert payload["protected"] is True
     assert "visibility" not in payload
-
 
 def test_strict_cinder_rejects_when_visibility_present(invoke, setup):
     """Simulate the Infomaniak-class 400 to prove the default path passes
@@ -356,9 +335,7 @@ def test_strict_cinder_rejects_when_visibility_present(invoke, setup):
     out = result_strict.output + (result_strict.stderr_bytes or b"").decode(errors="replace")
     assert "400" in out
 
-
 # ── name resolution ──────────────────────────────────────────────────────
-
 
 def test_resolve_volume_by_name(invoke, setup):
     rec = _Recorder().install(setup)

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import click
 
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.services.identity import IdentityService
@@ -165,8 +164,3 @@ def user_password_set(ctx, user_id, password):
     svc = IdentityService(ctx.find_object(OrcaContext).ensure_client())
     svc.update_user(user_id, {"password": password})
     console.print(f"[green]Password updated for user {user_id}.[/green]")
-
-
-add_command_with_alias(user, user_password_set,
-                        legacy_name="set-password",
-                        primary_path="user password set")

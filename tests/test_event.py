@@ -10,7 +10,6 @@ from orca_cli.core.config import save_profile, set_active_profile
 SRV_ID = "12345678-1234-1234-1234-123456789abc"
 REQ_ID = "req-aaaa-bbbb-cccc-dddd"
 
-
 def _action(action="create", request_id=REQ_ID, start_time="2025-03-01T10:00:00Z",
             user_id="user-1", message="", events=None):
     return {
@@ -23,7 +22,6 @@ def _action(action="create", request_id=REQ_ID, start_time="2025-03-01T10:00:00Z
         "events": events or [],
     }
 
-
 def _sub_event(event_name="compute_run_instance", result="Success",
                start_time="2025-03-01T10:00:00Z", finish_time="2025-03-01T10:00:05Z"):
     return {
@@ -33,13 +31,11 @@ def _sub_event(event_name="compute_run_instance", result="Success",
         "finish_time": finish_time,
     }
 
-
 def _server(srv_id=SRV_ID, name="web-1", status="ACTIVE"):
     return {
         "id": srv_id, "name": name, "status": status,
         "security_groups": [{"name": "default"}],
     }
-
 
 def _setup_mock(mock_client, actions=None, servers=None, action_detail=None):
     actions = actions or []
@@ -58,11 +54,9 @@ def _setup_mock(mock_client, actions=None, servers=None, action_detail=None):
     mock_client.get = _get
     mock_client.compute_url = "https://nova.example.com/v2.1"
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  event list
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestEventList:
 
@@ -105,11 +99,9 @@ class TestEventList:
         assert "2025-03-01" in result.output
         assert "10:00:00" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  event show
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestEventShow:
 
@@ -174,11 +166,9 @@ class TestEventShow:
         result = invoke(["event", "show", SRV_ID, REQ_ID])
         assert "Error" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  event all
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestEventAll:
 
@@ -293,11 +283,9 @@ class TestEventAll:
         create_pos = result.output.index("create")
         assert stop_pos < create_pos
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  event timeline
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestEventTimeline:
 
@@ -359,11 +347,9 @@ class TestEventTimeline:
         assert result.exit_code == 0
         assert "no sub-events" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestDropEmptyColumns:
     """Regression for the ``event list`` empty-columns rendering bug —
@@ -391,7 +377,6 @@ class TestDropEmptyColumns:
         items = [{"a": "", "b": ""}]
         defs = [("A", "a"), ("B", "b")]
         assert event_mod._drop_empty_columns(items, defs) == defs
-
 
 class TestEventHelp:
 

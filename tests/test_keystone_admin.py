@@ -8,12 +8,10 @@ ID  = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
 ID2 = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
 KS  = "https://keystone.example.com:5000/v3"
 
-
 def _client(mock_client):
     mock_client.identity_url = KS
     mock_client.catalog = []
     return mock_client
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  endpoint
@@ -56,7 +54,6 @@ class TestEndpointList:
         result = invoke(["endpoint", "list", "--help"])
         assert result.exit_code == 0
 
-
 class TestEndpointShow:
 
     def test_show(self, invoke, mock_client):
@@ -71,7 +68,6 @@ class TestEndpointShow:
 
     def test_help(self, invoke):
         assert invoke(["endpoint", "show", "--help"]).exit_code == 0
-
 
 class TestEndpointCreate:
 
@@ -99,7 +95,6 @@ class TestEndpointCreate:
     def test_help(self, invoke):
         assert invoke(["endpoint", "create", "--help"]).exit_code == 0
 
-
 class TestEndpointSet:
 
     def test_set_url(self, invoke, mock_client):
@@ -117,7 +112,6 @@ class TestEndpointSet:
     def test_help(self, invoke):
         assert invoke(["endpoint", "set", "--help"]).exit_code == 0
 
-
 class TestEndpointDelete:
 
     def test_delete_yes(self, invoke, mock_client):
@@ -129,7 +123,6 @@ class TestEndpointDelete:
 
     def test_help(self, invoke):
         assert invoke(["endpoint", "delete", "--help"]).exit_code == 0
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  service
@@ -164,7 +157,6 @@ class TestServiceList:
     def test_help(self, invoke):
         assert invoke(["service", "list", "--help"]).exit_code == 0
 
-
 class TestServiceCreate:
 
     def test_create(self, invoke, mock_client):
@@ -187,7 +179,6 @@ class TestServiceCreate:
     def test_help(self, invoke):
         assert invoke(["service", "create", "--help"]).exit_code == 0
 
-
 class TestServiceSet:
 
     def test_set_name(self, invoke, mock_client):
@@ -202,7 +193,6 @@ class TestServiceSet:
         assert result.exit_code == 0
         mock_client.patch.assert_not_called()
 
-
 class TestServiceDelete:
 
     def test_delete_yes(self, invoke, mock_client):
@@ -213,7 +203,6 @@ class TestServiceDelete:
 
     def test_help(self, invoke):
         assert invoke(["service", "delete", "--help"]).exit_code == 0
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  credential
@@ -247,7 +236,6 @@ class TestCredentialList:
     def test_help(self, invoke):
         assert invoke(["credential", "list", "--help"]).exit_code == 0
 
-
 class TestCredentialCreate:
 
     def test_create(self, invoke, mock_client):
@@ -273,7 +261,6 @@ class TestCredentialCreate:
     def test_help(self, invoke):
         assert invoke(["credential", "create", "--help"]).exit_code == 0
 
-
 class TestCredentialDelete:
 
     def test_delete_yes(self, invoke, mock_client):
@@ -284,7 +271,6 @@ class TestCredentialDelete:
 
     def test_help(self, invoke):
         assert invoke(["credential", "delete", "--help"]).exit_code == 0
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  region
@@ -319,7 +305,6 @@ class TestRegionList:
     def test_help(self, invoke):
         assert invoke(["region", "list", "--help"]).exit_code == 0
 
-
 class TestRegionShow:
 
     def test_show(self, invoke, mock_client):
@@ -333,7 +318,6 @@ class TestRegionShow:
 
     def test_help(self, invoke):
         assert invoke(["region", "show", "--help"]).exit_code == 0
-
 
 class TestRegionCreate:
 
@@ -362,7 +346,6 @@ class TestRegionCreate:
     def test_help(self, invoke):
         assert invoke(["region", "create", "--help"]).exit_code == 0
 
-
 class TestRegionSet:
 
     def test_set_description(self, invoke, mock_client):
@@ -378,7 +361,6 @@ class TestRegionSet:
         assert result.exit_code == 0
         mock_client.patch.assert_not_called()
 
-
 class TestRegionDelete:
 
     def test_delete_yes(self, invoke, mock_client):
@@ -390,7 +372,6 @@ class TestRegionDelete:
 
     def test_help(self, invoke):
         assert invoke(["region", "delete", "--help"]).exit_code == 0
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  trust
@@ -429,7 +410,6 @@ class TestTrustList:
     def test_help(self, invoke):
         assert invoke(["trust", "list", "--help"]).exit_code == 0
 
-
 class TestTrustShow:
 
     def test_show(self, invoke, mock_client):
@@ -445,7 +425,6 @@ class TestTrustShow:
 
     def test_help(self, invoke):
         assert invoke(["trust", "show", "--help"]).exit_code == 0
-
 
 class TestTrustCreate:
 
@@ -481,7 +460,6 @@ class TestTrustCreate:
     def test_help(self, invoke):
         assert invoke(["trust", "create", "--help"]).exit_code == 0
 
-
 class TestTrustDelete:
 
     def test_delete_yes(self, invoke, mock_client):
@@ -493,7 +471,6 @@ class TestTrustDelete:
     def test_help(self, invoke):
         assert invoke(["trust", "delete", "--help"]).exit_code == 0
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  auth token-revoke
 # ══════════════════════════════════════════════════════════════════════════
@@ -502,7 +479,7 @@ class TestTokenRevoke:
 
     def test_revoke(self, invoke, mock_client):
         mock_client.identity_url = KS
-        result = invoke(["auth", "token-revoke", "my-token-value"])
+        result = invoke(["auth", "token", "revoke", "my-token-value"])
         assert result.exit_code == 0
         assert mock_client.delete.called
         url = mock_client.delete.call_args[0][0]
@@ -510,14 +487,13 @@ class TestTokenRevoke:
 
     def test_revoke_sends_subject_token_header(self, invoke, mock_client):
         mock_client.identity_url = KS
-        invoke(["auth", "token-revoke", "my-secret-token"])
+        invoke(["auth", "token", "revoke", "my-secret-token"])
         headers = mock_client.delete.call_args[1].get("headers", {})
         assert headers.get("X-Subject-Token") == "my-secret-token"
 
     def test_help(self, invoke):
-        result = invoke(["auth", "token-revoke", "--help"])
+        result = invoke(["auth", "token", "revoke", "--help"])
         assert result.exit_code == 0
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  CLI registration
@@ -531,5 +507,5 @@ class TestRegistration:
         assert result.exit_code == 0
 
     def test_token_revoke_registered(self, invoke):
-        result = invoke(["auth", "token-revoke", "--help"])
+        result = invoke(["auth", "token", "revoke", "--help"])
         assert result.exit_code == 0

@@ -10,7 +10,6 @@ from pathlib import Path
 import click
 import yaml
 
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
@@ -95,7 +94,7 @@ def _stringify_dates(obj: object) -> object:
         return {k: _stringify_dates(v) for k, v in obj.items()}
     if isinstance(obj, list):
         return [_stringify_dates(i) for i in obj]
-    if isinstance(obj, (datetime.datetime, datetime.date)):
+    if isinstance(obj, datetime.datetime | datetime.date):
         return obj.isoformat()
     return obj
 
@@ -1076,34 +1075,3 @@ def stack_resource_metadata(ctx, stack_name_or_id, resource_name):
 
 
 # ── ADR-0008 deprecated aliases (backward compatibility) ────────────────
-
-add_command_with_alias(stack, resource_list,
-                        legacy_name="resource-list",
-                        primary_path="stack resource list")
-add_command_with_alias(stack, resource_show,
-                        legacy_name="resource-show",
-                        primary_path="stack resource show")
-add_command_with_alias(stack, event_list,
-                        legacy_name="event-list",
-                        primary_path="stack event list")
-add_command_with_alias(stack, event_show,
-                        legacy_name="event-show",
-                        primary_path="stack event show")
-add_command_with_alias(stack, output_list,
-                        legacy_name="output-list",
-                        primary_path="stack output list")
-add_command_with_alias(stack, output_show,
-                        legacy_name="output-show",
-                        primary_path="stack output show")
-add_command_with_alias(stack, template_show,
-                        legacy_name="template-show",
-                        primary_path="stack template show")
-add_command_with_alias(stack, template_validate,
-                        legacy_name="template-validate",
-                        primary_path="stack template validate")
-add_command_with_alias(stack, stack_resource_type_list,
-                        legacy_name="resource-type-list",
-                        primary_path="stack resource-type list")
-add_command_with_alias(stack, stack_resource_type_show,
-                        legacy_name="resource-type-show",
-                        primary_path="stack resource-type show")

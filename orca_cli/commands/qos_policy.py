@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import click
 
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
@@ -238,20 +237,3 @@ def qos_rule_delete(ctx, policy_id, rule_id, rule_type, yes):
 
 
 # ── ADR-0008 deprecated aliases (backward compatibility) ────────────────
-
-add_command_with_alias(qos_policy, qos_policy_list,
-                        legacy_name="policy-list", primary_path="qos policy list")
-add_command_with_alias(qos_policy, qos_policy_show,
-                        legacy_name="policy-show", primary_path="qos policy show")
-add_command_with_alias(qos_policy, qos_policy_create,
-                        legacy_name="policy-create", primary_path="qos policy create")
-add_command_with_alias(qos_policy, qos_policy_set,
-                        legacy_name="policy-set", primary_path="qos policy set")
-add_command_with_alias(qos_policy, qos_policy_delete,
-                        legacy_name="policy-delete", primary_path="qos policy delete")
-add_command_with_alias(qos_policy, qos_rule_list,
-                        legacy_name="rule-list", primary_path="qos rule list")
-add_command_with_alias(qos_policy, qos_rule_create,
-                        legacy_name="rule-create", primary_path="qos rule create")
-add_command_with_alias(qos_policy, qos_rule_delete,
-                        legacy_name="rule-delete", primary_path="qos rule delete")

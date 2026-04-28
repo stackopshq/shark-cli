@@ -8,7 +8,6 @@ from orca_cli.core.config import save_profile, set_active_profile
 
 DNS_URL = "https://dns.example.com"
 
-
 def _zone(zone_id="zone-1111-2222-3333-444444444444", name="example.com.",
           status="ACTIVE", ztype="PRIMARY", email="admin@example.com",
           ttl=3600, serial=1234567890):
@@ -20,7 +19,6 @@ def _zone(zone_id="zone-1111-2222-3333-444444444444", name="example.com.",
         "created_at": "2025-01-01T00:00:00Z", "updated_at": None, "version": 1,
     }
 
-
 def _recordset(rs_id="rs-1111-2222-3333-444444444444", name="www.example.com.",
                rtype="A", records=None, status="ACTIVE", ttl=300,
                zone_id="zone-1111-2222-3333-444444444444", zone_name="example.com."):
@@ -30,7 +28,6 @@ def _recordset(rs_id="rs-1111-2222-3333-444444444444", name="www.example.com.",
         "description": "", "zone_id": zone_id, "zone_name": zone_name,
         "created_at": "2025-01-01T00:00:00Z", "updated_at": None, "version": 1,
     }
-
 
 def _setup_mock(mock_client, zones=None, recordsets=None, zone_detail=None):
     zones = zones or []
@@ -76,11 +73,9 @@ def _setup_mock(mock_client, zones=None, recordsets=None, zone_detail=None):
     mock_client.delete = _delete
     mock_client.dns_url = DNS_URL
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  zone list
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestZoneList:
 
@@ -114,11 +109,9 @@ class TestZoneList:
         # Rich may truncate ACTIVE→ACTI… and email; just verify the table rendered
         assert "DNS Zones" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  zone show
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestZoneShow:
 
@@ -133,11 +126,9 @@ class TestZoneShow:
         assert "example.com." in result.output
         assert "ACTIVE" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  zone create
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestZoneCreate:
 
@@ -178,11 +169,9 @@ class TestZoneCreate:
         assert result.exit_code != 0
         assert "dot" in result.output.lower() or "dot" in str(result.exception).lower()
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  zone set (formerly zone-update)
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestZoneUpdate:
 
@@ -213,11 +202,9 @@ class TestZoneUpdate:
         assert result.exit_code == 0
         assert "Nothing to update" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  zone delete
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestZoneDelete:
 
@@ -230,11 +217,9 @@ class TestZoneDelete:
         assert result.exit_code == 0
         assert "deleted" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  recordset list
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestRecordList:
 
@@ -262,11 +247,9 @@ class TestRecordList:
         assert result.exit_code == 0
         assert "No recordsets found" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  recordset show
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestRecordShow:
 
@@ -287,11 +270,9 @@ class TestRecordShow:
         assert result.exit_code == 0
         assert "www.example.com." in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  recordset create
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestRecordCreate:
 
@@ -351,11 +332,9 @@ class TestRecordCreate:
         assert result.exit_code == 0
         assert posted["ttl"] == 600
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  recordset set (formerly record-update)
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestRecordUpdate:
 
@@ -388,11 +367,9 @@ class TestRecordUpdate:
         assert result.exit_code == 0
         assert "Nothing to update" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  recordset delete
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestRecordDelete:
 
@@ -405,11 +382,9 @@ class TestRecordDelete:
         assert result.exit_code == 0
         assert "deleted" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  zone tree
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestZoneTree:
 
@@ -467,11 +442,9 @@ class TestZoneTree:
         assert result.exit_code == 0
         assert "example.com." in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  zone reverse-lookup
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestReverseLookup:
 
@@ -532,11 +505,9 @@ class TestReverseLookup:
         assert result.exit_code == 0
         assert "host.example.com." in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestDnsHelp:
 
@@ -564,7 +535,6 @@ class TestDnsHelp:
         assert "--type" in result.output
         assert "--record" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  zone transfer-request / transfer-accept / tld
 # ══════════════════════════════════════════════════════════════════════════
@@ -572,7 +542,6 @@ class TestDnsHelp:
 _ZONE_NAME = "example.com."
 _ZONE_ID2 = "dddddddd-dddd-dddd-dddd-dddddddddddd"
 _XFER_ID = "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"
-
 
 class TestZoneTransferRequest:
 
@@ -586,20 +555,20 @@ class TestZoneTransferRequest:
             {"zones": [{"id": _ZONE_ID2, "name": _ZONE_NAME}]},
         ]
         mock_client.post.return_value = {"id": _XFER_ID, "key": "secret-key"}
-        result = invoke(["zone", "transfer-request-create", _ZONE_NAME])
+        result = invoke(["zone", "transfer", "request", "create", _ZONE_NAME])
         assert result.exit_code == 0
         assert "secret-key" in result.output
 
     def test_list(self, invoke, mock_client):
         mock_client.dns_url = DNS_URL
         mock_client.get.return_value = {"transfer_requests": [self._req()]}
-        result = invoke(["zone", "transfer-request-list"])
+        result = invoke(["zone", "transfer", "request", "list"])
         assert result.exit_code == 0
 
     def test_list_empty(self, invoke, mock_client):
         mock_client.dns_url = DNS_URL
         mock_client.get.return_value = {"transfer_requests": []}
-        result = invoke(["zone", "transfer-request-list"])
+        result = invoke(["zone", "transfer", "request", "list"])
         assert "No transfer" in result.output
 
     def test_show(self, invoke, mock_client):
@@ -609,39 +578,38 @@ class TestZoneTransferRequest:
             "status": "ACTIVE", "target_project_id": "", "description": "",
             "created_at": "", "updated_at": "",
         }
-        result = invoke(["zone", "transfer-request-show", _XFER_ID])
+        result = invoke(["zone", "transfer", "request", "show", _XFER_ID])
         assert result.exit_code == 0
 
     def test_delete_yes(self, invoke, mock_client):
         mock_client.dns_url = DNS_URL
-        result = invoke(["zone", "transfer-request-delete", _XFER_ID, "--yes"])
+        result = invoke(["zone", "transfer", "request", "delete", _XFER_ID, "--yes"])
         assert result.exit_code == 0
         mock_client.delete.assert_called_once()
 
     def test_delete_requires_confirm(self, invoke, mock_client):
         mock_client.dns_url = DNS_URL
-        result = invoke(["zone", "transfer-request-delete", _XFER_ID], input="n\n")
+        result = invoke(["zone", "transfer", "request", "delete", _XFER_ID], input="n\n")
         assert result.exit_code != 0
         mock_client.delete.assert_not_called()
 
     def test_accept(self, invoke, mock_client):
         mock_client.dns_url = DNS_URL
         mock_client.post.return_value = {"zone_id": _ZONE_ID2}
-        result = invoke(["zone", "transfer-accept", _XFER_ID, "mykey"])
+        result = invoke(["zone", "transfer", "accept", _XFER_ID, "mykey"])
         assert result.exit_code == 0
         body = mock_client.post.call_args[1]["json"]
         assert body["key"] == "mykey"
         assert body["zone_transfer_request_id"] == _XFER_ID
 
     def test_help_create(self, invoke):
-        assert invoke(["zone", "transfer-request-create", "--help"]).exit_code == 0
+        assert invoke(["zone", "transfer", "request", "create", "--help"]).exit_code == 0
 
     def test_help_list(self, invoke):
-        assert invoke(["zone", "transfer-request-list", "--help"]).exit_code == 0
+        assert invoke(["zone", "transfer", "request", "list", "--help"]).exit_code == 0
 
     def test_help_accept(self, invoke):
-        assert invoke(["zone", "transfer-accept", "--help"]).exit_code == 0
-
+        assert invoke(["zone", "transfer", "accept", "--help"]).exit_code == 0
 
 class TestZoneTld:
 
@@ -650,24 +618,24 @@ class TestZoneTld:
         mock_client.get.return_value = {"tlds": [
             {"id": "1", "name": "com", "description": ""},
         ]}
-        result = invoke(["zone", "tld-list"])
+        result = invoke(["zone", "tld", "list"])
         assert result.exit_code == 0
         assert "com" in result.output
 
     def test_create(self, invoke, mock_client):
         mock_client.dns_url = DNS_URL
         mock_client.post.return_value = {"id": "1", "name": "example"}
-        result = invoke(["zone", "tld-create", "example"])
+        result = invoke(["zone", "tld", "create", "example"])
         assert result.exit_code == 0
 
     def test_delete_yes(self, invoke, mock_client):
         mock_client.dns_url = DNS_URL
-        result = invoke(["zone", "tld-delete", "1", "--yes"])
+        result = invoke(["zone", "tld", "delete", "1", "--yes"])
         assert result.exit_code == 0
         mock_client.delete.assert_called_once()
 
     def test_help_list(self, invoke):
-        assert invoke(["zone", "tld-list", "--help"]).exit_code == 0
+        assert invoke(["zone", "tld", "list", "--help"]).exit_code == 0
 
     def test_help_create(self, invoke):
-        assert invoke(["zone", "tld-create", "--help"]).exit_code == 0
+        assert invoke(["zone", "tld", "create", "--help"]).exit_code == 0

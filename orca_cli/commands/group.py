@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import click
 
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.services.identity import IdentityService
@@ -164,11 +163,3 @@ def group_member_list(ctx, group_id, output_format, columns, fit_width, max_widt
         fit_width=fit_width, max_width=max_width, noindent=noindent,
         empty_msg="No users in this group.",
     )
-
-
-add_command_with_alias(group, group_user_add,
-                        legacy_name="add-user", primary_path="group user add")
-add_command_with_alias(group, group_user_remove,
-                        legacy_name="remove-user", primary_path="group user remove")
-add_command_with_alias(group, group_member_list,
-                        legacy_name="member-list", primary_path="group member list")
