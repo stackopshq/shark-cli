@@ -414,7 +414,8 @@ class TestVolumeQosCreate:
         assert result.exit_code == 0
         body = mock_client.post.call_args[1]["json"]["qos_specs"]
         assert body["name"] == "high-iops"
-        assert body["specs"]["total_iops_sec"] == "1000"
+        # Cinder expects flat keys at the top level, not nested under "specs"
+        assert body["total_iops_sec"] == "1000"
 
     def test_create_no_specs(self, invoke, mock_client):
         _vol(mock_client)
@@ -432,7 +433,7 @@ class TestVolumeQosSet:
         _vol(mock_client)
         result = invoke(["volume", "qos-set", QOS, "--property", "total_iops_sec=2000"])
         assert result.exit_code == 0
-        body = mock_client.put.call_args[1]["json"]["qos_specs"]["specs"]
+        body = mock_client.put.call_args[1]["json"]["qos_specs"]
         assert body["total_iops_sec"] == "2000"
 
     def test_set_nothing(self, invoke, mock_client):

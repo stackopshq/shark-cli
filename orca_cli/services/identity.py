@@ -155,13 +155,16 @@ class IdentityService:
         return data.get("role_inferences", [])
 
     def create_role_inference(self, prior_id: str, implied_id: str) -> None:
+        # Keystone exposes inference creation/deletion under /v3/roles/...,
+        # not /v3/role_inferences/... — the latter is the read-only listing
+        # endpoint. See https://docs.openstack.org/api-ref/identity/v3/
         self._client.put(
-            f"{self._v3}/role_inferences/{prior_id}/implies/{implied_id}"
+            f"{self._v3}/roles/{prior_id}/implies/{implied_id}"
         )
 
     def delete_role_inference(self, prior_id: str, implied_id: str) -> None:
         self._client.delete(
-            f"{self._v3}/role_inferences/{prior_id}/implies/{implied_id}"
+            f"{self._v3}/roles/{prior_id}/implies/{implied_id}"
         )
 
     # ── domains ────────────────────────────────────────────────────────
@@ -317,36 +320,36 @@ class IdentityService:
     def find_endpoint_groups(
         self, *, params: dict[str, Any] | None = None,
     ) -> list[EndpointGroup]:
-        data = self._client.get(f"{self._v3}/endpoint_groups", params=params)
+        data = self._client.get(f"{self._v3}/OS-EP-FILTER/endpoint_groups", params=params)
         return data.get("endpoint_groups", [])
 
     def get_endpoint_group(self, eg_id: str) -> EndpointGroup:
-        data = self._client.get(f"{self._v3}/endpoint_groups/{eg_id}")
+        data = self._client.get(f"{self._v3}/OS-EP-FILTER/endpoint_groups/{eg_id}")
         return data.get("endpoint_group", data)
 
     def create_endpoint_group(self, body: dict[str, Any]) -> EndpointGroup:
-        data = self._client.post(f"{self._v3}/endpoint_groups",
+        data = self._client.post(f"{self._v3}/OS-EP-FILTER/endpoint_groups",
                                  json={"endpoint_group": body})
         return data.get("endpoint_group", data) if data else {}
 
     def update_endpoint_group(self, eg_id: str,
                               body: dict[str, Any]) -> EndpointGroup:
-        data = self._client.patch(f"{self._v3}/endpoint_groups/{eg_id}",
+        data = self._client.patch(f"{self._v3}/OS-EP-FILTER/endpoint_groups/{eg_id}",
                                   json={"endpoint_group": body})
         return data.get("endpoint_group", data) if data else {}
 
     def delete_endpoint_group(self, eg_id: str) -> None:
-        self._client.delete(f"{self._v3}/endpoint_groups/{eg_id}")
+        self._client.delete(f"{self._v3}/OS-EP-FILTER/endpoint_groups/{eg_id}")
 
     def add_endpoint_group_project(self, eg_id: str, project_id: str) -> None:
         self._client.put(
-            f"{self._v3}/endpoint_groups/{eg_id}/projects/{project_id}"
+            f"{self._v3}/OS-EP-FILTER/endpoint_groups/{eg_id}/projects/{project_id}"
         )
 
     def remove_endpoint_group_project(self, eg_id: str,
                                       project_id: str) -> None:
         self._client.delete(
-            f"{self._v3}/endpoint_groups/{eg_id}/projects/{project_id}"
+            f"{self._v3}/OS-EP-FILTER/endpoint_groups/{eg_id}/projects/{project_id}"
         )
 
     # ── services (no /v3) ──────────────────────────────────────────────
@@ -428,11 +431,11 @@ class IdentityService:
     # ── federation: identity providers ─────────────────────────────────
 
     def find_identity_providers(self) -> list[IdentityProvider]:
-        data = self._client.get(f"{self._v3}/identity_providers")
+        data = self._client.get(f"{self._v3}/OS-FEDERATION/identity_providers")
         return data.get("identity_providers", [])
 
     def get_identity_provider(self, idp_id: str) -> IdentityProvider:
-        data = self._client.get(f"{self._v3}/identity_providers/{idp_id}")
+        data = self._client.get(f"{self._v3}/OS-FEDERATION/identity_providers/{idp_id}")
         return data.get("identity_provider", data)
 
     def create_identity_provider(
@@ -440,7 +443,7 @@ class IdentityService:
     ) -> IdentityProvider:
         # Keystone federation uses PUT for upsert creation.
         data = self._client.put(
-            f"{self._v3}/identity_providers/{idp_id}",
+            f"{self._v3}/OS-FEDERATION/identity_providers/{idp_id}",
             json={"identity_provider": body},
         )
         return data.get("identity_provider", data) if data else {}
@@ -449,19 +452,19 @@ class IdentityService:
         self, idp_id: str, body: dict[str, Any],
     ) -> IdentityProvider:
         data = self._client.patch(
-            f"{self._v3}/identity_providers/{idp_id}",
+            f"{self._v3}/OS-FEDERATION/identity_providers/{idp_id}",
             json={"identity_provider": body},
         )
         return data.get("identity_provider", data) if data else {}
 
     def delete_identity_provider(self, idp_id: str) -> None:
-        self._client.delete(f"{self._v3}/identity_providers/{idp_id}")
+        self._client.delete(f"{self._v3}/OS-FEDERATION/identity_providers/{idp_id}")
 
     # ── federation: protocols ──────────────────────────────────────────
 
     def find_federation_protocols(self, idp_id: str) -> list[FederationProtocol]:
         data = self._client.get(
-            f"{self._v3}/identity_providers/{idp_id}/protocols"
+            f"{self._v3}/OS-FEDERATION/identity_providers/{idp_id}/protocols"
         )
         return data.get("protocols", [])
 
@@ -469,7 +472,7 @@ class IdentityService:
         self, idp_id: str, proto_id: str,
     ) -> FederationProtocol:
         data = self._client.get(
-            f"{self._v3}/identity_providers/{idp_id}/protocols/{proto_id}"
+            f"{self._v3}/OS-FEDERATION/identity_providers/{idp_id}/protocols/{proto_id}"
         )
         return data.get("protocol", data)
 
@@ -477,7 +480,7 @@ class IdentityService:
         self, idp_id: str, proto_id: str, body: dict[str, Any],
     ) -> FederationProtocol:
         data = self._client.put(
-            f"{self._v3}/identity_providers/{idp_id}/protocols/{proto_id}",
+            f"{self._v3}/OS-FEDERATION/identity_providers/{idp_id}/protocols/{proto_id}",
             json={"protocol": body},
         )
         return data.get("protocol", data) if data else {}
@@ -486,7 +489,7 @@ class IdentityService:
         self, idp_id: str, proto_id: str, body: dict[str, Any],
     ) -> FederationProtocol:
         data = self._client.patch(
-            f"{self._v3}/identity_providers/{idp_id}/protocols/{proto_id}",
+            f"{self._v3}/OS-FEDERATION/identity_providers/{idp_id}/protocols/{proto_id}",
             json={"protocol": body},
         )
         return data.get("protocol", data) if data else {}
@@ -495,49 +498,49 @@ class IdentityService:
         self, idp_id: str, proto_id: str,
     ) -> None:
         self._client.delete(
-            f"{self._v3}/identity_providers/{idp_id}/protocols/{proto_id}"
+            f"{self._v3}/OS-FEDERATION/identity_providers/{idp_id}/protocols/{proto_id}"
         )
 
     # ── federation: mappings ───────────────────────────────────────────
 
     def find_mappings(self) -> list[Mapping]:
-        data = self._client.get(f"{self._v3}/mappings")
+        data = self._client.get(f"{self._v3}/OS-FEDERATION/mappings")
         return data.get("mappings", [])
 
     def get_mapping(self, mapping_id: str) -> Mapping:
-        data = self._client.get(f"{self._v3}/mappings/{mapping_id}")
+        data = self._client.get(f"{self._v3}/OS-FEDERATION/mappings/{mapping_id}")
         return data.get("mapping", data)
 
     def create_mapping(self, mapping_id: str,
                        body: dict[str, Any]) -> Mapping:
-        data = self._client.put(f"{self._v3}/mappings/{mapping_id}",
+        data = self._client.put(f"{self._v3}/OS-FEDERATION/mappings/{mapping_id}",
                                 json={"mapping": body})
         return data.get("mapping", data) if data else {}
 
     def update_mapping(self, mapping_id: str,
                        body: dict[str, Any]) -> Mapping:
-        data = self._client.patch(f"{self._v3}/mappings/{mapping_id}",
+        data = self._client.patch(f"{self._v3}/OS-FEDERATION/mappings/{mapping_id}",
                                   json={"mapping": body})
         return data.get("mapping", data) if data else {}
 
     def delete_mapping(self, mapping_id: str) -> None:
-        self._client.delete(f"{self._v3}/mappings/{mapping_id}")
+        self._client.delete(f"{self._v3}/OS-FEDERATION/mappings/{mapping_id}")
 
     # ── federation: service providers ──────────────────────────────────
 
     def find_service_providers(self) -> list[ServiceProvider]:
-        data = self._client.get(f"{self._v3}/service_providers")
+        data = self._client.get(f"{self._v3}/OS-FEDERATION/service_providers")
         return data.get("service_providers", [])
 
     def get_service_provider(self, sp_id: str) -> ServiceProvider:
-        data = self._client.get(f"{self._v3}/service_providers/{sp_id}")
+        data = self._client.get(f"{self._v3}/OS-FEDERATION/service_providers/{sp_id}")
         return data.get("service_provider", data)
 
     def create_service_provider(
         self, sp_id: str, body: dict[str, Any],
     ) -> ServiceProvider:
         data = self._client.put(
-            f"{self._v3}/service_providers/{sp_id}",
+            f"{self._v3}/OS-FEDERATION/service_providers/{sp_id}",
             json={"service_provider": body},
         )
         return data.get("service_provider", data) if data else {}
@@ -546,13 +549,13 @@ class IdentityService:
         self, sp_id: str, body: dict[str, Any],
     ) -> ServiceProvider:
         data = self._client.patch(
-            f"{self._v3}/service_providers/{sp_id}",
+            f"{self._v3}/OS-FEDERATION/service_providers/{sp_id}",
             json={"service_provider": body},
         )
         return data.get("service_provider", data) if data else {}
 
     def delete_service_provider(self, sp_id: str) -> None:
-        self._client.delete(f"{self._v3}/service_providers/{sp_id}")
+        self._client.delete(f"{self._v3}/OS-FEDERATION/service_providers/{sp_id}")
 
     # ── trusts (OS-TRUST extension) ────────────────────────────────────
 

@@ -1452,9 +1452,9 @@ def volume_qos_create(ctx: click.Context, name: str, consumer: str,
             raise OrcaCLIError(f"Invalid format '{prop}', expected KEY=VALUE.")
         k, v = prop.split("=", 1)
         specs[k] = v
-    body: dict = {"name": name, "consumer": consumer}
-    if specs:
-        body["specs"] = specs
+    # Cinder expects spec keys at the top level of qos_specs alongside
+    # name/consumer; not nested under a "specs" sub-key.
+    body: dict = {"name": name, "consumer": consumer, **specs}
     s = service.create_qos(body)
     console.print(f"[green]QoS spec '{name}' created: {s.get('id', '?')}[/green]")
 
@@ -1476,7 +1476,9 @@ def volume_qos_set(ctx: click.Context, qos_id: str, properties: tuple[str, ...])
             raise OrcaCLIError(f"Invalid format '{prop}', expected KEY=VALUE.")
         k, v = prop.split("=", 1)
         specs[k] = v
-    service.update_qos(qos_id, {"specs": specs})
+    # Cinder expects the spec keys at the top of qos_specs, not nested
+    # under a "specs" sub-key. Pass the flat dict directly.
+    service.update_qos(qos_id, specs)
     console.print(f"[green]QoS spec {qos_id} updated.[/green]")
 
 

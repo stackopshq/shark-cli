@@ -82,8 +82,10 @@ def server_group_create(ctx, name, policy):
       soft-anti-affinity — prefer different hosts
       soft-affinity      — prefer same host
     """
+    # Nova ≥ v2.64 (Rocky 2018) requires {"policy": "<single>"}; the legacy
+    # {"policies": ["<single>"]} shape is rejected as invalid.
     svc = ComputeService(ctx.find_object(OrcaContext).ensure_client())
-    sg = svc.create_server_group({"name": name, "policies": [policy]})
+    sg = svc.create_server_group({"name": name, "policy": policy})
     console.print(f"[green]Server group '{sg.get('name')}' ({sg.get('id')}) created "
                   f"with policy '{policy}'.[/green]")
 

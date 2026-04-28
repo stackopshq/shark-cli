@@ -519,7 +519,7 @@ class TestImpliedRole:
         result = invoke(["role", "implied-create", ROLE_A, ROLE_B])
         assert result.exit_code == 0
         url = mock_client.put.call_args[0][0]
-        assert f"role_inferences/{ROLE_A}/implies/{ROLE_B}" in url
+        assert f"roles/{ROLE_A}/implies/{ROLE_B}" in url
 
     def test_delete_yes(self, invoke, mock_client):
         _iam(mock_client)

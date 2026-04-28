@@ -116,7 +116,7 @@ def _setup_compute_mock(mock_client):
             return {"aggregate": _aggregate()}
         if "/os-server-groups" in url:
             return {"server_group": _server_group()}
-        if "/os-extra-specs" in url:
+        if "/os-extra_specs" in url:
             return {"extra_specs": {"hw:cpu_policy": "dedicated"}}
         return {}
 

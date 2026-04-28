@@ -165,8 +165,11 @@ class TestInventory:
         result = invoke(["placement", "resource-provider-inventory-set", RP_UUID, "VCPU",
                          "--total", "64"])
         assert result.exit_code == 0
-        body = mock_client.put.call_args[1]["json"]
+        # New behaviour (post 1.20-mv fix): POST /inventories first to
+        # create, falling back to PUT only on 409 Conflict.
+        body = mock_client.post.call_args[1]["json"]
         assert body["total"] == 64
+        assert body["resource_class"] == "VCPU"
         assert body["resource_provider_generation"] == 2
 
     def test_delete_yes(self, invoke, mock_client):
@@ -263,8 +266,10 @@ class TestResourceClass:
         _placement(mock_client)
         result = invoke(["placement", "resource-class-create", "CUSTOM_GPU"])
         assert result.exit_code == 0
-        url = mock_client.put.call_args[0][0]
-        assert "CUSTOM_GPU" in url
+        # Fixed: POST /resource_classes with {"name": "..."} instead of
+        # PUT /resource_classes/{name} with empty body.
+        body = mock_client.post.call_args[1]["json"]
+        assert body == {"name": "CUSTOM_GPU"}
 
     def test_delete_yes(self, invoke, mock_client):
         _placement(mock_client)

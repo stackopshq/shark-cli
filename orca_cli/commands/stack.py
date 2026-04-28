@@ -56,6 +56,14 @@ def _resolve_stack(client, stack: str) -> Stack:
         name = s.get("stack_name", stack)
         sid = s.get("id", "")
         return svc.get(name, sid)
+    # Caller may have passed a UUID — list with id filter (Heat accepts
+    # both query keys, but a name=<uuid> filter returns nothing).
+    stacks = svc.find(params={"id": stack})
+    if stacks:
+        s = stacks[0]
+        name = s.get("stack_name", stack)
+        sid = s.get("id", stack)
+        return svc.get(name, sid)
     # Fallback: maybe caller passed the canonical ``name/id`` form
     try:
         return svc.get(stack)

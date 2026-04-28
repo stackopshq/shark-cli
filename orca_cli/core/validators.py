@@ -13,6 +13,7 @@ def validate_id(ctx: click.Context, param: click.Parameter, value: str) -> str:
     Accepts:
     - Hyphenated UUID: ``8-4-4-4-12`` hex (e.g. Nova/Neutron resource IDs).
     - Bare hex UUID: 32 hex chars (e.g. Keystone project/user IDs).
+    - SHA-256 hex: 64 hex chars (e.g. Keystone credential IDs).
     - Numeric ID (e.g. flavor IDs on older clouds, quota resources).
     """
     # Pass through None so the callback is safe on optional parameters
@@ -23,9 +24,11 @@ def validate_id(ctx: click.Context, param: click.Parameter, value: str) -> str:
         r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
         re.IGNORECASE,
     )
-    hex_pattern = re.compile(r"^[0-9a-f]{32}$", re.IGNORECASE)
+    hex32_pattern = re.compile(r"^[0-9a-f]{32}$", re.IGNORECASE)
+    hex64_pattern = re.compile(r"^[0-9a-f]{64}$", re.IGNORECASE)
     numeric_pattern = re.compile(r"^\d+$")
-    if not (uuid_pattern.match(value) or hex_pattern.match(value) or numeric_pattern.match(value)):
+    if not (uuid_pattern.match(value) or hex32_pattern.match(value)
+            or hex64_pattern.match(value) or numeric_pattern.match(value)):
         raise click.BadParameter(f"'{value}' is not a valid resource ID (expected UUID or numeric).")
     return value
 

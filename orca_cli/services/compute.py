@@ -63,14 +63,14 @@ class ComputeService:
     def set_flavor_extra_specs(self, flavor_id: str,
                                specs: dict[str, str]) -> dict[str, str]:
         data = self._client.post(
-            f"{self._base}/flavors/{flavor_id}/os-extra-specs",
+            f"{self._base}/flavors/{flavor_id}/os-extra_specs",
             json={"extra_specs": specs},
         )
         return data.get("extra_specs", {}) if data else {}
 
     def unset_flavor_extra_spec(self, flavor_id: str, key: str) -> None:
         self._client.delete(
-            f"{self._base}/flavors/{flavor_id}/os-extra-specs/{key}"
+            f"{self._base}/flavors/{flavor_id}/os-extra_specs/{key}"
         )
 
     def list_flavor_access(self, flavor_id: str) -> list[FlavorAccess]:
