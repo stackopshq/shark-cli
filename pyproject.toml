@@ -86,6 +86,10 @@ warn_redundant_casts = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = "-m 'not live'"
+markers = [
+    "live: end-to-end tests against a real OpenStack cloud (run with `pytest -m live tests/devstack/`)",
+]
 
 [tool.coverage.run]
 source = ["orca_cli"]
