@@ -11,6 +11,7 @@ from typing import Any, cast
 import click
 from rich.tree import Tree
 
+from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
@@ -80,7 +81,12 @@ def object_stats(ctx: click.Context, output_format: str, columns: tuple[str, ...
 # ── container-list ───────────────────────────────────────────────────────────
 
 
-@object_store.command("container-list")
+@object_store.group("container")
+def object_container() -> None:
+    """Manage Swift containers."""
+
+
+@object_container.command("list")
 @output_options
 @click.pass_context
 def container_list(ctx: click.Context, output_format: str, columns: tuple[str, ...], fit_width: bool, max_width: int | None, noindent: bool) -> None:
@@ -109,7 +115,7 @@ def container_list(ctx: click.Context, output_format: str, columns: tuple[str, .
 # ── container-show ───────────────────────────────────────────────────────────
 
 
-@object_store.command("container-show")
+@object_container.command("show")
 @click.argument("container")
 @output_options
 @click.pass_context
@@ -141,7 +147,7 @@ def container_show(ctx: click.Context, container: str, output_format: str, colum
 # ── container-create ─────────────────────────────────────────────────────────
 
 
-@object_store.command("container-create")
+@object_container.command("create")
 @click.argument("container")
 @click.pass_context
 def container_create(ctx: click.Context, container: str) -> None:
@@ -155,7 +161,7 @@ def container_create(ctx: click.Context, container: str) -> None:
 # ── container-delete ─────────────────────────────────────────────────────────
 
 
-@object_store.command("container-delete")
+@object_container.command("delete")
 @click.argument("container")
 @click.option("--recursive", is_flag=True, default=False, help="Delete all objects before deleting the container.")
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation prompt.")
@@ -186,7 +192,7 @@ def container_delete(ctx: click.Context, container: str, recursive: bool, yes: b
 # ── container-set ────────────────────────────────────────────────────────────
 
 
-@object_store.command("container-set")
+@object_container.command("set")
 @click.argument("container")
 @click.option("--property", "properties", multiple=True, required=True, help="Metadata key=value pair (repeatable).")
 @click.pass_context
@@ -209,7 +215,7 @@ def container_set(ctx: click.Context, container: str, properties: tuple[str, ...
 # ── container-save ───────────────────────────────────────────────────────────
 
 
-@object_store.command("container-save")
+@object_container.command("save")
 @click.argument("container")
 @click.option("--output-dir", default=".", show_default=True, help="Local directory to save objects into.")
 @click.pass_context
@@ -593,7 +599,12 @@ def object_unset(ctx: click.Context, container: str, object_name: str, propertie
 # ── account-set ───────────────────────────────────────────────────────────────
 
 
-@object_store.command("account-set")
+@object_store.group("account")
+def object_account() -> None:
+    """Manage Swift account-level metadata."""
+
+
+@object_account.command("set")
 @click.option("--property", "properties", multiple=True, required=True, help="Metadata key=value pair (repeatable).")
 @click.pass_context
 def object_account_set(ctx: click.Context, properties: tuple[str, ...]) -> None:
@@ -615,7 +626,7 @@ def object_account_set(ctx: click.Context, properties: tuple[str, ...]) -> None:
 # ── account-unset ─────────────────────────────────────────────────────────────
 
 
-@object_store.command("account-unset")
+@object_account.command("unset")
 @click.option("--property", "properties", multiple=True, required=True, help="Metadata key to remove (repeatable).")
 @click.pass_context
 def object_account_unset(ctx: click.Context, properties: tuple[str, ...]) -> None:
@@ -694,3 +705,31 @@ def object_tree(ctx: click.Context, container: str | None, delimiter: str) -> No
 
         _add_nodes(tree, folder_tree)
         console.print(tree)
+
+
+# ── ADR-0008 deprecated aliases (backward compatibility) ────────────────
+
+add_command_with_alias(object_store, container_list,
+                        legacy_name="container-list",
+                        primary_path="object container list")
+add_command_with_alias(object_store, container_show,
+                        legacy_name="container-show",
+                        primary_path="object container show")
+add_command_with_alias(object_store, container_create,
+                        legacy_name="container-create",
+                        primary_path="object container create")
+add_command_with_alias(object_store, container_delete,
+                        legacy_name="container-delete",
+                        primary_path="object container delete")
+add_command_with_alias(object_store, container_set,
+                        legacy_name="container-set",
+                        primary_path="object container set")
+add_command_with_alias(object_store, container_save,
+                        legacy_name="container-save",
+                        primary_path="object container save")
+add_command_with_alias(object_store, object_account_set,
+                        legacy_name="account-set",
+                        primary_path="object account set")
+add_command_with_alias(object_store, object_account_unset,
+                        legacy_name="account-unset",
+                        primary_path="object account unset")

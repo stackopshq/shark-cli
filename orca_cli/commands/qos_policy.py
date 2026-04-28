@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import click
 
+from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
@@ -26,7 +27,12 @@ def qos_policy() -> None:
 
 # ── Policy CRUD ────────────────────────────────────────────────────────────
 
-@qos_policy.command("policy-list")
+@qos_policy.group("policy")
+def qos_policy_group() -> None:
+    """Manage QoS policies."""
+
+
+@qos_policy_group.command("list")
 @click.option("--shared", is_flag=True, default=False, help="Show only shared policies.")
 @output_options
 @click.pass_context
@@ -50,7 +56,7 @@ def qos_policy_list(ctx, shared, output_format, columns, fit_width, max_width, n
     )
 
 
-@qos_policy.command("policy-show")
+@qos_policy_group.command("show")
 @click.argument("policy_id", callback=validate_id)
 @output_options
 @click.pass_context
@@ -66,7 +72,7 @@ def qos_policy_show(ctx, policy_id, output_format, columns, fit_width, max_width
     )
 
 
-@qos_policy.command("policy-create")
+@qos_policy_group.command("create")
 @click.option("--name", required=True, help="Policy name.")
 @click.option("--shared", is_flag=True, default=False, help="Share with all projects.")
 @click.option("--default", "is_default", is_flag=True, default=False,
@@ -83,7 +89,7 @@ def qos_policy_create(ctx, name, shared, is_default, description):
     console.print(f"[green]QoS policy '{name}' created: {p.get('id', '?')}[/green]")
 
 
-@qos_policy.command("policy-set")
+@qos_policy_group.command("set")
 @click.argument("policy_id", callback=validate_id)
 @click.option("--name", default=None, help="New name.")
 @click.option("--description", default=None, help="New description.")
@@ -110,7 +116,7 @@ def qos_policy_set(ctx, policy_id, name, description, shared, is_default):
     console.print(f"[green]QoS policy {policy_id} updated.[/green]")
 
 
-@qos_policy.command("policy-delete")
+@qos_policy_group.command("delete")
 @click.argument("policy_id", callback=validate_id)
 @click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
 @click.pass_context
@@ -125,7 +131,12 @@ def qos_policy_delete(ctx, policy_id, yes):
 
 # ── Rules ─────────────────────────────────────────────────────────────────
 
-@qos_policy.command("rule-list")
+@qos_policy.group("rule")
+def qos_rule() -> None:
+    """Manage QoS rules attached to a policy."""
+
+
+@qos_rule.command("list")
 @click.argument("policy_id", callback=validate_id)
 @click.option("--type", "rule_type",
               type=click.Choice(list(_RULE_TYPES)),
@@ -155,7 +166,7 @@ def qos_rule_list(ctx, policy_id, rule_type,
     )
 
 
-@qos_policy.command("rule-create")
+@qos_rule.command("create")
 @click.argument("policy_id", callback=validate_id)
 @click.option("--type", "rule_type",
               type=click.Choice(list(_RULE_TYPES)),
@@ -208,7 +219,7 @@ def qos_rule_create(ctx, policy_id, rule_type, max_kbps, max_burst_kbps,
     console.print(f"[green]QoS {rule_type} rule created: {r.get('id', '?')}[/green]")
 
 
-@qos_policy.command("rule-delete")
+@qos_rule.command("delete")
 @click.argument("policy_id", callback=validate_id)
 @click.argument("rule_id", callback=validate_id)
 @click.option("--type", "rule_type",
@@ -224,3 +235,23 @@ def qos_rule_delete(ctx, policy_id, rule_id, rule_type, yes):
         click.confirm(f"Delete QoS {rule_type} rule {rule_id}?", abort=True)
     svc.delete_qos_rule(policy_id, _RULE_TYPES[rule_type], rule_id)
     console.print(f"[green]QoS rule {rule_id} deleted.[/green]")
+
+
+# ── ADR-0008 deprecated aliases (backward compatibility) ────────────────
+
+add_command_with_alias(qos_policy, qos_policy_list,
+                        legacy_name="policy-list", primary_path="qos policy list")
+add_command_with_alias(qos_policy, qos_policy_show,
+                        legacy_name="policy-show", primary_path="qos policy show")
+add_command_with_alias(qos_policy, qos_policy_create,
+                        legacy_name="policy-create", primary_path="qos policy create")
+add_command_with_alias(qos_policy, qos_policy_set,
+                        legacy_name="policy-set", primary_path="qos policy set")
+add_command_with_alias(qos_policy, qos_policy_delete,
+                        legacy_name="policy-delete", primary_path="qos policy delete")
+add_command_with_alias(qos_policy, qos_rule_list,
+                        legacy_name="rule-list", primary_path="qos rule list")
+add_command_with_alias(qos_policy, qos_rule_create,
+                        legacy_name="rule-create", primary_path="qos rule create")
+add_command_with_alias(qos_policy, qos_rule_delete,
+                        legacy_name="rule-delete", primary_path="qos rule delete")

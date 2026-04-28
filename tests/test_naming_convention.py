@@ -74,11 +74,8 @@ LEGACY_HYPHENATED_SUBCOMMANDS: dict[str, set[str]] = {
     # nested under a sub-group (agent, port, rbac, segment, subnet,
     # auto-allocated-topology, router) or sub-sub-group (router add/remove
     # for interface/route, router set/unset for gateway).
-    "object": {
-        "account-set", "account-unset",
-        "container-create", "container-delete", "container-list",
-        "container-save", "container-set", "container-show",
-    },
+    # object — migrated 2026-04-28: account-* moved under
+    # ``object account``, container-* moved under ``object container``.
     "placement": {
         "allocation-candidate-list", "allocation-delete", "allocation-set",
         "allocation-show",
@@ -104,11 +101,8 @@ LEGACY_HYPHENATED_SUBCOMMANDS: dict[str, set[str]] = {
         "set-color", "set-region",
         "to-clouds", "to-openrc",
     },
-    "qos": {
-        "policy-create", "policy-delete", "policy-list",
-        "policy-set", "policy-show",
-        "rule-create", "rule-delete", "rule-list",
-    },
+    # qos — migrated 2026-04-28: policy-* under ``qos policy``,
+    # rule-* under ``qos rule``.
     "rating": {
         "metric-list", "metric-show",
         "module-disable", "module-enable", "module-list",
