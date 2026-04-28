@@ -4256,6 +4256,16 @@ comment in the test whitelist explaining why.</p>
   sub-groups (<code>nodegroup</code>, <code>template</code>). All 30 old names live as
   deprecated aliases via <code>add_command_with_alias</code>. Whitelists for
   <code>backup</code> and <code>cluster</code> cleared.</li>
+<li>2026-04-28 — <strong>lot 11</strong> (<code>profile</code>): the last 6 hyphenated leaves
+  migrate to four sub-groups (<code>color</code>, <code>region</code>, <code>import</code>,
+  <code>export</code>) — <code>set-color</code> → <code>color set</code>, <code>set-region</code> →
+  <code>region set</code>, <code>to-openrc</code>/<code>to-clouds</code> → <code>export openrc</code>/
+  <code>export clouds</code>, <code>from-openrc</code>/<code>from-clouds</code> →
+  <code>import openrc</code>/<code>import clouds</code>. The single-word <code>regions</code> leaf
+  also moves under the new <code>region</code> sub-group as <code>region list</code> for
+  consistency. All 7 legacy names live on as deprecated aliases.
+  Whitelist for <code>profile</code> cleared — <strong>migration complete</strong>:
+  every command in the live tree now follows ADR-0008.</li>
 </ul>
 
 
