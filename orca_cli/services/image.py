@@ -212,5 +212,133 @@ class ImageService:
         """
         return self._client.get_stream(f"{self._base}/images/{image_id}/file")
 
+    # ── metadata definitions (Glance metadefs) ─────────────────────────
+    # Namespaces are catalogues of metadata schemas (key/value, with
+    # validation rules) that operators publish so users know which
+    # properties an image type understands. Used heavily by Horizon's
+    # "Image Properties" pickers.
+
+    def find_metadef_namespaces(self, *,
+                                params: dict[str, Any] | None = None) -> list[dict]:
+        data = self._client.get(f"{self._base}/metadefs/namespaces", params=params)
+        return data.get("namespaces", [])
+
+    def get_metadef_namespace(self, namespace: str) -> dict:
+        return self._client.get(
+            f"{self._base}/metadefs/namespaces/{namespace}"
+        ) or {}
+
+    def create_metadef_namespace(self, body: dict[str, Any]) -> dict:
+        return self._client.post(
+            f"{self._base}/metadefs/namespaces", json=body,
+        ) or {}
+
+    def update_metadef_namespace(self, namespace: str,
+                                  body: dict[str, Any]) -> dict:
+        return self._client.put(
+            f"{self._base}/metadefs/namespaces/{namespace}", json=body,
+        ) or {}
+
+    def delete_metadef_namespace(self, namespace: str) -> None:
+        self._client.delete(f"{self._base}/metadefs/namespaces/{namespace}")
+
+    # Objects within a namespace
+    def find_metadef_objects(self, namespace: str) -> list[dict]:
+        data = self._client.get(
+            f"{self._base}/metadefs/namespaces/{namespace}/objects"
+        )
+        return data.get("objects", [])
+
+    def get_metadef_object(self, namespace: str, object_name: str) -> dict:
+        return self._client.get(
+            f"{self._base}/metadefs/namespaces/{namespace}"
+            f"/objects/{object_name}"
+        ) or {}
+
+    def create_metadef_object(self, namespace: str,
+                               body: dict[str, Any]) -> dict:
+        return self._client.post(
+            f"{self._base}/metadefs/namespaces/{namespace}/objects",
+            json=body,
+        ) or {}
+
+    def update_metadef_object(self, namespace: str, object_name: str,
+                               body: dict[str, Any]) -> dict:
+        return self._client.put(
+            f"{self._base}/metadefs/namespaces/{namespace}"
+            f"/objects/{object_name}",
+            json=body,
+        ) or {}
+
+    def delete_metadef_object(self, namespace: str, object_name: str) -> None:
+        self._client.delete(
+            f"{self._base}/metadefs/namespaces/{namespace}"
+            f"/objects/{object_name}"
+        )
+
+    # Properties within a namespace
+    def find_metadef_properties(self, namespace: str) -> list[dict]:
+        data = self._client.get(
+            f"{self._base}/metadefs/namespaces/{namespace}/properties"
+        )
+        # Glance returns {"properties": {"key1": {...}, "key2": {...}}}
+        props = data.get("properties", {})
+        if isinstance(props, dict):
+            return [{"name": k, **(v or {})} for k, v in props.items()]
+        return list(props) if isinstance(props, list) else []
+
+    def get_metadef_property(self, namespace: str, name: str) -> dict:
+        return self._client.get(
+            f"{self._base}/metadefs/namespaces/{namespace}/properties/{name}"
+        ) or {}
+
+    def create_metadef_property(self, namespace: str,
+                                 body: dict[str, Any]) -> dict:
+        return self._client.post(
+            f"{self._base}/metadefs/namespaces/{namespace}/properties",
+            json=body,
+        ) or {}
+
+    def update_metadef_property(self, namespace: str, name: str,
+                                 body: dict[str, Any]) -> dict:
+        return self._client.put(
+            f"{self._base}/metadefs/namespaces/{namespace}/properties/{name}",
+            json=body,
+        ) or {}
+
+    def delete_metadef_property(self, namespace: str, name: str) -> None:
+        self._client.delete(
+            f"{self._base}/metadefs/namespaces/{namespace}/properties/{name}"
+        )
+
+    # Resource type associations
+    def find_metadef_resource_types(self) -> list[dict]:
+        data = self._client.get(f"{self._base}/metadefs/resource_types")
+        return data.get("resource_types", [])
+
+    def find_metadef_resource_type_associations(
+        self, namespace: str,
+    ) -> list[dict]:
+        data = self._client.get(
+            f"{self._base}/metadefs/namespaces/{namespace}/resource_types"
+        )
+        return data.get("resource_type_associations", [])
+
+    def create_metadef_resource_type_association(
+        self, namespace: str, body: dict[str, Any],
+    ) -> dict:
+        return self._client.post(
+            f"{self._base}/metadefs/namespaces/{namespace}/resource_types",
+            json=body,
+        ) or {}
+
+    def delete_metadef_resource_type_association(
+        self, namespace: str, resource_type: str,
+    ) -> None:
+        self._client.delete(
+            f"{self._base}/metadefs/namespaces/{namespace}"
+            f"/resource_types/{resource_type}"
+        )
+
 
 __all__ = ["ImageService"]

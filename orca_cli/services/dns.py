@@ -197,3 +197,84 @@ class DnsService:
 
     def delete_tld(self, tld_id: str) -> None:
         self._client.delete(f"{self._base}/tlds/{tld_id}")
+
+    # ── zone abandon / move (admin) ────────────────────────────────────
+
+    def abandon_zone(self, zone_id: str) -> None:
+        """Drop a zone from Designate without notifying the backend.
+
+        Use only after manual cleanup of the underlying nameservers.
+        """
+        self._client.post(f"{self._base}/zones/{zone_id}/tasks/abandon")
+
+    def axfr_zone(self, zone_id: str) -> None:
+        """Trigger an AXFR zone transfer from the master servers."""
+        self._client.post(f"{self._base}/zones/{zone_id}/tasks/xfr")
+
+    # ── zone shares (Designate share API) ──────────────────────────────
+
+    def find_shares(self, zone_id: str) -> list[dict]:
+        data = self._client.get(f"{self._base}/zones/{zone_id}/shares")
+        return data.get("shared_zones", [])
+
+    def get_share(self, zone_id: str, share_id: str) -> dict:
+        data = self._client.get(
+            f"{self._base}/zones/{zone_id}/shares/{share_id}"
+        )
+        return data.get("shared_zone", data) if isinstance(data, dict) else {}
+
+    def create_share(self, zone_id: str, target_project_id: str) -> dict:
+        data = self._client.post(
+            f"{self._base}/zones/{zone_id}/shares",
+            json={"target_project_id": target_project_id},
+        )
+        return data.get("shared_zone", data) if data else {}
+
+    def delete_share(self, zone_id: str, share_id: str) -> None:
+        self._client.delete(
+            f"{self._base}/zones/{zone_id}/shares/{share_id}"
+        )
+
+    # ── zone blacklists (admin: forbid certain domain patterns) ────────
+
+    def find_blacklists(self) -> list[dict]:
+        data = self._client.get(f"{self._base}/blacklists")
+        return data.get("blacklists", [])
+
+    def get_blacklist(self, blacklist_id: str) -> dict:
+        data = self._client.get(f"{self._base}/blacklists/{blacklist_id}")
+        return data.get("blacklist", data) if isinstance(data, dict) else {}
+
+    def create_blacklist(self, body: dict[str, Any]) -> dict:
+        data = self._client.post(f"{self._base}/blacklists", json=body)
+        return data.get("blacklist", data) if data else {}
+
+    def update_blacklist(self, blacklist_id: str,
+                         body: dict[str, Any]) -> dict:
+        data = self._client.patch(
+            f"{self._base}/blacklists/{blacklist_id}", json=body,
+        )
+        return data.get("blacklist", data) if data else {}
+
+    def delete_blacklist(self, blacklist_id: str) -> None:
+        self._client.delete(f"{self._base}/blacklists/{blacklist_id}")
+
+    # ── export / import detail helpers (per-task) ──────────────────────
+
+    def find_exports(self) -> list[dict]:
+        data = self._client.get(f"{self._base}/zones/tasks/exports")
+        return data.get("exports", [])
+
+    def delete_export(self, export_id: str) -> None:
+        self._client.delete(
+            f"{self._base}/zones/tasks/exports/{export_id}"
+        )
+
+    def find_imports(self) -> list[dict]:
+        data = self._client.get(f"{self._base}/zones/tasks/imports")
+        return data.get("imports", [])
+
+    def delete_import(self, import_id: str) -> None:
+        self._client.delete(
+            f"{self._base}/zones/tasks/imports/{import_id}"
+        )

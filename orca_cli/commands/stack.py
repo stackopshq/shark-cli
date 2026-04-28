@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime
+import json
 import time
 from pathlib import Path
 
@@ -12,7 +13,7 @@ import yaml
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
-from orca_cli.core.validators import safe_output_path
+from orca_cli.core.validators import safe_output_path, validate_id
 from orca_cli.models.orchestration import Stack
 from orca_cli.services.orchestration import OrchestrationService
 
@@ -791,3 +792,263 @@ def stack_resource_type_show(ctx: click.Context, resource_type: str,
         resource_type, params={"template_type": template_type},
     )
     console.print(json.dumps(data, indent=2))
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  stack snapshot
+# ══════════════════════════════════════════════════════════════════════
+
+
+@stack.group("snapshot")
+def stack_snapshot() -> None:
+    """Manage stack snapshots (Heat snapshot/restore)."""
+
+
+@stack_snapshot.command("create")
+@click.argument("stack_name_or_id")
+@click.option("--name", default=None, help="Snapshot name (auto if omitted).")
+@click.pass_context
+def stack_snapshot_create(ctx, stack_name_or_id, name):
+    """Take a snapshot of a stack's current state."""
+    client = ctx.find_object(OrcaContext).ensure_client()
+    stk = _resolve_stack(client, stack_name_or_id)
+    snap = OrchestrationService(client).create_snapshot(
+        stk["stack_name"], stk["id"], snapshot_name=name,
+    )
+    console.print(f"[green]Snapshot created: {snap.get('id', '?')}[/green]")
+
+
+@stack_snapshot.command("list")
+@click.argument("stack_name_or_id")
+@output_options
+@click.pass_context
+def stack_snapshot_list(ctx, stack_name_or_id,
+                         output_format, columns, fit_width, max_width, noindent):
+    """List snapshots of a stack."""
+    client = ctx.find_object(OrcaContext).ensure_client()
+    stk = _resolve_stack(client, stack_name_or_id)
+    items = OrchestrationService(client).find_snapshots(
+        stk["stack_name"], stk["id"],
+    )
+    if not items:
+        console.print("No snapshots found.")
+        return
+    print_list(
+        items,
+        [("ID", "id"), ("Name", "name"), ("Status", "status"),
+         ("Status Reason", "status_reason"), ("Created", "creation_time")],
+        title=f"Snapshots of stack {stk['stack_name']}",
+        output_format=output_format, columns=columns,
+        fit_width=fit_width, max_width=max_width, noindent=noindent,
+    )
+
+
+@stack_snapshot.command("show")
+@click.argument("stack_name_or_id")
+@click.argument("snapshot_id", callback=validate_id)
+@output_options
+@click.pass_context
+def stack_snapshot_show(ctx, stack_name_or_id, snapshot_id,
+                         output_format, columns, fit_width, max_width, noindent):
+    """Show a stack snapshot."""
+    client = ctx.find_object(OrcaContext).ensure_client()
+    stk = _resolve_stack(client, stack_name_or_id)
+    snap = OrchestrationService(client).get_snapshot(
+        stk["stack_name"], stk["id"], snapshot_id,
+    )
+    console.print(json.dumps(snap, indent=2))
+
+
+@stack_snapshot.command("delete")
+@click.argument("stack_name_or_id")
+@click.argument("snapshot_id", callback=validate_id)
+@click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
+@click.pass_context
+def stack_snapshot_delete(ctx, stack_name_or_id, snapshot_id, yes):
+    """Delete a stack snapshot."""
+    if not yes:
+        click.confirm(f"Delete snapshot {snapshot_id}?", abort=True)
+    client = ctx.find_object(OrcaContext).ensure_client()
+    stk = _resolve_stack(client, stack_name_or_id)
+    OrchestrationService(client).delete_snapshot(
+        stk["stack_name"], stk["id"], snapshot_id,
+    )
+    console.print(f"[green]Snapshot {snapshot_id} deleted.[/green]")
+
+
+@stack_snapshot.command("restore")
+@click.argument("stack_name_or_id")
+@click.argument("snapshot_id", callback=validate_id)
+@click.pass_context
+def stack_snapshot_restore(ctx, stack_name_or_id, snapshot_id):
+    """Restore a stack to a previous snapshot."""
+    client = ctx.find_object(OrcaContext).ensure_client()
+    stk = _resolve_stack(client, stack_name_or_id)
+    OrchestrationService(client).restore_snapshot(
+        stk["stack_name"], stk["id"], snapshot_id,
+    )
+    console.print(f"[green]Stack restoring from snapshot {snapshot_id}...[/green]")
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  stack adopt / files / environment / failures
+# ══════════════════════════════════════════════════════════════════════
+
+
+@stack.command("adopt")
+@click.argument("name")
+@click.option("-t", "--template", required=True,
+              type=click.Path(exists=True, dir_okay=False),
+              help="Template file (yaml/json).")
+@click.option("--adopt-file", required=True,
+              type=click.Path(exists=True, dir_okay=False),
+              help="JSON file with the adopt_stack_data payload "
+                   "(existing resources to adopt).")
+@click.option("--parameter", multiple=True,
+              help="Parameter key=value (repeatable).")
+@click.option("--timeout", type=int, default=None,
+              help="Timeout in minutes.")
+@click.pass_context
+def stack_adopt(ctx, name, template, adopt_file, parameter, timeout):
+    """Adopt existing resources into a new stack."""
+    from pathlib import Path
+    tpl = Path(template).read_text()
+    adopt_data = Path(adopt_file).read_text()
+    body: dict = {
+        "stack_name": name,
+        "template": tpl,
+        "adopt_stack_data": adopt_data,
+        "parameters": _parse_params(parameter),
+    }
+    if timeout is not None:
+        body["timeout_mins"] = timeout
+    client = ctx.find_object(OrcaContext).ensure_client()
+    stk = OrchestrationService(client).adopt(body)
+    console.print(f"[green]Stack '{name}' adopted: {stk.get('id', '?')}[/green]")
+
+
+@stack.group("environment")
+def stack_environment() -> None:
+    """Inspect a stack's resolved environment."""
+
+
+@stack_environment.command("show")
+@click.argument("stack_name_or_id")
+@click.pass_context
+def stack_environment_show(ctx, stack_name_or_id):
+    """Show the resolved environment of a stack."""
+    client = ctx.find_object(OrcaContext).ensure_client()
+    stk = _resolve_stack(client, stack_name_or_id)
+    env = OrchestrationService(client).get_environment(
+        stk["stack_name"], stk["id"],
+    )
+    console.print(json.dumps(env, indent=2))
+
+
+@stack.group("file")
+def stack_file() -> None:
+    """Inspect files referenced by a stack template."""
+
+
+@stack_file.command("list")
+@click.argument("stack_name_or_id")
+@click.pass_context
+def stack_file_list(ctx, stack_name_or_id):
+    """List local files referenced by a stack template."""
+    client = ctx.find_object(OrcaContext).ensure_client()
+    stk = _resolve_stack(client, stack_name_or_id)
+    files = OrchestrationService(client).get_files(stk["stack_name"], stk["id"])
+    if not files:
+        console.print("No files referenced.")
+        return
+    for path in sorted(files):
+        console.print(path)
+
+
+@stack.group("failures")
+def stack_failures() -> None:
+    """Inspect failed events on a stack."""
+
+
+@stack_failures.command("list")
+@click.argument("stack_name_or_id")
+@click.pass_context
+def stack_failures_list(ctx, stack_name_or_id):
+    """List events on a stack whose resource_status is FAILED."""
+    client = ctx.find_object(OrcaContext).ensure_client()
+    svc = OrchestrationService(client)
+    stk = _resolve_stack(client, stack_name_or_id)
+    events = svc.find_events(stk["stack_name"], stk["id"])
+    failures = [e for e in events if "FAILED" in (e.get("resource_status") or "")]
+    if not failures:
+        console.print("No failed events on this stack.")
+        return
+    print_list(
+        failures,
+        [("Resource", "resource_name"),
+         ("Status", "resource_status"),
+         ("Reason", "resource_status_reason"),
+         ("Time", "event_time")],
+        title=f"Failures on {stk['stack_name']}",
+        output_format="table",
+    )
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  stack resource actions: signal, mark-unhealthy, metadata
+#
+# Note: ``resource-list`` and ``resource-show`` exist as legacy
+# top-level commands (whitelisted in test_naming_convention). The new
+# action sub-commands live under a dedicated ``resource`` sub-group.
+# ══════════════════════════════════════════════════════════════════════
+
+
+@stack.group("resource")
+def stack_resource() -> None:
+    """Per-resource actions on a stack (signal, metadata, mark-unhealthy)."""
+
+
+@stack_resource.command("signal")
+@click.argument("stack_name_or_id")
+@click.argument("resource_name")
+@click.option("--data", default=None,
+              help="JSON body to send as the signal payload.")
+@click.pass_context
+def stack_resource_signal(ctx, stack_name_or_id, resource_name, data):
+    """Send a signal to a stack resource (e.g. WaitCondition)."""
+    body = json.loads(data) if data else {}
+    client = ctx.find_object(OrcaContext).ensure_client()
+    stk = _resolve_stack(client, stack_name_or_id)
+    OrchestrationService(client).signal_resource(
+        stk["stack_name"], stk["id"], resource_name, body,
+    )
+    console.print(f"[green]Signal sent to resource {resource_name}.[/green]")
+
+
+@stack_resource.command("mark-unhealthy")
+@click.argument("stack_name_or_id")
+@click.argument("resource_name")
+@click.option("--reason", default=None, help="Status reason.")
+@click.pass_context
+def stack_resource_mark_unhealthy(ctx, stack_name_or_id, resource_name, reason):
+    """Mark a stack resource as unhealthy (forces re-create on update)."""
+    client = ctx.find_object(OrcaContext).ensure_client()
+    stk = _resolve_stack(client, stack_name_or_id)
+    OrchestrationService(client).mark_resource_unhealthy(
+        stk["stack_name"], stk["id"], resource_name, status_reason=reason,
+    )
+    console.print(f"[green]Resource {resource_name} marked unhealthy.[/green]")
+
+
+@stack_resource.command("metadata")
+@click.argument("stack_name_or_id")
+@click.argument("resource_name")
+@click.pass_context
+def stack_resource_metadata(ctx, stack_name_or_id, resource_name):
+    """Show the metadata of a stack resource."""
+    client = ctx.find_object(OrcaContext).ensure_client()
+    stk = _resolve_stack(client, stack_name_or_id)
+    meta = OrchestrationService(client).get_resource_metadata(
+        stk["stack_name"], stk["id"], resource_name,
+    )
+    console.print(json.dumps(meta, indent=2))

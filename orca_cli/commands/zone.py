@@ -8,7 +8,7 @@ import click
 
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
-from orca_cli.core.validators import safe_output_path
+from orca_cli.core.validators import safe_output_path, validate_id
 from orca_cli.services.dns import DnsService
 
 
@@ -562,3 +562,197 @@ def zone_tld_delete(ctx: click.Context, tld_id: str, yes: bool) -> None:
     svc = DnsService(client)
     svc.delete_tld(tld_id)
     console.print(f"[green]TLD {tld_id} deleted.[/green]")
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  zone abandon / axfr (admin)
+# ══════════════════════════════════════════════════════════════════════
+
+
+@zone.command("abandon")
+@click.argument("zone_id", callback=validate_id)
+@click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
+@click.pass_context
+def zone_abandon(ctx, zone_id, yes):
+    """Drop a zone from Designate without notifying the backend (admin)."""
+    if not yes:
+        click.confirm(
+            f"Abandon zone {zone_id}? This bypasses backend cleanup.",
+            abort=True,
+        )
+    svc = DnsService(ctx.find_object(OrcaContext).ensure_client())
+    svc.abandon_zone(zone_id)
+    console.print(f"[green]Zone {zone_id} abandoned.[/green]")
+
+
+@zone.command("axfr")
+@click.argument("zone_id", callback=validate_id)
+@click.pass_context
+def zone_axfr(ctx, zone_id):
+    """Trigger an AXFR transfer on a secondary zone."""
+    svc = DnsService(ctx.find_object(OrcaContext).ensure_client())
+    svc.axfr_zone(zone_id)
+    console.print(f"[green]AXFR transfer triggered for zone {zone_id}.[/green]")
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  zone share — share a zone with another project
+# ══════════════════════════════════════════════════════════════════════
+
+
+@zone.group("share")
+def zone_share() -> None:
+    """Share a zone with other projects."""
+
+
+@zone_share.command("create")
+@click.argument("zone_id", callback=validate_id)
+@click.option("--target-project", required=True,
+              help="Project ID to share the zone with.")
+@click.pass_context
+def zone_share_create(ctx, zone_id, target_project):
+    """Share a zone with a target project."""
+    svc = DnsService(ctx.find_object(OrcaContext).ensure_client())
+    s = svc.create_share(zone_id, target_project)
+    console.print(f"[green]Zone {zone_id} shared with project "
+                  f"{target_project}: share id {s.get('id', '?')}[/green]")
+
+
+@zone_share.command("list")
+@click.argument("zone_id", callback=validate_id)
+@output_options
+@click.pass_context
+def zone_share_list(ctx, zone_id,
+                     output_format, columns, fit_width, max_width, noindent):
+    """List share grants on a zone."""
+    svc = DnsService(ctx.find_object(OrcaContext).ensure_client())
+    items = svc.find_shares(zone_id)
+    if not items:
+        console.print("No shares for this zone.")
+        return
+    print_list(
+        items,
+        [("ID", "id"), ("Target Project", "target_project_id"),
+         ("Created", "created_at")],
+        title=f"Shares of zone {zone_id}",
+        output_format=output_format, columns=columns,
+        fit_width=fit_width, max_width=max_width, noindent=noindent,
+    )
+
+
+@zone_share.command("show")
+@click.argument("zone_id", callback=validate_id)
+@click.argument("share_id", callback=validate_id)
+@click.pass_context
+def zone_share_show(ctx, zone_id, share_id):
+    """Show a single zone share."""
+    svc = DnsService(ctx.find_object(OrcaContext).ensure_client())
+    s = svc.get_share(zone_id, share_id)
+    print_detail([(k, str(v)) for k, v in s.items()],
+                 output_format="table", columns=(),
+                 fit_width=False, max_width=None, noindent=False)
+
+
+@zone_share.command("delete")
+@click.argument("zone_id", callback=validate_id)
+@click.argument("share_id", callback=validate_id)
+@click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
+@click.pass_context
+def zone_share_delete(ctx, zone_id, share_id, yes):
+    """Revoke a zone share."""
+    if not yes:
+        click.confirm(f"Revoke share {share_id} on zone {zone_id}?", abort=True)
+    svc = DnsService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_share(zone_id, share_id)
+    console.print(f"[green]Share {share_id} on zone {zone_id} revoked.[/green]")
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  zone blacklist (admin: forbid certain domain patterns)
+# ══════════════════════════════════════════════════════════════════════
+
+
+@zone.group("blacklist")
+def zone_blacklist() -> None:
+    """Manage DNS zone blacklists (admin)."""
+
+
+@zone_blacklist.command("create")
+@click.argument("pattern")
+@click.option("--description", default=None, help="Blacklist description.")
+@click.pass_context
+def zone_blacklist_create(ctx, pattern, description):
+    """Add a blacklist rule (regex pattern matched against zone names)."""
+    svc = DnsService(ctx.find_object(OrcaContext).ensure_client())
+    body: dict = {"pattern": pattern}
+    if description:
+        body["description"] = description
+    bl = svc.create_blacklist(body)
+    console.print(f"[green]Blacklist created: {bl.get('id', '?')} "
+                  f"({pattern})[/green]")
+
+
+@zone_blacklist.command("list")
+@output_options
+@click.pass_context
+def zone_blacklist_list(ctx,
+                        output_format, columns, fit_width, max_width, noindent):
+    """List blacklist rules."""
+    svc = DnsService(ctx.find_object(OrcaContext).ensure_client())
+    items = svc.find_blacklists()
+    if not items:
+        console.print("No blacklist rules defined.")
+        return
+    print_list(
+        items,
+        [("ID", "id"), ("Pattern", "pattern"),
+         ("Description", "description"), ("Created", "created_at")],
+        title="DNS Blacklists",
+        output_format=output_format, columns=columns,
+        fit_width=fit_width, max_width=max_width, noindent=noindent,
+    )
+
+
+@zone_blacklist.command("show")
+@click.argument("blacklist_id", callback=validate_id)
+@click.pass_context
+def zone_blacklist_show(ctx, blacklist_id):
+    """Show a blacklist rule."""
+    svc = DnsService(ctx.find_object(OrcaContext).ensure_client())
+    bl = svc.get_blacklist(blacklist_id)
+    print_detail([(k, str(v)) for k, v in bl.items()],
+                 output_format="table", columns=(),
+                 fit_width=False, max_width=None, noindent=False)
+
+
+@zone_blacklist.command("set")
+@click.argument("blacklist_id", callback=validate_id)
+@click.option("--pattern", default=None, help="New pattern.")
+@click.option("--description", default=None, help="New description.")
+@click.pass_context
+def zone_blacklist_set(ctx, blacklist_id, pattern, description):
+    """Update a blacklist rule."""
+    body: dict = {}
+    if pattern is not None:
+        body["pattern"] = pattern
+    if description is not None:
+        body["description"] = description
+    if not body:
+        console.print("[yellow]Nothing to update.[/yellow]")
+        return
+    svc = DnsService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_blacklist(blacklist_id, body)
+    console.print(f"[green]Blacklist {blacklist_id} updated.[/green]")
+
+
+@zone_blacklist.command("delete")
+@click.argument("blacklist_id", callback=validate_id)
+@click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
+@click.pass_context
+def zone_blacklist_delete(ctx, blacklist_id, yes):
+    """Delete a blacklist rule."""
+    if not yes:
+        click.confirm(f"Delete blacklist {blacklist_id}?", abort=True)
+    svc = DnsService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_blacklist(blacklist_id)
+    console.print(f"[green]Blacklist {blacklist_id} deleted.[/green]")

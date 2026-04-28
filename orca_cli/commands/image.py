@@ -1097,3 +1097,413 @@ def image_task_show(ctx: click.Context, task_id: str, output_format: str,
     ]
     print_detail(fields, output_format=output_format, fit_width=fit_width,
                  max_width=max_width, noindent=noindent, columns=columns)
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  image metadef — Glance metadata definitions catalogue
+# ══════════════════════════════════════════════════════════════════════
+
+
+@image.group("metadef")
+def image_metadef() -> None:
+    """Manage Glance metadata definitions (namespaces, objects, properties)."""
+
+
+# ── namespace ───────────────────────────────────────────────────────────
+
+
+@image_metadef.group("namespace")
+def image_metadef_namespace() -> None:
+    """Manage metadef namespaces."""
+
+
+@image_metadef_namespace.command("list")
+@output_options
+@click.pass_context
+def metadef_namespace_list(ctx,
+                           output_format, columns, fit_width, max_width, noindent):
+    """List metadef namespaces."""
+    svc = ImageService(ctx.find_object(OrcaContext).ensure_client())
+    items = svc.find_metadef_namespaces()
+    if not items:
+        console.print("No namespaces found.")
+        return
+    print_list(
+        items,
+        [("Namespace", "namespace"),
+         ("Display Name", "display_name"),
+         ("Visibility", "visibility"),
+         ("Resource Types",
+          lambda ns: ", ".join(rt.get("name", "")
+                               for rt in (ns.get("resource_type_associations") or [])))],
+        title="Metadef Namespaces",
+        output_format=output_format, columns=columns,
+        fit_width=fit_width, max_width=max_width, noindent=noindent,
+    )
+
+
+@image_metadef_namespace.command("show")
+@click.argument("namespace")
+@click.pass_context
+def metadef_namespace_show(ctx, namespace):
+    """Show namespace details."""
+    svc = ImageService(ctx.find_object(OrcaContext).ensure_client())
+    data = svc.get_metadef_namespace(namespace)
+    console.print(_json.dumps(data, indent=2))
+
+
+@image_metadef_namespace.command("create")
+@click.argument("namespace")
+@click.option("--display-name", default=None, help="Human-readable name.")
+@click.option("--description", default=None, help="Description.")
+@click.option("--visibility", default="private",
+              type=click.Choice(["private", "public"]), show_default=True)
+@click.option("--protected", is_flag=True, default=False,
+              help="Prevent deletion via API.")
+@click.pass_context
+def metadef_namespace_create(ctx, namespace, display_name, description,
+                              visibility, protected):
+    """Create a metadef namespace."""
+    body: dict = {"namespace": namespace, "visibility": visibility,
+                  "protected": protected}
+    if display_name:
+        body["display_name"] = display_name
+    if description:
+        body["description"] = description
+    svc = ImageService(ctx.find_object(OrcaContext).ensure_client())
+    svc.create_metadef_namespace(body)
+    console.print(f"[green]Namespace '{namespace}' created.[/green]")
+
+
+@image_metadef_namespace.command("set")
+@click.argument("namespace")
+@click.option("--display-name", default=None)
+@click.option("--description", default=None)
+@click.option("--visibility", default=None,
+              type=click.Choice(["private", "public"]))
+@click.option("--protected/--no-protected", default=None)
+@click.pass_context
+def metadef_namespace_set(ctx, namespace, display_name, description,
+                           visibility, protected):
+    """Update a metadef namespace."""
+    body: dict = {"namespace": namespace}
+    if display_name is not None:
+        body["display_name"] = display_name
+    if description is not None:
+        body["description"] = description
+    if visibility is not None:
+        body["visibility"] = visibility
+    if protected is not None:
+        body["protected"] = protected
+    if len(body) == 1:
+        console.print("[yellow]Nothing to update.[/yellow]")
+        return
+    svc = ImageService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_metadef_namespace(namespace, body)
+    console.print(f"[green]Namespace '{namespace}' updated.[/green]")
+
+
+@image_metadef_namespace.command("delete")
+@click.argument("namespace")
+@click.option("--yes", "-y", is_flag=True, help="Skip confirmation.")
+@click.pass_context
+def metadef_namespace_delete(ctx, namespace, yes):
+    """Delete a metadef namespace (and all its objects/properties)."""
+    if not yes:
+        click.confirm(f"Delete namespace '{namespace}' (cascades)?", abort=True)
+    svc = ImageService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_metadef_namespace(namespace)
+    console.print(f"[green]Namespace '{namespace}' deleted.[/green]")
+
+
+# ── object ──────────────────────────────────────────────────────────────
+
+
+@image_metadef.group("object")
+def image_metadef_object() -> None:
+    """Manage metadef objects within a namespace."""
+
+
+@image_metadef_object.command("list")
+@click.argument("namespace")
+@output_options
+@click.pass_context
+def metadef_object_list(ctx, namespace,
+                        output_format, columns, fit_width, max_width, noindent):
+    """List objects in a namespace."""
+    svc = ImageService(ctx.find_object(OrcaContext).ensure_client())
+    items = svc.find_metadef_objects(namespace)
+    if not items:
+        console.print("No objects in this namespace.")
+        return
+    print_list(
+        items,
+        [("Name", "name"), ("Description", "description")],
+        title=f"Metadef objects in {namespace}",
+        output_format=output_format, columns=columns,
+        fit_width=fit_width, max_width=max_width, noindent=noindent,
+    )
+
+
+@image_metadef_object.command("show")
+@click.argument("namespace")
+@click.argument("object_name")
+@click.pass_context
+def metadef_object_show(ctx, namespace, object_name):
+    """Show a metadef object."""
+    svc = ImageService(ctx.find_object(OrcaContext).ensure_client())
+    data = svc.get_metadef_object(namespace, object_name)
+    console.print(_json.dumps(data, indent=2))
+
+
+@image_metadef_object.command("create")
+@click.argument("namespace")
+@click.argument("name")
+@click.option("--description", default=None)
+@click.option("--required", multiple=True,
+              help="Required property name (repeatable).")
+@click.pass_context
+def metadef_object_create(ctx, namespace, name, description, required):
+    """Create a metadef object (a grouping of related properties)."""
+    body: dict = {"name": name}
+    if description:
+        body["description"] = description
+    if required:
+        body["required"] = list(required)
+    svc = ImageService(ctx.find_object(OrcaContext).ensure_client())
+    svc.create_metadef_object(namespace, body)
+    console.print(f"[green]Object '{name}' created in '{namespace}'.[/green]")
+
+
+@image_metadef_object.command("update")
+@click.argument("namespace")
+@click.argument("object_name")
+@click.option("--description", default=None)
+@click.option("--required", multiple=True,
+              help="Replace required list (repeatable).")
+@click.pass_context
+def metadef_object_update(ctx, namespace, object_name, description, required):
+    """Update a metadef object."""
+    body: dict = {"name": object_name}
+    if description is not None:
+        body["description"] = description
+    if required:
+        body["required"] = list(required)
+    if len(body) == 1:
+        console.print("[yellow]Nothing to update.[/yellow]")
+        return
+    svc = ImageService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_metadef_object(namespace, object_name, body)
+    console.print(f"[green]Object '{object_name}' updated.[/green]")
+
+
+@image_metadef_object.command("delete")
+@click.argument("namespace")
+@click.argument("object_name")
+@click.option("--yes", "-y", is_flag=True)
+@click.pass_context
+def metadef_object_delete(ctx, namespace, object_name, yes):
+    """Delete a metadef object."""
+    if not yes:
+        click.confirm(
+            f"Delete object '{object_name}' from '{namespace}'?", abort=True,
+        )
+    svc = ImageService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_metadef_object(namespace, object_name)
+    console.print(f"[green]Object '{object_name}' deleted.[/green]")
+
+
+# ── property ────────────────────────────────────────────────────────────
+
+
+@image_metadef.group("property")
+def image_metadef_property() -> None:
+    """Manage metadef properties within a namespace."""
+
+
+@image_metadef_property.command("list")
+@click.argument("namespace")
+@output_options
+@click.pass_context
+def metadef_property_list(ctx, namespace,
+                          output_format, columns, fit_width, max_width, noindent):
+    """List properties in a namespace."""
+    svc = ImageService(ctx.find_object(OrcaContext).ensure_client())
+    items = svc.find_metadef_properties(namespace)
+    if not items:
+        console.print("No properties in this namespace.")
+        return
+    print_list(
+        items,
+        [("Name", "name"), ("Type", "type"),
+         ("Title", "title"), ("Description", "description")],
+        title=f"Metadef properties in {namespace}",
+        output_format=output_format, columns=columns,
+        fit_width=fit_width, max_width=max_width, noindent=noindent,
+    )
+
+
+@image_metadef_property.command("show")
+@click.argument("namespace")
+@click.argument("name")
+@click.pass_context
+def metadef_property_show(ctx, namespace, name):
+    """Show a metadef property's schema."""
+    svc = ImageService(ctx.find_object(OrcaContext).ensure_client())
+    data = svc.get_metadef_property(namespace, name)
+    console.print(_json.dumps(data, indent=2))
+
+
+@image_metadef_property.command("create")
+@click.argument("namespace")
+@click.argument("name")
+@click.option("--type", "ptype", required=True,
+              type=click.Choice(["string", "integer", "number",
+                                  "boolean", "array"]),
+              help="JSON Schema type.")
+@click.option("--title", default=None)
+@click.option("--description", default=None)
+@click.option("--default", default=None)
+@click.pass_context
+def metadef_property_create(ctx, namespace, name, ptype, title,
+                             description, default):
+    """Define a property schema in a namespace."""
+    body: dict = {"name": name, "type": ptype}
+    if title:
+        body["title"] = title
+    if description:
+        body["description"] = description
+    if default is not None:
+        body["default"] = default
+    svc = ImageService(ctx.find_object(OrcaContext).ensure_client())
+    svc.create_metadef_property(namespace, body)
+    console.print(f"[green]Property '{name}' created in '{namespace}'.[/green]")
+
+
+@image_metadef_property.command("set")
+@click.argument("namespace")
+@click.argument("name")
+@click.option("--type", "ptype", default=None,
+              type=click.Choice(["string", "integer", "number",
+                                  "boolean", "array"]))
+@click.option("--title", default=None)
+@click.option("--description", default=None)
+@click.option("--default", default=None)
+@click.pass_context
+def metadef_property_set(ctx, namespace, name, ptype, title,
+                          description, default):
+    """Update a metadef property."""
+    body: dict = {"name": name}
+    if ptype is not None:
+        body["type"] = ptype
+    if title is not None:
+        body["title"] = title
+    if description is not None:
+        body["description"] = description
+    if default is not None:
+        body["default"] = default
+    if len(body) == 1:
+        console.print("[yellow]Nothing to update.[/yellow]")
+        return
+    svc = ImageService(ctx.find_object(OrcaContext).ensure_client())
+    svc.update_metadef_property(namespace, name, body)
+    console.print(f"[green]Property '{name}' updated.[/green]")
+
+
+@image_metadef_property.command("delete")
+@click.argument("namespace")
+@click.argument("name")
+@click.option("--yes", "-y", is_flag=True)
+@click.pass_context
+def metadef_property_delete(ctx, namespace, name, yes):
+    """Delete a metadef property."""
+    if not yes:
+        click.confirm(
+            f"Delete property '{name}' from '{namespace}'?", abort=True,
+        )
+    svc = ImageService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_metadef_property(namespace, name)
+    console.print(f"[green]Property '{name}' deleted.[/green]")
+
+
+# ── resource type ───────────────────────────────────────────────────────
+
+
+@image_metadef.group("resource-type")
+def image_metadef_resource_type() -> None:
+    """Inspect Glance resource types and their namespace associations."""
+
+
+@image_metadef_resource_type.command("list")
+@output_options
+@click.pass_context
+def metadef_resource_type_list(ctx,
+                                output_format, columns, fit_width, max_width, noindent):
+    """List all Glance resource types globally."""
+    svc = ImageService(ctx.find_object(OrcaContext).ensure_client())
+    items = svc.find_metadef_resource_types()
+    if not items:
+        console.print("No resource types found.")
+        return
+    print_list(
+        items, [("Name", "name"), ("Created", "created_at")],
+        title="Glance Resource Types",
+        output_format=output_format, columns=columns,
+        fit_width=fit_width, max_width=max_width, noindent=noindent,
+    )
+
+
+@image_metadef_resource_type.command("association-list")
+@click.argument("namespace")
+@output_options
+@click.pass_context
+def metadef_rt_assoc_list(ctx, namespace,
+                          output_format, columns, fit_width, max_width, noindent):
+    """List resource type associations on a namespace."""
+    svc = ImageService(ctx.find_object(OrcaContext).ensure_client())
+    items = svc.find_metadef_resource_type_associations(namespace)
+    if not items:
+        console.print("No associations.")
+        return
+    print_list(
+        items,
+        [("Name", "name"), ("Prefix", "prefix"),
+         ("Property Prefix", "properties_target")],
+        title=f"Resource type associations in {namespace}",
+        output_format=output_format, columns=columns,
+        fit_width=fit_width, max_width=max_width, noindent=noindent,
+    )
+
+
+@image_metadef_resource_type.command("association-create")
+@click.argument("namespace")
+@click.argument("resource_type")
+@click.option("--prefix", default=None,
+              help="Property prefix (e.g. 'hw_').")
+@click.pass_context
+def metadef_rt_assoc_create(ctx, namespace, resource_type, prefix):
+    """Associate a resource type with a namespace."""
+    body: dict = {"name": resource_type}
+    if prefix:
+        body["prefix"] = prefix
+    svc = ImageService(ctx.find_object(OrcaContext).ensure_client())
+    svc.create_metadef_resource_type_association(namespace, body)
+    console.print(f"[green]Resource type '{resource_type}' associated with "
+                  f"'{namespace}'.[/green]")
+
+
+@image_metadef_resource_type.command("association-delete")
+@click.argument("namespace")
+@click.argument("resource_type")
+@click.option("--yes", "-y", is_flag=True)
+@click.pass_context
+def metadef_rt_assoc_delete(ctx, namespace, resource_type, yes):
+    """Remove a resource type association from a namespace."""
+    if not yes:
+        click.confirm(
+            f"Remove association '{resource_type}' from '{namespace}'?",
+            abort=True,
+        )
+    svc = ImageService(ctx.find_object(OrcaContext).ensure_client())
+    svc.delete_metadef_resource_type_association(namespace, resource_type)
+    console.print(f"[green]Association '{resource_type}' removed.[/green]")

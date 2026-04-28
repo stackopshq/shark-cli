@@ -142,3 +142,91 @@ class OrchestrationService:
             f"{self._base}/resource_types/{resource_type}/template",
             params=params,
         ) or {}
+
+    # ── snapshots (Heat stack snapshot/restore) ────────────────────────
+
+    def create_snapshot(self, name: str, stack_id: str,
+                        snapshot_name: str | None = None) -> dict:
+        body: dict = {}
+        if snapshot_name:
+            body["name"] = snapshot_name
+        return self._client.post(
+            f"{self._base}/stacks/{name}/{stack_id}/snapshots",
+            json=body,
+        ) or {}
+
+    def find_snapshots(self, name: str, stack_id: str) -> list[dict]:
+        data = self._client.get(
+            f"{self._base}/stacks/{name}/{stack_id}/snapshots"
+        )
+        return data.get("snapshots", []) if isinstance(data, dict) else []
+
+    def get_snapshot(self, name: str, stack_id: str, snapshot_id: str) -> dict:
+        data = self._client.get(
+            f"{self._base}/stacks/{name}/{stack_id}/snapshots/{snapshot_id}"
+        )
+        return data.get("snapshot", data) if isinstance(data, dict) else {}
+
+    def delete_snapshot(self, name: str, stack_id: str,
+                        snapshot_id: str) -> None:
+        self._client.delete(
+            f"{self._base}/stacks/{name}/{stack_id}/snapshots/{snapshot_id}"
+        )
+
+    def restore_snapshot(self, name: str, stack_id: str,
+                         snapshot_id: str) -> None:
+        self._client.post(
+            f"{self._base}/stacks/{name}/{stack_id}"
+            f"/snapshots/{snapshot_id}/restore"
+        )
+
+    # ── adopt (rebuild a stack from existing resources) ────────────────
+
+    def adopt(self, body: dict[str, Any]) -> Stack:
+        # POST /stacks with adopt_stack_data — same endpoint as create.
+        data = self._client.post(f"{self._base}/stacks", json=body)
+        return data.get("stack", data) if data else {}
+
+    # ── files / environment / breakpoints ──────────────────────────────
+
+    def get_files(self, name: str, stack_id: str) -> dict:
+        return self._client.get(
+            f"{self._base}/stacks/{name}/{stack_id}/files"
+        ) or {}
+
+    def get_environment(self, name: str, stack_id: str) -> dict:
+        return self._client.get(
+            f"{self._base}/stacks/{name}/{stack_id}/environment"
+        ) or {}
+
+    # ── resource actions: signal, mark unhealthy, get metadata ──────────
+
+    def signal_resource(self, name: str, stack_id: str,
+                        resource_name: str,
+                        body: dict[str, Any] | None = None) -> None:
+        self._client.post(
+            f"{self._base}/stacks/{name}/{stack_id}"
+            f"/resources/{resource_name}/signal",
+            json=body or {},
+        )
+
+    def mark_resource_unhealthy(self, name: str, stack_id: str,
+                                 resource_name: str,
+                                 status_reason: str | None = None) -> None:
+        body = {
+            "mark_unhealthy": True,
+            "resource_status_reason": status_reason or "marked unhealthy via orca",
+        }
+        self._client.patch(
+            f"{self._base}/stacks/{name}/{stack_id}"
+            f"/resources/{resource_name}",
+            json=body,
+        )
+
+    def get_resource_metadata(self, name: str, stack_id: str,
+                              resource_name: str) -> dict:
+        data = self._client.get(
+            f"{self._base}/stacks/{name}/{stack_id}"
+            f"/resources/{resource_name}/metadata"
+        )
+        return data.get("metadata", data) if isinstance(data, dict) else {}
