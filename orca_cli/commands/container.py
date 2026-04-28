@@ -100,14 +100,23 @@ def container_create(ctx: click.Context, container_name: str) -> None:
 @container.command("delete")
 @click.argument("container_name", metavar="CONTAINER")
 @click.option("--recursive", is_flag=True, default=False, help="Delete all objects before deleting the container.")
+@click.option("--yes", "-y", is_flag=True, help="Skip confirmation prompt.")
 @click.pass_context
-def container_delete(ctx: click.Context, container_name: str, recursive: bool) -> None:
+def container_delete(ctx: click.Context, container_name: str, recursive: bool, yes: bool) -> None:
     """Delete a container.
 
     Use --recursive to delete all objects in the container first.
     """
     client = ctx.find_object(OrcaContext).ensure_client()
     svc = ObjectStoreService(client)
+
+    if not yes:
+        prompt = (
+            f"Delete container '{container_name}' and ALL its objects?"
+            if recursive
+            else f"Delete container '{container_name}'?"
+        )
+        click.confirm(prompt, abort=True)
 
     if recursive:
         # Fetch and delete all objects first

@@ -558,8 +558,7 @@ def image_shrink(ctx: click.Context, image_id: str, yes: bool) -> None:
 
     # Check qemu-img availability
     if not shutil.which("qemu-img"):
-        console.print("[red]Error: qemu-img not found. Install qemu-utils (apt) or qemu (brew).[/red]")
-        raise SystemExit(1)
+        raise OrcaCLIError("qemu-img not found. Install qemu-utils (apt) or qemu (brew).")
 
     client = ctx.find_object(OrcaContext).ensure_client()
     service = ImageService(client)
@@ -571,8 +570,7 @@ def image_shrink(ctx: click.Context, image_id: str, yes: bool) -> None:
     original_size = meta.get("size") or 0
 
     if status != "active":
-        console.print(f"[red]Image is not active (status={status}). Cannot shrink.[/red]")
-        raise SystemExit(1)
+        raise OrcaCLIError(f"Image is not active (status={status}). Cannot shrink.")
 
     if fmt != "raw":
         console.print(f"[yellow]Image format is '{fmt}', not raw. Shrink is most effective on raw images.[/yellow]")
@@ -610,8 +608,7 @@ def image_shrink(ctx: click.Context, image_id: str, yes: bool) -> None:
             capture_output=True, text=True,
         )
         if result.returncode != 0:
-            console.print(f"[red]qemu-img failed:[/red] {result.stderr.strip()}")
-            raise SystemExit(1)
+            raise OrcaCLIError(f"qemu-img failed: {result.stderr.strip()}")
 
         new_size = qcow2_path.stat().st_size
         ratio = (1 - new_size / original_size) * 100 if original_size else 0

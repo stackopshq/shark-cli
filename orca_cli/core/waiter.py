@@ -17,8 +17,7 @@ from __future__ import annotations
 
 import time
 
-import click
-
+from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console
 
 
@@ -58,7 +57,7 @@ def wait_for_resource(
             elapsed = time.monotonic() - start
 
             if elapsed >= timeout:
-                raise click.ClickException(
+                raise OrcaCLIError(
                     f"Timeout after {timeout}s — {display} never reached {target}."
                 )
 
@@ -85,7 +84,7 @@ def wait_for_resource(
                 msg = f"{display} entered {error_status} state."
                 if fault:
                     msg += f" Details: {fault}"
-                raise click.ClickException(msg)
+                raise OrcaCLIError(msg)
 
             spinner.update(
                 f"[bold cyan]Waiting for {display} → {target} "

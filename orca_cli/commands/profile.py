@@ -702,7 +702,7 @@ def profile_from_openrc(file: str, profile_name: str | None) -> None:
     profiles = list_profiles()
     if name in profiles:
         if not click.confirm(f"Profile '{name}' exists. Overwrite?"):
-            raise SystemExit(0)
+            return
 
     save_profile(name, cfg)
     console.print(f"[green]Profile '{name}' imported from {file}.[/green]")
@@ -758,7 +758,7 @@ def profile_from_clouds(cloud_name: str, profile_name: str | None, clouds_file: 
     profiles = list_profiles()
     if name in profiles:
         if not click.confirm(f"Profile '{name}' exists. Overwrite?"):
-            raise SystemExit(0)
+            return
 
     save_profile(name, cfg)
     console.print(f"[green]Profile '{name}' imported from clouds.yaml (cloud: {cloud_name}).[/green]")

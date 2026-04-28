@@ -193,7 +193,7 @@ class TestContainerDelete:
         set_active_profile("p")
         _ = _setup_mock(mock_client)
 
-        result = invoke(["container", "delete", "old-bucket"])
+        result = invoke(["container", "delete", "old-bucket", "-y"])
         assert result.exit_code == 0
         assert "deleted" in result.output.lower()
 
@@ -210,9 +210,20 @@ class TestContainerDelete:
             return orig_get(url, **kwargs)
         mock_client.get = _get
 
-        result = invoke(["container", "delete", "old-bucket", "--recursive"])
+        result = invoke(["container", "delete", "old-bucket", "--recursive", "-y"])
         assert result.exit_code == 0
         assert len(state["deleted"]) == 3  # 2 objects + 1 container
+
+    def test_delete_aborts_without_yes(self, invoke, config_dir, mock_client, sample_profile):
+        save_profile("p", sample_profile)
+        set_active_profile("p")
+        state = _setup_mock(mock_client)
+
+        # CliRunner default `input=None` => prompt sees EOF, click.confirm aborts.
+        result = invoke(["container", "delete", "old-bucket"])
+        assert result.exit_code != 0
+        assert "deleted" not in result.output.lower()
+        assert state["deleted"] == []
 
 
 # ══════════════════════════════════════════════════════════════════════════
