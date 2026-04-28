@@ -16,6 +16,7 @@ from orca_cli.core.config import (
 )
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console
+from orca_cli.services.identity import IdentityService
 
 
 @click.group()
@@ -306,8 +307,5 @@ def auth_token_revoke(ctx: click.Context, token: str) -> None:
       orca auth token-revoke <token-value>
     """
     client = ctx.find_object(OrcaContext).ensure_client()
-    client.delete(
-        f"{client.identity_url}/auth/tokens",
-        headers={"X-Subject-Token": token},
-    )
+    IdentityService(client).revoke_token(token)
     console.print("[green]Token revoked.[/green]")
