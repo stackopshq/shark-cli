@@ -5362,19 +5362,19 @@ always reflects the version installed.</p>
 <td><code>--resource</code></td>
 <td>text</td>
 <td>Requested resource, e.g. VCPU=4. Repeatable.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--required</code></td>
 <td>text</td>
 <td>Required trait. Repeatable.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--forbidden</code></td>
 <td>text</td>
 <td>Forbidden trait. Repeatable.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--limit</code></td>
@@ -5404,7 +5404,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -5470,25 +5470,25 @@ always reflects the version installed.</p>
 <td><code>--resource-provider</code></td>
 <td>text</td>
 <td>Resource provider UUID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--resource</code></td>
 <td>text</td>
 <td>Resource class and amount, e.g. VCPU=4. Repeatable.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--project-id</code></td>
 <td>text</td>
 <td>Consumer project UUID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--user-id</code></td>
 <td>text</td>
 <td>Consumer user UUID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -5536,7 +5536,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -5572,19 +5572,19 @@ always reflects the version installed.</p>
 <td><code>--resource</code></td>
 <td>text</td>
 <td>Requested resource, e.g. VCPU=4. Repeatable.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--required</code></td>
 <td>text</td>
 <td>Required trait. Repeatable.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--forbidden</code></td>
 <td>text</td>
 <td>Forbidden trait. Repeatable.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--limit</code></td>
@@ -5614,7 +5614,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -5680,25 +5680,25 @@ always reflects the version installed.</p>
 <td><code>--resource-provider</code></td>
 <td>text</td>
 <td>Resource provider UUID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--resource</code></td>
 <td>text</td>
 <td>Resource class and amount, e.g. VCPU=4. Repeatable.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--project-id</code></td>
 <td>text</td>
 <td>Consumer project UUID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--user-id</code></td>
 <td>text</td>
 <td>Consumer user UUID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -5746,7 +5746,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -5885,7 +5885,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -6017,7 +6017,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -6169,7 +6169,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -6259,7 +6259,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -6404,7 +6404,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -6440,7 +6440,7 @@ always reflects the version installed.</p>
 <td><code>--total</code></td>
 <td>integer</td>
 <td>Total inventory units.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--reserved</code></td>
@@ -6518,7 +6518,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -6590,7 +6590,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -6680,7 +6680,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -6764,7 +6764,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -6842,7 +6842,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -6926,7 +6926,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7016,7 +7016,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7161,7 +7161,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7197,7 +7197,7 @@ always reflects the version installed.</p>
 <td><code>--total</code></td>
 <td>integer</td>
 <td>Total inventory units.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--reserved</code></td>
@@ -7275,7 +7275,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7347,7 +7347,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7437,7 +7437,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7521,7 +7521,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7599,7 +7599,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7749,7 +7749,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7869,7 +7869,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7963,7 +7963,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -8029,7 +8029,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>

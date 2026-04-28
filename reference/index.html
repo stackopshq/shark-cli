@@ -32532,7 +32532,7 @@
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -32592,7 +32592,7 @@
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -32904,7 +32904,7 @@
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -32976,7 +32976,7 @@
 <td><code>--property</code></td>
 <td>text</td>
 <td>Metadata key=value (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -33024,7 +33024,7 @@
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -33060,7 +33060,7 @@
 <td><code>--property</code></td>
 <td>text</td>
 <td>Metadata key to remove (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -33138,19 +33138,19 @@
 <td><code>--name</code></td>
 <td>text</td>
 <td>Alarm name.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--type</code></td>
 <td>choice (<code>gnocchi_resources_threshold</code> &#x7C; <code>gnocchi_aggregation_by_metrics_threshold</code> &#x7C; <code>gnocchi_aggregation_by_resources_threshold</code> &#x7C; <code>event</code> &#x7C; <code>composite</code> &#x7C; <code>loadbalancer_member_health</code> &#x7C; <code>threshold</code>)</td>
 <td>Alarm type.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--rule</code></td>
 <td>text</td>
 <td>Type-specific rule as a JSON string.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--description</code></td>
@@ -33180,19 +33180,19 @@
 <td><code>--alarm-action</code></td>
 <td>text</td>
 <td>Webhook URL to call when entering alarm state. Repeatable.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--ok-action</code></td>
 <td>text</td>
 <td>Webhook URL to call when entering ok state. Repeatable.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--insufficient-data-action</code></td>
 <td>text</td>
 <td>Webhook URL to call on insufficient data. Repeatable.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--noindent</code></td>
@@ -33216,7 +33216,7 @@
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -33306,7 +33306,7 @@
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -33390,7 +33390,7 @@
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -33450,7 +33450,7 @@
 <td><code>--alarms</code></td>
 <td>integer</td>
 <td>Maximum number of alarms for the project.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -33480,7 +33480,7 @@
 <td><code>--alarms</code></td>
 <td>integer</td>
 <td>Maximum number of alarms for the project.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -33546,19 +33546,19 @@
 <td><code>--alarm-action</code></td>
 <td>text</td>
 <td>N/A</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--ok-action</code></td>
 <td>text</td>
 <td>N/A</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--insufficient-data-action</code></td>
 <td>text</td>
 <td>N/A</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -33606,7 +33606,7 @@
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -33906,7 +33906,7 @@
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -33966,7 +33966,7 @@
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -34323,7 +34323,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -34418,7 +34418,7 @@ all resources.</p>
 <td><code>--path</code></td>
 <td>text</td>
 <td>Path to back up or restore.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--container</code></td>
@@ -34532,7 +34532,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -34586,7 +34586,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -34632,7 +34632,7 @@ all resources.</p>
 <td><code>--path</code></td>
 <td>text</td>
 <td>Path to back up or restore.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--container</code></td>
@@ -34746,7 +34746,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -34800,7 +34800,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -34914,7 +34914,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -34998,7 +34998,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -35088,7 +35088,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -35172,7 +35172,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -35272,7 +35272,7 @@ all resources.</p>
 <td><code>--client-id</code></td>
 <td>text</td>
 <td>Freezer client ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--action</code></td>
@@ -35284,7 +35284,7 @@ all resources.</p>
 <td><code>--path</code></td>
 <td>text</td>
 <td>Path to back up or restore.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--container</code></td>
@@ -35392,7 +35392,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -35446,7 +35446,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -35540,7 +35540,7 @@ all resources.</p>
 <td><code>--client-id</code></td>
 <td>text</td>
 <td>Freezer client ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--action</code></td>
@@ -35552,7 +35552,7 @@ all resources.</p>
 <td><code>--path</code></td>
 <td>text</td>
 <td>Path to back up or restore.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--container</code></td>
@@ -35660,7 +35660,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -35714,7 +35714,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -35828,7 +35828,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -36002,7 +36002,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -36080,7 +36080,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -36254,7 +36254,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -36332,7 +36332,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -36410,7 +36410,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -36464,7 +36464,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -36529,7 +36529,7 @@ all resources.</p>
 <td><code>--skip</code></td>
 <td>choice (<code>floating-ip</code> &#x7C; <code>volume</code> &#x7C; <code>snapshot</code> &#x7C; <code>port</code> &#x7C; <code>security-group</code> &#x7C; <code>server</code> &#x7C; <code>router</code> &#x7C; <code>stack</code> &#x7C; <code>loadbalancer</code>)</td>
 <td>Resource type to skip (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--yes</code>, <code>-y</code></td>
@@ -36592,7 +36592,7 @@ all resources.</p>
 <td><code>--template</code></td>
 <td>text</td>
 <td>Cluster template UUID or name.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--node-count</code></td>
@@ -36730,7 +36730,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -36790,13 +36790,13 @@ all resources.</p>
 <td><code>--name</code></td>
 <td>text</td>
 <td>Node group name.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--flavor-id</code></td>
 <td>text</td>
 <td>Flavor ID for nodes.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--node-count</code></td>
@@ -36904,7 +36904,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -36958,7 +36958,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -37036,13 +37036,13 @@ all resources.</p>
 <td><code>--name</code></td>
 <td>text</td>
 <td>Node group name.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--flavor-id</code></td>
 <td>text</td>
 <td>Flavor ID for nodes.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--node-count</code></td>
@@ -37150,7 +37150,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -37204,7 +37204,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -37282,7 +37282,7 @@ all resources.</p>
 <td><code>--node-count</code></td>
 <td>integer</td>
 <td>New number of worker nodes.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -37330,7 +37330,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -37390,13 +37390,13 @@ all resources.</p>
 <td><code>--image</code></td>
 <td>text</td>
 <td>Base image UUID or name.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--external-network</code></td>
 <td>text</td>
 <td>External network ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--coe</code></td>
@@ -37456,7 +37456,7 @@ all resources.</p>
 <td><code>--label</code></td>
 <td>text</td>
 <td>Key=value label (repeatable). E.g. --label boot_volume_size=20</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -37534,7 +37534,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -37588,7 +37588,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -37624,13 +37624,13 @@ all resources.</p>
 <td><code>--image</code></td>
 <td>text</td>
 <td>Base image UUID or name.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--external-network</code></td>
 <td>text</td>
 <td>External network ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--coe</code></td>
@@ -37690,7 +37690,7 @@ all resources.</p>
 <td><code>--label</code></td>
 <td>text</td>
 <td>Key=value label (repeatable). E.g. --label boot_volume_size=20</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -37768,7 +37768,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -37822,7 +37822,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -37858,7 +37858,7 @@ all resources.</p>
 <td><code>--template-id</code></td>
 <td>text</td>
 <td>New cluster template ID to upgrade to.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--max-batch-size</code></td>
@@ -38067,7 +38067,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -38252,7 +38252,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -38318,7 +38318,7 @@ all resources.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Metadata key=value pair (repeatable).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -38366,7 +38366,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -38420,7 +38420,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -38456,7 +38456,7 @@ all resources.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Metadata key to remove (repeatable).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -38510,19 +38510,19 @@ all resources.</p>
 <td><code>--user</code></td>
 <td>text</td>
 <td>User ID who owns this credential.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--type</code></td>
 <td>text</td>
 <td>Credential type (ec2, totp, cert, etc.).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--blob</code></td>
 <td>text</td>
 <td>Credential data (JSON string or raw value).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--project</code></td>
@@ -38618,7 +38618,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -38708,7 +38708,7 @@ all resources.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -38902,7 +38902,7 @@ unless --fix is specified.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -38998,7 +38998,7 @@ unless --fix is specified.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -39058,19 +39058,19 @@ unless --fix is specified.</p>
 <td><code>--service</code></td>
 <td>text</td>
 <td>Service ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--interface</code></td>
 <td>choice (<code>public</code> &#x7C; <code>internal</code> &#x7C; <code>admin</code>)</td>
 <td>Endpoint interface.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--url</code></td>
 <td>text</td>
 <td>Endpoint URL.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--region</code></td>
@@ -39178,7 +39178,7 @@ unless --fix is specified.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -39280,7 +39280,7 @@ unless --fix is specified.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -39412,7 +39412,7 @@ unless --fix is specified.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -39496,13 +39496,13 @@ unless --fix is specified.</p>
 <td><code>--name</code></td>
 <td>text</td>
 <td>Endpoint group name.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--filter</code></td>
 <td>text</td>
 <td>Filter criterion (e.g. service_id=xxx). Repeatable.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--description</code></td>
@@ -39532,7 +39532,7 @@ unless --fix is specified.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -39616,7 +39616,7 @@ unless --fix is specified.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -39772,7 +39772,7 @@ unless --fix is specified.</p>
 <td><code>--filter</code></td>
 <td>text</td>
 <td>N/A</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -39820,7 +39820,7 @@ unless --fix is specified.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -39916,7 +39916,7 @@ start time (newest first).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -39973,7 +39973,7 @@ start time (newest first).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -40029,7 +40029,7 @@ start time (newest first).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -40158,7 +40158,7 @@ start time (newest first).</p>
 <td><code>--mapping-id</code></td>
 <td>text</td>
 <td>Mapping ID to associate.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--noindent</code></td>
@@ -40182,7 +40182,7 @@ start time (newest first).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -40266,7 +40266,7 @@ start time (newest first).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -40302,7 +40302,7 @@ start time (newest first).</p>
 <td><code>--mapping-id</code></td>
 <td>text</td>
 <td>New mapping ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -40350,7 +40350,7 @@ start time (newest first).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -40393,7 +40393,7 @@ CIDRs, fingerprints, MAC addresses, and device references.</p>
 <td><code>--type</code>, <code>-t</code></td>
 <td>choice (<code>servers</code> &#x7C; <code>ports</code> &#x7C; <code>floatingips</code> &#x7C; <code>volumes</code> &#x7C; <code>networks</code> &#x7C; <code>subnets</code> &#x7C; <code>security_groups</code> &#x7C; <code>routers</code> &#x7C; <code>images</code> &#x7C; <code>keypairs</code>)</td>
 <td>Restrict search to one or more resource types (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -40513,7 +40513,7 @@ CIDRs, fingerprints, MAC addresses, and device references.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -40621,7 +40621,7 @@ CIDRs, fingerprints, MAC addresses, and device references.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -40687,13 +40687,13 @@ CIDRs, fingerprints, MAC addresses, and device references.</p>
 <td><code>--vcpus</code></td>
 <td>integer</td>
 <td>Number of vCPUs.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--ram</code></td>
 <td>integer</td>
 <td>RAM in MB.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--disk</code></td>
@@ -40815,7 +40815,7 @@ the Nova <code>marker</code> cursor (useful on clouds exposing hundreds of flavo
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -40854,7 +40854,7 @@ the Nova <code>marker</code> cursor (useful on clouds exposing hundreds of flavo
 <td><code>--property</code></td>
 <td>text</td>
 <td>Extra spec key=value (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -40902,7 +40902,7 @@ the Nova <code>marker</code> cursor (useful on clouds exposing hundreds of flavo
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -40938,7 +40938,7 @@ the Nova <code>marker</code> cursor (useful on clouds exposing hundreds of flavo
 <td><code>--property</code></td>
 <td>text</td>
 <td>Extra spec key to remove (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -40994,7 +40994,7 @@ the Nova <code>marker</code> cursor (useful on clouds exposing hundreds of flavo
 <td><code>--port-id</code></td>
 <td>text</td>
 <td>Port ID to associate with.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--fixed-ip</code></td>
@@ -41080,7 +41080,7 @@ cleanup.</p>
 <td><code>--network</code></td>
 <td>text</td>
 <td>External network ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -41182,7 +41182,7 @@ cleanup.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -41295,7 +41295,7 @@ cleanup.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -41508,7 +41508,7 @@ cleanup.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -41586,7 +41586,7 @@ cleanup.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -41640,7 +41640,7 @@ cleanup.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -41754,7 +41754,7 @@ cleanup.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -41904,7 +41904,7 @@ cleanup.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -41958,7 +41958,7 @@ cleanup.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -42066,7 +42066,7 @@ dimension) so the most-saturated hypervisors surface at the top.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -42126,7 +42126,7 @@ dimension) so the most-saturated hypervisors surface at the top.</p>
 <td><code>--remote-id</code></td>
 <td>text</td>
 <td>Remote entity ID. Repeatable.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--description</code></td>
@@ -42168,7 +42168,7 @@ dimension) so the most-saturated hypervisors surface at the top.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -42252,7 +42252,7 @@ dimension) so the most-saturated hypervisors surface at the top.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -42300,7 +42300,7 @@ dimension) so the most-saturated hypervisors surface at the top.</p>
 <td><code>--remote-id</code></td>
 <td>text</td>
 <td>N/A</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -42348,7 +42348,7 @@ dimension) so the most-saturated hypervisors surface at the top.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -42510,7 +42510,7 @@ dimension) so the most-saturated hypervisors surface at the top.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -42648,7 +42648,7 @@ dimension) so the most-saturated hypervisors surface at the top.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -42751,7 +42751,7 @@ dimension) so the most-saturated hypervisors surface at the top.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Custom image property to set on creation (e.g. os_distro=ubuntu). Repeatable. Values may contain '='; only the first '=' splits.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -42843,7 +42843,7 @@ Examples:
 <td><code>--output</code>, <code>-o</code></td>
 <td>path</td>
 <td>Output file path.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -42893,7 +42893,7 @@ Examples:
 <td><code>--store</code></td>
 <td>text</td>
 <td>Target store(s) for copy-image (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -42941,7 +42941,7 @@ Examples:
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -43078,7 +43078,7 @@ to confirm acceptance.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -43118,7 +43118,7 @@ to confirm acceptance.</p>
 <td><code>--status</code></td>
 <td>choice (<code>accepted</code> &#x7C; <code>rejected</code> &#x7C; <code>pending</code>)</td>
 <td>New membership status.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -43166,7 +43166,7 @@ to confirm acceptance.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -43279,7 +43279,7 @@ to confirm acceptance.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -43319,7 +43319,7 @@ to confirm acceptance.</p>
 <td><code>--status</code></td>
 <td>choice (<code>accepted</code> &#x7C; <code>rejected</code> &#x7C; <code>pending</code>)</td>
 <td>New membership status.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -43367,7 +43367,7 @@ to confirm acceptance.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -43547,7 +43547,7 @@ to confirm acceptance.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -43685,7 +43685,7 @@ to confirm acceptance.</p>
 <td><code>--required</code></td>
 <td>text</td>
 <td>Required property name (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -43763,7 +43763,7 @@ to confirm acceptance.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -43829,7 +43829,7 @@ to confirm acceptance.</p>
 <td><code>--required</code></td>
 <td>text</td>
 <td>Replace required list (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -43883,7 +43883,7 @@ to confirm acceptance.</p>
 <td><code>--type</code></td>
 <td>choice (<code>string</code> &#x7C; <code>integer</code> &#x7C; <code>number</code> &#x7C; <code>boolean</code> &#x7C; <code>array</code>)</td>
 <td>JSON Schema type.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--title</code></td>
@@ -43979,7 +43979,7 @@ to confirm acceptance.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -44191,7 +44191,7 @@ to confirm acceptance.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -44245,7 +44245,7 @@ to confirm acceptance.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -44362,7 +44362,7 @@ os_distro, os_version, hw_qemu_guest_agent) are surfaced separately:
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -44517,7 +44517,7 @@ After staging, run:</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -44580,7 +44580,7 @@ After staging, run:</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -44790,7 +44790,7 @@ After staging, run:</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -44844,7 +44844,7 @@ After staging, run:</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -44910,7 +44910,7 @@ After staging, run:</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -44964,7 +44964,7 @@ After staging, run:</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -45084,13 +45084,13 @@ and turns idempotent under <code>--ignore-missing</code>.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Set or replace a custom image property (KEY=VALUE). Repeatable. Untouched properties are preserved.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--remove-property</code></td>
 <td>text</td>
 <td>Remove a custom image property by key. Repeatable. Errors if the key is absent (use --ignore-missing for idempotent runs).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--ignore-missing</code></td>
@@ -45357,7 +45357,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -45411,7 +45411,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -45510,25 +45510,25 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--project-id</code></td>
 <td>text</td>
 <td>Project ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--service-id</code></td>
 <td>text</td>
 <td>Service ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--resource-name</code></td>
 <td>text</td>
 <td>Resource name.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--resource-limit</code></td>
 <td>integer</td>
 <td>Limit value.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--region-id</code></td>
@@ -45564,7 +45564,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -45672,7 +45672,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -45762,7 +45762,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -45960,7 +45960,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -46014,7 +46014,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -46110,7 +46110,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -46164,7 +46164,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -46202,7 +46202,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--subnet-id</code></td>
 <td>text</td>
 <td>VIP subnet ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--description</code></td>
@@ -46304,25 +46304,25 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--pool-id</code></td>
 <td>text</td>
 <td>Pool ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--type</code></td>
 <td>choice (<code>HTTP</code> &#x7C; <code>HTTPS</code> &#x7C; <code>PING</code> &#x7C; <code>TCP</code> &#x7C; <code>TLS-HELLO</code> &#x7C; <code>UDP-CONNECT</code>)</td>
 <td>N/A</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--delay</code></td>
 <td>integer</td>
 <td>Probe interval (seconds).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--timeout</code></td>
 <td>integer</td>
 <td>Probe timeout (seconds).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--max-retries</code></td>
@@ -46418,7 +46418,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -46538,7 +46538,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -46574,25 +46574,25 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--pool-id</code></td>
 <td>text</td>
 <td>Pool ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--type</code></td>
 <td>choice (<code>HTTP</code> &#x7C; <code>HTTPS</code> &#x7C; <code>PING</code> &#x7C; <code>TCP</code> &#x7C; <code>TLS-HELLO</code> &#x7C; <code>UDP-CONNECT</code>)</td>
 <td>N/A</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--delay</code></td>
 <td>integer</td>
 <td>Probe interval (seconds).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--timeout</code></td>
 <td>integer</td>
 <td>Probe timeout (seconds).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--max-retries</code></td>
@@ -46688,7 +46688,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -46808,7 +46808,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -46872,13 +46872,13 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--listener-id</code></td>
 <td>text</td>
 <td>Listener to attach the policy to.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--action</code></td>
 <td>choice (<code>REDIRECT_TO_POOL</code> &#x7C; <code>REDIRECT_TO_URL</code> &#x7C; <code>REJECT</code> &#x7C; <code>REDIRECT_PREFIX</code>)</td>
 <td>Policy action.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--name</code></td>
@@ -46992,7 +46992,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -47112,7 +47112,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -47152,13 +47152,13 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--listener-id</code></td>
 <td>text</td>
 <td>Listener to attach the policy to.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--action</code></td>
 <td>choice (<code>REDIRECT_TO_POOL</code> &#x7C; <code>REDIRECT_TO_URL</code> &#x7C; <code>REJECT</code> &#x7C; <code>REDIRECT_PREFIX</code>)</td>
 <td>Policy action.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--name</code></td>
@@ -47272,7 +47272,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -47392,7 +47392,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -47455,19 +47455,19 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--type</code></td>
 <td>choice (<code>COOKIE</code> &#x7C; <code>FILE_TYPE</code> &#x7C; <code>HEADER</code> &#x7C; <code>HOST_NAME</code> &#x7C; <code>PATH</code> &#x7C; <code>SSL_CONN_HAS_CERT</code> &#x7C; <code>SSL_VERIFY_RESULT</code> &#x7C; <code>SSL_DN_FIELD</code>)</td>
 <td>Rule type.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--compare-type</code></td>
 <td>choice (<code>CONTAINS</code> &#x7C; <code>ENDS_WITH</code> &#x7C; <code>EQUAL_TO</code> &#x7C; <code>REGEX</code> &#x7C; <code>STARTS_WITH</code>)</td>
 <td>Comparison type.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--value</code></td>
 <td>text</td>
 <td>Value to compare against.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--key</code></td>
@@ -47557,7 +47557,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -47671,7 +47671,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -47710,19 +47710,19 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--type</code></td>
 <td>choice (<code>COOKIE</code> &#x7C; <code>FILE_TYPE</code> &#x7C; <code>HEADER</code> &#x7C; <code>HOST_NAME</code> &#x7C; <code>PATH</code> &#x7C; <code>SSL_CONN_HAS_CERT</code> &#x7C; <code>SSL_VERIFY_RESULT</code> &#x7C; <code>SSL_DN_FIELD</code>)</td>
 <td>Rule type.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--compare-type</code></td>
 <td>choice (<code>CONTAINS</code> &#x7C; <code>ENDS_WITH</code> &#x7C; <code>EQUAL_TO</code> &#x7C; <code>REGEX</code> &#x7C; <code>STARTS_WITH</code>)</td>
 <td>Comparison type.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--value</code></td>
 <td>text</td>
 <td>Value to compare against.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--key</code></td>
@@ -47812,7 +47812,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -47926,7 +47926,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -47980,7 +47980,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -48040,19 +48040,19 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--lb-id</code></td>
 <td>text</td>
 <td>Load balancer ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--protocol</code></td>
 <td>choice (<code>HTTP</code> &#x7C; <code>HTTPS</code> &#x7C; <code>TCP</code> &#x7C; <code>UDP</code> &#x7C; <code>TERMINATED_HTTPS</code>)</td>
 <td>N/A</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--port</code></td>
 <td>integer</td>
 <td>Listen port.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--default-pool-id</code></td>
@@ -48136,7 +48136,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -48244,7 +48244,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -48280,19 +48280,19 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--lb-id</code></td>
 <td>text</td>
 <td>Load balancer ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--protocol</code></td>
 <td>choice (<code>HTTP</code> &#x7C; <code>HTTPS</code> &#x7C; <code>TCP</code> &#x7C; <code>UDP</code> &#x7C; <code>TERMINATED_HTTPS</code>)</td>
 <td>N/A</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--port</code></td>
 <td>integer</td>
 <td>Listen port.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--default-pool-id</code></td>
@@ -48376,7 +48376,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -48484,7 +48484,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -48544,13 +48544,13 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--address</code></td>
 <td>text</td>
 <td>Member IP address.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--port</code></td>
 <td>integer</td>
 <td>Member port.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--subnet-id</code></td>
@@ -48616,7 +48616,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -48742,7 +48742,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -48778,13 +48778,13 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--address</code></td>
 <td>text</td>
 <td>Member IP address.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--port</code></td>
 <td>integer</td>
 <td>Member port.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--subnet-id</code></td>
@@ -48850,7 +48850,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -48976,7 +48976,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -49048,13 +49048,13 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--protocol</code></td>
 <td>choice (<code>HTTP</code> &#x7C; <code>HTTPS</code> &#x7C; <code>PROXY</code> &#x7C; <code>TCP</code> &#x7C; <code>UDP</code>)</td>
 <td>N/A</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--algorithm</code></td>
 <td>choice (<code>ROUND_ROBIN</code> &#x7C; <code>LEAST_CONNECTIONS</code> &#x7C; <code>SOURCE_IP</code>)</td>
 <td>Load balancing algorithm.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -49132,7 +49132,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -49234,7 +49234,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -49282,13 +49282,13 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--protocol</code></td>
 <td>choice (<code>HTTP</code> &#x7C; <code>HTTPS</code> &#x7C; <code>PROXY</code> &#x7C; <code>TCP</code> &#x7C; <code>UDP</code>)</td>
 <td>N/A</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--algorithm</code></td>
 <td>choice (<code>ROUND_ROBIN</code> &#x7C; <code>LEAST_CONNECTIONS</code> &#x7C; <code>SOURCE_IP</code>)</td>
 <td>Load balancing algorithm.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -49366,7 +49366,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -49468,7 +49468,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -49564,7 +49564,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -49642,7 +49642,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -49696,7 +49696,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -49828,7 +49828,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--rules</code></td>
 <td>text</td>
 <td>Mapping rules as a JSON string.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -49906,7 +49906,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -49942,7 +49942,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--rules</code></td>
 <td>text</td>
 <td>New rules as JSON.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -50047,13 +50047,13 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--definition</code></td>
 <td>text</td>
 <td>Granularity:points pair (repeatable). E.g. 1m:1440.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--aggregation-method</code></td>
 <td>text</td>
 <td>Aggregation method (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -50131,7 +50131,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -50185,7 +50185,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -50224,13 +50224,13 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--definition</code></td>
 <td>text</td>
 <td>Granularity:points pair (repeatable). E.g. 1m:1440.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--aggregation-method</code></td>
 <td>text</td>
 <td>Aggregation method (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -50308,7 +50308,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -50362,7 +50362,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -50398,7 +50398,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--name</code></td>
 <td>text</td>
 <td>Metric name.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--archive-policy-name</code></td>
@@ -50494,7 +50494,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -50557,7 +50557,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--measure</code></td>
 <td>text</td>
 <td>Measure as timestamp:value (repeatable). Timestamp: ISO-8601.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -50638,7 +50638,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -50677,7 +50677,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--measure</code></td>
 <td>text</td>
 <td>Measure as timestamp:value (repeatable). Timestamp: ISO-8601.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -50761,7 +50761,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -50821,7 +50821,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -50887,7 +50887,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -50947,7 +50947,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -51007,7 +51007,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--attribute</code></td>
 <td>text</td>
 <td>Resource attribute key:type (repeatable). E.g. host:string.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -51085,7 +51085,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -51139,7 +51139,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -51175,7 +51175,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--attribute</code></td>
 <td>text</td>
 <td>Resource attribute key:type (repeatable). E.g. host:string.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -51253,7 +51253,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -51307,7 +51307,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -51361,7 +51361,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -51415,7 +51415,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -51559,7 +51559,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -51649,7 +51649,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -51745,7 +51745,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -51835,7 +51835,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -51965,7 +51965,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -52071,7 +52071,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -52191,7 +52191,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -52251,7 +52251,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--network-id</code></td>
 <td>text</td>
 <td>Network ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--name</code></td>
@@ -52347,7 +52347,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -52401,7 +52401,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -52441,7 +52441,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--security-group</code></td>
 <td>text</td>
 <td>Security group ID to remove (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--qos-policy</code></td>
@@ -52519,7 +52519,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--network-id</code></td>
 <td>text</td>
 <td>Network ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--name</code></td>
@@ -52615,7 +52615,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -52669,7 +52669,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -52709,7 +52709,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--security-group</code></td>
 <td>text</td>
 <td>Security group ID to remove (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--qos-policy</code></td>
@@ -52817,25 +52817,25 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--object-type</code></td>
 <td>choice (<code>network</code> &#x7C; <code>qos_policy</code> &#x7C; <code>security_group</code> &#x7C; <code>address_group</code> &#x7C; <code>address_scope</code> &#x7C; <code>subnetpool</code>)</td>
 <td>Type of the shared object.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--object</code></td>
 <td>text</td>
 <td>ID of the object to share.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--action</code></td>
 <td>choice (<code>access_as_shared</code> &#x7C; <code>access_as_external</code>)</td>
 <td>RBAC action.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--target-project</code></td>
 <td>text</td>
 <td>Project ID to grant access to (use '*' for all projects).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -52919,7 +52919,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -52973,7 +52973,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -53012,7 +53012,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--target-project</code></td>
 <td>text</td>
 <td>New target project ID (use '*' for all projects).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -53048,25 +53048,25 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--object-type</code></td>
 <td>choice (<code>network</code> &#x7C; <code>qos_policy</code> &#x7C; <code>security_group</code> &#x7C; <code>address_group</code> &#x7C; <code>address_scope</code> &#x7C; <code>subnetpool</code>)</td>
 <td>Type of the shared object.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--object</code></td>
 <td>text</td>
 <td>ID of the object to share.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--action</code></td>
 <td>choice (<code>access_as_shared</code> &#x7C; <code>access_as_external</code>)</td>
 <td>RBAC action.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--target-project</code></td>
 <td>text</td>
 <td>Project ID to grant access to (use '*' for all projects).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -53150,7 +53150,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -53204,7 +53204,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -53243,7 +53243,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--target-project</code></td>
 <td>text</td>
 <td>New target project ID (use '*' for all projects).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -53321,7 +53321,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--subnet-id</code></td>
 <td>text</td>
 <td>Subnet to attach.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -53353,13 +53353,13 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--destination</code></td>
 <td>text</td>
 <td>Destination network (e.g. 10.1.0.0/24).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--nexthop</code></td>
 <td>text</td>
 <td>Next-hop IP address.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -53467,7 +53467,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -53527,7 +53527,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--subnet-id</code></td>
 <td>text</td>
 <td>Subnet to detach.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -53559,13 +53559,13 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--destination</code></td>
 <td>text</td>
 <td>Destination network to remove.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--nexthop</code></td>
 <td>text</td>
 <td>Next-hop IP address.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -53622,7 +53622,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--external-network</code></td>
 <td>text</td>
 <td>External network ID to use as gateway.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--enable-snat</code> / <code>--disable-snat</code></td>
@@ -53676,7 +53676,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -53798,7 +53798,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--subnet-id</code></td>
 <td>text</td>
 <td>Subnet to attach.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -53830,13 +53830,13 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--destination</code></td>
 <td>text</td>
 <td>Destination network (e.g. 10.1.0.0/24).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--nexthop</code></td>
 <td>text</td>
 <td>Next-hop IP address.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -53944,7 +53944,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -53980,7 +53980,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--subnet-id</code></td>
 <td>text</td>
 <td>Subnet to detach.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -54012,13 +54012,13 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--destination</code></td>
 <td>text</td>
 <td>Destination network to remove.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--nexthop</code></td>
 <td>text</td>
 <td>Next-hop IP address.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -54051,7 +54051,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--external-network</code></td>
 <td>text</td>
 <td>External network ID to use as gateway.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--enable-snat</code> / <code>--disable-snat</code></td>
@@ -54105,7 +54105,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -54227,13 +54227,13 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--network-id</code></td>
 <td>text</td>
 <td>Network ID this segment belongs to.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--network-type</code></td>
 <td>choice (<code>flat</code> &#x7C; <code>geneve</code> &#x7C; <code>gre</code> &#x7C; <code>local</code> &#x7C; <code>vlan</code> &#x7C; <code>vxlan</code>)</td>
 <td>Network type.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--physical-network</code></td>
@@ -54335,7 +54335,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -54425,7 +54425,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -54461,13 +54461,13 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--network-id</code></td>
 <td>text</td>
 <td>Network ID this segment belongs to.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--network-type</code></td>
 <td>choice (<code>flat</code> &#x7C; <code>geneve</code> &#x7C; <code>gre</code> &#x7C; <code>local</code> &#x7C; <code>vlan</code> &#x7C; <code>vxlan</code>)</td>
 <td>Network type.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--physical-network</code></td>
@@ -54569,7 +54569,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -54659,7 +54659,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -54713,7 +54713,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -54773,13 +54773,13 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--network-id</code></td>
 <td>text</td>
 <td>Parent network ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--cidr</code></td>
 <td>text</td>
 <td>CIDR (e.g. 10.0.0.0/24).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--ip-version</code></td>
@@ -54803,7 +54803,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--dns</code></td>
 <td>text</td>
 <td>DNS nameserver (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -54881,7 +54881,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -54935,7 +54935,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -54983,7 +54983,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--dns-nameserver</code></td>
 <td>text</td>
 <td>DNS nameserver IP (repeatable, replaces existing list).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--enable-dhcp</code> / <code>--disable-dhcp</code></td>
@@ -55019,13 +55019,13 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--network-id</code></td>
 <td>text</td>
 <td>Parent network ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--cidr</code></td>
 <td>text</td>
 <td>CIDR (e.g. 10.0.0.0/24).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--ip-version</code></td>
@@ -55049,7 +55049,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--dns</code></td>
 <td>text</td>
 <td>DNS nameserver (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -55127,7 +55127,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -55181,7 +55181,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -55229,7 +55229,7 @@ and saved locally. The public key is stored server-side.</p>
 <td><code>--dns-nameserver</code></td>
 <td>text</td>
 <td>DNS nameserver IP (repeatable, replaces existing list).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--enable-dhcp</code> / <code>--disable-dhcp</code></td>
@@ -55413,7 +55413,7 @@ floating IP, with status and IDs at each step.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Metadata key=value pair (repeatable).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -55443,7 +55443,7 @@ floating IP, with status and IDs at each step.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Metadata key to remove (repeatable).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -55473,7 +55473,7 @@ floating IP, with status and IDs at each step.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Metadata key=value pair (repeatable).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -55503,7 +55503,7 @@ floating IP, with status and IDs at each step.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Metadata key to remove (repeatable).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -55636,7 +55636,7 @@ floating IP, with status and IDs at each step.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -55702,7 +55702,7 @@ floating IP, with status and IDs at each step.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Metadata key=value pair (repeatable).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -55750,7 +55750,7 @@ floating IP, with status and IDs at each step.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -55865,7 +55865,7 @@ floating IP, with status and IDs at each step.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -55931,7 +55931,7 @@ floating IP, with status and IDs at each step.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Metadata key=value pair (repeatable).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -55979,7 +55979,7 @@ floating IP, with status and IDs at each step.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -56105,7 +56105,7 @@ floating IP, with status and IDs at each step.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -56141,7 +56141,7 @@ floating IP, with status and IDs at each step.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Metadata key=value pair (repeatable).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -56189,7 +56189,7 @@ floating IP, with status and IDs at each step.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -56243,7 +56243,7 @@ floating IP, with status and IDs at each step.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -56311,7 +56311,7 @@ shows the pseudo-folder structure of objects within it.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Metadata key to remove (repeatable).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -56451,19 +56451,19 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--resource</code></td>
 <td>text</td>
 <td>Requested resource, e.g. VCPU=4. Repeatable.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--required</code></td>
 <td>text</td>
 <td>Required trait. Repeatable.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--forbidden</code></td>
 <td>text</td>
 <td>Forbidden trait. Repeatable.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--limit</code></td>
@@ -56493,7 +56493,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -56559,25 +56559,25 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--resource-provider</code></td>
 <td>text</td>
 <td>Resource provider UUID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--resource</code></td>
 <td>text</td>
 <td>Resource class and amount, e.g. VCPU=4. Repeatable.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--project-id</code></td>
 <td>text</td>
 <td>Consumer project UUID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--user-id</code></td>
 <td>text</td>
 <td>Consumer user UUID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -56625,7 +56625,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -56661,19 +56661,19 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--resource</code></td>
 <td>text</td>
 <td>Requested resource, e.g. VCPU=4. Repeatable.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--required</code></td>
 <td>text</td>
 <td>Required trait. Repeatable.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--forbidden</code></td>
 <td>text</td>
 <td>Forbidden trait. Repeatable.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--limit</code></td>
@@ -56703,7 +56703,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -56769,25 +56769,25 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--resource-provider</code></td>
 <td>text</td>
 <td>Resource provider UUID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--resource</code></td>
 <td>text</td>
 <td>Resource class and amount, e.g. VCPU=4. Repeatable.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--project-id</code></td>
 <td>text</td>
 <td>Consumer project UUID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--user-id</code></td>
 <td>text</td>
 <td>Consumer user UUID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -56835,7 +56835,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -56967,7 +56967,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -57099,7 +57099,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -57231,7 +57231,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -57321,7 +57321,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -57466,7 +57466,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -57502,7 +57502,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--total</code></td>
 <td>integer</td>
 <td>Total inventory units.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--reserved</code></td>
@@ -57580,7 +57580,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -57652,7 +57652,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -57742,7 +57742,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -57826,7 +57826,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -57904,7 +57904,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -57988,7 +57988,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -58078,7 +58078,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -58223,7 +58223,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -58259,7 +58259,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--total</code></td>
 <td>integer</td>
 <td>Total inventory units.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--reserved</code></td>
@@ -58337,7 +58337,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -58409,7 +58409,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -58499,7 +58499,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -58583,7 +58583,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -58661,7 +58661,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -58805,7 +58805,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -58925,7 +58925,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -59015,7 +59015,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -59081,7 +59081,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -59165,7 +59165,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -59255,7 +59255,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -59345,7 +59345,7 @@ using Swift SLO (Static Large Object).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -60231,7 +60231,7 @@ used for authentication.</p>
 <td><code>--skip</code></td>
 <td>choice (<code>stack</code> &#x7C; <code>loadbalancer</code> &#x7C; <code>server</code> &#x7C; <code>floating-ip</code> &#x7C; <code>dns-zone</code> &#x7C; <code>router</code> &#x7C; <code>network</code> &#x7C; <code>security-group</code> &#x7C; <code>backup</code> &#x7C; <code>volume</code> &#x7C; <code>snapshot</code> &#x7C; <code>image</code> &#x7C; <code>secret</code> &#x7C; <code>container</code>)</td>
 <td>Resource type to skip (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -60279,7 +60279,7 @@ used for authentication.</p>
 <td><code>--tag</code></td>
 <td>text</td>
 <td>Tag (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -60375,7 +60375,7 @@ used for authentication.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -60471,7 +60471,7 @@ used for authentication.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -60555,7 +60555,7 @@ used for authentication.</p>
 <td><code>--name</code></td>
 <td>text</td>
 <td>Policy name.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--shared</code></td>
@@ -60657,7 +60657,7 @@ used for authentication.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -60759,7 +60759,7 @@ used for authentication.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -60795,7 +60795,7 @@ used for authentication.</p>
 <td><code>--name</code></td>
 <td>text</td>
 <td>Policy name.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--shared</code></td>
@@ -60897,7 +60897,7 @@ used for authentication.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -60999,7 +60999,7 @@ used for authentication.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -61183,7 +61183,7 @@ used for authentication.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -61343,7 +61343,7 @@ used for authentication.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -61397,7 +61397,7 @@ used for authentication.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -61578,7 +61578,7 @@ used for authentication.</p>
 <td><code>--service-id</code></td>
 <td>text</td>
 <td>Filter fields by service ID.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--noindent</code></td>
@@ -61602,7 +61602,7 @@ used for authentication.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -61710,7 +61710,7 @@ used for authentication.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -61769,7 +61769,7 @@ used for authentication.</p>
 <td><code>--cost</code></td>
 <td>text</td>
 <td>Price (e.g. 0.05).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--type</code></td>
@@ -61877,7 +61877,7 @@ used for authentication.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -61985,7 +61985,7 @@ used for authentication.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -62033,13 +62033,13 @@ used for authentication.</p>
 <td><code>--level</code></td>
 <td>text</td>
 <td>Quantity level at which this tier starts.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--cost</code></td>
 <td>text</td>
 <td>N/A</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--type</code></td>
@@ -62147,7 +62147,7 @@ used for authentication.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -62249,7 +62249,7 @@ used for authentication.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -62303,7 +62303,7 @@ used for authentication.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -62357,7 +62357,7 @@ used for authentication.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -62411,7 +62411,7 @@ used for authentication.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -62537,7 +62537,7 @@ used for authentication.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -62615,7 +62615,7 @@ used for authentication.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -62717,7 +62717,7 @@ used for authentication.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -62795,7 +62795,7 @@ used for authentication.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -62836,7 +62836,7 @@ item (service + metadata + volume).</p>
 <td><code>--resource</code></td>
 <td>text</td>
 <td>Resource JSON, e.g. '{"service":"instance","desc":{"flavor":"m1.small"},"volume":"1"}' (repeatable).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -62882,13 +62882,13 @@ item (service + metadata + volume).</p>
 <td><code>--groupby</code></td>
 <td>text</td>
 <td>Group results by field (repeatable). Common: type, project_id, user_id.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--filters</code></td>
 <td>text</td>
 <td>Filter results (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--noindent</code></td>
@@ -62912,7 +62912,7 @@ item (service + metadata + volume).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -62976,13 +62976,13 @@ item (service + metadata + volume).</p>
 <td><code>--type</code></td>
 <td>text</td>
 <td>Record type (A, AAAA, CNAME, MX, TXT, …).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--record</code></td>
 <td>text</td>
 <td>Record value (repeatable for multiple values).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--ttl</code></td>
@@ -63086,7 +63086,7 @@ item (service + metadata + volume).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -63124,7 +63124,7 @@ all existing record values.</p>
 <td><code>--record</code></td>
 <td>text</td>
 <td>Record value (repeatable — replaces all existing values).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--ttl</code></td>
@@ -63185,7 +63185,7 @@ all existing record values.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -63336,7 +63336,7 @@ all existing record values.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -63420,7 +63420,7 @@ all existing record values.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -63480,19 +63480,19 @@ all existing record values.</p>
 <td><code>--service-id</code></td>
 <td>text</td>
 <td>Service ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--resource-name</code></td>
 <td>text</td>
 <td>Resource name (e.g. server).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--default-limit</code></td>
 <td>integer</td>
 <td>Default limit value.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--region-id</code></td>
@@ -63528,7 +63528,7 @@ all existing record values.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -63630,7 +63630,7 @@ all existing record values.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -63738,7 +63738,7 @@ all existing record values.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -63927,7 +63927,7 @@ all existing record values.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -64017,7 +64017,7 @@ all existing record values.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -64215,7 +64215,7 @@ all existing record values.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -64323,7 +64323,7 @@ all existing record values.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -64383,7 +64383,7 @@ all existing record values.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -64524,7 +64524,7 @@ all existing record values.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -64656,7 +64656,7 @@ all existing record values.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -64692,7 +64692,7 @@ all existing record values.</p>
 <td><code>--user</code></td>
 <td>text</td>
 <td>User ID to grant read access to (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--project-access</code> / <code>--no-project-access</code></td>
@@ -64776,7 +64776,7 @@ all existing record values.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -64812,7 +64812,7 @@ all existing record values.</p>
 <td><code>--user</code></td>
 <td>text</td>
 <td>User ID to grant read access to (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--project-access</code> / <code>--no-project-access</code></td>
@@ -64872,13 +64872,13 @@ all existing record values.</p>
 <td><code>--name</code></td>
 <td>text</td>
 <td>Consumer name (free-form).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--url</code></td>
 <td>text</td>
 <td>Consumer URL (e.g. the resource that uses the secret).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -64908,13 +64908,13 @@ all existing record values.</p>
 <td><code>--name</code></td>
 <td>text</td>
 <td>Consumer name to remove.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--url</code></td>
 <td>text</td>
 <td>Consumer URL to remove.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--yes</code>, <code>-y</code></td>
@@ -64968,7 +64968,7 @@ all existing record values.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -65020,7 +65020,7 @@ all existing record values.</p>
 <td><code>--secret</code></td>
 <td>text</td>
 <td>Secret reference (repeatable): name=<secret-href>.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -65098,7 +65098,7 @@ all existing record values.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -65152,7 +65152,7 @@ all existing record values.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -65329,7 +65329,7 @@ all existing record values.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -65368,7 +65368,7 @@ all existing record values.</p>
 <td><code>--type</code></td>
 <td>choice (<code>key</code> &#x7C; <code>asymmetric</code> &#x7C; <code>certificate</code>)</td>
 <td>Order type.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--name</code></td>
@@ -65470,7 +65470,7 @@ all existing record values.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -65524,7 +65524,7 @@ all existing record values.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -65578,7 +65578,7 @@ all existing record values.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -65614,13 +65614,13 @@ all existing record values.</p>
 <td><code>--payload</code></td>
 <td>text</td>
 <td>Inline payload (use --payload-file for binary).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--payload-file</code></td>
 <td>file</td>
 <td>File containing the payload (binary safe).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--content-type</code></td>
@@ -65632,7 +65632,7 @@ all existing record values.</p>
 <td><code>--content-encoding</code></td>
 <td>text</td>
 <td>Payload encoding (e.g. base64 for binary inside text).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -65840,7 +65840,7 @@ instances. Use --delete to remove them.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -65903,7 +65903,7 @@ instances. Use --delete to remove them.</p>
 <td><code>--direction</code></td>
 <td>choice (<code>ingress</code> &#x7C; <code>egress</code>)</td>
 <td>N/A</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--protocol</code></td>
@@ -66002,7 +66002,7 @@ instances. Use --delete to remove them.</p>
 <td><code>--direction</code></td>
 <td>choice (<code>ingress</code> &#x7C; <code>egress</code>)</td>
 <td>N/A</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--protocol</code></td>
@@ -66116,7 +66116,7 @@ instances. Use --delete to remove them.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -66625,7 +66625,7 @@ Override with <code>--boot-from-image</code> / <code>--boot-from-volume</code>.<
 <td><code>--name</code></td>
 <td>text</td>
 <td>Name for the cloned server.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--disk-size</code></td>
@@ -66921,7 +66921,7 @@ to override the auto-detection.</p>
 <td><code>--security-group</code></td>
 <td>text</td>
 <td>Security group name (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--boot-from-image</code></td>
@@ -67343,7 +67343,7 @@ a crash dump. The server must be ACTIVE.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -67403,7 +67403,7 @@ a crash dump. The server must be ACTIVE.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -67457,7 +67457,7 @@ a crash dump. The server must be ACTIVE.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -67511,7 +67511,7 @@ a crash dump. The server must be ACTIVE.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -67816,7 +67816,7 @@ a crash dump. The server must be ACTIVE.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -67870,7 +67870,7 @@ a crash dump. The server must be ACTIVE.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -67972,7 +67972,7 @@ a crash dump. The server must be ACTIVE.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -68026,7 +68026,7 @@ a crash dump. The server must be ACTIVE.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -68225,7 +68225,7 @@ decrypts it locally with your private key (RSA only).</p>
 <td><code>--image</code></td>
 <td>text</td>
 <td>New image ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--name</code></td>
@@ -68611,7 +68611,7 @@ decrypts it locally with your private key (RSA only).</p>
 <td><code>--flavor</code></td>
 <td>text</td>
 <td>Target flavor ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -68726,13 +68726,13 @@ decrypts it locally with your private key (RSA only).</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Metadata key=value (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--tag</code></td>
 <td>text</td>
 <td>Tag to set (repeatable, replaces all existing tags).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--admin-password</code></td>
@@ -68816,7 +68816,7 @@ decrypts it locally with your private key (RSA only).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -69187,13 +69187,13 @@ keypair name in <code>~/.ssh/</code>).</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Metadata key to remove (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--tag</code></td>
 <td>text</td>
 <td>Tag to remove (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -69295,7 +69295,7 @@ keypair name in <code>~/.ssh/</code>).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -69491,7 +69491,7 @@ is reached. Useful in scripts and automation.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -69545,7 +69545,7 @@ is reached. Useful in scripts and automation.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -69605,13 +69605,13 @@ is reached. Useful in scripts and automation.</p>
 <td><code>--name</code></td>
 <td>text</td>
 <td>Service name.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--type</code></td>
 <td>text</td>
 <td>Service type (e.g. identity, compute).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--description</code></td>
@@ -69707,7 +69707,7 @@ is reached. Useful in scripts and automation.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -69809,7 +69809,7 @@ is reached. Useful in scripts and automation.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -69869,13 +69869,13 @@ is reached. Useful in scripts and automation.</p>
 <td><code>--auth-url</code></td>
 <td>text</td>
 <td>Remote Keystone auth URL.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--sp-url</code></td>
 <td>text</td>
 <td>Service provider SAML2 endpoint.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--description</code></td>
@@ -69911,7 +69911,7 @@ is reached. Useful in scripts and automation.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -69995,7 +69995,7 @@ is reached. Useful in scripts and automation.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -70097,7 +70097,7 @@ is reached. Useful in scripts and automation.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -70229,19 +70229,19 @@ Heat without actually deleting the underlying OpenStack resources.</p>
 <td><code>-t</code>, <code>--template</code></td>
 <td>file</td>
 <td>Template file (yaml/json).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--adopt-file</code></td>
 <td>file</td>
 <td>JSON file with the adopt_stack_data payload (existing resources to adopt).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--parameter</code></td>
 <td>text</td>
 <td>Parameter key=value (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--timeout</code></td>
@@ -70329,7 +70329,7 @@ Heat without actually deleting the underlying OpenStack resources.</p>
 <td><code>--template</code>, <code>-t</code></td>
 <td>text</td>
 <td>Template file path or URL.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--environment</code>, <code>-e</code></td>
@@ -70341,7 +70341,7 @@ Heat without actually deleting the underlying OpenStack resources.</p>
 <td><code>--parameter</code></td>
 <td>text</td>
 <td>Parameter key=value (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--timeout</code></td>
@@ -70425,7 +70425,7 @@ against the local file so you can review changes before running
 <td><code>--template</code>, <code>-t</code></td>
 <td>path</td>
 <td>Local template file to compare against.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -70557,7 +70557,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -70611,7 +70611,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -70677,7 +70677,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -70731,7 +70731,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -70881,7 +70881,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -70959,7 +70959,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -71013,7 +71013,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -71067,7 +71067,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -71121,7 +71121,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -71199,7 +71199,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -71307,7 +71307,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -71391,7 +71391,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -71445,7 +71445,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -71529,7 +71529,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -71619,7 +71619,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -71727,7 +71727,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -71865,7 +71865,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -71943,7 +71943,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -72054,7 +72054,7 @@ against the local file so you can review changes before running
 <td><code>--template</code>, <code>-t</code></td>
 <td>text</td>
 <td>Template file path or URL.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--environment</code>, <code>-e</code></td>
@@ -72066,7 +72066,7 @@ against the local file so you can review changes before running
 <td><code>--parameter</code></td>
 <td>text</td>
 <td>Parameter key=value (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -72123,7 +72123,7 @@ against the local file so you can review changes before running
 <td><code>--template</code>, <code>-t</code></td>
 <td>text</td>
 <td>Template file path or URL.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--environment</code>, <code>-e</code></td>
@@ -72135,7 +72135,7 @@ against the local file so you can review changes before running
 <td><code>--parameter</code></td>
 <td>text</td>
 <td>Parameter key=value (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -72192,7 +72192,7 @@ against the local file so you can review changes before running
 <td><code>--template</code>, <code>-t</code></td>
 <td>text</td>
 <td>Template file path or URL.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--environment</code>, <code>-e</code></td>
@@ -72204,7 +72204,7 @@ against the local file so you can review changes before running
 <td><code>--parameter</code></td>
 <td>text</td>
 <td>Parameter key=value (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--timeout</code></td>
@@ -72275,13 +72275,13 @@ against the local file so you can review changes before running
 <td><code>--name</code></td>
 <td>text</td>
 <td>Pool name.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--pool-prefix</code></td>
 <td>text</td>
 <td>CIDR prefix for the pool (repeatable).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--default-prefix-length</code></td>
@@ -72407,7 +72407,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -72461,7 +72461,7 @@ against the local file so you can review changes before running
 <td><code>--pool-prefix</code></td>
 <td>text</td>
 <td>Add a prefix to the pool (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--default</code> / <code>--no-default</code></td>
@@ -72515,7 +72515,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -72593,7 +72593,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -72683,7 +72683,7 @@ against the local file so you can review changes before running
 <td><code>--port</code></td>
 <td>text</td>
 <td>Sub-port port ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--segmentation-type</code></td>
@@ -72695,7 +72695,7 @@ against the local file so you can review changes before running
 <td><code>--segmentation-id</code></td>
 <td>integer</td>
 <td>VLAN ID (1–4094).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -72725,7 +72725,7 @@ against the local file so you can review changes before running
 <td><code>--port</code></td>
 <td>text</td>
 <td>Parent port ID (the trunk port).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--name</code></td>
@@ -72821,7 +72821,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -72857,7 +72857,7 @@ against the local file so you can review changes before running
 <td><code>--port</code></td>
 <td>text</td>
 <td>Sub-port port ID to remove.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--yes</code>, <code>-y</code></td>
@@ -72953,7 +72953,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -73013,7 +73013,7 @@ against the local file so you can review changes before running
 <td><code>--port</code></td>
 <td>text</td>
 <td>Sub-port port ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--segmentation-type</code></td>
@@ -73025,7 +73025,7 @@ against the local file so you can review changes before running
 <td><code>--segmentation-id</code></td>
 <td>integer</td>
 <td>VLAN ID (1–4094).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -73073,7 +73073,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -73109,7 +73109,7 @@ against the local file so you can review changes before running
 <td><code>--port</code></td>
 <td>text</td>
 <td>Sub-port port ID to remove.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--yes</code>, <code>-y</code></td>
@@ -73163,7 +73163,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -73230,13 +73230,13 @@ against the local file so you can review changes before running
 <td><code>--trustor</code></td>
 <td>text</td>
 <td>Trustor user ID (delegating identity).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--trustee</code></td>
 <td>text</td>
 <td>Trustee user ID (receiving delegation).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--project</code></td>
@@ -73248,7 +73248,7 @@ against the local file so you can review changes before running
 <td><code>--role</code></td>
 <td>text</td>
 <td>Role name to delegate (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--impersonate</code> / <code>--no-impersonate</code></td>
@@ -73356,7 +73356,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -73410,7 +73410,7 @@ against the local file so you can review changes before running
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -73481,7 +73481,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -73541,7 +73541,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--password</code></td>
 <td>text</td>
 <td>User password.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--email</code></td>
@@ -73667,7 +73667,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -73727,7 +73727,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--password</code></td>
 <td>text</td>
 <td>New password.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -73811,7 +73811,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--password</code></td>
 <td>text</td>
 <td>New password.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -73859,7 +73859,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -74001,7 +74001,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -74091,7 +74091,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -74127,7 +74127,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--connector</code></td>
 <td>text</td>
 <td>Updated connector info as JSON.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--noindent</code></td>
@@ -74151,7 +74151,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -74205,7 +74205,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -74299,7 +74299,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -74389,7 +74389,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -74425,7 +74425,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--connector</code></td>
 <td>text</td>
 <td>Updated connector info as JSON.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--noindent</code></td>
@@ -74449,7 +74449,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -74503,7 +74503,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -74693,7 +74693,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -74793,7 +74793,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -74959,7 +74959,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -75059,7 +75059,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -75217,7 +75217,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--size</code></td>
 <td>integer</td>
 <td>New size in GB (must be larger).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -75275,13 +75275,13 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--group-type</code></td>
 <td>text</td>
 <td>Group type ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--volume-type</code></td>
 <td>text</td>
 <td>Volume type ID (repeatable).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--description</code></td>
@@ -75380,7 +75380,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -75434,7 +75434,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -75578,7 +75578,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -75632,7 +75632,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -75776,7 +75776,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -75830,7 +75830,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Group spec key=value (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -75878,7 +75878,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -75914,7 +75914,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Group spec key to remove (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -75960,13 +75960,13 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--add-volume</code></td>
 <td>text</td>
 <td>Volume ID to add to the group (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--remove-volume</code></td>
 <td>text</td>
 <td>Volume ID to remove from the group (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -76000,13 +76000,13 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--group-type</code></td>
 <td>text</td>
 <td>Group type ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--volume-type</code></td>
 <td>text</td>
 <td>Volume type ID (repeatable).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--description</code></td>
@@ -76105,7 +76105,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -76159,7 +76159,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -76279,7 +76279,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -76333,7 +76333,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -76453,7 +76453,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -76507,7 +76507,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Group spec key=value (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -76555,7 +76555,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -76591,7 +76591,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Group spec key to remove (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -76637,13 +76637,13 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--add-volume</code></td>
 <td>text</td>
 <td>Volume ID to add to the group (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--remove-volume</code></td>
 <td>text</td>
 <td>Volume ID to remove from the group (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -76721,7 +76721,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -76775,7 +76775,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -76895,7 +76895,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -76949,7 +76949,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -77045,7 +77045,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -77099,7 +77099,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -77137,7 +77137,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--host</code></td>
 <td>text</td>
 <td>Destination host (e.g. cinder@lvm#LVM).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--force-host-copy</code></td>
@@ -77227,7 +77227,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -77320,7 +77320,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>QoS spec key=value (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -77434,7 +77434,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -77470,7 +77470,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>QoS spec key=value to add or update (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -77518,7 +77518,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -77587,7 +77587,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>QoS spec key=value (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -77701,7 +77701,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -77737,7 +77737,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>QoS spec key=value to add or update (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -77785,7 +77785,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -77821,7 +77821,7 @@ from the Nova simple-tenant-usage API.</p>
 <td><code>--type</code></td>
 <td>text</td>
 <td>New volume type.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--migration-policy</code></td>
@@ -77939,7 +77939,7 @@ the most recent one for this volume.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -77975,13 +77975,13 @@ the most recent one for this volume.</p>
 <td><code>--enable</code></td>
 <td>text</td>
 <td>Enable the service.</td>
-<td><code>False</code></td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--disable</code></td>
 <td>text</td>
 <td>Disable the service.</td>
-<td><code>False</code></td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--disabled-reason</code></td>
@@ -78047,7 +78047,7 @@ the most recent one for this volume.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -78083,13 +78083,13 @@ the most recent one for this volume.</p>
 <td><code>--enable</code></td>
 <td>text</td>
 <td>Enable the service.</td>
-<td><code>False</code></td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--disable</code></td>
 <td>text</td>
 <td>Disable the service.</td>
-<td><code>False</code></td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--disabled-reason</code></td>
@@ -78130,7 +78130,7 @@ the most recent one for this volume.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Metadata key=value pair (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--name</code></td>
@@ -78262,7 +78262,7 @@ the most recent one for this volume.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -78322,7 +78322,7 @@ the most recent one for this volume.</p>
 <td><code>--name</code></td>
 <td>text</td>
 <td>Snapshot name.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--description</code></td>
@@ -78412,7 +78412,7 @@ the most recent one for this volume.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -78488,7 +78488,7 @@ the most recent one for this volume.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Metadata key=value (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -78536,7 +78536,7 @@ the most recent one for this volume.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -78572,7 +78572,7 @@ the most recent one for this volume.</p>
 <td><code>--name</code></td>
 <td>text</td>
 <td>Snapshot name.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--description</code></td>
@@ -78662,7 +78662,7 @@ the most recent one for this volume.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -78710,7 +78710,7 @@ the most recent one for this volume.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Metadata key=value (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -78758,7 +78758,7 @@ the most recent one for this volume.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -78812,7 +78812,7 @@ the most recent one for this volume.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -78980,7 +78980,7 @@ the most recent one for this volume.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -79034,7 +79034,7 @@ the most recent one for this volume.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -79178,7 +79178,7 @@ the most recent one for this volume.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -79232,7 +79232,7 @@ the most recent one for this volume.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -79394,7 +79394,7 @@ see what depends on what.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -79472,7 +79472,7 @@ see what depends on what.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Extra spec (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -79556,7 +79556,7 @@ see what depends on what.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -79604,7 +79604,7 @@ see what depends on what.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Extra spec to add or update (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -79652,7 +79652,7 @@ see what depends on what.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -79730,7 +79730,7 @@ see what depends on what.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -79808,7 +79808,7 @@ see what depends on what.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Extra spec (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -79892,7 +79892,7 @@ see what depends on what.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -79940,7 +79940,7 @@ see what depends on what.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Extra spec to add or update (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -79988,7 +79988,7 @@ see what depends on what.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -80024,7 +80024,7 @@ see what depends on what.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Metadata key to remove (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -80129,7 +80129,7 @@ therefore be downloaded with <code>orca image download</code>.</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Custom Glance property to set on the resulting image. Repeatable. Applied via JSON-Patch after the upload action.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--wait</code></td>
@@ -80375,7 +80375,7 @@ therefore be downloaded with <code>orca image download</code>.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -80473,7 +80473,7 @@ therefore be downloaded with <code>orca image download</code>.</p>
 <td><code>--email</code></td>
 <td>text</td>
 <td>Zone administrator email.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--ttl</code></td>
@@ -80497,7 +80497,7 @@ therefore be downloaded with <code>orca image download</code>.</p>
 <td><code>--masters</code></td>
 <td>text</td>
 <td>Master servers (for SECONDARY zones, repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -80593,7 +80593,7 @@ therefore be downloaded with <code>orca image download</code>.</p>
 <td><code>--file</code></td>
 <td>path</td>
 <td>BIND-format zone file to import.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -80641,7 +80641,7 @@ therefore be downloaded with <code>orca image download</code>.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -80772,7 +80772,7 @@ in-addr.arpa / ip6.arpa zones.</p>
 <td><code>--target-project</code></td>
 <td>text</td>
 <td>Project ID to share the zone with.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -80850,7 +80850,7 @@ in-addr.arpa / ip6.arpa zones.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -80929,7 +80929,7 @@ in-addr.arpa / ip6.arpa zones.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -81067,7 +81067,7 @@ in-addr.arpa / ip6.arpa zones.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -81181,7 +81181,7 @@ in-addr.arpa / ip6.arpa zones.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -81373,7 +81373,7 @@ in-addr.arpa / ip6.arpa zones.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -81427,7 +81427,7 @@ in-addr.arpa / ip6.arpa zones.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -81571,7 +81571,7 @@ in-addr.arpa / ip6.arpa zones.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -81625,7 +81625,7 @@ in-addr.arpa / ip6.arpa zones.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>

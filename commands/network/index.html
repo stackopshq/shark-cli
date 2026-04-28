@@ -6194,7 +6194,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -6284,7 +6284,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -6380,7 +6380,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -6470,7 +6470,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -6605,7 +6605,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -6711,7 +6711,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -6831,7 +6831,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -6900,7 +6900,7 @@ always reflects the version installed.</p>
 <td><code>--network-id</code></td>
 <td>text</td>
 <td>Network ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--name</code></td>
@@ -6996,7 +6996,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7050,7 +7050,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7090,7 +7090,7 @@ always reflects the version installed.</p>
 <td><code>--security-group</code></td>
 <td>text</td>
 <td>Security group ID to remove (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--qos-policy</code></td>
@@ -7168,7 +7168,7 @@ always reflects the version installed.</p>
 <td><code>--network-id</code></td>
 <td>text</td>
 <td>Network ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--name</code></td>
@@ -7264,7 +7264,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7318,7 +7318,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7358,7 +7358,7 @@ always reflects the version installed.</p>
 <td><code>--security-group</code></td>
 <td>text</td>
 <td>Security group ID to remove (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--qos-policy</code></td>
@@ -7474,25 +7474,25 @@ always reflects the version installed.</p>
 <td><code>--object-type</code></td>
 <td>choice (<code>network</code> &#x7C; <code>qos_policy</code> &#x7C; <code>security_group</code> &#x7C; <code>address_group</code> &#x7C; <code>address_scope</code> &#x7C; <code>subnetpool</code>)</td>
 <td>Type of the shared object.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--object</code></td>
 <td>text</td>
 <td>ID of the object to share.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--action</code></td>
 <td>choice (<code>access_as_shared</code> &#x7C; <code>access_as_external</code>)</td>
 <td>RBAC action.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--target-project</code></td>
 <td>text</td>
 <td>Project ID to grant access to (use '*' for all projects).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -7576,7 +7576,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7630,7 +7630,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7669,7 +7669,7 @@ always reflects the version installed.</p>
 <td><code>--target-project</code></td>
 <td>text</td>
 <td>New target project ID (use '*' for all projects).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -7705,25 +7705,25 @@ always reflects the version installed.</p>
 <td><code>--object-type</code></td>
 <td>choice (<code>network</code> &#x7C; <code>qos_policy</code> &#x7C; <code>security_group</code> &#x7C; <code>address_group</code> &#x7C; <code>address_scope</code> &#x7C; <code>subnetpool</code>)</td>
 <td>Type of the shared object.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--object</code></td>
 <td>text</td>
 <td>ID of the object to share.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--action</code></td>
 <td>choice (<code>access_as_shared</code> &#x7C; <code>access_as_external</code>)</td>
 <td>RBAC action.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--target-project</code></td>
 <td>text</td>
 <td>Project ID to grant access to (use '*' for all projects).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -7807,7 +7807,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7861,7 +7861,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7900,7 +7900,7 @@ always reflects the version installed.</p>
 <td><code>--target-project</code></td>
 <td>text</td>
 <td>New target project ID (use '*' for all projects).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -7995,7 +7995,7 @@ always reflects the version installed.</p>
 <td><code>--subnet-id</code></td>
 <td>text</td>
 <td>Subnet to attach.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -8027,13 +8027,13 @@ always reflects the version installed.</p>
 <td><code>--destination</code></td>
 <td>text</td>
 <td>Destination network (e.g. 10.1.0.0/24).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--nexthop</code></td>
 <td>text</td>
 <td>Next-hop IP address.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -8141,7 +8141,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -8206,7 +8206,7 @@ always reflects the version installed.</p>
 <td><code>--subnet-id</code></td>
 <td>text</td>
 <td>Subnet to detach.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -8238,13 +8238,13 @@ always reflects the version installed.</p>
 <td><code>--destination</code></td>
 <td>text</td>
 <td>Destination network to remove.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--nexthop</code></td>
 <td>text</td>
 <td>Next-hop IP address.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -8305,7 +8305,7 @@ always reflects the version installed.</p>
 <td><code>--external-network</code></td>
 <td>text</td>
 <td>External network ID to use as gateway.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--enable-snat</code> / <code>--disable-snat</code></td>
@@ -8359,7 +8359,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -8485,7 +8485,7 @@ always reflects the version installed.</p>
 <td><code>--subnet-id</code></td>
 <td>text</td>
 <td>Subnet to attach.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -8517,13 +8517,13 @@ always reflects the version installed.</p>
 <td><code>--destination</code></td>
 <td>text</td>
 <td>Destination network (e.g. 10.1.0.0/24).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--nexthop</code></td>
 <td>text</td>
 <td>Next-hop IP address.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -8631,7 +8631,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -8667,7 +8667,7 @@ always reflects the version installed.</p>
 <td><code>--subnet-id</code></td>
 <td>text</td>
 <td>Subnet to detach.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -8699,13 +8699,13 @@ always reflects the version installed.</p>
 <td><code>--destination</code></td>
 <td>text</td>
 <td>Destination network to remove.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--nexthop</code></td>
 <td>text</td>
 <td>Next-hop IP address.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -8738,7 +8738,7 @@ always reflects the version installed.</p>
 <td><code>--external-network</code></td>
 <td>text</td>
 <td>External network ID to use as gateway.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--enable-snat</code> / <code>--disable-snat</code></td>
@@ -8792,7 +8792,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -8922,13 +8922,13 @@ always reflects the version installed.</p>
 <td><code>--network-id</code></td>
 <td>text</td>
 <td>Network ID this segment belongs to.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--network-type</code></td>
 <td>choice (<code>flat</code> &#x7C; <code>geneve</code> &#x7C; <code>gre</code> &#x7C; <code>local</code> &#x7C; <code>vlan</code> &#x7C; <code>vxlan</code>)</td>
 <td>Network type.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--physical-network</code></td>
@@ -9030,7 +9030,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -9120,7 +9120,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -9156,13 +9156,13 @@ always reflects the version installed.</p>
 <td><code>--network-id</code></td>
 <td>text</td>
 <td>Network ID this segment belongs to.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--network-type</code></td>
 <td>choice (<code>flat</code> &#x7C; <code>geneve</code> &#x7C; <code>gre</code> &#x7C; <code>local</code> &#x7C; <code>vlan</code> &#x7C; <code>vxlan</code>)</td>
 <td>Network type.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--physical-network</code></td>
@@ -9264,7 +9264,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -9354,7 +9354,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -9408,7 +9408,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -9476,13 +9476,13 @@ always reflects the version installed.</p>
 <td><code>--network-id</code></td>
 <td>text</td>
 <td>Parent network ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--cidr</code></td>
 <td>text</td>
 <td>CIDR (e.g. 10.0.0.0/24).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--ip-version</code></td>
@@ -9506,7 +9506,7 @@ always reflects the version installed.</p>
 <td><code>--dns</code></td>
 <td>text</td>
 <td>DNS nameserver (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -9584,7 +9584,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -9638,7 +9638,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -9686,7 +9686,7 @@ always reflects the version installed.</p>
 <td><code>--dns-nameserver</code></td>
 <td>text</td>
 <td>DNS nameserver IP (repeatable, replaces existing list).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--enable-dhcp</code> / <code>--disable-dhcp</code></td>
@@ -9722,13 +9722,13 @@ always reflects the version installed.</p>
 <td><code>--network-id</code></td>
 <td>text</td>
 <td>Parent network ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--cidr</code></td>
 <td>text</td>
 <td>CIDR (e.g. 10.0.0.0/24).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--ip-version</code></td>
@@ -9752,7 +9752,7 @@ always reflects the version installed.</p>
 <td><code>--dns</code></td>
 <td>text</td>
 <td>DNS nameserver (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -9830,7 +9830,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -9884,7 +9884,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -9932,7 +9932,7 @@ always reflects the version installed.</p>
 <td><code>--dns-nameserver</code></td>
 <td>text</td>
 <td>DNS nameserver IP (repeatable, replaces existing list).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--enable-dhcp</code> / <code>--disable-dhcp</code></td>

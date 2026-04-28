@@ -3970,13 +3970,13 @@ always reflects the version installed.</p>
 <td><code>--type</code></td>
 <td>text</td>
 <td>Record type (A, AAAA, CNAME, MX, TXT, …).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--record</code></td>
 <td>text</td>
 <td>Record value (repeatable for multiple values).</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--ttl</code></td>
@@ -4080,7 +4080,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -4118,7 +4118,7 @@ all existing record values.</p>
 <td><code>--record</code></td>
 <td>text</td>
 <td>Record value (repeatable — replaces all existing values).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--ttl</code></td>
@@ -4179,7 +4179,7 @@ all existing record values.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>

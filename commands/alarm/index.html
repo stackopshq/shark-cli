@@ -4241,19 +4241,19 @@ always reflects the version installed.</p>
 <td><code>--name</code></td>
 <td>text</td>
 <td>Alarm name.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--type</code></td>
 <td>choice (<code>gnocchi_resources_threshold</code> &#x7C; <code>gnocchi_aggregation_by_metrics_threshold</code> &#x7C; <code>gnocchi_aggregation_by_resources_threshold</code> &#x7C; <code>event</code> &#x7C; <code>composite</code> &#x7C; <code>loadbalancer_member_health</code> &#x7C; <code>threshold</code>)</td>
 <td>Alarm type.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--rule</code></td>
 <td>text</td>
 <td>Type-specific rule as a JSON string.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--description</code></td>
@@ -4283,19 +4283,19 @@ always reflects the version installed.</p>
 <td><code>--alarm-action</code></td>
 <td>text</td>
 <td>Webhook URL to call when entering alarm state. Repeatable.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--ok-action</code></td>
 <td>text</td>
 <td>Webhook URL to call when entering ok state. Repeatable.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--insufficient-data-action</code></td>
 <td>text</td>
 <td>Webhook URL to call on insufficient data. Repeatable.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--noindent</code></td>
@@ -4319,7 +4319,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -4409,7 +4409,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -4493,7 +4493,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -4557,7 +4557,7 @@ always reflects the version installed.</p>
 <td><code>--alarms</code></td>
 <td>integer</td>
 <td>Maximum number of alarms for the project.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -4587,7 +4587,7 @@ always reflects the version installed.</p>
 <td><code>--alarms</code></td>
 <td>integer</td>
 <td>Maximum number of alarms for the project.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -4653,19 +4653,19 @@ always reflects the version installed.</p>
 <td><code>--alarm-action</code></td>
 <td>text</td>
 <td>N/A</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--ok-action</code></td>
 <td>text</td>
 <td>N/A</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--insufficient-data-action</code></td>
 <td>text</td>
 <td>N/A</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -4713,7 +4713,7 @@ always reflects the version installed.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>

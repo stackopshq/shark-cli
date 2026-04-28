@@ -6508,7 +6508,7 @@ Override with <code>--boot-from-image</code> / <code>--boot-from-volume</code>.<
 <td><code>--name</code></td>
 <td>text</td>
 <td>Name for the cloned server.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--disk-size</code></td>
@@ -6809,7 +6809,7 @@ to override the auto-detection.</p>
 <td><code>--security-group</code></td>
 <td>text</td>
 <td>Security group name (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--boot-from-image</code></td>
@@ -7243,7 +7243,7 @@ a crash dump. The server must be ACTIVE.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7303,7 +7303,7 @@ a crash dump. The server must be ACTIVE.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7357,7 +7357,7 @@ a crash dump. The server must be ACTIVE.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7411,7 +7411,7 @@ a crash dump. The server must be ACTIVE.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7727,7 +7727,7 @@ a crash dump. The server must be ACTIVE.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7781,7 +7781,7 @@ a crash dump. The server must be ACTIVE.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7883,7 +7883,7 @@ a crash dump. The server must be ACTIVE.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -7937,7 +7937,7 @@ a crash dump. The server must be ACTIVE.</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -8136,7 +8136,7 @@ decrypts it locally with your private key (RSA only).</p>
 <td><code>--image</code></td>
 <td>text</td>
 <td>New image ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--name</code></td>
@@ -8531,7 +8531,7 @@ decrypts it locally with your private key (RSA only).</p>
 <td><code>--flavor</code></td>
 <td>text</td>
 <td>Target flavor ID.</td>
-<td>_required</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -8646,13 +8646,13 @@ decrypts it locally with your private key (RSA only).</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Metadata key=value (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--tag</code></td>
 <td>text</td>
 <td>Tag to set (repeatable, replaces all existing tags).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--admin-password</code></td>
@@ -8736,7 +8736,7 @@ decrypts it locally with your private key (RSA only).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
@@ -9111,13 +9111,13 @@ keypair name in <code>~/.ssh/</code>).</p>
 <td><code>--property</code></td>
 <td>text</td>
 <td>Metadata key to remove (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--tag</code></td>
 <td>text</td>
 <td>Tag to remove (repeatable).</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--help</code></td>
@@ -9223,7 +9223,7 @@ keypair name in <code>~/.ssh/</code>).</p>
 <td><code>--column</code>, <code>-c</code></td>
 <td>text</td>
 <td>Column to include (repeatable). Shows all if omitted.</td>
-<td>None</td>
+<td><code>Sentinel.UNSET</code></td>
 </tr>
 <tr>
 <td><code>--format</code>, <code>-f</code></td>
