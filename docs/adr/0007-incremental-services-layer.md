@@ -1,6 +1,6 @@
 # ADR-0007: Incremental services layer with typed models
 
-**Status**: Accepted
+**Status**: Accepted (migration complete 2026-04-28)
 **Date**: 2026-04-20
 **Supersedes**: [ADR-0004](0004-no-services-layer.md)
 
@@ -254,3 +254,40 @@ readers can see how far along the work is.
   callers (Nova os-keypairs, Cinder, Heat, Octavia, Swift, Designate,
   Barbican) keep direct ``client.*`` calls until their respective
   services land.
+- 2026-04-28 — Final migration sweep, ADR-0007 reaches 100 %:
+  - ``auth.token-revoke`` routed through the existing
+    ``IdentityService.revoke_token``.
+  - PlacementService gains ``get_inventory`` (single resource_class
+    GET) and ``delete_all_inventories`` (bulk DELETE); the two
+    remaining holdouts in ``commands/placement.py`` are gone.
+  - Streaming I/O is now expressed in services. ``OrcaClient`` exposes
+    ``put_stream`` (rewritten — explicit ``content_length``, no retry
+    because streamed bodies cannot be replayed), ``post_stream``,
+    ``post_no_body``, ``head_request``, and ``get_stream`` with
+    ``extra_headers``. ObjectStoreService gains ``upload_object`` /
+    ``download_object`` / ``fetch_object_bytes`` /
+    ``post_account_metadata``. ImageService.upload/stage now take a
+    ``content`` iterable and an optional ``content_length``.
+    DnsService gains ``fetch_export_text`` /
+    ``import_zone_text`` for the Designate text/dns endpoints.
+    KeyManagerService gains ``get_secret_payload`` for the Barbican
+    text/plain endpoint.
+  - The auth-state attributes commands previously read off the client
+    (``_token``, ``_token_data``, ``_catalog``, ``_auth_url``,
+    ``_region_name``, ``_interface``, ``_project_id``) are now public
+    properties on ``OrcaClient``. ``_authenticate()`` is exposed as
+    ``authenticate()``.
+  - ``orca doctor`` reachability probes and quota checks route through
+    Compute / Volume / Network / Image services.
+    ``NetworkService.get_quota_details`` covers the
+    ``/quotas/{id}/details`` endpoint that was missing.
+  - **BackupService + models/backup.py introduced**: 24 Freezer
+    operations (backups, jobs, sessions, clients, actions) finally
+    have a service. ``commands/backup.py`` no longer issues raw HTTP.
+  - A ratchet test
+    (``tests/test_no_private_client_api_in_commands.py``) walks every
+    command module and fails if a future change reintroduces
+    ``client._<anything>``.
+  - Result: zero ``client.get/post/put/patch/delete`` and zero
+    ``client._*`` accesses remain in ``orca_cli/commands/``. Every
+    command module is service-only.
