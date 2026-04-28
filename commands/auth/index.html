@@ -2813,6 +2813,45 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#orca-auth-token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        token
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="token">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-auth-token-debug" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        debug
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-auth-token-revoke" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        revoke
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#orca-auth-token-debug" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3831,6 +3870,45 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#orca-auth-token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        token
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="token">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-auth-token-debug" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        debug
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-auth-token-revoke" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        revoke
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#orca-auth-token-debug" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3919,8 +3997,9 @@ always reflects the version installed.</p>
 <p><strong>Subcommands</strong></p>
 <ul>
 <li><em><a href="#orca-auth-check">check</a></em>: Verify credentials are still valid (password check).</li>
-<li><em><a href="#orca-auth-token-debug">token-debug</a></em>: Inspect the current token — roles, catalog, methods, expiration.</li>
-<li><em><a href="#orca-auth-token-revoke">token-revoke</a></em>: Revoke a token.</li>
+<li><em><a href="#orca-auth-token">token</a></em>: Inspect or revoke the current token.</li>
+<li><em><a href="#orca-auth-token-debug">token-debug</a></em>: [deprecated, use 'auth token debug' instead]</li>
+<li><em><a href="#orca-auth-token-revoke">token-revoke</a></em>: [deprecated, use 'auth token revoke' instead]</li>
 <li><em><a href="#orca-auth-whoami">whoami</a></em>: Show current identity — user, project, roles, endpoints.</li>
 </ul>
 <h4 id="orca-auth-check">orca auth check<a class="headerlink" href="#orca-auth-check" title="Permanent link">&para;</a></h4>
@@ -3965,15 +4044,105 @@ Use before long scripts to fail fast.</p>
 </tr>
 </tbody>
 </table>
+<h4 id="orca-auth-token">orca auth token<a class="headerlink" href="#orca-auth-token" title="Permanent link">&para;</a></h4>
+<p>Inspect or revoke the current token.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>orca auth token [OPTIONS] COMMAND [ARGS]...
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Subcommands</strong></p>
+<ul>
+<li><em><a href="#orca-auth-token-debug">debug</a></em>: Inspect the current token — roles, catalog, methods, expiration.</li>
+<li><em><a href="#orca-auth-token-revoke">revoke</a></em>: Revoke a token.</li>
+</ul>
+<h5 id="orca-auth-token-debug">orca auth token debug<a class="headerlink" href="#orca-auth-token-debug" title="Permanent link">&para;</a></h5>
+<p>Inspect the current token — roles, catalog, methods, expiration.</p>
+<p>Shows everything Keystone returned in the token payload.
+Use --raw for the full JSON dump.</p>
+<p>Examples:
+  orca auth token debug
+  orca auth token debug --raw</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>orca auth token debug [OPTIONS]
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--raw</code></td>
+<td>boolean</td>
+<td>Print the full token body as JSON.</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<h5 id="orca-auth-token-revoke">orca auth token revoke<a class="headerlink" href="#orca-auth-token-revoke" title="Permanent link">&para;</a></h5>
+<p>Revoke a token.</p>
+<p>Example:
+  orca auth token revoke <token-value></p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>orca auth token revoke [OPTIONS] TOKEN
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
 <h4 id="orca-auth-token-debug">orca auth token-debug<a class="headerlink" href="#orca-auth-token-debug" title="Permanent link">&para;</a></h4>
 <p>Inspect the current token — roles, catalog, methods, expiration.</p>
 <p>Shows everything Keystone returned in the token payload.
 Use --raw for the full JSON dump.</p>
 <p>Examples:
-  orca auth token-debug
-  orca auth token-debug --raw</p>
+  orca auth token debug
+  orca auth token debug --raw</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>orca auth token-debug [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>orca auth token-debug [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4003,9 +4172,9 @@ Use --raw for the full JSON dump.</p>
 <h4 id="orca-auth-token-revoke">orca auth token-revoke<a class="headerlink" href="#orca-auth-token-revoke" title="Permanent link">&para;</a></h4>
 <p>Revoke a token.</p>
 <p>Example:
-  orca auth token-revoke <token-value></p>
+  orca auth token revoke <token-value></p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>orca auth token-revoke [OPTIONS] TOKEN
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>orca auth token-revoke [OPTIONS] TOKEN
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4034,7 +4203,7 @@ all resources.</p>
   orca auth whoami
   orca -P staging auth whoami</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>orca auth whoami [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>orca auth whoami [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>

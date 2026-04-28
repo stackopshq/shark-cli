@@ -2902,6 +2902,45 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#orca-endpoint-group-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        project
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="project">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-endpoint-group-project-add" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-endpoint-group-project-remove" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        remove
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#orca-endpoint-group-remove-project" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3897,6 +3936,45 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#orca-endpoint-group-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        project
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="project">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-endpoint-group-project-add" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-endpoint-group-project-remove" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        remove
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#orca-endpoint-group-remove-project" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3984,11 +4062,12 @@ always reflects the version installed.</p>
 </table>
 <p><strong>Subcommands</strong></p>
 <ul>
-<li><em><a href="#orca-endpoint-group-add-project">add-project</a></em>: Associate a project with an endpoint group.</li>
+<li><em><a href="#orca-endpoint-group-add-project">add-project</a></em>: [deprecated, use 'endpoint-group project add' instead]</li>
 <li><em><a href="#orca-endpoint-group-create">create</a></em>: Create an endpoint group.</li>
 <li><em><a href="#orca-endpoint-group-delete">delete</a></em>: Delete an endpoint group.</li>
 <li><em><a href="#orca-endpoint-group-list">list</a></em>: List endpoint groups.</li>
-<li><em><a href="#orca-endpoint-group-remove-project">remove-project</a></em>: Remove a project from an endpoint group.</li>
+<li><em><a href="#orca-endpoint-group-project">project</a></em>: Manage project membership of an endpoint group.</li>
+<li><em><a href="#orca-endpoint-group-remove-project">remove-project</a></em>: [deprecated, use 'endpoint-group project remove' instead]</li>
 <li><em><a href="#orca-endpoint-group-set">set</a></em>: Update an endpoint group.</li>
 <li><em><a href="#orca-endpoint-group-show">show</a></em>: Show an endpoint group.</li>
 </ul>
@@ -4172,10 +4251,93 @@ always reflects the version installed.</p>
 </tr>
 </tbody>
 </table>
+<h4 id="orca-endpoint-group-project">orca endpoint-group project<a class="headerlink" href="#orca-endpoint-group-project" title="Permanent link">&para;</a></h4>
+<p>Manage project membership of an endpoint group.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>orca endpoint-group project [OPTIONS] COMMAND [ARGS]...
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Subcommands</strong></p>
+<ul>
+<li><em><a href="#orca-endpoint-group-project-add">add</a></em>: Associate a project with an endpoint group.</li>
+<li><em><a href="#orca-endpoint-group-project-remove">remove</a></em>: Remove a project from an endpoint group.</li>
+</ul>
+<h5 id="orca-endpoint-group-project-add">orca endpoint-group project add<a class="headerlink" href="#orca-endpoint-group-project-add" title="Permanent link">&para;</a></h5>
+<p>Associate a project with an endpoint group.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>orca endpoint-group project add [OPTIONS] ENDPOINT_GROUP_ID PROJECT_ID
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<h5 id="orca-endpoint-group-project-remove">orca endpoint-group project remove<a class="headerlink" href="#orca-endpoint-group-project-remove" title="Permanent link">&para;</a></h5>
+<p>Remove a project from an endpoint group.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>orca endpoint-group project remove [OPTIONS] ENDPOINT_GROUP_ID PROJECT_ID
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--yes</code>, <code>-y</code></td>
+<td>boolean</td>
+<td>N/A</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
 <h4 id="orca-endpoint-group-remove-project">orca endpoint-group remove-project<a class="headerlink" href="#orca-endpoint-group-remove-project" title="Permanent link">&para;</a></h4>
 <p>Remove a project from an endpoint group.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>orca endpoint-group remove-project [OPTIONS] ENDPOINT_GROUP_ID PROJECT_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>orca endpoint-group remove-project [OPTIONS] ENDPOINT_GROUP_ID PROJECT_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4205,7 +4367,7 @@ always reflects the version installed.</p>
 <h4 id="orca-endpoint-group-set">orca endpoint-group set<a class="headerlink" href="#orca-endpoint-group-set" title="Permanent link">&para;</a></h4>
 <p>Update an endpoint group.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>orca endpoint-group set [OPTIONS] ENDPOINT_GROUP_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>orca endpoint-group set [OPTIONS] ENDPOINT_GROUP_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4247,7 +4409,7 @@ always reflects the version installed.</p>
 <h4 id="orca-endpoint-group-show">orca endpoint-group show<a class="headerlink" href="#orca-endpoint-group-show" title="Permanent link">&para;</a></h4>
 <p>Show an endpoint group.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>orca endpoint-group show [OPTIONS] ENDPOINT_GROUP_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>orca endpoint-group show [OPTIONS] ENDPOINT_GROUP_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>

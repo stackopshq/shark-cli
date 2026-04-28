@@ -2527,6 +2527,34 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#orca-user-password" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        password
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="password">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-user-password-set" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        set
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#orca-user-set" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3875,6 +3903,34 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#orca-user-password" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        password
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="password">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-user-password-set" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        set
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#orca-user-set" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3965,8 +4021,9 @@ always reflects the version installed.</p>
 <li><em><a href="#orca-user-create">create</a></em>: Create a user.</li>
 <li><em><a href="#orca-user-delete">delete</a></em>: Delete a user.</li>
 <li><em><a href="#orca-user-list">list</a></em>: List users.</li>
+<li><em><a href="#orca-user-password">password</a></em>: Manage a user's password (admin).</li>
 <li><em><a href="#orca-user-set">set</a></em>: Update a user.</li>
-<li><em><a href="#orca-user-set-password">set-password</a></em>: Set a user's password (admin).</li>
+<li><em><a href="#orca-user-set-password">set-password</a></em>: [deprecated, use 'user password set' instead]</li>
 <li><em><a href="#orca-user-show">show</a></em>: Show user details.</li>
 </ul>
 <h4 id="orca-user-create">orca user create<a class="headerlink" href="#orca-user-create" title="Permanent link">&para;</a></h4>
@@ -4131,10 +4188,68 @@ always reflects the version installed.</p>
 </tr>
 </tbody>
 </table>
+<h4 id="orca-user-password">orca user password<a class="headerlink" href="#orca-user-password" title="Permanent link">&para;</a></h4>
+<p>Manage a user's password (admin).</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>orca user password [OPTIONS] COMMAND [ARGS]...
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Subcommands</strong></p>
+<ul>
+<li><em><a href="#orca-user-password-set">set</a></em>: Set a user's password (admin).</li>
+</ul>
+<h5 id="orca-user-password-set">orca user password set<a class="headerlink" href="#orca-user-password-set" title="Permanent link">&para;</a></h5>
+<p>Set a user's password (admin).</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>orca user password set [OPTIONS] USER_ID
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--password</code></td>
+<td>text</td>
+<td>New password.</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
 <h4 id="orca-user-set">orca user set<a class="headerlink" href="#orca-user-set" title="Permanent link">&para;</a></h4>
 <p>Update a user.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>orca user set [OPTIONS] USER_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>orca user set [OPTIONS] USER_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4188,7 +4303,7 @@ always reflects the version installed.</p>
 <h4 id="orca-user-set-password">orca user set-password<a class="headerlink" href="#orca-user-set-password" title="Permanent link">&para;</a></h4>
 <p>Set a user's password (admin).</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>orca user set-password [OPTIONS] USER_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>orca user set-password [OPTIONS] USER_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4218,7 +4333,7 @@ always reflects the version installed.</p>
 <h4 id="orca-user-show">orca user show<a class="headerlink" href="#orca-user-show" title="Permanent link">&para;</a></h4>
 <p>Show user details.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>orca user show [OPTIONS] USER_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>orca user show [OPTIONS] USER_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>

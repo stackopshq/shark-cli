@@ -2650,6 +2650,34 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#orca-group-member" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        member
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="member">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-group-member-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        list
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#orca-group-member-list" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2690,6 +2718,45 @@
       
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-group-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        user
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="user">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-group-user-add" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-group-user-remove" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        remove
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -3908,6 +3975,34 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#orca-group-member" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        member
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="member">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-group-member-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        list
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#orca-group-member-list" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3948,6 +4043,45 @@
       
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-group-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        user
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="user">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-group-user-add" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-group-user-remove" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        remove
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -4006,14 +4140,16 @@ always reflects the version installed.</p>
 </table>
 <p><strong>Subcommands</strong></p>
 <ul>
-<li><em><a href="#orca-group-add-user">add-user</a></em>: Add a user to a group.</li>
+<li><em><a href="#orca-group-add-user">add-user</a></em>: [deprecated, use 'group user add' instead]</li>
 <li><em><a href="#orca-group-create">create</a></em>: Create a group.</li>
 <li><em><a href="#orca-group-delete">delete</a></em>: Delete a group.</li>
 <li><em><a href="#orca-group-list">list</a></em>: List groups.</li>
-<li><em><a href="#orca-group-member-list">member-list</a></em>: List users in a group.</li>
-<li><em><a href="#orca-group-remove-user">remove-user</a></em>: Remove a user from a group.</li>
+<li><em><a href="#orca-group-member">member</a></em>: Inspect users belonging to a group.</li>
+<li><em><a href="#orca-group-member-list">member-list</a></em>: [deprecated, use 'group member list' instead]</li>
+<li><em><a href="#orca-group-remove-user">remove-user</a></em>: [deprecated, use 'group user remove' instead]</li>
 <li><em><a href="#orca-group-set">set</a></em>: Update a group.</li>
 <li><em><a href="#orca-group-show">show</a></em>: Show group details.</li>
+<li><em><a href="#orca-group-user">user</a></em>: Manage user membership of a group.</li>
 </ul>
 <h4 id="orca-group-add-user">orca group add-user<a class="headerlink" href="#orca-group-add-user" title="Permanent link">&para;</a></h4>
 <p>Add a user to a group.</p>
@@ -4165,10 +4301,92 @@ always reflects the version installed.</p>
 </tr>
 </tbody>
 </table>
+<h4 id="orca-group-member">orca group member<a class="headerlink" href="#orca-group-member" title="Permanent link">&para;</a></h4>
+<p>Inspect users belonging to a group.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>orca group member [OPTIONS] COMMAND [ARGS]...
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Subcommands</strong></p>
+<ul>
+<li><em><a href="#orca-group-member-list">list</a></em>: List users in a group.</li>
+</ul>
+<h5 id="orca-group-member-list">orca group member list<a class="headerlink" href="#orca-group-member-list" title="Permanent link">&para;</a></h5>
+<p>List users in a group.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>orca group member list [OPTIONS] GROUP_ID
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--noindent</code></td>
+<td>boolean</td>
+<td>Disable JSON indentation.</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--max-width</code></td>
+<td>integer</td>
+<td>Maximum table width (0 = unlimited).</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>--fit-width</code></td>
+<td>boolean</td>
+<td>Fit table to terminal width.</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--column</code>, <code>-c</code></td>
+<td>text</td>
+<td>Column to include (repeatable). Shows all if omitted.</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>--format</code>, <code>-f</code></td>
+<td>choice (<code>table</code> &#x7C; <code>json</code> &#x7C; <code>value</code>)</td>
+<td>Output format.</td>
+<td><code>table</code></td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
 <h4 id="orca-group-member-list">orca group member-list<a class="headerlink" href="#orca-group-member-list" title="Permanent link">&para;</a></h4>
 <p>List users in a group.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>orca group member-list [OPTIONS] GROUP_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>orca group member-list [OPTIONS] GROUP_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4222,7 +4440,7 @@ always reflects the version installed.</p>
 <h4 id="orca-group-remove-user">orca group remove-user<a class="headerlink" href="#orca-group-remove-user" title="Permanent link">&para;</a></h4>
 <p>Remove a user from a group.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>orca group remove-user [OPTIONS] GROUP_ID USER_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>orca group remove-user [OPTIONS] GROUP_ID USER_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4246,7 +4464,7 @@ always reflects the version installed.</p>
 <h4 id="orca-group-set">orca group set<a class="headerlink" href="#orca-group-set" title="Permanent link">&para;</a></h4>
 <p>Update a group.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>orca group set [OPTIONS] GROUP_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>orca group set [OPTIONS] GROUP_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4282,7 +4500,7 @@ always reflects the version installed.</p>
 <h4 id="orca-group-show">orca group show<a class="headerlink" href="#orca-group-show" title="Permanent link">&para;</a></h4>
 <p>Show group details.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>orca group show [OPTIONS] GROUP_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>orca group show [OPTIONS] GROUP_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4325,6 +4543,83 @@ always reflects the version installed.</p>
 <td>Output format.</td>
 <td><code>table</code></td>
 </tr>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="orca-group-user">orca group user<a class="headerlink" href="#orca-group-user" title="Permanent link">&para;</a></h4>
+<p>Manage user membership of a group.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>orca group user [OPTIONS] COMMAND [ARGS]...
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Subcommands</strong></p>
+<ul>
+<li><em><a href="#orca-group-user-add">add</a></em>: Add a user to a group.</li>
+<li><em><a href="#orca-group-user-remove">remove</a></em>: Remove a user from a group.</li>
+</ul>
+<h5 id="orca-group-user-add">orca group user add<a class="headerlink" href="#orca-group-user-add" title="Permanent link">&para;</a></h5>
+<p>Add a user to a group.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>orca group user add [OPTIONS] GROUP_ID USER_ID
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<h5 id="orca-group-user-remove">orca group user remove<a class="headerlink" href="#orca-group-user-remove" title="Permanent link">&para;</a></h5>
+<p>Remove a user from a group.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>orca group user remove [OPTIONS] GROUP_ID USER_ID
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
 <tr>
 <td><code>--help</code></td>
 <td>boolean</td>

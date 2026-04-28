@@ -987,6 +987,73 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#orca-aggregate-host" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        host
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="host">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-aggregate-host-add" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-aggregate-host-remove" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        remove
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-aggregate-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        image
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="image">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-aggregate-image-cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cache
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#orca-aggregate-list" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3919,6 +3986,73 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#orca-aggregate-host" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        host
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="host">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-aggregate-host-add" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-aggregate-host-remove" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        remove
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-aggregate-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        image
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="image">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-aggregate-image-cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cache
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#orca-aggregate-list" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4028,12 +4162,14 @@ always reflects the version installed.</p>
 </table>
 <p><strong>Subcommands</strong></p>
 <ul>
-<li><em><a href="#orca-aggregate-add-host">add-host</a></em>: Add a host to an aggregate.</li>
-<li><em><a href="#orca-aggregate-cache-image">cache-image</a></em>: Request that images be cached on hosts in an aggregate.</li>
+<li><em><a href="#orca-aggregate-add-host">add-host</a></em>: [deprecated, use 'aggregate host add' instead]</li>
+<li><em><a href="#orca-aggregate-cache-image">cache-image</a></em>: [deprecated, use 'aggregate image cache' instead]</li>
 <li><em><a href="#orca-aggregate-create">create</a></em>: Create a host aggregate.</li>
 <li><em><a href="#orca-aggregate-delete">delete</a></em>: Delete a host aggregate.</li>
+<li><em><a href="#orca-aggregate-host">host</a></em>: Manage hosts inside an aggregate.</li>
+<li><em><a href="#orca-aggregate-image">image</a></em>: Manage image caching on aggregates.</li>
 <li><em><a href="#orca-aggregate-list">list</a></em>: List host aggregates.</li>
-<li><em><a href="#orca-aggregate-remove-host">remove-host</a></em>: Remove a host from an aggregate.</li>
+<li><em><a href="#orca-aggregate-remove-host">remove-host</a></em>: [deprecated, use 'aggregate host remove' instead]</li>
 <li><em><a href="#orca-aggregate-set">set</a></em>: Update an aggregate's name, AZ, or metadata.</li>
 <li><em><a href="#orca-aggregate-show">show</a></em>: Show aggregate details.</li>
 <li><em><a href="#orca-aggregate-unset">unset</a></em>: Unset metadata properties on an aggregate.</li>
@@ -4065,8 +4201,8 @@ always reflects the version installed.</p>
 <h4 id="orca-aggregate-cache-image">orca aggregate cache-image<a class="headerlink" href="#orca-aggregate-cache-image" title="Permanent link">&para;</a></h4>
 <p>Request that images be cached on hosts in an aggregate.</p>
 <p>Examples:
-  orca aggregate cache-image <agg-id> <image-id>
-  orca aggregate cache-image <agg-id> <img1> <img2></p>
+  orca aggregate image cache <agg-id> <image-id>
+  orca aggregate image cache <agg-id> <img1> <img2></p>
 <p><strong>Usage:</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>orca aggregate cache-image [OPTIONS] AGGREGATE_ID IMAGE_IDS...
 </code></pre></div>
@@ -4149,10 +4285,142 @@ always reflects the version installed.</p>
 </tr>
 </tbody>
 </table>
+<h4 id="orca-aggregate-host">orca aggregate host<a class="headerlink" href="#orca-aggregate-host" title="Permanent link">&para;</a></h4>
+<p>Manage hosts inside an aggregate.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>orca aggregate host [OPTIONS] COMMAND [ARGS]...
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Subcommands</strong></p>
+<ul>
+<li><em><a href="#orca-aggregate-host-add">add</a></em>: Add a host to an aggregate.</li>
+<li><em><a href="#orca-aggregate-host-remove">remove</a></em>: Remove a host from an aggregate.</li>
+</ul>
+<h5 id="orca-aggregate-host-add">orca aggregate host add<a class="headerlink" href="#orca-aggregate-host-add" title="Permanent link">&para;</a></h5>
+<p>Add a host to an aggregate.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>orca aggregate host add [OPTIONS] AGGREGATE_ID HOST
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<h5 id="orca-aggregate-host-remove">orca aggregate host remove<a class="headerlink" href="#orca-aggregate-host-remove" title="Permanent link">&para;</a></h5>
+<p>Remove a host from an aggregate.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>orca aggregate host remove [OPTIONS] AGGREGATE_ID HOST
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="orca-aggregate-image">orca aggregate image<a class="headerlink" href="#orca-aggregate-image" title="Permanent link">&para;</a></h4>
+<p>Manage image caching on aggregates.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>orca aggregate image [OPTIONS] COMMAND [ARGS]...
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Subcommands</strong></p>
+<ul>
+<li><em><a href="#orca-aggregate-image-cache">cache</a></em>: Request that images be cached on hosts in an aggregate.</li>
+</ul>
+<h5 id="orca-aggregate-image-cache">orca aggregate image cache<a class="headerlink" href="#orca-aggregate-image-cache" title="Permanent link">&para;</a></h5>
+<p>Request that images be cached on hosts in an aggregate.</p>
+<p>Examples:
+  orca aggregate image cache <agg-id> <image-id>
+  orca aggregate image cache <agg-id> <img1> <img2></p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>orca aggregate image cache [OPTIONS] AGGREGATE_ID IMAGE_IDS...
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
 <h4 id="orca-aggregate-list">orca aggregate list<a class="headerlink" href="#orca-aggregate-list" title="Permanent link">&para;</a></h4>
 <p>List host aggregates.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>orca aggregate list [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>orca aggregate list [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4206,7 +4474,7 @@ always reflects the version installed.</p>
 <h4 id="orca-aggregate-remove-host">orca aggregate remove-host<a class="headerlink" href="#orca-aggregate-remove-host" title="Permanent link">&para;</a></h4>
 <p>Remove a host from an aggregate.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>orca aggregate remove-host [OPTIONS] AGGREGATE_ID HOST
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>orca aggregate remove-host [OPTIONS] AGGREGATE_ID HOST
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4230,7 +4498,7 @@ always reflects the version installed.</p>
 <h4 id="orca-aggregate-set">orca aggregate set<a class="headerlink" href="#orca-aggregate-set" title="Permanent link">&para;</a></h4>
 <p>Update an aggregate's name, AZ, or metadata.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>orca aggregate set [OPTIONS] AGGREGATE_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>orca aggregate set [OPTIONS] AGGREGATE_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4272,7 +4540,7 @@ always reflects the version installed.</p>
 <h4 id="orca-aggregate-show">orca aggregate show<a class="headerlink" href="#orca-aggregate-show" title="Permanent link">&para;</a></h4>
 <p>Show aggregate details.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>orca aggregate show [OPTIONS] AGGREGATE_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>orca aggregate show [OPTIONS] AGGREGATE_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4326,7 +4594,7 @@ always reflects the version installed.</p>
 <h4 id="orca-aggregate-unset">orca aggregate unset<a class="headerlink" href="#orca-aggregate-unset" title="Permanent link">&para;</a></h4>
 <p>Unset metadata properties on an aggregate.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>orca aggregate unset [OPTIONS] AGGREGATE_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>orca aggregate unset [OPTIONS] AGGREGATE_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>

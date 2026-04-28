@@ -887,6 +887,56 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#orca-flavor-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        access
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="access">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-flavor-access-add" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-flavor-access-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        list
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-flavor-access-remove" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        remove
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#orca-flavor-access-add" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3875,6 +3925,56 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#orca-flavor-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        access
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="access">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-flavor-access-add" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-flavor-access-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        list
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-flavor-access-remove" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        remove
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#orca-flavor-access-add" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4028,9 +4128,10 @@ always reflects the version installed.</p>
 </table>
 <p><strong>Subcommands</strong></p>
 <ul>
-<li><em><a href="#orca-flavor-access-add">access-add</a></em>: Grant a project access to a private flavor.</li>
-<li><em><a href="#orca-flavor-access-list">access-list</a></em>: List projects that have access to a private flavor.</li>
-<li><em><a href="#orca-flavor-access-remove">access-remove</a></em>: Revoke a project's access to a private flavor.</li>
+<li><em><a href="#orca-flavor-access">access</a></em>: Manage per-project access on private flavors.</li>
+<li><em><a href="#orca-flavor-access-add">access-add</a></em>: [deprecated, use 'flavor access add' instead]</li>
+<li><em><a href="#orca-flavor-access-list">access-list</a></em>: [deprecated, use 'flavor access list' instead]</li>
+<li><em><a href="#orca-flavor-access-remove">access-remove</a></em>: [deprecated, use 'flavor access remove' instead]</li>
 <li><em><a href="#orca-flavor-create">create</a></em>: Create a flavor.</li>
 <li><em><a href="#orca-flavor-delete">delete</a></em>: Delete a flavor.</li>
 <li><em><a href="#orca-flavor-list">list</a></em>: List available flavors.</li>
@@ -4038,10 +4139,148 @@ always reflects the version installed.</p>
 <li><em><a href="#orca-flavor-show">show</a></em>: Show flavor details.</li>
 <li><em><a href="#orca-flavor-unset">unset</a></em>: Unset extra specs from a flavor.</li>
 </ul>
+<h4 id="orca-flavor-access">orca flavor access<a class="headerlink" href="#orca-flavor-access" title="Permanent link">&para;</a></h4>
+<p>Manage per-project access on private flavors.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>orca flavor access [OPTIONS] COMMAND [ARGS]...
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Subcommands</strong></p>
+<ul>
+<li><em><a href="#orca-flavor-access-add">add</a></em>: Grant a project access to a private flavor.</li>
+<li><em><a href="#orca-flavor-access-list">list</a></em>: List projects that have access to a private flavor.</li>
+<li><em><a href="#orca-flavor-access-remove">remove</a></em>: Revoke a project's access to a private flavor.</li>
+</ul>
+<h5 id="orca-flavor-access-add">orca flavor access add<a class="headerlink" href="#orca-flavor-access-add" title="Permanent link">&para;</a></h5>
+<p>Grant a project access to a private flavor.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>orca flavor access add [OPTIONS] FLAVOR_ID PROJECT_ID
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<h5 id="orca-flavor-access-list">orca flavor access list<a class="headerlink" href="#orca-flavor-access-list" title="Permanent link">&para;</a></h5>
+<p>List projects that have access to a private flavor.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>orca flavor access list [OPTIONS] FLAVOR_ID
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--noindent</code></td>
+<td>boolean</td>
+<td>Disable JSON indentation.</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--max-width</code></td>
+<td>integer</td>
+<td>Maximum table width (0 = unlimited).</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>--fit-width</code></td>
+<td>boolean</td>
+<td>Fit table to terminal width.</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--column</code>, <code>-c</code></td>
+<td>text</td>
+<td>Column to include (repeatable). Shows all if omitted.</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>--format</code>, <code>-f</code></td>
+<td>choice (<code>table</code> &#x7C; <code>json</code> &#x7C; <code>value</code>)</td>
+<td>Output format.</td>
+<td><code>table</code></td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<h5 id="orca-flavor-access-remove">orca flavor access remove<a class="headerlink" href="#orca-flavor-access-remove" title="Permanent link">&para;</a></h5>
+<p>Revoke a project's access to a private flavor.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>orca flavor access remove [OPTIONS] FLAVOR_ID PROJECT_ID
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--yes</code>, <code>-y</code></td>
+<td>boolean</td>
+<td>Skip confirmation.</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
 <h4 id="orca-flavor-access-add">orca flavor access-add<a class="headerlink" href="#orca-flavor-access-add" title="Permanent link">&para;</a></h4>
 <p>Grant a project access to a private flavor.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>orca flavor access-add [OPTIONS] FLAVOR_ID PROJECT_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>orca flavor access-add [OPTIONS] FLAVOR_ID PROJECT_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4065,7 +4304,7 @@ always reflects the version installed.</p>
 <h4 id="orca-flavor-access-list">orca flavor access-list<a class="headerlink" href="#orca-flavor-access-list" title="Permanent link">&para;</a></h4>
 <p>List projects that have access to a private flavor.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>orca flavor access-list [OPTIONS] FLAVOR_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>orca flavor access-list [OPTIONS] FLAVOR_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4119,7 +4358,7 @@ always reflects the version installed.</p>
 <h4 id="orca-flavor-access-remove">orca flavor access-remove<a class="headerlink" href="#orca-flavor-access-remove" title="Permanent link">&para;</a></h4>
 <p>Revoke a project's access to a private flavor.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>orca flavor access-remove [OPTIONS] FLAVOR_ID PROJECT_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>orca flavor access-remove [OPTIONS] FLAVOR_ID PROJECT_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4149,7 +4388,7 @@ always reflects the version installed.</p>
 <h4 id="orca-flavor-create">orca flavor create<a class="headerlink" href="#orca-flavor-create" title="Permanent link">&para;</a></h4>
 <p>Create a flavor.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>orca flavor create [OPTIONS] NAME
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>orca flavor create [OPTIONS] NAME
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4221,7 +4460,7 @@ always reflects the version installed.</p>
 <h4 id="orca-flavor-delete">orca flavor delete<a class="headerlink" href="#orca-flavor-delete" title="Permanent link">&para;</a></h4>
 <p>Delete a flavor.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>orca flavor delete [OPTIONS] FLAVOR_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>orca flavor delete [OPTIONS] FLAVOR_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4253,7 +4492,7 @@ always reflects the version installed.</p>
 <p>With no <code>--limit</code> the command auto-paginates through all flavors using
 the Nova <code>marker</code> cursor (useful on clouds exposing hundreds of flavors).</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>orca flavor list [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>orca flavor list [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4316,7 +4555,7 @@ the Nova <code>marker</code> cursor (useful on clouds exposing hundreds of flavo
   orca flavor set <id> --property hw:cpu_policy=dedicated
   orca flavor set <id> --property hw:mem_page_size=large --property aggregate_instance_extra_specs:ssd=true</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>orca flavor set [OPTIONS] FLAVOR_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>orca flavor set [OPTIONS] FLAVOR_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4346,7 +4585,7 @@ the Nova <code>marker</code> cursor (useful on clouds exposing hundreds of flavo
 <h4 id="orca-flavor-show">orca flavor show<a class="headerlink" href="#orca-flavor-show" title="Permanent link">&para;</a></h4>
 <p>Show flavor details.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>orca flavor show [OPTIONS] FLAVOR_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>orca flavor show [OPTIONS] FLAVOR_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4400,7 +4639,7 @@ the Nova <code>marker</code> cursor (useful on clouds exposing hundreds of flavo
 <h4 id="orca-flavor-unset">orca flavor unset<a class="headerlink" href="#orca-flavor-unset" title="Permanent link">&para;</a></h4>
 <p>Unset extra specs from a flavor.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>orca flavor unset [OPTIONS] FLAVOR_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>orca flavor unset [OPTIONS] FLAVOR_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>

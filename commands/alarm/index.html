@@ -2201,6 +2201,34 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#orca-alarm-quota" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        quota
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="quota">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-alarm-quota-set" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        set
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#orca-alarm-quota-set" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2230,6 +2258,45 @@
       
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-alarm-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        state
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="state">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-alarm-state-get" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-alarm-state-set" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        set
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -3941,6 +4008,34 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#orca-alarm-quota" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        quota
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="quota">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-alarm-quota-set" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        set
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#orca-alarm-quota-set" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3970,6 +4065,45 @@
       
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-alarm-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        state
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="state">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-alarm-state-get" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-alarm-state-set" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        set
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -4055,11 +4189,13 @@ always reflects the version installed.</p>
 <li><em><a href="#orca-alarm-delete">delete</a></em>: Delete an alarm.</li>
 <li><em><a href="#orca-alarm-history">history</a></em>: Show the change history of an alarm.</li>
 <li><em><a href="#orca-alarm-list">list</a></em>: List alarms.</li>
-<li><em><a href="#orca-alarm-quota-set">quota-set</a></em>: Set alarm quota for a project.</li>
+<li><em><a href="#orca-alarm-quota">quota</a></em>: Inspect or set Aodh per-project alarm quota.</li>
+<li><em><a href="#orca-alarm-quota-set">quota-set</a></em>: [deprecated, use 'alarm quota set' instead]</li>
 <li><em><a href="#orca-alarm-set">set</a></em>: Update an alarm.</li>
 <li><em><a href="#orca-alarm-show">show</a></em>: Show an alarm.</li>
-<li><em><a href="#orca-alarm-state-get">state-get</a></em>: Get the current state of an alarm.</li>
-<li><em><a href="#orca-alarm-state-set">state-set</a></em>: Set the state of an alarm.</li>
+<li><em><a href="#orca-alarm-state">state</a></em>: Inspect or override an alarm's evaluation state.</li>
+<li><em><a href="#orca-alarm-state-get">state-get</a></em>: [deprecated, use 'alarm state get' instead]</li>
+<li><em><a href="#orca-alarm-state-set">state-set</a></em>: [deprecated, use 'alarm state set' instead]</li>
 </ul>
 <h4 id="orca-alarm-capabilities">orca alarm capabilities<a class="headerlink" href="#orca-alarm-capabilities" title="Permanent link">&para;</a></h4>
 <p>Show Aodh API capabilities.</p>
@@ -4373,10 +4509,68 @@ always reflects the version installed.</p>
 </tr>
 </tbody>
 </table>
+<h4 id="orca-alarm-quota">orca alarm quota<a class="headerlink" href="#orca-alarm-quota" title="Permanent link">&para;</a></h4>
+<p>Inspect or set Aodh per-project alarm quota.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>orca alarm quota [OPTIONS] COMMAND [ARGS]...
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Subcommands</strong></p>
+<ul>
+<li><em><a href="#orca-alarm-quota-set">set</a></em>: Set alarm quota for a project.</li>
+</ul>
+<h5 id="orca-alarm-quota-set">orca alarm quota set<a class="headerlink" href="#orca-alarm-quota-set" title="Permanent link">&para;</a></h5>
+<p>Set alarm quota for a project.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>orca alarm quota set [OPTIONS] PROJECT_ID
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--alarms</code></td>
+<td>integer</td>
+<td>Maximum number of alarms for the project.</td>
+<td>_required</td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
 <h4 id="orca-alarm-quota-set">orca alarm quota-set<a class="headerlink" href="#orca-alarm-quota-set" title="Permanent link">&para;</a></h4>
 <p>Set alarm quota for a project.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>orca alarm quota-set [OPTIONS] PROJECT_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>orca alarm quota-set [OPTIONS] PROJECT_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4406,7 +4600,7 @@ always reflects the version installed.</p>
 <h4 id="orca-alarm-set">orca alarm set<a class="headerlink" href="#orca-alarm-set" title="Permanent link">&para;</a></h4>
 <p>Update an alarm.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>orca alarm set [OPTIONS] ALARM_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>orca alarm set [OPTIONS] ALARM_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4484,7 +4678,7 @@ always reflects the version installed.</p>
 <h4 id="orca-alarm-show">orca alarm show<a class="headerlink" href="#orca-alarm-show" title="Permanent link">&para;</a></h4>
 <p>Show an alarm.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>orca alarm show [OPTIONS] ALARM_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>orca alarm show [OPTIONS] ALARM_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4535,10 +4729,87 @@ always reflects the version installed.</p>
 </tr>
 </tbody>
 </table>
+<h4 id="orca-alarm-state">orca alarm state<a class="headerlink" href="#orca-alarm-state" title="Permanent link">&para;</a></h4>
+<p>Inspect or override an alarm's evaluation state.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>orca alarm state [OPTIONS] COMMAND [ARGS]...
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Subcommands</strong></p>
+<ul>
+<li><em><a href="#orca-alarm-state-get">get</a></em>: Get the current state of an alarm.</li>
+<li><em><a href="#orca-alarm-state-set">set</a></em>: Set the state of an alarm.</li>
+</ul>
+<h5 id="orca-alarm-state-get">orca alarm state get<a class="headerlink" href="#orca-alarm-state-get" title="Permanent link">&para;</a></h5>
+<p>Get the current state of an alarm.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>orca alarm state get [OPTIONS] ALARM_ID
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<h5 id="orca-alarm-state-set">orca alarm state set<a class="headerlink" href="#orca-alarm-state-set" title="Permanent link">&para;</a></h5>
+<p>Set the state of an alarm.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>orca alarm state set [OPTIONS] ALARM_ID {ok|alarm|insufficient_data}
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
 <h4 id="orca-alarm-state-get">orca alarm state-get<a class="headerlink" href="#orca-alarm-state-get" title="Permanent link">&para;</a></h4>
 <p>Get the current state of an alarm.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>orca alarm state-get [OPTIONS] ALARM_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>orca alarm state-get [OPTIONS] ALARM_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4562,7 +4833,7 @@ always reflects the version installed.</p>
 <h4 id="orca-alarm-state-set">orca alarm state-set<a class="headerlink" href="#orca-alarm-state-set" title="Permanent link">&para;</a></h4>
 <p>Set the state of an alarm.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>orca alarm state-set [OPTIONS] ALARM_ID {ok|alarm|insufficient_data}
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>orca alarm state-set [OPTIONS] ALARM_ID {ok|alarm|insufficient_data}
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>

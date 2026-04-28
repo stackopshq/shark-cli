@@ -4194,6 +4194,24 @@ comment in the test whitelist explaining why.</p>
   excludes sub-groups whose name is itself a compound noun, in
   line with the ADR's "compound nouns keep their hyphen" rule.
   Whitelist for <code>network</code> is empty — no permanent exceptions.</li>
+<li>2026-04-28 — <strong>lot 1</strong> (modules with ≤ 4 hyphenated leaves):
+  <code>aggregate</code>, <code>alarm</code>, <code>auth</code>, <code>endpoint-group</code>, <code>flavor</code>, <code>group</code>,
+  <code>role</code>, <code>secret</code> (acl-*), <code>security-group</code>, <code>trunk</code>, <code>user</code>
+  (<code>set-password</code>). 26 commands moved to 12 new sub-groups
+  (<code>aggregate host</code>, <code>aggregate image</code>, <code>alarm state</code>, <code>alarm quota</code>,
+  <code>auth token</code>, <code>endpoint-group project</code>, <code>flavor access</code>, <code>group user</code>,
+  <code>group member</code>, <code>role assignment</code>, <code>role implied</code>, <code>secret acl</code>,
+  <code>security-group rule</code>, <code>trunk subport</code>, <code>user password</code>). All old
+  hyphenated names live on as deprecated aliases via
+  <code>add_command_with_alias</code>. Whitelists for these modules cleared.</li>
+<li>2026-04-28 — <strong>stack/zone/image admin</strong> (gap-closure with OSC):
+  <code>stack</code> gained <code>snapshot/{create,delete,list,show,restore}</code>,
+  <code>adopt</code>, <code>environment show</code>, <code>failures list</code>, <code>file list</code>, and
+  three <code>resource</code> actions (<code>signal</code>, <code>metadata</code>, <code>mark-unhealthy</code>).
+  <code>zone</code> gained <code>abandon</code>, <code>axfr</code>, <code>share/*</code>, <code>blacklist/*</code>. <code>image</code>
+  gained the full <code>metadef/*</code> catalogue (namespaces, objects,
+  properties, resource-type associations). All new commands follow
+  ADR-0008 from day one (no aliases needed).</li>
 </ul>
 
 

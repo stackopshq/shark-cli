@@ -1732,6 +1732,56 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#orca-trunk-subport" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        subport
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="subport">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-trunk-subport-add" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-trunk-subport-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        list
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-trunk-subport-remove" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        remove
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#orca-trunk-subport-list" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3941,6 +3991,56 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#orca-trunk-subport" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        subport
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="subport">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-trunk-subport-add" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-trunk-subport-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        list
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-trunk-subport-remove" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        remove
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#orca-trunk-subport-list" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4006,14 +4106,15 @@ always reflects the version installed.</p>
 </table>
 <p><strong>Subcommands</strong></p>
 <ul>
-<li><em><a href="#orca-trunk-add-subport">add-subport</a></em>: Add a sub-port to a trunk.</li>
+<li><em><a href="#orca-trunk-add-subport">add-subport</a></em>: [deprecated, use 'trunk subport add' instead]</li>
 <li><em><a href="#orca-trunk-create">create</a></em>: Create a trunk.</li>
 <li><em><a href="#orca-trunk-delete">delete</a></em>: Delete a trunk.</li>
 <li><em><a href="#orca-trunk-list">list</a></em>: List trunks.</li>
-<li><em><a href="#orca-trunk-remove-subport">remove-subport</a></em>: Remove a sub-port from a trunk.</li>
+<li><em><a href="#orca-trunk-remove-subport">remove-subport</a></em>: [deprecated, use 'trunk subport remove' instead]</li>
 <li><em><a href="#orca-trunk-set">set</a></em>: Update a trunk.</li>
 <li><em><a href="#orca-trunk-show">show</a></em>: Show trunk details.</li>
-<li><em><a href="#orca-trunk-subport-list">subport-list</a></em>: List sub-ports on a trunk.</li>
+<li><em><a href="#orca-trunk-subport">subport</a></em>: Manage sub-ports on a trunk.</li>
+<li><em><a href="#orca-trunk-subport-list">subport-list</a></em>: [deprecated, use 'trunk subport list' instead]</li>
 </ul>
 <h4 id="orca-trunk-add-subport">orca trunk add-subport<a class="headerlink" href="#orca-trunk-add-subport" title="Permanent link">&para;</a></h4>
 <p>Add a sub-port to a trunk.</p>
@@ -4321,10 +4422,172 @@ always reflects the version installed.</p>
 </tr>
 </tbody>
 </table>
+<h4 id="orca-trunk-subport">orca trunk subport<a class="headerlink" href="#orca-trunk-subport" title="Permanent link">&para;</a></h4>
+<p>Manage sub-ports on a trunk.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>orca trunk subport [OPTIONS] COMMAND [ARGS]...
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Subcommands</strong></p>
+<ul>
+<li><em><a href="#orca-trunk-subport-add">add</a></em>: Add a sub-port to a trunk.</li>
+<li><em><a href="#orca-trunk-subport-list">list</a></em>: List sub-ports on a trunk.</li>
+<li><em><a href="#orca-trunk-subport-remove">remove</a></em>: Remove a sub-port from a trunk.</li>
+</ul>
+<h5 id="orca-trunk-subport-add">orca trunk subport add<a class="headerlink" href="#orca-trunk-subport-add" title="Permanent link">&para;</a></h5>
+<p>Add a sub-port to a trunk.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>orca trunk subport add [OPTIONS] TRUNK_ID
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--port</code></td>
+<td>text</td>
+<td>Sub-port port ID.</td>
+<td>_required</td>
+</tr>
+<tr>
+<td><code>--segmentation-type</code></td>
+<td>choice (<code>vlan</code> &#x7C; <code>inherit</code>)</td>
+<td>Segmentation type.</td>
+<td><code>vlan</code></td>
+</tr>
+<tr>
+<td><code>--segmentation-id</code></td>
+<td>integer</td>
+<td>VLAN ID (1–4094).</td>
+<td>_required</td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<h5 id="orca-trunk-subport-list">orca trunk subport list<a class="headerlink" href="#orca-trunk-subport-list" title="Permanent link">&para;</a></h5>
+<p>List sub-ports on a trunk.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>orca trunk subport list [OPTIONS] TRUNK_ID
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--noindent</code></td>
+<td>boolean</td>
+<td>Disable JSON indentation.</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--max-width</code></td>
+<td>integer</td>
+<td>Maximum table width (0 = unlimited).</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>--fit-width</code></td>
+<td>boolean</td>
+<td>Fit table to terminal width.</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--column</code>, <code>-c</code></td>
+<td>text</td>
+<td>Column to include (repeatable). Shows all if omitted.</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>--format</code>, <code>-f</code></td>
+<td>choice (<code>table</code> &#x7C; <code>json</code> &#x7C; <code>value</code>)</td>
+<td>Output format.</td>
+<td><code>table</code></td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<h5 id="orca-trunk-subport-remove">orca trunk subport remove<a class="headerlink" href="#orca-trunk-subport-remove" title="Permanent link">&para;</a></h5>
+<p>Remove a sub-port from a trunk.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>orca trunk subport remove [OPTIONS] TRUNK_ID
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--port</code></td>
+<td>text</td>
+<td>Sub-port port ID to remove.</td>
+<td>_required</td>
+</tr>
+<tr>
+<td><code>--yes</code>, <code>-y</code></td>
+<td>boolean</td>
+<td>Skip confirmation.</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
 <h4 id="orca-trunk-subport-list">orca trunk subport-list<a class="headerlink" href="#orca-trunk-subport-list" title="Permanent link">&para;</a></h4>
 <p>List sub-ports on a trunk.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>orca trunk subport-list [OPTIONS] TRUNK_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>orca trunk subport-list [OPTIONS] TRUNK_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
