@@ -1329,3 +1329,514 @@ class TestClose:
         client = OrcaClient(BASE_CFG)
         client.close()
         http.close.assert_called_once()
+
+
+# ════════════════════════════════════════════════════════════════════════════
+#  Project scoping — concrete cloud configurations
+# ════════════════════════════════════════════════════════════════════════════
+#
+# Different OpenStack providers give users different "shapes" of credentials:
+#
+# * **Infomaniak** (and most public clouds): a project *name* + user/project
+#   domain. Keystone scope = ``{"name": <name>, "domain": <domain_ref>}``.
+# * **Sharktech** (and clouds that expose UUIDs at signup): a project *UUID*
+#   only. Keystone scope = ``{"id": <uuid>}`` (no domain — UUIDs are global).
+# * Application credentials (any provider): pre-scoped at creation time, the
+#   client must NOT add a ``scope`` block.
+# * The pre-multi-profile orca config legacy stored the project *name* under
+#   the ``project_id`` key. That format has to keep loading.
+#
+# These tests pin all four shapes, plus the way config flows through profile
+# / env / clouds.yaml.
+
+
+def _scope(http: MagicMock) -> dict:
+    """Return the ``auth.scope`` block from the most recent POST sent to
+    the mocked Keystone client."""
+    payload = http.post.call_args.kwargs["json"]
+    return payload["auth"].get("scope")
+
+
+class TestPasswordAuthScoping:
+    """``OrcaClient(cfg)`` produces the right Keystone scope block for each
+    cloud-shape we have to support.
+
+    All tests here drive the client directly with a config dict — no profile
+    file, no env vars — so each case shows the *intended* mapping in
+    isolation from the resolution chain (which is exercised separately
+    below).
+    """
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_infomaniak_style_project_name(self, mock_httpx_cls):
+        """project_name + project_domain_name → name-scoped auth, full domain ref."""
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        mock_httpx_cls.return_value = http
+
+        OrcaClient({
+            "auth_url": "https://api.pub1.infomaniak.cloud:5000",
+            "username": "PCU-XXXXX",
+            "password": "secret",
+            "user_domain_name": "default",
+            "project_domain_name": "default",
+            "project_name": "PCP-XXXXX",
+        })
+
+        scope = _scope(http)["project"]
+        assert scope == {"name": "PCP-XXXXX", "domain": {"name": "default"}}
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_sharktech_style_project_uuid(self, mock_httpx_cls):
+        """A real Keystone v3 UUID in project_id → id-scoped auth, no domain.
+
+        Regression: an earlier bug rewrote any value in ``project_id`` into
+        ``project_name`` and dropped ``project_id``, so Sharktech and similar
+        clouds always failed authentication. ``OrcaClient`` itself never had
+        that bug — it correctly emits ``{"id": <uuid>}`` here — but pin it
+        to detect any future regression at this layer too.
+        """
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        mock_httpx_cls.return_value = http
+
+        uuid = "abcdef01-2345-6789-abcd-ef0123456789"
+        OrcaClient({
+            "auth_url": "https://keystone.sharktech.example:5000",
+            "username": "alice",
+            "password": "secret",
+            "user_domain_name": "Default",
+            "project_id": uuid,
+        })
+
+        scope = _scope(http)["project"]
+        assert scope == {"id": uuid}
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_32hex_slug_project_id(self, mock_httpx_cls):
+        """Older Keystone deployments use a 32-hex slug instead of canonical
+        UUID. The scope must still be ID-only.
+        """
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        mock_httpx_cls.return_value = http
+
+        slug = "0123456789abcdef0123456789abcdef"
+        OrcaClient({
+            "auth_url": "https://ks:5000",
+            "username": "alice",
+            "password": "secret",
+            "user_domain_id": "default",
+            "project_id": slug,
+        })
+
+        scope = _scope(http)["project"]
+        assert scope == {"id": slug}
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_project_id_wins_over_project_name(self, mock_httpx_cls):
+        """When both are present, ``project_id`` wins — IDs are unambiguous,
+        names are scoped by domain. The explicit precedence is in
+        ``_build_auth_payload`` and we lock it here.
+        """
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        mock_httpx_cls.return_value = http
+
+        uuid = "11111111-2222-3333-4444-555555555555"
+        OrcaClient({
+            "auth_url": "https://ks:5000",
+            "username": "alice",
+            "password": "secret",
+            "user_domain_name": "Default",
+            "project_domain_name": "Default",
+            "project_id": uuid,
+            "project_name": "should-be-ignored",
+        })
+
+        scope = _scope(http)["project"]
+        assert scope == {"id": uuid}
+        assert "name" not in scope
+        assert "domain" not in scope
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_project_domain_falls_back_to_user_domain(self, mock_httpx_cls):
+        """Most clouds set a single domain for both user and project.
+
+        We accept ``user_domain_name`` alone and propagate it to the project
+        scope's domain ref — the alternative is requiring users to repeat
+        themselves, which everyone forgets.
+        """
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        mock_httpx_cls.return_value = http
+
+        OrcaClient({
+            "auth_url": "https://ks:5000",
+            "username": "alice",
+            "password": "secret",
+            "user_domain_name": "Default",
+            # project_domain_* deliberately omitted
+            "project_name": "demo",
+        })
+
+        scope = _scope(http)["project"]
+        assert scope == {"name": "demo", "domain": {"name": "Default"}}
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_user_domain_id_path(self, mock_httpx_cls):
+        """``user_domain_id`` is the ID-flavoured equivalent of
+        ``user_domain_name`` — propagates to the user reference and falls
+        back to the project_domain.
+        """
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        mock_httpx_cls.return_value = http
+
+        OrcaClient({
+            "auth_url": "https://ks:5000",
+            "username": "alice",
+            "password": "secret",
+            "user_domain_id": "default",
+            "project_name": "demo",
+        })
+
+        payload = http.post.call_args.kwargs["json"]
+        user = payload["auth"]["identity"]["password"]["user"]
+        assert user["domain"] == {"id": "default"}
+        scope = payload["auth"]["scope"]["project"]
+        assert scope == {"name": "demo", "domain": {"id": "default"}}
+
+
+class TestAppCredentialAuthScoping:
+    """Application credentials are pre-scoped at creation time. The client
+    must emit the ``v3applicationcredential`` identity method and *not* a
+    ``scope`` block — Keystone returns 400 otherwise.
+    """
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_app_credential_by_id_no_scope(self, mock_httpx_cls):
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        mock_httpx_cls.return_value = http
+
+        OrcaClient({
+            "auth_url": "https://ks:5000",
+            "application_credential_id": "ac-uuid",
+            "application_credential_secret": "sssecret",
+        })
+
+        payload = http.post.call_args.kwargs["json"]
+        assert payload["auth"]["identity"]["methods"] == ["application_credential"]
+        ac = payload["auth"]["identity"]["application_credential"]
+        assert ac == {"id": "ac-uuid", "secret": "sssecret"}
+        assert "scope" not in payload["auth"]
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_app_credential_by_name_requires_user_ref(self, mock_httpx_cls):
+        """When the app credential is identified by *name* rather than id,
+        Keystone needs the ``user`` block to disambiguate. The client builds
+        it from ``username`` + the user domain.
+        """
+        http = MagicMock()
+        http.post.return_value = _make_auth_response()
+        mock_httpx_cls.return_value = http
+
+        OrcaClient({
+            "auth_url": "https://ks:5000",
+            "application_credential_name": "deploy-bot",
+            "application_credential_secret": "sssecret",
+            "username": "alice",
+            "user_domain_name": "Default",
+        })
+
+        payload = http.post.call_args.kwargs["json"]
+        ac = payload["auth"]["identity"]["application_credential"]
+        assert ac["name"] == "deploy-bot"
+        assert ac["secret"] == "sssecret"
+        assert ac["user"] == {"name": "alice", "domain": {"name": "Default"}}
+        assert "scope" not in payload["auth"]
+
+
+class TestEndToEndProjectScoping:
+    """Full resolution chain: profile / OS_* env / clouds.yaml all converge
+    on ``OrcaClient`` with the same set of shapes — and produce the right
+    Keystone scope. These tests are the only place that exercises
+    ``load_config`` together with ``OrcaClient``, which is the actual
+    user-facing path.
+    """
+
+    def setup_method(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self._cache_path = Path(self._tmp.name) / "token_cache.yaml"
+
+    def teardown_method(self):
+        self._tmp.cleanup()
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_profile_with_project_name(
+        self, mock_httpx_cls, config_dir, write_config,
+    ):
+        """Profile saved with ``project_name`` (Infomaniak shape) loads and
+        scopes by name.
+        """
+        write_config({
+            "active_profile": "infomaniak",
+            "profiles": {
+                "infomaniak": {
+                    "auth_url": "https://api.pub1.infomaniak.cloud:5000",
+                    "username": "PCU-XXXXX",
+                    "password": "secret",
+                    "user_domain_name": "default",
+                    "project_domain_name": "default",
+                    "project_name": "PCP-XXXXX",
+                },
+            },
+        })
+
+        from orca_cli.core.config import load_config
+        cfg = load_config(profile_name="infomaniak")
+
+        with patch("orca_cli.core.client.TOKEN_CACHE_PATH", self._cache_path):
+            http = MagicMock()
+            http.post.return_value = _make_auth_response()
+            mock_httpx_cls.return_value = http
+            OrcaClient(cfg)
+
+        scope = _scope(http)["project"]
+        assert scope == {"name": "PCP-XXXXX", "domain": {"name": "default"}}
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_profile_with_project_uuid(
+        self, mock_httpx_cls, config_dir, write_config,
+    ):
+        """Profile saved with a real ``project_id`` UUID (Sharktech shape)
+        loads and scopes by id — the legacy normaliser must NOT rewrite it
+        into ``project_name``.
+        """
+        uuid = "abcdef01-2345-6789-abcd-ef0123456789"
+        write_config({
+            "active_profile": "sharktech",
+            "profiles": {
+                "sharktech": {
+                    "auth_url": "https://keystone.sharktech.example:5000",
+                    "username": "alice",
+                    "password": "secret",
+                    "user_domain_name": "Default",
+                    "project_id": uuid,
+                },
+            },
+        })
+
+        from orca_cli.core.config import load_config
+        cfg = load_config(profile_name="sharktech")
+        # Pin the post-load shape too — this is the field that the bug fix
+        # protects.
+        assert cfg["project_id"] == uuid
+        assert cfg.get("project_name") is None
+
+        with patch("orca_cli.core.client.TOKEN_CACHE_PATH", self._cache_path):
+            http = MagicMock()
+            http.post.return_value = _make_auth_response()
+            mock_httpx_cls.return_value = http
+            OrcaClient(cfg)
+
+        scope = _scope(http)["project"]
+        assert scope == {"id": uuid}
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_legacy_profile_with_project_name_in_project_id(
+        self, mock_httpx_cls, config_dir, write_config,
+    ):
+        """Pre-multi-profile orca configs stored the project *name* under
+        the ``project_id`` key. The normaliser must still rewrite that to
+        ``project_name`` so old profiles keep authenticating.
+        """
+        write_config({
+            "active_profile": "old",
+            "profiles": {
+                "old": {
+                    "auth_url": "https://ks:5000",
+                    "username": "alice",
+                    "password": "secret",
+                    "domain_id": "Default",       # also legacy
+                    "project_id": "production",    # this is actually a name
+                },
+            },
+        })
+
+        from orca_cli.core.config import load_config
+        cfg = load_config(profile_name="old")
+        # Normaliser swapped legacy name into the canonical fields.
+        assert cfg["project_name"] == "production"
+        assert "project_id" not in cfg
+        assert cfg["user_domain_name"] == "Default"
+
+        with patch("orca_cli.core.client.TOKEN_CACHE_PATH", self._cache_path):
+            http = MagicMock()
+            http.post.return_value = _make_auth_response()
+            mock_httpx_cls.return_value = http
+            OrcaClient(cfg)
+
+        scope = _scope(http)["project"]
+        assert scope == {"name": "production", "domain": {"name": "Default"}}
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_os_env_with_project_name(
+        self, mock_httpx_cls, config_dir, monkeypatch,
+    ):
+        """``OS_*`` env vars (the ``source openrc.sh`` path) — project_name
+        flavour."""
+        monkeypatch.setenv("OS_AUTH_URL", "https://ks:5000")
+        monkeypatch.setenv("OS_USERNAME", "alice")
+        monkeypatch.setenv("OS_PASSWORD", "secret")
+        monkeypatch.setenv("OS_USER_DOMAIN_NAME", "Default")
+        monkeypatch.setenv("OS_PROJECT_NAME", "demo")
+
+        from orca_cli.core.config import load_config
+        cfg = load_config()
+
+        with patch("orca_cli.core.client.TOKEN_CACHE_PATH", self._cache_path):
+            http = MagicMock()
+            http.post.return_value = _make_auth_response()
+            mock_httpx_cls.return_value = http
+            OrcaClient(cfg)
+
+        scope = _scope(http)["project"]
+        assert scope == {"name": "demo", "domain": {"name": "Default"}}
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_os_env_with_project_uuid(
+        self, mock_httpx_cls, config_dir, monkeypatch,
+    ):
+        """``OS_*`` env vars — project_id UUID flavour. ``OS_PROJECT_ID``
+        must reach the client unchanged.
+        """
+        uuid = "abcdef01-2345-6789-abcd-ef0123456789"
+        monkeypatch.setenv("OS_AUTH_URL", "https://ks:5000")
+        monkeypatch.setenv("OS_USERNAME", "alice")
+        monkeypatch.setenv("OS_PASSWORD", "secret")
+        monkeypatch.setenv("OS_USER_DOMAIN_NAME", "Default")
+        monkeypatch.setenv("OS_PROJECT_ID", uuid)
+
+        from orca_cli.core.config import load_config
+        cfg = load_config()
+        assert cfg["project_id"] == uuid
+
+        with patch("orca_cli.core.client.TOKEN_CACHE_PATH", self._cache_path):
+            http = MagicMock()
+            http.post.return_value = _make_auth_response()
+            mock_httpx_cls.return_value = http
+            OrcaClient(cfg)
+
+        scope = _scope(http)["project"]
+        assert scope == {"id": uuid}
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_clouds_yaml_with_project_name(
+        self, mock_httpx_cls, config_dir, monkeypatch, tmp_path,
+    ):
+        """``OS_CLOUD`` → clouds.yaml lookup, project_name flavour."""
+        clouds = tmp_path / "clouds.yaml"
+        clouds.write_text(yaml.dump({
+            "clouds": {
+                "demo": {
+                    "auth": {
+                        "auth_url": "https://ks:5000",
+                        "username": "alice",
+                        "password": "secret",
+                        "user_domain_name": "Default",
+                        "project_name": "demo-proj",
+                    },
+                },
+            },
+        }))
+        monkeypatch.setenv("OS_CLOUD", "demo")
+        monkeypatch.setattr(
+            "orca_cli.core.config._CLOUDS_YAML_PATHS", [clouds],
+        )
+
+        from orca_cli.core.config import load_config
+        cfg = load_config()
+
+        with patch("orca_cli.core.client.TOKEN_CACHE_PATH", self._cache_path):
+            http = MagicMock()
+            http.post.return_value = _make_auth_response()
+            mock_httpx_cls.return_value = http
+            OrcaClient(cfg)
+
+        scope = _scope(http)["project"]
+        assert scope == {"name": "demo-proj", "domain": {"name": "Default"}}
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_clouds_yaml_with_project_uuid(
+        self, mock_httpx_cls, config_dir, monkeypatch, tmp_path,
+    ):
+        """``OS_CLOUD`` → clouds.yaml lookup, project_id UUID flavour."""
+        uuid = "abcdef01-2345-6789-abcd-ef0123456789"
+        clouds = tmp_path / "clouds.yaml"
+        clouds.write_text(yaml.dump({
+            "clouds": {
+                "shark": {
+                    "auth": {
+                        "auth_url": "https://ks:5000",
+                        "username": "alice",
+                        "password": "secret",
+                        "user_domain_name": "Default",
+                        "project_id": uuid,
+                    },
+                },
+            },
+        }))
+        monkeypatch.setenv("OS_CLOUD", "shark")
+        monkeypatch.setattr(
+            "orca_cli.core.config._CLOUDS_YAML_PATHS", [clouds],
+        )
+
+        from orca_cli.core.config import load_config
+        cfg = load_config()
+        assert cfg["project_id"] == uuid
+
+        with patch("orca_cli.core.client.TOKEN_CACHE_PATH", self._cache_path):
+            http = MagicMock()
+            http.post.return_value = _make_auth_response()
+            mock_httpx_cls.return_value = http
+            OrcaClient(cfg)
+
+        scope = _scope(http)["project"]
+        assert scope == {"id": uuid}
+
+    @patch("orca_cli.core.client.httpx.Client")
+    def test_app_credential_profile_no_project_block(
+        self, mock_httpx_cls, config_dir, write_config,
+    ):
+        """Application-credential profile produces no ``scope`` block —
+        regardless of any vestigial project fields the user may have left.
+        """
+        write_config({
+            "active_profile": "deploy",
+            "profiles": {
+                "deploy": {
+                    "auth_url": "https://ks:5000",
+                    "auth_type": "v3applicationcredential",
+                    "application_credential_id": "ac-uuid",
+                    "application_credential_secret": "sssecret",
+                    # User accidentally also configured a project — it must
+                    # be ignored, not appended to the auth payload.
+                    "project_name": "leftover",
+                },
+            },
+        })
+
+        from orca_cli.core.config import load_config
+        cfg = load_config(profile_name="deploy")
+
+        with patch("orca_cli.core.client.TOKEN_CACHE_PATH", self._cache_path):
+            http = MagicMock()
+            http.post.return_value = _make_auth_response()
+            mock_httpx_cls.return_value = http
+            OrcaClient(cfg)
+
+        payload = http.post.call_args.kwargs["json"]
+        assert payload["auth"]["identity"]["methods"] == ["application_credential"]
+        assert "scope" not in payload["auth"]
