@@ -4212,6 +4212,50 @@ comment in the test whitelist explaining why.</p>
   gained the full <code>metadef/*</code> catalogue (namespaces, objects,
   properties, resource-type associations). All new commands follow
   ADR-0008 from day one (no aliases needed).</li>
+<li>2026-04-28 — <strong>lots 2 + 3</strong> (<code>zone</code>, <code>stack</code>): zone keeps
+  <code>reverse-lookup</code> as a permanent exception (compound verb, no OSC
+  equivalent); <code>tld-*</code> and <code>transfer-*</code> migrate to <code>tld {list,create,
+  show,delete}</code>, <code>transfer request {list,create,show,delete}</code>,
+  <code>transfer accept {list,create,show}</code>. <code>stack</code> migrates every
+  former hyphenated leaf into a sub-group (<code>event</code>, <code>output</code>,
+  <code>resource</code>, <code>template</code>, <code>resource-type</code>); old names live as
+  deprecated aliases.</li>
+<li>2026-04-28 — <strong>lots 4 + 5</strong> (<code>object</code>, <code>qos</code>): object's
+  <code>account-*</code> and <code>container-*</code> move under <code>object account</code> and
+  <code>object container</code>. qos splits into <code>qos policy</code> and <code>qos rule</code>
+  (every former hyphenated leaf migrated).</li>
+<li>2026-04-28 — <strong>lot 6</strong> (<code>rating</code>, <code>metric</code>): rating splits into
+  <code>rating metric {list,create,delete}</code> and <code>rating module {list,
+  enable,disable,set-priority}</code> (set-priority is a compound verb
+  whitelisted on the module sub-group). metric migrates <code>archive-
+  policy-*</code>, <code>resource-type-*</code>, <code>resource-{list,show}</code>, and
+  <code>measures-*</code> under sub-groups (<code>archive-policy</code>, <code>resource-type</code>,
+  <code>resource</code>, <code>measures</code>); <code>archive-policy</code> and <code>resource-type</code>
+  keep their hyphen as compound-noun sub-group names.</li>
+<li>2026-04-28 — <strong>lot 7</strong> (<code>image</code>): <code>cache-*</code>, <code>member-*</code>, <code>tag-*</code>,
+  <code>task-*</code>, <code>stores-*</code> move under <code>image cache</code>, <code>image member</code>,
+  <code>image tag</code>, <code>image task</code>, <code>image stores</code>. <code>share-and-accept</code>
+  remains a permanent exception (orca-specific compound verb that
+  bundles <code>member-create + member-set --status accepted</code>).</li>
+<li>2026-04-28 — <strong>lot 8</strong> (<code>loadbalancer</code>): 35 former hyphenated
+  leaves migrate to nine sub-groups (<code>amphora</code>, <code>healthmonitor</code>,
+  <code>l7policy</code>, <code>l7rule</code>, <code>listener</code>, <code>member</code>, <code>pool</code>, <code>stats</code>,
+  <code>status</code>). <code>l7policy</code> and <code>l7rule</code> keep their hyphen as
+  compound-noun sub-group names.</li>
+<li>2026-04-28 — <strong>lot 9</strong> (<code>placement</code>): 29 former hyphenated leaves
+  migrate to five sub-groups (<code>resource-provider</code>, <code>resource-class</code>,
+  <code>trait</code>, <code>allocation</code>, <code>usage</code>). Sub-leaves of resource-provider
+  (<code>inventory-list/set/show/delete-all</code>, <code>trait-list/set/delete</code>,
+  <code>aggregate-list/set/delete</code>) and <code>allocation candidate-list</code> keep
+  their hyphen as compound nouns/verbs that read as one phrase.</li>
+<li>2026-04-28 — <strong>lot 10</strong> (<code>backup</code>, <code>cluster</code>): backup's 21
+  hyphenated leaves migrate to four sub-groups (<code>action</code>, <code>client</code>,
+  <code>job</code>, <code>session</code>); <code>session add-job</code> and <code>session remove-job</code>
+  remain hyphenated as compound verbs nested under the <code>session</code>
+  sub-group. cluster's 9 hyphenated leaves migrate to two
+  sub-groups (<code>nodegroup</code>, <code>template</code>). All 30 old names live as
+  deprecated aliases via <code>add_command_with_alias</code>. Whitelists for
+  <code>backup</code> and <code>cluster</code> cleared.</li>
 </ul>
 
 
