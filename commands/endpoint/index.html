@@ -2863,6 +2863,56 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#orca-endpoint-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        project
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="project">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-endpoint-project-add" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-endpoint-project-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        list
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-endpoint-project-remove" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        remove
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#orca-endpoint-set" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3864,6 +3914,56 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#orca-endpoint-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        project
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="project">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-endpoint-project-add" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-endpoint-project-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        list
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-endpoint-project-remove" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        remove
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#orca-endpoint-set" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3943,6 +4043,7 @@ always reflects the version installed.</p>
 <li><em><a href="#orca-endpoint-create">create</a></em>: Create an endpoint.</li>
 <li><em><a href="#orca-endpoint-delete">delete</a></em>: Delete an endpoint.</li>
 <li><em><a href="#orca-endpoint-list">list</a></em>: List endpoints.</li>
+<li><em><a href="#orca-endpoint-project">project</a></em>: Manage endpoint↔project filter (Keystone OS-EP-FILTER extension).</li>
 <li><em><a href="#orca-endpoint-set">set</a></em>: Update an endpoint.</li>
 <li><em><a href="#orca-endpoint-show">show</a></em>: Show endpoint details.</li>
 </ul>
@@ -4102,10 +4203,148 @@ always reflects the version installed.</p>
 </tr>
 </tbody>
 </table>
+<h4 id="orca-endpoint-project">orca endpoint project<a class="headerlink" href="#orca-endpoint-project" title="Permanent link">&para;</a></h4>
+<p>Manage endpoint↔project filter (Keystone OS-EP-FILTER extension).</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>orca endpoint project [OPTIONS] COMMAND [ARGS]...
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Subcommands</strong></p>
+<ul>
+<li><em><a href="#orca-endpoint-project-add">add</a></em>: Restrict an endpoint to a project.</li>
+<li><em><a href="#orca-endpoint-project-list">list</a></em>: List projects an endpoint is bound to.</li>
+<li><em><a href="#orca-endpoint-project-remove">remove</a></em>: Drop an endpoint↔project binding.</li>
+</ul>
+<h5 id="orca-endpoint-project-add">orca endpoint project add<a class="headerlink" href="#orca-endpoint-project-add" title="Permanent link">&para;</a></h5>
+<p>Restrict an endpoint to a project.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>orca endpoint project add [OPTIONS] ENDPOINT_ID PROJECT_ID
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<h5 id="orca-endpoint-project-list">orca endpoint project list<a class="headerlink" href="#orca-endpoint-project-list" title="Permanent link">&para;</a></h5>
+<p>List projects an endpoint is bound to.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>orca endpoint project list [OPTIONS] ENDPOINT_ID
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--noindent</code></td>
+<td>boolean</td>
+<td>Disable JSON indentation.</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--max-width</code></td>
+<td>integer</td>
+<td>Maximum table width (0 = unlimited).</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>--fit-width</code></td>
+<td>boolean</td>
+<td>Fit table to terminal width.</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--column</code>, <code>-c</code></td>
+<td>text</td>
+<td>Column to include (repeatable). Shows all if omitted.</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>--format</code>, <code>-f</code></td>
+<td>choice (<code>table</code> &#x7C; <code>json</code> &#x7C; <code>value</code>)</td>
+<td>Output format.</td>
+<td><code>table</code></td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<h5 id="orca-endpoint-project-remove">orca endpoint project remove<a class="headerlink" href="#orca-endpoint-project-remove" title="Permanent link">&para;</a></h5>
+<p>Drop an endpoint↔project binding.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>orca endpoint project remove [OPTIONS] ENDPOINT_ID PROJECT_ID
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--yes</code>, <code>-y</code></td>
+<td>boolean</td>
+<td>Skip confirmation.</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
 <h4 id="orca-endpoint-set">orca endpoint set<a class="headerlink" href="#orca-endpoint-set" title="Permanent link">&para;</a></h4>
 <p>Update an endpoint.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>orca endpoint set [OPTIONS] ENDPOINT_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>orca endpoint set [OPTIONS] ENDPOINT_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -4153,7 +4392,7 @@ always reflects the version installed.</p>
 <h4 id="orca-endpoint-show">orca endpoint show<a class="headerlink" href="#orca-endpoint-show" title="Permanent link">&para;</a></h4>
 <p>Show endpoint details.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>orca endpoint show [OPTIONS] ENDPOINT_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>orca endpoint show [OPTIONS] ENDPOINT_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>

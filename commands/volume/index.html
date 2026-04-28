@@ -1975,6 +1975,34 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#orca-volume-host" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        host
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="host">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-volume-host-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        list
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#orca-volume-list" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2076,6 +2104,34 @@
       
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-volume-pool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pool
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pool">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-volume-pool-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        list
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -6089,6 +6145,34 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#orca-volume-host" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        host
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="host">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-volume-host-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        list
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#orca-volume-list" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6190,6 +6274,34 @@
       
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orca-volume-pool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pool
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pool">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orca-volume-pool-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        list
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -7108,12 +7220,14 @@ always reflects the version installed.</p>
 <li><em><a href="#orca-volume-group-type-show">group-type-show</a></em>: [deprecated, use 'volume group type show' instead]</li>
 <li><em><a href="#orca-volume-group-type-unset">group-type-unset</a></em>: [deprecated, use 'volume group type unset' instead]</li>
 <li><em><a href="#orca-volume-group-update">group-update</a></em>: [deprecated, use 'volume group update' instead]</li>
+<li><em><a href="#orca-volume-host">host</a></em>: Inspect Cinder hosts (admin).</li>
 <li><em><a href="#orca-volume-list">list</a></em>: List volumes.</li>
 <li><em><a href="#orca-volume-message">message</a></em>: User-facing Cinder messages (failures, info).</li>
 <li><em><a href="#orca-volume-message-delete">message-delete</a></em>: [deprecated, use 'volume message delete' instead]</li>
 <li><em><a href="#orca-volume-message-list">message-list</a></em>: [deprecated, use 'volume message list' instead]</li>
 <li><em><a href="#orca-volume-message-show">message-show</a></em>: [deprecated, use 'volume message show' instead]</li>
 <li><em><a href="#orca-volume-migrate">migrate</a></em>: Migrate a volume to a different Cinder host/backend.</li>
+<li><em><a href="#orca-volume-pool">pool</a></em>: Inspect Cinder scheduler backend pools (admin).</li>
 <li><em><a href="#orca-volume-qos">qos</a></em>: QoS specifications.</li>
 <li><em><a href="#orca-volume-qos-associate">qos-associate</a></em>: [deprecated, use 'volume qos associate' instead]</li>
 <li><em><a href="#orca-volume-qos-create">qos-create</a></em>: [deprecated, use 'volume qos create' instead]</li>
@@ -9955,10 +10069,98 @@ always reflects the version installed.</p>
 </tr>
 </tbody>
 </table>
+<h4 id="orca-volume-host">orca volume host<a class="headerlink" href="#orca-volume-host" title="Permanent link">&para;</a></h4>
+<p>Inspect Cinder hosts (admin).</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a>orca volume host [OPTIONS] COMMAND [ARGS]...
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Subcommands</strong></p>
+<ul>
+<li><em><a href="#orca-volume-host-list">list</a></em>: List Cinder hosts.</li>
+</ul>
+<h5 id="orca-volume-host-list">orca volume host list<a class="headerlink" href="#orca-volume-host-list" title="Permanent link">&para;</a></h5>
+<p>List Cinder hosts.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a>orca volume host list [OPTIONS]
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--zone</code></td>
+<td>text</td>
+<td>Filter by availability zone.</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>--noindent</code></td>
+<td>boolean</td>
+<td>Disable JSON indentation.</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--max-width</code></td>
+<td>integer</td>
+<td>Maximum table width (0 = unlimited).</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>--fit-width</code></td>
+<td>boolean</td>
+<td>Fit table to terminal width.</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--column</code>, <code>-c</code></td>
+<td>text</td>
+<td>Column to include (repeatable). Shows all if omitted.</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>--format</code>, <code>-f</code></td>
+<td>choice (<code>table</code> &#x7C; <code>json</code> &#x7C; <code>value</code>)</td>
+<td>Output format.</td>
+<td><code>table</code></td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
 <h4 id="orca-volume-list">orca volume list<a class="headerlink" href="#orca-volume-list" title="Permanent link">&para;</a></h4>
 <p>List volumes.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a>orca volume list [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a>orca volume list [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10012,7 +10214,7 @@ always reflects the version installed.</p>
 <h4 id="orca-volume-message">orca volume message<a class="headerlink" href="#orca-volume-message" title="Permanent link">&para;</a></h4>
 <p>User-facing Cinder messages (failures, info).</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a>orca volume message [OPTIONS] COMMAND [ARGS]...
+<div class="highlight"><pre><span></span><code><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a>orca volume message [OPTIONS] COMMAND [ARGS]...
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10042,7 +10244,7 @@ always reflects the version installed.</p>
 <h5 id="orca-volume-message-delete">orca volume message delete<a class="headerlink" href="#orca-volume-message-delete" title="Permanent link">&para;</a></h5>
 <p>Delete a Cinder error message.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a>orca volume message delete [OPTIONS] MESSAGE_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a>orca volume message delete [OPTIONS] MESSAGE_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10072,7 +10274,7 @@ always reflects the version installed.</p>
 <h5 id="orca-volume-message-list">orca volume message list<a class="headerlink" href="#orca-volume-message-list" title="Permanent link">&para;</a></h5>
 <p>List Cinder error messages.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a>orca volume message list [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a>orca volume message list [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10138,7 +10340,7 @@ always reflects the version installed.</p>
 <h5 id="orca-volume-message-show">orca volume message show<a class="headerlink" href="#orca-volume-message-show" title="Permanent link">&para;</a></h5>
 <p>Show a Cinder error message.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a>orca volume message show [OPTIONS] MESSAGE_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a>orca volume message show [OPTIONS] MESSAGE_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10192,7 +10394,7 @@ always reflects the version installed.</p>
 <h4 id="orca-volume-message-delete">orca volume message-delete<a class="headerlink" href="#orca-volume-message-delete" title="Permanent link">&para;</a></h4>
 <p>Delete a Cinder error message.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a>orca volume message-delete [OPTIONS] MESSAGE_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a>orca volume message-delete [OPTIONS] MESSAGE_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10222,7 +10424,7 @@ always reflects the version installed.</p>
 <h4 id="orca-volume-message-list">orca volume message-list<a class="headerlink" href="#orca-volume-message-list" title="Permanent link">&para;</a></h4>
 <p>List Cinder error messages.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a>orca volume message-list [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a>orca volume message-list [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10288,7 +10490,7 @@ always reflects the version installed.</p>
 <h4 id="orca-volume-message-show">orca volume message-show<a class="headerlink" href="#orca-volume-message-show" title="Permanent link">&para;</a></h4>
 <p>Show a Cinder error message.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a>orca volume message-show [OPTIONS] MESSAGE_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a>orca volume message-show [OPTIONS] MESSAGE_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10344,7 +10546,7 @@ always reflects the version installed.</p>
 <p>Example:
   orca volume migrate <id> --host cinder@lvm2#LVM2</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a>orca volume migrate [OPTIONS] VOLUME_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-71-1" name="__codelineno-71-1" href="#__codelineno-71-1"></a>orca volume migrate [OPTIONS] VOLUME_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10383,10 +10585,98 @@ always reflects the version installed.</p>
 </tr>
 </tbody>
 </table>
+<h4 id="orca-volume-pool">orca volume pool<a class="headerlink" href="#orca-volume-pool" title="Permanent link">&para;</a></h4>
+<p>Inspect Cinder scheduler backend pools (admin).</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a>orca volume pool [OPTIONS] COMMAND [ARGS]...
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Subcommands</strong></p>
+<ul>
+<li><em><a href="#orca-volume-pool-list">list</a></em>: List Cinder scheduler backend pools.</li>
+</ul>
+<h5 id="orca-volume-pool-list">orca volume pool list<a class="headerlink" href="#orca-volume-pool-list" title="Permanent link">&para;</a></h5>
+<p>List Cinder scheduler backend pools.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-73-1" name="__codelineno-73-1" href="#__codelineno-73-1"></a>orca volume pool list [OPTIONS]
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--detail</code></td>
+<td>boolean</td>
+<td>Include detailed capabilities per pool.</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--noindent</code></td>
+<td>boolean</td>
+<td>Disable JSON indentation.</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--max-width</code></td>
+<td>integer</td>
+<td>Maximum table width (0 = unlimited).</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>--fit-width</code></td>
+<td>boolean</td>
+<td>Fit table to terminal width.</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--column</code>, <code>-c</code></td>
+<td>text</td>
+<td>Column to include (repeatable). Shows all if omitted.</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>--format</code>, <code>-f</code></td>
+<td>choice (<code>table</code> &#x7C; <code>json</code> &#x7C; <code>value</code>)</td>
+<td>Output format.</td>
+<td><code>table</code></td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
 <h4 id="orca-volume-qos">orca volume qos<a class="headerlink" href="#orca-volume-qos" title="Permanent link">&para;</a></h4>
 <p>QoS specifications.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a>orca volume qos [OPTIONS] COMMAND [ARGS]...
+<div class="highlight"><pre><span></span><code><a id="__codelineno-74-1" name="__codelineno-74-1" href="#__codelineno-74-1"></a>orca volume qos [OPTIONS] COMMAND [ARGS]...
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10420,7 +10710,7 @@ always reflects the version installed.</p>
 <h5 id="orca-volume-qos-associate">orca volume qos associate<a class="headerlink" href="#orca-volume-qos-associate" title="Permanent link">&para;</a></h5>
 <p>Associate a QoS spec with a volume type.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-71-1" name="__codelineno-71-1" href="#__codelineno-71-1"></a>orca volume qos associate [OPTIONS] QOS_ID TYPE_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-75-1" name="__codelineno-75-1" href="#__codelineno-75-1"></a>orca volume qos associate [OPTIONS] QOS_ID TYPE_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10447,7 +10737,7 @@ always reflects the version installed.</p>
   orca volume qos-create my-qos --consumer back-end \
     --property total_iops_sec=1000</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a>orca volume qos create [OPTIONS] NAME
+<div class="highlight"><pre><span></span><code><a id="__codelineno-76-1" name="__codelineno-76-1" href="#__codelineno-76-1"></a>orca volume qos create [OPTIONS] NAME
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10483,7 +10773,7 @@ always reflects the version installed.</p>
 <h5 id="orca-volume-qos-delete">orca volume qos delete<a class="headerlink" href="#orca-volume-qos-delete" title="Permanent link">&para;</a></h5>
 <p>Delete a volume QoS spec.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-73-1" name="__codelineno-73-1" href="#__codelineno-73-1"></a>orca volume qos delete [OPTIONS] QOS_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-77-1" name="__codelineno-77-1" href="#__codelineno-77-1"></a>orca volume qos delete [OPTIONS] QOS_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10519,7 +10809,7 @@ always reflects the version installed.</p>
 <h5 id="orca-volume-qos-disassociate">orca volume qos disassociate<a class="headerlink" href="#orca-volume-qos-disassociate" title="Permanent link">&para;</a></h5>
 <p>Disassociate a QoS spec from a volume type.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-74-1" name="__codelineno-74-1" href="#__codelineno-74-1"></a>orca volume qos disassociate [OPTIONS] QOS_ID TYPE_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-78-1" name="__codelineno-78-1" href="#__codelineno-78-1"></a>orca volume qos disassociate [OPTIONS] QOS_ID TYPE_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10549,7 +10839,7 @@ always reflects the version installed.</p>
 <h5 id="orca-volume-qos-list">orca volume qos list<a class="headerlink" href="#orca-volume-qos-list" title="Permanent link">&para;</a></h5>
 <p>List volume QoS specs.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-75-1" name="__codelineno-75-1" href="#__codelineno-75-1"></a>orca volume qos list [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-79-1" name="__codelineno-79-1" href="#__codelineno-79-1"></a>orca volume qos list [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10603,7 +10893,7 @@ always reflects the version installed.</p>
 <h5 id="orca-volume-qos-set">orca volume qos set<a class="headerlink" href="#orca-volume-qos-set" title="Permanent link">&para;</a></h5>
 <p>Add or update keys on a volume QoS spec.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-76-1" name="__codelineno-76-1" href="#__codelineno-76-1"></a>orca volume qos set [OPTIONS] QOS_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-80-1" name="__codelineno-80-1" href="#__codelineno-80-1"></a>orca volume qos set [OPTIONS] QOS_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10633,7 +10923,7 @@ always reflects the version installed.</p>
 <h5 id="orca-volume-qos-show">orca volume qos show<a class="headerlink" href="#orca-volume-qos-show" title="Permanent link">&para;</a></h5>
 <p>Show volume QoS spec details.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-77-1" name="__codelineno-77-1" href="#__codelineno-77-1"></a>orca volume qos show [OPTIONS] QOS_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-81-1" name="__codelineno-81-1" href="#__codelineno-81-1"></a>orca volume qos show [OPTIONS] QOS_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10687,7 +10977,7 @@ always reflects the version installed.</p>
 <h4 id="orca-volume-qos-associate">orca volume qos-associate<a class="headerlink" href="#orca-volume-qos-associate" title="Permanent link">&para;</a></h4>
 <p>Associate a QoS spec with a volume type.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-78-1" name="__codelineno-78-1" href="#__codelineno-78-1"></a>orca volume qos-associate [OPTIONS] QOS_ID TYPE_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-82-1" name="__codelineno-82-1" href="#__codelineno-82-1"></a>orca volume qos-associate [OPTIONS] QOS_ID TYPE_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10714,7 +11004,7 @@ always reflects the version installed.</p>
   orca volume qos-create my-qos --consumer back-end \
     --property total_iops_sec=1000</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-79-1" name="__codelineno-79-1" href="#__codelineno-79-1"></a>orca volume qos-create [OPTIONS] NAME
+<div class="highlight"><pre><span></span><code><a id="__codelineno-83-1" name="__codelineno-83-1" href="#__codelineno-83-1"></a>orca volume qos-create [OPTIONS] NAME
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10750,7 +11040,7 @@ always reflects the version installed.</p>
 <h4 id="orca-volume-qos-delete">orca volume qos-delete<a class="headerlink" href="#orca-volume-qos-delete" title="Permanent link">&para;</a></h4>
 <p>Delete a volume QoS spec.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-80-1" name="__codelineno-80-1" href="#__codelineno-80-1"></a>orca volume qos-delete [OPTIONS] QOS_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-84-1" name="__codelineno-84-1" href="#__codelineno-84-1"></a>orca volume qos-delete [OPTIONS] QOS_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10786,7 +11076,7 @@ always reflects the version installed.</p>
 <h4 id="orca-volume-qos-disassociate">orca volume qos-disassociate<a class="headerlink" href="#orca-volume-qos-disassociate" title="Permanent link">&para;</a></h4>
 <p>Disassociate a QoS spec from a volume type.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-81-1" name="__codelineno-81-1" href="#__codelineno-81-1"></a>orca volume qos-disassociate [OPTIONS] QOS_ID TYPE_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-85-1" name="__codelineno-85-1" href="#__codelineno-85-1"></a>orca volume qos-disassociate [OPTIONS] QOS_ID TYPE_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10816,7 +11106,7 @@ always reflects the version installed.</p>
 <h4 id="orca-volume-qos-list">orca volume qos-list<a class="headerlink" href="#orca-volume-qos-list" title="Permanent link">&para;</a></h4>
 <p>List volume QoS specs.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-82-1" name="__codelineno-82-1" href="#__codelineno-82-1"></a>orca volume qos-list [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-86-1" name="__codelineno-86-1" href="#__codelineno-86-1"></a>orca volume qos-list [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10870,7 +11160,7 @@ always reflects the version installed.</p>
 <h4 id="orca-volume-qos-set">orca volume qos-set<a class="headerlink" href="#orca-volume-qos-set" title="Permanent link">&para;</a></h4>
 <p>Add or update keys on a volume QoS spec.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-83-1" name="__codelineno-83-1" href="#__codelineno-83-1"></a>orca volume qos-set [OPTIONS] QOS_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-87-1" name="__codelineno-87-1" href="#__codelineno-87-1"></a>orca volume qos-set [OPTIONS] QOS_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10900,7 +11190,7 @@ always reflects the version installed.</p>
 <h4 id="orca-volume-qos-show">orca volume qos-show<a class="headerlink" href="#orca-volume-qos-show" title="Permanent link">&para;</a></h4>
 <p>Show volume QoS spec details.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-84-1" name="__codelineno-84-1" href="#__codelineno-84-1"></a>orca volume qos-show [OPTIONS] QOS_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-88-1" name="__codelineno-88-1" href="#__codelineno-88-1"></a>orca volume qos-show [OPTIONS] QOS_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10954,7 +11244,7 @@ always reflects the version installed.</p>
 <h4 id="orca-volume-retype">orca volume retype<a class="headerlink" href="#orca-volume-retype" title="Permanent link">&para;</a></h4>
 <p>Change volume type.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-85-1" name="__codelineno-85-1" href="#__codelineno-85-1"></a>orca volume retype [OPTIONS] VOLUME_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-89-1" name="__codelineno-89-1" href="#__codelineno-89-1"></a>orca volume retype [OPTIONS] VOLUME_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -10994,7 +11284,7 @@ the most recent one for this volume.</p>
 <p>Example:
   orca volume revert-to-snapshot <volume-id> <snapshot-id></p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-86-1" name="__codelineno-86-1" href="#__codelineno-86-1"></a>orca volume revert-to-snapshot [OPTIONS] VOLUME_ID SNAPSHOT_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-90-1" name="__codelineno-90-1" href="#__codelineno-90-1"></a>orca volume revert-to-snapshot [OPTIONS] VOLUME_ID SNAPSHOT_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -11018,7 +11308,7 @@ the most recent one for this volume.</p>
 <h4 id="orca-volume-service">orca volume service<a class="headerlink" href="#orca-volume-service" title="Permanent link">&para;</a></h4>
 <p>Cinder backend services (admin).</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-87-1" name="__codelineno-87-1" href="#__codelineno-87-1"></a>orca volume service [OPTIONS] COMMAND [ARGS]...
+<div class="highlight"><pre><span></span><code><a id="__codelineno-91-1" name="__codelineno-91-1" href="#__codelineno-91-1"></a>orca volume service [OPTIONS] COMMAND [ARGS]...
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -11047,7 +11337,7 @@ the most recent one for this volume.</p>
 <h5 id="orca-volume-service-list">orca volume service list<a class="headerlink" href="#orca-volume-service-list" title="Permanent link">&para;</a></h5>
 <p>List Cinder services.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-88-1" name="__codelineno-88-1" href="#__codelineno-88-1"></a>orca volume service list [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-92-1" name="__codelineno-92-1" href="#__codelineno-92-1"></a>orca volume service list [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -11113,7 +11403,7 @@ the most recent one for this volume.</p>
 <h5 id="orca-volume-service-set">orca volume service set<a class="headerlink" href="#orca-volume-service-set" title="Permanent link">&para;</a></h5>
 <p>Enable or disable a Cinder service.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-89-1" name="__codelineno-89-1" href="#__codelineno-89-1"></a>orca volume service set [OPTIONS] HOST BINARY
+<div class="highlight"><pre><span></span><code><a id="__codelineno-93-1" name="__codelineno-93-1" href="#__codelineno-93-1"></a>orca volume service set [OPTIONS] HOST BINARY
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -11155,7 +11445,7 @@ the most recent one for this volume.</p>
 <h4 id="orca-volume-service-list">orca volume service-list<a class="headerlink" href="#orca-volume-service-list" title="Permanent link">&para;</a></h4>
 <p>List Cinder services.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-90-1" name="__codelineno-90-1" href="#__codelineno-90-1"></a>orca volume service-list [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-94-1" name="__codelineno-94-1" href="#__codelineno-94-1"></a>orca volume service-list [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -11221,7 +11511,7 @@ the most recent one for this volume.</p>
 <h4 id="orca-volume-service-set">orca volume service-set<a class="headerlink" href="#orca-volume-service-set" title="Permanent link">&para;</a></h4>
 <p>Enable or disable a Cinder service.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-91-1" name="__codelineno-91-1" href="#__codelineno-91-1"></a>orca volume service-set [OPTIONS] HOST BINARY
+<div class="highlight"><pre><span></span><code><a id="__codelineno-95-1" name="__codelineno-95-1" href="#__codelineno-95-1"></a>orca volume service-set [OPTIONS] HOST BINARY
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -11268,7 +11558,7 @@ the most recent one for this volume.</p>
   orca volume set <id> --bootable
   orca volume set <id> --read-only</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-92-1" name="__codelineno-92-1" href="#__codelineno-92-1"></a>orca volume set [OPTIONS] VOLUME_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-96-1" name="__codelineno-96-1" href="#__codelineno-96-1"></a>orca volume set [OPTIONS] VOLUME_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -11322,7 +11612,7 @@ the most recent one for this volume.</p>
 <h4 id="orca-volume-set-bootable">orca volume set-bootable<a class="headerlink" href="#orca-volume-set-bootable" title="Permanent link">&para;</a></h4>
 <p>Set bootable flag (deprecated — use 'volume set --bootable').</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-93-1" name="__codelineno-93-1" href="#__codelineno-93-1"></a>orca volume set-bootable [OPTIONS] VOLUME_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-97-1" name="__codelineno-97-1" href="#__codelineno-97-1"></a>orca volume set-bootable [OPTIONS] VOLUME_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -11352,7 +11642,7 @@ the most recent one for this volume.</p>
 <h4 id="orca-volume-set-readonly">orca volume set-readonly<a class="headerlink" href="#orca-volume-set-readonly" title="Permanent link">&para;</a></h4>
 <p>Set read-only flag (deprecated — use 'volume set --read-only').</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-94-1" name="__codelineno-94-1" href="#__codelineno-94-1"></a>orca volume set-readonly [OPTIONS] VOLUME_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-98-1" name="__codelineno-98-1" href="#__codelineno-98-1"></a>orca volume set-readonly [OPTIONS] VOLUME_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -11382,7 +11672,7 @@ the most recent one for this volume.</p>
 <h4 id="orca-volume-show">orca volume show<a class="headerlink" href="#orca-volume-show" title="Permanent link">&para;</a></h4>
 <p>Show volume details.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-95-1" name="__codelineno-95-1" href="#__codelineno-95-1"></a>orca volume show [OPTIONS] VOLUME_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-99-1" name="__codelineno-99-1" href="#__codelineno-99-1"></a>orca volume show [OPTIONS] VOLUME_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -11436,7 +11726,7 @@ the most recent one for this volume.</p>
 <h4 id="orca-volume-snapshot">orca volume snapshot<a class="headerlink" href="#orca-volume-snapshot" title="Permanent link">&para;</a></h4>
 <p>Manage volume snapshots.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-96-1" name="__codelineno-96-1" href="#__codelineno-96-1"></a>orca volume snapshot [OPTIONS] COMMAND [ARGS]...
+<div class="highlight"><pre><span></span><code><a id="__codelineno-100-1" name="__codelineno-100-1" href="#__codelineno-100-1"></a>orca volume snapshot [OPTIONS] COMMAND [ARGS]...
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -11469,7 +11759,7 @@ the most recent one for this volume.</p>
 <h5 id="orca-volume-snapshot-create">orca volume snapshot create<a class="headerlink" href="#orca-volume-snapshot-create" title="Permanent link">&para;</a></h5>
 <p>Create a snapshot of a volume (accepts UUID or name).</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-97-1" name="__codelineno-97-1" href="#__codelineno-97-1"></a>orca volume snapshot create [OPTIONS] VOLUME_ID_OR_NAME
+<div class="highlight"><pre><span></span><code><a id="__codelineno-101-1" name="__codelineno-101-1" href="#__codelineno-101-1"></a>orca volume snapshot create [OPTIONS] VOLUME_ID_OR_NAME
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -11511,7 +11801,7 @@ the most recent one for this volume.</p>
 <h5 id="orca-volume-snapshot-delete">orca volume snapshot delete<a class="headerlink" href="#orca-volume-snapshot-delete" title="Permanent link">&para;</a></h5>
 <p>Delete a volume snapshot.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-98-1" name="__codelineno-98-1" href="#__codelineno-98-1"></a>orca volume snapshot delete [OPTIONS] SNAPSHOT_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-102-1" name="__codelineno-102-1" href="#__codelineno-102-1"></a>orca volume snapshot delete [OPTIONS] SNAPSHOT_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -11541,7 +11831,7 @@ the most recent one for this volume.</p>
 <h5 id="orca-volume-snapshot-list">orca volume snapshot list<a class="headerlink" href="#orca-volume-snapshot-list" title="Permanent link">&para;</a></h5>
 <p>List volume snapshots.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-99-1" name="__codelineno-99-1" href="#__codelineno-99-1"></a>orca volume snapshot list [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-103-1" name="__codelineno-103-1" href="#__codelineno-103-1"></a>orca volume snapshot list [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -11599,7 +11889,7 @@ the most recent one for this volume.</p>
 <p>Example:
   orca volume revert-to-snapshot <volume-id> <snapshot-id></p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-100-1" name="__codelineno-100-1" href="#__codelineno-100-1"></a>orca volume snapshot revert [OPTIONS] VOLUME_ID SNAPSHOT_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-104-1" name="__codelineno-104-1" href="#__codelineno-104-1"></a>orca volume snapshot revert [OPTIONS] VOLUME_ID SNAPSHOT_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -11623,7 +11913,7 @@ the most recent one for this volume.</p>
 <h5 id="orca-volume-snapshot-set">orca volume snapshot set<a class="headerlink" href="#orca-volume-snapshot-set" title="Permanent link">&para;</a></h5>
 <p>Update a snapshot's name, description, or metadata.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-101-1" name="__codelineno-101-1" href="#__codelineno-101-1"></a>orca volume snapshot set [OPTIONS] SNAPSHOT_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-105-1" name="__codelineno-105-1" href="#__codelineno-105-1"></a>orca volume snapshot set [OPTIONS] SNAPSHOT_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -11665,7 +11955,7 @@ the most recent one for this volume.</p>
 <h5 id="orca-volume-snapshot-show">orca volume snapshot show<a class="headerlink" href="#orca-volume-snapshot-show" title="Permanent link">&para;</a></h5>
 <p>Show snapshot details.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-102-1" name="__codelineno-102-1" href="#__codelineno-102-1"></a>orca volume snapshot show [OPTIONS] SNAPSHOT_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-106-1" name="__codelineno-106-1" href="#__codelineno-106-1"></a>orca volume snapshot show [OPTIONS] SNAPSHOT_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -11719,7 +12009,7 @@ the most recent one for this volume.</p>
 <h4 id="orca-volume-snapshot-create">orca volume snapshot-create<a class="headerlink" href="#orca-volume-snapshot-create" title="Permanent link">&para;</a></h4>
 <p>Create a snapshot of a volume (accepts UUID or name).</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-103-1" name="__codelineno-103-1" href="#__codelineno-103-1"></a>orca volume snapshot-create [OPTIONS] VOLUME_ID_OR_NAME
+<div class="highlight"><pre><span></span><code><a id="__codelineno-107-1" name="__codelineno-107-1" href="#__codelineno-107-1"></a>orca volume snapshot-create [OPTIONS] VOLUME_ID_OR_NAME
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -11761,7 +12051,7 @@ the most recent one for this volume.</p>
 <h4 id="orca-volume-snapshot-delete">orca volume snapshot-delete<a class="headerlink" href="#orca-volume-snapshot-delete" title="Permanent link">&para;</a></h4>
 <p>Delete a volume snapshot.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-104-1" name="__codelineno-104-1" href="#__codelineno-104-1"></a>orca volume snapshot-delete [OPTIONS] SNAPSHOT_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-108-1" name="__codelineno-108-1" href="#__codelineno-108-1"></a>orca volume snapshot-delete [OPTIONS] SNAPSHOT_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -11791,7 +12081,7 @@ the most recent one for this volume.</p>
 <h4 id="orca-volume-snapshot-list">orca volume snapshot-list<a class="headerlink" href="#orca-volume-snapshot-list" title="Permanent link">&para;</a></h4>
 <p>List volume snapshots.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-105-1" name="__codelineno-105-1" href="#__codelineno-105-1"></a>orca volume snapshot-list [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-109-1" name="__codelineno-109-1" href="#__codelineno-109-1"></a>orca volume snapshot-list [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -11845,7 +12135,7 @@ the most recent one for this volume.</p>
 <h4 id="orca-volume-snapshot-set">orca volume snapshot-set<a class="headerlink" href="#orca-volume-snapshot-set" title="Permanent link">&para;</a></h4>
 <p>Update a snapshot's name, description, or metadata.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-106-1" name="__codelineno-106-1" href="#__codelineno-106-1"></a>orca volume snapshot-set [OPTIONS] SNAPSHOT_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-110-1" name="__codelineno-110-1" href="#__codelineno-110-1"></a>orca volume snapshot-set [OPTIONS] SNAPSHOT_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -11887,7 +12177,7 @@ the most recent one for this volume.</p>
 <h4 id="orca-volume-snapshot-show">orca volume snapshot-show<a class="headerlink" href="#orca-volume-snapshot-show" title="Permanent link">&para;</a></h4>
 <p>Show snapshot details.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-107-1" name="__codelineno-107-1" href="#__codelineno-107-1"></a>orca volume snapshot-show [OPTIONS] SNAPSHOT_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-111-1" name="__codelineno-111-1" href="#__codelineno-111-1"></a>orca volume snapshot-show [OPTIONS] SNAPSHOT_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -11941,7 +12231,7 @@ the most recent one for this volume.</p>
 <h4 id="orca-volume-summary">orca volume summary<a class="headerlink" href="#orca-volume-summary" title="Permanent link">&para;</a></h4>
 <p>Show aggregated volume count and total size for the project.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-108-1" name="__codelineno-108-1" href="#__codelineno-108-1"></a>orca volume summary [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-112-1" name="__codelineno-112-1" href="#__codelineno-112-1"></a>orca volume summary [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -11995,7 +12285,7 @@ the most recent one for this volume.</p>
 <h4 id="orca-volume-transfer">orca volume transfer<a class="headerlink" href="#orca-volume-transfer" title="Permanent link">&para;</a></h4>
 <p>Volume transfers between projects.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-109-1" name="__codelineno-109-1" href="#__codelineno-109-1"></a>orca volume transfer [OPTIONS] COMMAND [ARGS]...
+<div class="highlight"><pre><span></span><code><a id="__codelineno-113-1" name="__codelineno-113-1" href="#__codelineno-113-1"></a>orca volume transfer [OPTIONS] COMMAND [ARGS]...
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12027,7 +12317,7 @@ the most recent one for this volume.</p>
 <h5 id="orca-volume-transfer-accept">orca volume transfer accept<a class="headerlink" href="#orca-volume-transfer-accept" title="Permanent link">&para;</a></h5>
 <p>Accept a volume transfer request.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-110-1" name="__codelineno-110-1" href="#__codelineno-110-1"></a>orca volume transfer accept [OPTIONS] TRANSFER_ID AUTH_KEY
+<div class="highlight"><pre><span></span><code><a id="__codelineno-114-1" name="__codelineno-114-1" href="#__codelineno-114-1"></a>orca volume transfer accept [OPTIONS] TRANSFER_ID AUTH_KEY
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12051,7 +12341,7 @@ the most recent one for this volume.</p>
 <h5 id="orca-volume-transfer-create">orca volume transfer create<a class="headerlink" href="#orca-volume-transfer-create" title="Permanent link">&para;</a></h5>
 <p>Create a volume transfer request.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-111-1" name="__codelineno-111-1" href="#__codelineno-111-1"></a>orca volume transfer create [OPTIONS] VOLUME_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-115-1" name="__codelineno-115-1" href="#__codelineno-115-1"></a>orca volume transfer create [OPTIONS] VOLUME_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12081,7 +12371,7 @@ the most recent one for this volume.</p>
 <h5 id="orca-volume-transfer-delete">orca volume transfer delete<a class="headerlink" href="#orca-volume-transfer-delete" title="Permanent link">&para;</a></h5>
 <p>Delete a volume transfer request.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-112-1" name="__codelineno-112-1" href="#__codelineno-112-1"></a>orca volume transfer delete [OPTIONS] TRANSFER_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-116-1" name="__codelineno-116-1" href="#__codelineno-116-1"></a>orca volume transfer delete [OPTIONS] TRANSFER_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12111,7 +12401,7 @@ the most recent one for this volume.</p>
 <h5 id="orca-volume-transfer-list">orca volume transfer list<a class="headerlink" href="#orca-volume-transfer-list" title="Permanent link">&para;</a></h5>
 <p>List volume transfer requests.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-113-1" name="__codelineno-113-1" href="#__codelineno-113-1"></a>orca volume transfer list [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-117-1" name="__codelineno-117-1" href="#__codelineno-117-1"></a>orca volume transfer list [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12171,7 +12461,7 @@ the most recent one for this volume.</p>
 <h5 id="orca-volume-transfer-show">orca volume transfer show<a class="headerlink" href="#orca-volume-transfer-show" title="Permanent link">&para;</a></h5>
 <p>Show a volume transfer request.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-114-1" name="__codelineno-114-1" href="#__codelineno-114-1"></a>orca volume transfer show [OPTIONS] TRANSFER_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-118-1" name="__codelineno-118-1" href="#__codelineno-118-1"></a>orca volume transfer show [OPTIONS] TRANSFER_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12225,7 +12515,7 @@ the most recent one for this volume.</p>
 <h4 id="orca-volume-transfer-accept">orca volume transfer-accept<a class="headerlink" href="#orca-volume-transfer-accept" title="Permanent link">&para;</a></h4>
 <p>Accept a volume transfer request.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-115-1" name="__codelineno-115-1" href="#__codelineno-115-1"></a>orca volume transfer-accept [OPTIONS] TRANSFER_ID AUTH_KEY
+<div class="highlight"><pre><span></span><code><a id="__codelineno-119-1" name="__codelineno-119-1" href="#__codelineno-119-1"></a>orca volume transfer-accept [OPTIONS] TRANSFER_ID AUTH_KEY
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12249,7 +12539,7 @@ the most recent one for this volume.</p>
 <h4 id="orca-volume-transfer-create">orca volume transfer-create<a class="headerlink" href="#orca-volume-transfer-create" title="Permanent link">&para;</a></h4>
 <p>Create a volume transfer request.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-116-1" name="__codelineno-116-1" href="#__codelineno-116-1"></a>orca volume transfer-create [OPTIONS] VOLUME_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-120-1" name="__codelineno-120-1" href="#__codelineno-120-1"></a>orca volume transfer-create [OPTIONS] VOLUME_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12279,7 +12569,7 @@ the most recent one for this volume.</p>
 <h4 id="orca-volume-transfer-delete">orca volume transfer-delete<a class="headerlink" href="#orca-volume-transfer-delete" title="Permanent link">&para;</a></h4>
 <p>Delete a volume transfer request.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-117-1" name="__codelineno-117-1" href="#__codelineno-117-1"></a>orca volume transfer-delete [OPTIONS] TRANSFER_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-121-1" name="__codelineno-121-1" href="#__codelineno-121-1"></a>orca volume transfer-delete [OPTIONS] TRANSFER_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12309,7 +12599,7 @@ the most recent one for this volume.</p>
 <h4 id="orca-volume-transfer-list">orca volume transfer-list<a class="headerlink" href="#orca-volume-transfer-list" title="Permanent link">&para;</a></h4>
 <p>List volume transfer requests.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-118-1" name="__codelineno-118-1" href="#__codelineno-118-1"></a>orca volume transfer-list [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-122-1" name="__codelineno-122-1" href="#__codelineno-122-1"></a>orca volume transfer-list [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12369,7 +12659,7 @@ the most recent one for this volume.</p>
 <h4 id="orca-volume-transfer-show">orca volume transfer-show<a class="headerlink" href="#orca-volume-transfer-show" title="Permanent link">&para;</a></h4>
 <p>Show a volume transfer request.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-119-1" name="__codelineno-119-1" href="#__codelineno-119-1"></a>orca volume transfer-show [OPTIONS] TRANSFER_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-123-1" name="__codelineno-123-1" href="#__codelineno-123-1"></a>orca volume transfer-show [OPTIONS] TRANSFER_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12429,7 +12719,7 @@ see what depends on what.</p>
   orca volume tree
   orca volume tree --volume-id <id></p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-120-1" name="__codelineno-120-1" href="#__codelineno-120-1"></a>orca volume tree [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-124-1" name="__codelineno-124-1" href="#__codelineno-124-1"></a>orca volume tree [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12459,7 +12749,7 @@ see what depends on what.</p>
 <h4 id="orca-volume-type">orca volume type<a class="headerlink" href="#orca-volume-type" title="Permanent link">&para;</a></h4>
 <p>Volume types.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-121-1" name="__codelineno-121-1" href="#__codelineno-121-1"></a>orca volume type [OPTIONS] COMMAND [ARGS]...
+<div class="highlight"><pre><span></span><code><a id="__codelineno-125-1" name="__codelineno-125-1" href="#__codelineno-125-1"></a>orca volume type [OPTIONS] COMMAND [ARGS]...
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12492,7 +12782,7 @@ see what depends on what.</p>
 <h5 id="orca-volume-type-access">orca volume type access<a class="headerlink" href="#orca-volume-type-access" title="Permanent link">&para;</a></h5>
 <p>Project-level access to a volume type.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-122-1" name="__codelineno-122-1" href="#__codelineno-122-1"></a>orca volume type access [OPTIONS] COMMAND [ARGS]...
+<div class="highlight"><pre><span></span><code><a id="__codelineno-126-1" name="__codelineno-126-1" href="#__codelineno-126-1"></a>orca volume type access [OPTIONS] COMMAND [ARGS]...
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12522,7 +12812,7 @@ see what depends on what.</p>
 <h6 id="orca-volume-type-access-add">orca volume type access add<a class="headerlink" href="#orca-volume-type-access-add" title="Permanent link">&para;</a></h6>
 <p>Grant a project access to a private volume type.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-123-1" name="__codelineno-123-1" href="#__codelineno-123-1"></a>orca volume type access add [OPTIONS] TYPE_ID PROJECT_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-127-1" name="__codelineno-127-1" href="#__codelineno-127-1"></a>orca volume type access add [OPTIONS] TYPE_ID PROJECT_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12546,7 +12836,7 @@ see what depends on what.</p>
 <h6 id="orca-volume-type-access-list">orca volume type access list<a class="headerlink" href="#orca-volume-type-access-list" title="Permanent link">&para;</a></h6>
 <p>List projects that have access to a private volume type.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-124-1" name="__codelineno-124-1" href="#__codelineno-124-1"></a>orca volume type access list [OPTIONS] TYPE_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-128-1" name="__codelineno-128-1" href="#__codelineno-128-1"></a>orca volume type access list [OPTIONS] TYPE_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12600,7 +12890,7 @@ see what depends on what.</p>
 <h6 id="orca-volume-type-access-remove">orca volume type access remove<a class="headerlink" href="#orca-volume-type-access-remove" title="Permanent link">&para;</a></h6>
 <p>Revoke a project's access to a private volume type.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-125-1" name="__codelineno-125-1" href="#__codelineno-125-1"></a>orca volume type access remove [OPTIONS] TYPE_ID PROJECT_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-129-1" name="__codelineno-129-1" href="#__codelineno-129-1"></a>orca volume type access remove [OPTIONS] TYPE_ID PROJECT_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12630,7 +12920,7 @@ see what depends on what.</p>
 <h5 id="orca-volume-type-create">orca volume type create<a class="headerlink" href="#orca-volume-type-create" title="Permanent link">&para;</a></h5>
 <p>Create a volume type.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-126-1" name="__codelineno-126-1" href="#__codelineno-126-1"></a>orca volume type create [OPTIONS] NAME
+<div class="highlight"><pre><span></span><code><a id="__codelineno-130-1" name="__codelineno-130-1" href="#__codelineno-130-1"></a>orca volume type create [OPTIONS] NAME
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12672,7 +12962,7 @@ see what depends on what.</p>
 <h5 id="orca-volume-type-delete">orca volume type delete<a class="headerlink" href="#orca-volume-type-delete" title="Permanent link">&para;</a></h5>
 <p>Delete a volume type.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-127-1" name="__codelineno-127-1" href="#__codelineno-127-1"></a>orca volume type delete [OPTIONS] TYPE_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-131-1" name="__codelineno-131-1" href="#__codelineno-131-1"></a>orca volume type delete [OPTIONS] TYPE_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12702,7 +12992,7 @@ see what depends on what.</p>
 <h5 id="orca-volume-type-list">orca volume type list<a class="headerlink" href="#orca-volume-type-list" title="Permanent link">&para;</a></h5>
 <p>List volume types.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-128-1" name="__codelineno-128-1" href="#__codelineno-128-1"></a>orca volume type list [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-132-1" name="__codelineno-132-1" href="#__codelineno-132-1"></a>orca volume type list [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12762,7 +13052,7 @@ see what depends on what.</p>
 <h5 id="orca-volume-type-set">orca volume type set<a class="headerlink" href="#orca-volume-type-set" title="Permanent link">&para;</a></h5>
 <p>Update a volume type.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-129-1" name="__codelineno-129-1" href="#__codelineno-129-1"></a>orca volume type set [OPTIONS] TYPE_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-133-1" name="__codelineno-133-1" href="#__codelineno-133-1"></a>orca volume type set [OPTIONS] TYPE_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12804,7 +13094,7 @@ see what depends on what.</p>
 <h5 id="orca-volume-type-show">orca volume type show<a class="headerlink" href="#orca-volume-type-show" title="Permanent link">&para;</a></h5>
 <p>Show volume type details.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-130-1" name="__codelineno-130-1" href="#__codelineno-130-1"></a>orca volume type show [OPTIONS] TYPE_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-134-1" name="__codelineno-134-1" href="#__codelineno-134-1"></a>orca volume type show [OPTIONS] TYPE_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12858,7 +13148,7 @@ see what depends on what.</p>
 <h4 id="orca-volume-type-access-add">orca volume type-access-add<a class="headerlink" href="#orca-volume-type-access-add" title="Permanent link">&para;</a></h4>
 <p>Grant a project access to a private volume type.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-131-1" name="__codelineno-131-1" href="#__codelineno-131-1"></a>orca volume type-access-add [OPTIONS] TYPE_ID PROJECT_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-135-1" name="__codelineno-135-1" href="#__codelineno-135-1"></a>orca volume type-access-add [OPTIONS] TYPE_ID PROJECT_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12882,7 +13172,7 @@ see what depends on what.</p>
 <h4 id="orca-volume-type-access-list">orca volume type-access-list<a class="headerlink" href="#orca-volume-type-access-list" title="Permanent link">&para;</a></h4>
 <p>List projects that have access to a private volume type.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-132-1" name="__codelineno-132-1" href="#__codelineno-132-1"></a>orca volume type-access-list [OPTIONS] TYPE_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-136-1" name="__codelineno-136-1" href="#__codelineno-136-1"></a>orca volume type-access-list [OPTIONS] TYPE_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12936,7 +13226,7 @@ see what depends on what.</p>
 <h4 id="orca-volume-type-access-remove">orca volume type-access-remove<a class="headerlink" href="#orca-volume-type-access-remove" title="Permanent link">&para;</a></h4>
 <p>Revoke a project's access to a private volume type.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-133-1" name="__codelineno-133-1" href="#__codelineno-133-1"></a>orca volume type-access-remove [OPTIONS] TYPE_ID PROJECT_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-137-1" name="__codelineno-137-1" href="#__codelineno-137-1"></a>orca volume type-access-remove [OPTIONS] TYPE_ID PROJECT_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -12966,7 +13256,7 @@ see what depends on what.</p>
 <h4 id="orca-volume-type-create">orca volume type-create<a class="headerlink" href="#orca-volume-type-create" title="Permanent link">&para;</a></h4>
 <p>Create a volume type.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-134-1" name="__codelineno-134-1" href="#__codelineno-134-1"></a>orca volume type-create [OPTIONS] NAME
+<div class="highlight"><pre><span></span><code><a id="__codelineno-138-1" name="__codelineno-138-1" href="#__codelineno-138-1"></a>orca volume type-create [OPTIONS] NAME
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -13008,7 +13298,7 @@ see what depends on what.</p>
 <h4 id="orca-volume-type-delete">orca volume type-delete<a class="headerlink" href="#orca-volume-type-delete" title="Permanent link">&para;</a></h4>
 <p>Delete a volume type.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-135-1" name="__codelineno-135-1" href="#__codelineno-135-1"></a>orca volume type-delete [OPTIONS] TYPE_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-139-1" name="__codelineno-139-1" href="#__codelineno-139-1"></a>orca volume type-delete [OPTIONS] TYPE_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -13038,7 +13328,7 @@ see what depends on what.</p>
 <h4 id="orca-volume-type-list">orca volume type-list<a class="headerlink" href="#orca-volume-type-list" title="Permanent link">&para;</a></h4>
 <p>List volume types.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-136-1" name="__codelineno-136-1" href="#__codelineno-136-1"></a>orca volume type-list [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-140-1" name="__codelineno-140-1" href="#__codelineno-140-1"></a>orca volume type-list [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -13098,7 +13388,7 @@ see what depends on what.</p>
 <h4 id="orca-volume-type-set">orca volume type-set<a class="headerlink" href="#orca-volume-type-set" title="Permanent link">&para;</a></h4>
 <p>Update a volume type.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-137-1" name="__codelineno-137-1" href="#__codelineno-137-1"></a>orca volume type-set [OPTIONS] TYPE_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-141-1" name="__codelineno-141-1" href="#__codelineno-141-1"></a>orca volume type-set [OPTIONS] TYPE_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -13140,7 +13430,7 @@ see what depends on what.</p>
 <h4 id="orca-volume-type-show">orca volume type-show<a class="headerlink" href="#orca-volume-type-show" title="Permanent link">&para;</a></h4>
 <p>Show volume type details.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-138-1" name="__codelineno-138-1" href="#__codelineno-138-1"></a>orca volume type-show [OPTIONS] TYPE_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-142-1" name="__codelineno-142-1" href="#__codelineno-142-1"></a>orca volume type-show [OPTIONS] TYPE_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -13194,7 +13484,7 @@ see what depends on what.</p>
 <h4 id="orca-volume-unset">orca volume unset<a class="headerlink" href="#orca-volume-unset" title="Permanent link">&para;</a></h4>
 <p>Unset volume metadata keys.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-139-1" name="__codelineno-139-1" href="#__codelineno-139-1"></a>orca volume unset [OPTIONS] VOLUME_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-143-1" name="__codelineno-143-1" href="#__codelineno-143-1"></a>orca volume unset [OPTIONS] VOLUME_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -13224,7 +13514,7 @@ see what depends on what.</p>
 <h4 id="orca-volume-update">orca volume update<a class="headerlink" href="#orca-volume-update" title="Permanent link">&para;</a></h4>
 <p>Update volume name or description.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-140-1" name="__codelineno-140-1" href="#__codelineno-140-1"></a>orca volume update [OPTIONS] VOLUME_ID
+<div class="highlight"><pre><span></span><code><a id="__codelineno-144-1" name="__codelineno-144-1" href="#__codelineno-144-1"></a>orca volume update [OPTIONS] VOLUME_ID
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -13269,7 +13559,7 @@ therefore be downloaded with <code>orca image download</code>.</p>
   orca volume upload-to-image <id> img --force                # in-use volume
   orca volume upload-to-image <id> img --property os_distro=ubuntu --wait</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-141-1" name="__codelineno-141-1" href="#__codelineno-141-1"></a>orca volume upload-to-image [OPTIONS] VOLUME_ID_OR_NAME IMAGE_NAME
+<div class="highlight"><pre><span></span><code><a id="__codelineno-145-1" name="__codelineno-145-1" href="#__codelineno-145-1"></a>orca volume upload-to-image [OPTIONS] VOLUME_ID_OR_NAME IMAGE_NAME
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
