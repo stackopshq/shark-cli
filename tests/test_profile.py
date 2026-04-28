@@ -201,7 +201,7 @@ class TestProfileSetColor:
         save_profile("p", sample_profile)
         set_active_profile("p")
 
-        result = invoke(["profile", "set-color", "red"])
+        result = invoke(["profile", "color", "set", "red"])
         assert result.exit_code == 0
         assert "Color set" in result.output
 
@@ -210,12 +210,12 @@ class TestProfileSetColor:
         save_profile("p", cfg)
         set_active_profile("p")
 
-        result = invoke(["profile", "set-color", "none"])
+        result = invoke(["profile", "color", "set", "none"])
         assert result.exit_code == 0
         assert "removed" in result.output.lower()
 
     def test_set_color_not_found(self, invoke, config_dir):
-        result = invoke(["profile", "set-color", "red", "nope"])
+        result = invoke(["profile", "color", "set", "red", "nope"])
         assert result.exit_code != 0
 
 
@@ -278,7 +278,7 @@ class TestProfileSetRegion:
         save_profile("p", sample_profile)
         set_active_profile("p")
 
-        result = invoke(["profile", "set-region", "us-east-1"])
+        result = invoke(["profile", "region", "set", "us-east-1"])
         assert result.exit_code == 0
         assert "us-east-1" in result.output
 
@@ -287,7 +287,7 @@ class TestProfileSetRegion:
         save_profile("p", cfg)
         set_active_profile("p")
 
-        result = invoke(["profile", "set-region", "none"])
+        result = invoke(["profile", "region", "set", "none"])
         assert result.exit_code == 0
         assert "cleared" in result.output.lower()
 
@@ -303,7 +303,7 @@ class TestProfileToOpenrc:
         save_profile("p", sample_profile)
         set_active_profile("p")
 
-        result = invoke(["profile", "to-openrc"])
+        result = invoke(["profile", "export", "openrc"])
         assert result.exit_code == 0
         assert "OS_AUTH_URL" in result.output
         assert "export" in result.output
@@ -313,7 +313,7 @@ class TestProfileToOpenrc:
         set_active_profile("p")
         out = str(tmp_path / "openrc.sh")
 
-        result = invoke(["profile", "to-openrc", "-o", out])
+        result = invoke(["profile", "export", "openrc", "-o", out])
         assert result.exit_code == 0
         content = Path(out).read_text()
         assert "OS_AUTH_URL" in content
@@ -330,7 +330,7 @@ class TestProfileToClouds:
         save_profile("p", sample_profile)
         set_active_profile("p")
 
-        result = invoke(["profile", "to-clouds"])
+        result = invoke(["profile", "export", "clouds"])
         assert result.exit_code == 0
         assert "clouds:" in result.output
         assert "auth_url" in result.output
@@ -340,7 +340,7 @@ class TestProfileToClouds:
         set_active_profile("p")
         out = str(tmp_path / "clouds.yaml")
 
-        result = invoke(["profile", "to-clouds", "-o", out])
+        result = invoke(["profile", "export", "clouds", "-o", out])
         assert result.exit_code == 0
         content = Path(out).read_text()
         assert "clouds:" in content
@@ -416,7 +416,11 @@ class TestProfileHelp:
     def test_profile_help(self, invoke):
         result = invoke(["profile", "--help"])
         assert result.exit_code == 0
+        # New-style sub-groups + leaves
         for cmd in ("list", "show", "add", "edit", "switch", "remove",
-                    "rename", "set-color", "set-region", "regions",
+                    "rename", "color", "region", "import", "export"):
+            assert cmd in result.output
+        # Deprecated hyphenated aliases must remain visible (with marker)
+        for cmd in ("set-color", "set-region", "regions",
                     "to-openrc", "to-clouds", "from-openrc", "from-clouds"):
             assert cmd in result.output

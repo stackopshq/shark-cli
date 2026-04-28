@@ -215,3 +215,13 @@ Update this list when a module's hyphenated commands are migrated.
   sub-groups (`nodegroup`, `template`). All 30 old names live as
   deprecated aliases via `add_command_with_alias`. Whitelists for
   `backup` and `cluster` cleared.
+- 2026-04-28 — **lot 11** (`profile`): the last 6 hyphenated leaves
+  migrate to four sub-groups (`color`, `region`, `import`,
+  `export`) — `set-color` → `color set`, `set-region` →
+  `region set`, `to-openrc`/`to-clouds` → `export openrc`/
+  `export clouds`, `from-openrc`/`from-clouds` →
+  `import openrc`/`import clouds`. The single-word `regions` leaf
+  also moves under the new `region` sub-group as `region list` for
+  consistency. All 7 legacy names live on as deprecated aliases.
+  Whitelist for `profile` cleared — **migration complete**:
+  every command in the live tree now follows ADR-0008.

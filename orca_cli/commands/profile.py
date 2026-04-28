@@ -8,6 +8,7 @@ from typing import Any
 
 import click
 
+from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.config import (
     _find_clouds_yaml,
     _normalise_legacy_keys,
@@ -83,6 +84,30 @@ def _active_marker(name: str, cfg: dict, active: str | None) -> str:
 def profile() -> None:
     """Manage configuration profiles (multi-account)."""
     pass
+
+
+# ══════════════════════════════════════════════════════════════════════════
+#  Sub-groups (ADR-0008: noun [subnoun] verb)
+# ══════════════════════════════════════════════════════════════════════════
+
+@profile.group("color")
+def profile_color_group() -> None:
+    """Manage profile color."""
+
+
+@profile.group("region")
+def profile_region_group() -> None:
+    """Manage profile region."""
+
+
+@profile.group("import")
+def profile_import_group() -> None:
+    """Import profiles from external sources."""
+
+
+@profile.group("export")
+def profile_export_group() -> None:
+    """Export profiles to external formats."""
 
 
 @profile.command("list")
@@ -339,7 +364,7 @@ def profile_switch(name: str | None) -> None:
     console.print(f"[green]Switched to '[/green]{styled_name}[green]'.[/green]")
 
 
-@profile.command("set-color")
+@profile_color_group.command("set")
 @click.argument("color")
 @click.argument("name", required=False, default=None)
 def profile_set_color(color: str, name: str | None) -> None:
@@ -353,9 +378,9 @@ def profile_set_color(color: str, name: str | None) -> None:
 
     \b
     Examples:
-      orca profile set-color red
-      orca profile set-color blue production
-      orca profile set-color none staging
+      orca profile color set red
+      orca profile color set blue production
+      orca profile color set none staging
     """
     if not name:
         name = get_active_profile_name()
@@ -410,7 +435,7 @@ def _complete_regions(ctx: click.Context, param: click.Parameter, incomplete: st
         return []
 
 
-@profile.command("set-region")
+@profile_region_group.command("set")
 @click.argument("region", shell_complete=_complete_regions)
 @click.argument("name", required=False, default=None)
 def profile_set_region(region: str, name: str | None) -> None:
@@ -420,9 +445,9 @@ def profile_set_region(region: str, name: str | None) -> None:
 
     \b
     Examples:
-      orca profile set-region dc3-a
-      orca profile set-region dc4-a production
-      orca profile set-region none               # clear region
+      orca profile region set dc3-a
+      orca profile region set dc4-a production
+      orca profile region set none               # clear region
     """
     if not name:
         name = get_active_profile_name()
@@ -441,7 +466,7 @@ def profile_set_region(region: str, name: str | None) -> None:
         console.print(f"[green]Region set to '[bold]{region}[/bold]' for profile '{name}'.[/green]")
 
 
-@profile.command("regions")
+@profile_region_group.command("list")
 @click.pass_context
 def profile_regions(ctx: click.Context) -> None:
     """List available regions from the Keystone service catalog.
@@ -451,8 +476,8 @@ def profile_regions(ctx: click.Context) -> None:
 
     \b
     Examples:
-      orca profile regions
-      orca -P infomaniak profile regions
+      orca profile region list
+      orca -P infomaniak profile region list
     """
     from orca_cli.core.context import OrcaContext
 
@@ -483,9 +508,9 @@ def profile_regions(ctx: click.Context) -> None:
     console.print()
     console.print(table)
     if current:
-        console.print(f"\n[dim]Current region: {current}. Switch with 'orca profile set-region <region>'.[/dim]")
+        console.print(f"\n[dim]Current region: {current}. Switch with 'orca profile region set <region>'.[/dim]")
     else:
-        console.print("\n[dim]No region set. Set with 'orca profile set-region <region>' or 'orca -R <region> <command>'.[/dim]")
+        console.print("\n[dim]No region set. Set with 'orca profile region set <region>' or 'orca -R <region> <command>'.[/dim]")
     console.print()
 
 
@@ -565,7 +590,7 @@ def _cfg_to_os_env(cfg: dict) -> dict[str, str]:
     return m
 
 
-@profile.command("to-openrc")
+@profile_export_group.command("openrc")
 @click.argument("name", required=False, default=None)
 @click.option("--output", "-o", "output_file", default=None,
               help="Write to file instead of stdout.")
@@ -574,10 +599,10 @@ def profile_to_openrc(name: str | None, output_file: str | None) -> None:
 
     \b
     Examples:
-      orca profile to-openrc                     # active profile to stdout
-      orca profile to-openrc production           # specific profile
-      orca profile to-openrc production -o prod-openrc.sh
-      source <(orca profile to-openrc)            # source directly
+      orca profile export openrc                     # active profile to stdout
+      orca profile export openrc production           # specific profile
+      orca profile export openrc production -o prod-openrc.sh
+      source <(orca profile export openrc)            # source directly
     """
     name, cfg = _resolve_config(name)
     env_vars = _cfg_to_os_env(cfg)
@@ -596,7 +621,7 @@ def profile_to_openrc(name: str | None, output_file: str | None) -> None:
         click.echo(output, nl=False)
 
 
-@profile.command("to-clouds")
+@profile_export_group.command("clouds")
 @click.argument("name", required=False, default=None)
 @click.option("--output", "-o", "output_file", default=None,
               help="Write to file instead of stdout.")
@@ -607,9 +632,9 @@ def profile_to_clouds(name: str | None, output_file: str | None, cloud_name: str
 
     \b
     Examples:
-      orca profile to-clouds                          # active profile
-      orca profile to-clouds production               # specific profile
-      orca profile to-clouds production -o clouds.yaml
+      orca profile export clouds                          # active profile
+      orca profile export clouds production               # specific profile
+      orca profile export clouds production -o clouds.yaml
     """
     import yaml
 
@@ -676,7 +701,7 @@ def profile_to_clouds(name: str | None, output_file: str | None, cloud_name: str
         click.echo(output, nl=False)
 
 
-@profile.command("from-openrc")
+@profile_import_group.command("openrc")
 @click.argument("file", type=click.Path(exists=True))
 @click.option("--name", "-n", "profile_name", default=None,
               help="Profile name (default: filename without extension).")
@@ -685,8 +710,8 @@ def profile_from_openrc(file: str, profile_name: str | None) -> None:
 
     \b
     Examples:
-      orca profile from-openrc admin-openrc.sh
-      orca profile from-openrc admin-openrc.sh --name production
+      orca profile import openrc admin-openrc.sh
+      orca profile import openrc admin-openrc.sh --name production
     """
     path = Path(file)
     name = profile_name or path.stem.replace("-openrc", "").replace("_openrc", "")
@@ -708,7 +733,7 @@ def profile_from_openrc(file: str, profile_name: str | None) -> None:
     console.print(f"[green]Profile '{name}' imported from {file}.[/green]")
 
 
-@profile.command("from-clouds")
+@profile_import_group.command("clouds")
 @click.argument("cloud_name")
 @click.option("--name", "-n", "profile_name", default=None,
               help="Profile name (default: cloud name).")
@@ -719,9 +744,9 @@ def profile_from_clouds(cloud_name: str, profile_name: str | None, clouds_file: 
 
     \b
     Examples:
-      orca profile from-clouds mycloud
-      orca profile from-clouds mycloud --name production
-      orca profile from-clouds mycloud -f /path/to/clouds.yaml
+      orca profile import clouds mycloud
+      orca profile import clouds mycloud --name production
+      orca profile import clouds mycloud -f /path/to/clouds.yaml
     """
     import yaml
 
@@ -830,3 +855,30 @@ def _os_env_to_cfg(env: dict[str, str]) -> dict[str, str]:
     if env.get("OS_INSECURE"):
         cfg["insecure"] = env["OS_INSECURE"]
     return cfg
+
+
+# ══════════════════════════════════════════════════════════════════════════
+#  Deprecated hyphenated aliases (ADR-0008 — backwards compatibility)
+# ══════════════════════════════════════════════════════════════════════════
+
+add_command_with_alias(profile, profile_set_color,
+                       legacy_name="set-color",
+                       primary_path="profile color set")
+add_command_with_alias(profile, profile_set_region,
+                       legacy_name="set-region",
+                       primary_path="profile region set")
+add_command_with_alias(profile, profile_regions,
+                       legacy_name="regions",
+                       primary_path="profile region list")
+add_command_with_alias(profile, profile_to_openrc,
+                       legacy_name="to-openrc",
+                       primary_path="profile export openrc")
+add_command_with_alias(profile, profile_to_clouds,
+                       legacy_name="to-clouds",
+                       primary_path="profile export clouds")
+add_command_with_alias(profile, profile_from_openrc,
+                       legacy_name="from-openrc",
+                       primary_path="profile import openrc")
+add_command_with_alias(profile, profile_from_clouds,
+                       legacy_name="from-clouds",
+                       primary_path="profile import clouds")

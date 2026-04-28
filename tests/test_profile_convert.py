@@ -15,7 +15,7 @@ class TestToOpenrc:
         save_profile("prod", sample_profile)
         set_active_profile("prod")
 
-        result = invoke(["profile", "to-openrc"])
+        result = invoke(["profile", "export", "openrc"])
         assert result.exit_code == 0
         output = result.output
         assert "export OS_AUTH_URL=" in output
@@ -30,7 +30,7 @@ class TestToOpenrc:
         save_profile("prod", sample_profile)
         set_active_profile("prod")
 
-        result = invoke(["profile", "to-openrc", "staging"])
+        result = invoke(["profile", "export", "openrc", "staging"])
         assert result.exit_code == 0
         assert "stage-user" in result.output
 
@@ -39,7 +39,7 @@ class TestToOpenrc:
         set_active_profile("prod")
 
         outfile = str(tmp_path / "openrc.sh")
-        result = invoke(["profile", "to-openrc", "-o", outfile])
+        result = invoke(["profile", "export", "openrc", "-o", outfile])
         assert result.exit_code == 0
         content = Path(outfile).read_text()
         assert "export OS_AUTH_URL=" in content
@@ -48,14 +48,14 @@ class TestToOpenrc:
         save_profile("prod", sample_profile)
         set_active_profile("prod")
 
-        result = invoke(["profile", "to-openrc"])
+        result = invoke(["profile", "export", "openrc"])
         assert "OS_PROJECT_NAME" in result.output or "OS_PROJECT_ID" in result.output
 
     def test_export_nonexistent_profile_fails(self, invoke, config_dir, mock_client):
         save_profile("prod", {"auth_url": "x", "username": "u", "password": "p",
                                "user_domain_name": "D", "project_name": "P"})
         set_active_profile("prod")
-        result = invoke(["profile", "to-openrc", "nope"])
+        result = invoke(["profile", "export", "openrc", "nope"])
         assert result.exit_code != 0
 
 
@@ -65,7 +65,7 @@ class TestToClouds:
         save_profile("prod", sample_profile)
         set_active_profile("prod")
 
-        result = invoke(["profile", "to-clouds"])
+        result = invoke(["profile", "export", "clouds"])
         assert result.exit_code == 0
         data = yaml.safe_load(result.output)
         assert "clouds" in data
@@ -78,7 +78,7 @@ class TestToClouds:
         save_profile("prod", sample_profile)
         set_active_profile("prod")
 
-        result = invoke(["profile", "to-clouds", "--cloud-name", "custom"])
+        result = invoke(["profile", "export", "clouds", "--cloud-name", "custom"])
         assert result.exit_code == 0
         data = yaml.safe_load(result.output)
         assert "custom" in data["clouds"]
@@ -88,7 +88,7 @@ class TestToClouds:
         set_active_profile("prod")
 
         outfile = str(tmp_path / "clouds.yaml")
-        result = invoke(["profile", "to-clouds", "-o", outfile])
+        result = invoke(["profile", "export", "clouds", "-o", outfile])
         assert result.exit_code == 0
         data = yaml.safe_load(Path(outfile).read_text())
         assert "clouds" in data
@@ -105,7 +105,7 @@ class TestToClouds:
         save_profile("prod", profile)
         set_active_profile("prod")
 
-        result = invoke(["profile", "to-clouds"])
+        result = invoke(["profile", "export", "clouds"])
         data = yaml.safe_load(result.output)
         assert data["clouds"]["prod"].get("verify") is False
 
@@ -128,7 +128,7 @@ class TestFromOpenrc:
                                 "user_domain_name": "D", "project_name": "P"})
         set_active_profile("dummy")
 
-        result = invoke(["profile", "from-openrc", str(openrc)])
+        result = invoke(["profile", "import", "openrc", str(openrc)])
         assert result.exit_code == 0
         assert "imported" in result.output.lower() or "admin" in result.output.lower()
 
@@ -151,7 +151,7 @@ class TestFromOpenrc:
                                 "user_domain_name": "D", "project_name": "P"})
         set_active_profile("dummy")
 
-        result = invoke(["profile", "from-openrc", str(openrc), "--name", "custom"])
+        result = invoke(["profile", "import", "openrc", str(openrc), "--name", "custom"])
         assert result.exit_code == 0
 
         from orca_cli.core.config import get_profile
@@ -161,7 +161,7 @@ class TestFromOpenrc:
         openrc = tmp_path / "bad.sh"
         openrc.write_text("export OS_USERNAME=u\n")
 
-        result = invoke(["profile", "from-openrc", str(openrc)])
+        result = invoke(["profile", "import", "openrc", str(openrc)])
         assert result.exit_code != 0
 
     def test_import_handles_quoted_values(self, invoke, config_dir, mock_client, tmp_path):
@@ -177,7 +177,7 @@ class TestFromOpenrc:
                                 "user_domain_name": "D", "project_name": "P"})
         set_active_profile("dummy")
 
-        result = invoke(["profile", "from-openrc", str(openrc), "--name", "q"])
+        result = invoke(["profile", "import", "openrc", str(openrc), "--name", "q"])
         assert result.exit_code == 0
 
         from orca_cli.core.config import get_profile
@@ -216,7 +216,7 @@ class TestFromClouds:
                                 "user_domain_name": "D", "project_name": "P"})
         set_active_profile("dummy")
 
-        result = invoke(["profile", "from-clouds", "mycloud"])
+        result = invoke(["profile", "import", "clouds", "mycloud"])
         assert result.exit_code == 0
 
         from orca_cli.core.config import get_profile
@@ -247,7 +247,7 @@ class TestFromClouds:
                                 "user_domain_name": "D", "project_name": "P"})
         set_active_profile("dummy")
 
-        result = invoke(["profile", "from-clouds", "other", "-f", str(clouds_path)])
+        result = invoke(["profile", "import", "clouds", "other", "-f", str(clouds_path)])
         assert result.exit_code == 0
 
         from orca_cli.core.config import get_profile
@@ -271,11 +271,11 @@ class TestRoundTrip:
 
         # Export
         outfile = str(tmp_path / "rt.sh")
-        result = invoke(["profile", "to-openrc", "-o", outfile])
+        result = invoke(["profile", "export", "openrc", "-o", outfile])
         assert result.exit_code == 0
 
         # Import
-        result = invoke(["profile", "from-openrc", outfile, "--name", "imported"])
+        result = invoke(["profile", "import", "openrc", outfile, "--name", "imported"])
         assert result.exit_code == 0
 
         from orca_cli.core.config import get_profile
@@ -298,11 +298,11 @@ class TestRoundTrip:
 
         # Export
         outfile = str(tmp_path / "clouds.yaml")
-        result = invoke(["profile", "to-clouds", "-o", outfile])
+        result = invoke(["profile", "export", "clouds", "-o", outfile])
         assert result.exit_code == 0
 
         # Import
-        result = invoke(["profile", "from-clouds", "original", "-f", outfile, "--name", "imported"])
+        result = invoke(["profile", "import", "clouds", "original", "-f", outfile, "--name", "imported"])
         assert result.exit_code == 0
 
         from orca_cli.core.config import get_profile

@@ -332,7 +332,7 @@ class TestProfileFromClouds:
                 }
             }
         }))
-        result = invoke(["profile", "from-clouds", "myapp", "-f", str(clouds_path)])
+        result = invoke(["profile", "import", "clouds", "myapp", "-f", str(clouds_path)])
         assert result.exit_code == 0, result.output
         # Check the saved profile
         from orca_cli.core.config import get_profile
@@ -353,7 +353,7 @@ class TestProfileFromOpenrc:
             'export OS_APPLICATION_CREDENTIAL_SECRET="topsecret"\n'
             "export OS_IDENTITY_API_VERSION=3\n"
         )
-        result = invoke(["profile", "from-openrc", str(openrc_path), "-n", "appcred-prof"])
+        result = invoke(["profile", "import", "openrc", str(openrc_path), "-n", "appcred-prof"])
         assert result.exit_code == 0, result.output
         from orca_cli.core.config import get_profile
         cfg = get_profile("appcred-prof")
@@ -374,7 +374,7 @@ class TestProfileToOpenrc:
                 "application_credential_secret": "topsecret",
             }},
         })
-        result = invoke(["profile", "to-openrc", "ap"])
+        result = invoke(["profile", "export", "openrc", "ap"])
         assert result.exit_code == 0, result.output
         out = result.output
         assert "OS_AUTH_TYPE=v3applicationcredential" in out
@@ -397,7 +397,7 @@ class TestProfileToClouds:
                 "application_credential_secret": "topsecret",
             }},
         })
-        result = invoke(["profile", "to-clouds", "ap"])
+        result = invoke(["profile", "export", "clouds", "ap"])
         assert result.exit_code == 0, result.output
         data = yaml.safe_load(result.output)
         cloud = data["clouds"]["ap"]
@@ -426,9 +426,9 @@ class TestRoundTrip:
                 }
             }
         }))
-        r1 = invoke(["profile", "from-clouds", "src", "-f", str(original)])
+        r1 = invoke(["profile", "import", "clouds", "src", "-f", str(original)])
         assert r1.exit_code == 0, r1.output
-        r2 = invoke(["profile", "to-clouds", "src"])
+        r2 = invoke(["profile", "export", "clouds", "src"])
         assert r2.exit_code == 0, r2.output
 
         out = yaml.safe_load(r2.output)["clouds"]["src"]

@@ -62,11 +62,11 @@ LEGACY_HYPHENATED_SUBCOMMANDS: dict[str, set[str]] = {
     # show/delete-all``, ``trait-list/set/delete``, ``aggregate-list/
     # set/delete``, ``candidate-list`` keep their hyphen for the same
     # reason (sub-resources of resource-provider / allocation).
-    "profile": {
-        "from-clouds", "from-openrc",
-        "set-color", "set-region",
-        "to-clouds", "to-openrc",
-    },
+    # profile — migrated 2026-04-28 (lot 11): set-color → ``color set``,
+    # set-region → ``region set``, regions → ``region list``,
+    # to-/from-openrc → ``export/import openrc``, to-/from-clouds →
+    # ``export/import clouds``. Old hyphenated names live as deprecated
+    # aliases. Whitelist cleared.
     # qos — migrated 2026-04-28: policy-* under ``qos policy``,
     # rule-* under ``qos rule``.
     # rating — migrated 2026-04-28: metric-* under ``rating metric``,
