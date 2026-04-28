@@ -69,3 +69,51 @@ def add_command_with_alias(
     alias = _DeprecatedAliasCommand(primary, replacement=primary_path)
     alias.name = legacy_name
     group.add_command(alias, name=legacy_name)
+
+
+def _iter_subcommands(group: click.Group) -> list[tuple[str, click.Command]]:
+    """Yield ``(name, command)`` for every direct child of *group*.
+
+    Uses ``list_commands`` / ``get_command`` rather than ``group.commands``
+    so it works on lazy groups (e.g. the top-level orca CLI's
+    ``LazyOrcaGroup`` only materialises modules on demand).
+    """
+    out: list[tuple[str, click.Command]] = []
+    for name in group.list_commands(None):
+        cmd = group.get_command(None, name)
+        if cmd is not None:
+            out.append((name, cmd))
+    return out
+
+
+def count_deprecated_aliases(group: click.Group) -> int:
+    """Recursively count :class:`_DeprecatedAliasCommand` entries in *group*.
+
+    Used by ``orca doctor`` to surface how many ADR-0008 deprecated
+    aliases remain in the tree — that count is what disappears at the
+    next major bump (see ADR-0008 — *Deprecation horizon*).
+    """
+    n = 0
+    for _, cmd in _iter_subcommands(group):
+        if isinstance(cmd, _DeprecatedAliasCommand):
+            n += 1
+        elif isinstance(cmd, click.Group):
+            n += count_deprecated_aliases(cmd)
+    return n
+
+
+def list_deprecated_aliases(group: click.Group, prefix: str = "") -> list[tuple[str, str]]:
+    """Recursively list ``(full_path, replacement)`` for every alias.
+
+    *full_path* is the legacy invocation a user would type (e.g.
+    ``"placement resource-provider-list"``); *replacement* is the
+    primary path the alias forwards to.
+    """
+    out: list[tuple[str, str]] = []
+    for name, cmd in _iter_subcommands(group):
+        full = f"{prefix} {name}".strip()
+        if isinstance(cmd, _DeprecatedAliasCommand):
+            out.append((full, cmd._replacement))
+        elif isinstance(cmd, click.Group):
+            out.extend(list_deprecated_aliases(cmd, prefix=full))
+    return out

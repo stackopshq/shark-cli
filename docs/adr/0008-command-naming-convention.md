@@ -70,7 +70,7 @@ The full inventory by module (top 10):
    refactored, the new (compliant) command becomes primary and the old
    name is registered as an alias on the same callback, with
    `[deprecated, use 'X Y' instead]` appended to its short help.
-   Aliases are removed in **v2.0**.
+   Aliases are removed in **v3.0.0** — see *Deprecation horizon* below.
 
 ### Migration policy
 
@@ -127,6 +127,31 @@ re-read.
 
 Adding to this list requires a deliberate choice and an inline
 comment in the test whitelist explaining why.
+
+## Deprecation horizon
+
+The original ADR (2026-04-20) said aliases would be retired in
+v2.0. In practice the migration finished in 2.3.0 — eleven lots
+between 2026-04-20 and 2026-04-28 — so the v2.0 cut never
+happened. The new target is **v3.0.0**:
+
+- **Until 3.0.0** — every deprecated alias keeps working and prints
+  a one-line yellow hint to stderr pointing at the new path.
+  Existing scripts continue to run unchanged.
+- **3.0.0 (next major)** — every alias registered through
+  `add_command_with_alias` is dropped. Permanent exceptions
+  (see above) stay. The ratchet test is no longer needed and can
+  be deleted at the same time.
+
+3.0.0 will also be the version that drops Python 3.9 support
+(already removed from `pyproject.toml`'s `requires-python` floor on
+2026-04-28). Bundling the breaking-change debt into a single major
+release keeps the upgrade story coherent.
+
+Users wanting to audit their own scripts before 3.0.0 can run
+``orca doctor`` — its *Deprecated commands* section reports how
+many alias entries currently live in the CLI tree and points back
+to this ADR.
 
 ## Migration tracking
 

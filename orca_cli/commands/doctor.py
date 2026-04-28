@@ -17,8 +17,11 @@ from orca_cli.services.volume import VolumeService
 @click.option("--cidr", default=None,
               help="CIDR for auto-created security group rules (--fix). "
                    "Defaults to interactive prompt when a TTY is detected, otherwise 0.0.0.0/0.")
+@click.option("--list-deprecated", "list_deprecated", is_flag=True,
+              help="List every ADR-0008 deprecated alias in the CLI tree and exit "
+                   "(offline — no authentication required).")
 @click.pass_context
-def doctor(ctx: click.Context, fix: bool, cidr: str | None) -> None:  # noqa: C901
+def doctor(ctx: click.Context, fix: bool, cidr: str | None, list_deprecated: bool) -> None:  # noqa: C901
     """Run a pre-deployment health check on your OpenStack environment.
 
     Verifies authentication, quota headroom, default security group rules,
@@ -40,6 +43,27 @@ def doctor(ctx: click.Context, fix: bool, cidr: str | None) -> None:  # noqa: C9
       Yellow 70–90%  — monitor closely
       Red    ≥ 90%   — critical, next deploy may fail
     """
+
+    # Offline branch: list deprecated aliases and exit before authenticating.
+    if list_deprecated:
+        from rich.table import Table
+
+        from orca_cli.core.aliases import list_deprecated_aliases
+        from orca_cli.main import cli as _cli_root
+
+        rows = sorted(list_deprecated_aliases(_cli_root))
+        if not rows:
+            console.print("[bold green]No deprecated aliases — CLI tree is clean.[/bold green]")
+            return
+
+        table = Table(title=f"ADR-0008 deprecated aliases ({len(rows)} total)")
+        table.add_column("Legacy invocation", style="yellow")
+        table.add_column("Replacement", style="green")
+        for legacy, replacement in rows:
+            table.add_row(f"orca {legacy}", f"orca {replacement}")
+        console.print(table)
+        console.print("\n[dim]These aliases will be removed in v3.0.0. See ADR-0008.[/dim]")
+        return
 
     orca_ctx = ctx.find_object(OrcaContext)
     client = orca_ctx.ensure_client()
@@ -171,6 +195,26 @@ def doctor(ctx: click.Context, fix: bool, cidr: str | None) -> None:  # noqa: C9
             _error("Network quotas", f"Could not retrieve — {exc}")
     else:
         _info("Network quotas", "Skipped — Neutron unreachable")
+
+    # ── 6.5. ADR-0008 deprecated-alias inventory (offline, no API) ──────────
+    # Surface how many hyphenated-form aliases still live in the CLI tree —
+    # they are scheduled for removal in v3.0.0 (see ADR-0008 / Deprecation
+    # horizon). Helps users audit their own scripts before the breaking
+    # major bump.
+    try:
+        from orca_cli.core.aliases import count_deprecated_aliases
+        from orca_cli.main import cli as _cli_root
+        n_deprecated = count_deprecated_aliases(_cli_root)
+        if n_deprecated:
+            _info(
+                "ADR-0008: deprecated aliases",
+                f"{n_deprecated} alias(es) kept for backwards-compat — will be "
+                "removed in v3.0.0. Run 'orca doctor --list-deprecated' to enumerate.",
+            )
+        else:
+            _ok("ADR-0008: deprecated aliases", "None — tree is clean")
+    except Exception as exc:  # pragma: no cover — best-effort, never crash doctor
+        _info("ADR-0008: deprecated aliases", f"Could not introspect tree — {exc}")
 
     # ── 6. Default security group SSH/ICMP (skip if Neutron is down) ───────
     if svc_up.get("Neutron (network)", False):
