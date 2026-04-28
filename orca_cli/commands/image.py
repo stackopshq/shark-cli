@@ -11,7 +11,6 @@ import click
 from rich.progress import BarColumn, DownloadColumn, Progress, TimeRemainingColumn, TransferSpeedColumn
 from rich.table import Table
 
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.client import APIError, AuthenticationError
 from orca_cli.core.completions import complete_images
 from orca_cli.core.context import OrcaContext
@@ -1536,32 +1535,3 @@ def metadef_rt_assoc_delete(ctx, namespace, resource_type, yes):
 
 
 # ── ADR-0008 deprecated aliases (backward compatibility) ────────────────
-
-add_command_with_alias(image, image_tag_add,
-                        legacy_name="tag-add", primary_path="image tag add")
-add_command_with_alias(image, image_tag_delete,
-                        legacy_name="tag-delete", primary_path="image tag delete")
-add_command_with_alias(image, image_member_list,
-                        legacy_name="member-list", primary_path="image member list")
-add_command_with_alias(image, image_member_show,
-                        legacy_name="member-show", primary_path="image member show")
-add_command_with_alias(image, image_member_create,
-                        legacy_name="member-create", primary_path="image member create")
-add_command_with_alias(image, image_member_delete,
-                        legacy_name="member-delete", primary_path="image member delete")
-add_command_with_alias(image, image_member_set,
-                        legacy_name="member-set", primary_path="image member set")
-add_command_with_alias(image, image_cache_list,
-                        legacy_name="cache-list", primary_path="image cache list")
-add_command_with_alias(image, image_cache_queue,
-                        legacy_name="cache-queue", primary_path="image cache queue")
-add_command_with_alias(image, image_cache_delete,
-                        legacy_name="cache-delete", primary_path="image cache delete")
-add_command_with_alias(image, image_cache_clear,
-                        legacy_name="cache-clear", primary_path="image cache clear")
-add_command_with_alias(image, image_stores_info,
-                        legacy_name="stores-info", primary_path="image stores info")
-add_command_with_alias(image, image_task_list,
-                        legacy_name="task-list", primary_path="image task list")
-add_command_with_alias(image, image_task_show,
-                        legacy_name="task-show", primary_path="image task show")

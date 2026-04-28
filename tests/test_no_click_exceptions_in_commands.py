@@ -32,7 +32,6 @@ _FORBIDDEN = re.compile(
     r"\braise\s+(?:click\.(?:ClickException|UsageError)|SystemExit)\b",
 )
 
-
 def test_no_click_exceptions_raised_in_commands():
     """Walk every commands/core module and reject ``raise
     click.ClickException``, ``raise click.UsageError``, or

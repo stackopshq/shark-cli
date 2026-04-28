@@ -11,7 +11,6 @@ from orca_cli.core.config import save_profile, set_active_profile
 SECRET_ID = "11112222-3333-4444-5555-666677778888"
 CONTAINER_ID = "aaaabbbb-cccc-dddd-eeee-ffffffffffff"
 
-
 def _setup_mock(mock_client):
     mock_client.key_manager_url = "https://barbican.example.com"
     mock_client.token = "fake-token"
@@ -87,11 +86,9 @@ def _setup_mock(mock_client):
 
     return {"posted": posted, "deleted": deleted}
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  secret list
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestSecretList:
 
@@ -114,11 +111,9 @@ class TestSecretList:
         assert result.exit_code == 0
         assert "No secrets found" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  secret show
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestSecretShow:
 
@@ -132,11 +127,9 @@ class TestSecretShow:
         assert "my-secret" in result.output
         assert "opaque" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  secret create
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestSecretCreate:
 
@@ -164,11 +157,9 @@ class TestSecretCreate:
         assert state["posted"]["bit_length"] == 256
         assert state["posted"]["secret_type"] == "symmetric"
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  secret delete
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestSecretDelete:
 
@@ -182,11 +173,9 @@ class TestSecretDelete:
         assert "deleted" in result.output.lower()
         assert len(state["deleted"]) == 1
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  secret get-payload
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestSecretGetPayload:
 
@@ -199,11 +188,9 @@ class TestSecretGetPayload:
         assert result.exit_code == 0
         assert "my-payload-value" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  container-list
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestContainerList:
 
@@ -226,11 +213,9 @@ class TestContainerList:
         assert result.exit_code == 0
         assert "No containers found" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  container-show
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestContainerShow:
 
@@ -244,11 +229,9 @@ class TestContainerShow:
         assert "my-container" in result.output
         assert "generic" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  container-delete
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestContainerDelete:
 
@@ -261,11 +244,9 @@ class TestContainerDelete:
         assert result.exit_code == 0
         assert "deleted" in result.output.lower()
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestSecretHelp:
 
@@ -276,7 +257,6 @@ class TestSecretHelp:
                     "container-list", "container-show", "container-delete"):
             assert cmd in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  container-create / acl-get / acl-set / acl-delete
 #  order-list / order-show / order-create / order-delete
@@ -284,7 +264,6 @@ class TestSecretHelp:
 
 _BARB = "https://barbican.example.com"
 _ORDER_ID = "cccccccc-cccc-cccc-cccc-cccccccccccc"
-
 
 class TestSecretContainerCreate:
 
@@ -309,7 +288,6 @@ class TestSecretContainerCreate:
     def test_help(self, invoke):
         assert invoke(["secret", "container-create", "--help"]).exit_code == 0
 
-
 class TestSecretAcl:
 
     def test_acl_get(self, invoke, mock_client):
@@ -317,12 +295,12 @@ class TestSecretAcl:
         mock_client.get.return_value = {
             "read": {"project-access": True, "users": [], "created": "", "updated": ""}
         }
-        result = invoke(["secret", "acl-get", SECRET_ID])
+        result = invoke(["secret", "acl", "get", SECRET_ID])
         assert result.exit_code == 0
 
     def test_acl_set(self, invoke, mock_client):
         mock_client.key_manager_url = _BARB
-        result = invoke(["secret", "acl-set", SECRET_ID,
+        result = invoke(["secret", "acl", "set", SECRET_ID,
                          "--user", "user-a", "--user", "user-b"])
         assert result.exit_code == 0
         body = mock_client.put.call_args[1]["json"]
@@ -331,38 +309,37 @@ class TestSecretAcl:
 
     def test_acl_set_no_project_access(self, invoke, mock_client):
         mock_client.key_manager_url = _BARB
-        invoke(["secret", "acl-set", SECRET_ID, "--no-project-access"])
+        invoke(["secret", "acl", "set", SECRET_ID, "--no-project-access"])
         body = mock_client.put.call_args[1]["json"]
         assert body["read"]["project-access"] is False
 
     def test_acl_delete_yes(self, invoke, mock_client):
         mock_client.key_manager_url = _BARB
-        result = invoke(["secret", "acl-delete", SECRET_ID, "--yes"])
+        result = invoke(["secret", "acl", "delete", SECRET_ID, "--yes"])
         assert result.exit_code == 0
         mock_client.delete.assert_called_once()
 
     def test_acl_delete_requires_confirm(self, invoke, mock_client):
         mock_client.key_manager_url = _BARB
-        result = invoke(["secret", "acl-delete", SECRET_ID], input="n\n")
+        result = invoke(["secret", "acl", "delete", SECRET_ID], input="n\n")
         assert result.exit_code != 0
         mock_client.delete.assert_not_called()
 
     def test_acl_calls_correct_url(self, invoke, mock_client):
         mock_client.key_manager_url = _BARB
         mock_client.get.return_value = {"read": {}}
-        invoke(["secret", "acl-get", SECRET_ID])
+        invoke(["secret", "acl", "get", SECRET_ID])
         url = mock_client.get.call_args[0][0]
         assert f"/v1/secrets/{SECRET_ID}/acl" in url
 
     def test_help_acl_get(self, invoke):
-        assert invoke(["secret", "acl-get", "--help"]).exit_code == 0
+        assert invoke(["secret", "acl", "get", "--help"]).exit_code == 0
 
     def test_help_acl_set(self, invoke):
-        assert invoke(["secret", "acl-set", "--help"]).exit_code == 0
+        assert invoke(["secret", "acl", "set", "--help"]).exit_code == 0
 
     def test_help_acl_delete(self, invoke):
-        assert invoke(["secret", "acl-delete", "--help"]).exit_code == 0
-
+        assert invoke(["secret", "acl", "delete", "--help"]).exit_code == 0
 
 class TestSecretOrders:
 

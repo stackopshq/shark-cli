@@ -13,7 +13,6 @@ from orca_cli.core.config import save_profile, set_active_profile
 #  Unit tests — per-resource searchers
 # ══════════════════════════════════════════════════════════════════════════
 
-
 def _client(**urls):
     c = MagicMock()
     c.compute_url = urls.get("compute", "https://nova")
@@ -21,7 +20,6 @@ def _client(**urls):
     c.volume_url = urls.get("volume", "https://cinder")
     c.image_url = urls.get("image", "https://glance")
     return c
-
 
 class TestSafe:
 
@@ -41,7 +39,6 @@ class TestSafe:
     def test_empty_result_passes_through(self):
         fn = MagicMock(return_value=[])
         assert find_mod._safe(fn) == []
-
 
 class TestFindServers:
 
@@ -74,7 +71,6 @@ class TestFindServers:
         c.get.return_value = {"servers": [{"id": "s1", "name": "db"}]}
         assert find_mod._find_servers(c, "web") == []
 
-
 class TestFindPorts:
 
     def test_match_on_fixed_ip(self):
@@ -105,7 +101,6 @@ class TestFindPorts:
         assert len(hits) == 1
         assert "device_id=" in hits[0][1]
 
-
 class TestFindFloatingIps:
 
     def test_match_on_floating_address(self):
@@ -126,7 +121,6 @@ class TestFindFloatingIps:
         hits = find_mod._find_floatingips(c, "10.0.0.42")
         assert "fixed=10.0.0.42" in hits[0][1]
 
-
 class TestFindSubnets:
 
     def test_match_on_cidr(self):
@@ -136,7 +130,6 @@ class TestFindSubnets:
         ]}
         hits = find_mod._find_subnets(c, "10.0.0.0/24")
         assert "cidr=10.0.0.0/24" in hits[0][1]
-
 
 class TestFindKeypairs:
 
@@ -157,7 +150,6 @@ class TestFindKeypairs:
         hits = find_mod._find_keypairs(c, "admin")
         assert hits[0][1] == "name"
 
-
 class TestFindRouters:
 
     def test_match_on_external_gateway_ip(self):
@@ -170,7 +162,6 @@ class TestFindRouters:
         }]}
         hits = find_mod._find_routers(c, "203.0.113.1")
         assert "gw=" in hits[0][1]
-
 
 class TestFindVolumesImagesNetworksSgs:
     """Plain name/id matches for the simpler resource types."""
@@ -195,11 +186,9 @@ class TestFindVolumesImagesNetworksSgs:
         c.get.return_value = {"security_groups": [{"id": "sg1", "name": "default"}]}
         assert find_mod._find_security_groups(c, "default")[0][1] == "name"
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Extra column
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestExtraColumn:
 
@@ -232,11 +221,9 @@ class TestExtraColumn:
     def test_unknown_type(self):
         assert find_mod._extra("unknown", {}) == ""
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Integration — orca find
 # ══════════════════════════════════════════════════════════════════════════
-
 
 def _setup_profile(mock_client, sample_profile):
     save_profile("test", sample_profile)
@@ -245,7 +232,6 @@ def _setup_profile(mock_client, sample_profile):
     mock_client.network_url = "https://neutron.example.com"
     mock_client.volume_url = "https://cinder.example.com/v3"
     mock_client.image_url = "https://glance.example.com"
-
 
 def _url_dispatcher(responses: dict):
     """Return a side_effect fn mapping URL substring → payload."""
@@ -256,14 +242,12 @@ def _url_dispatcher(responses: dict):
         return {}
     return _get
 
-
 class TestFindHelp:
 
     def test_help(self, invoke):
         result = invoke(["find", "--help"])
         assert result.exit_code == 0
         assert "Universal search" in result.output
-
 
 class TestFindIntegration:
 

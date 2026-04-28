@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import click
 
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_list
 from orca_cli.core.validators import validate_id
@@ -241,12 +240,6 @@ def sg_rule_delete(ctx: click.Context, rule_id: str, yes: bool) -> None:
     console.print(f"[green]Rule {rule_id} deleted.[/green]")
 
 
-add_command_with_alias(security_group, sg_rule_add,
-                        legacy_name="rule-add",
-                        primary_path="security-group rule add")
-add_command_with_alias(security_group, sg_rule_delete,
-                        legacy_name="rule-delete",
-                        primary_path="security-group rule delete")
 
 
 # ── cleanup ──────────────────────────────────────────────────────────────

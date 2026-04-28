@@ -12,7 +12,6 @@ PORT_ID = "99998888-7777-6666-5555-444433332222"
 NET_ID = "abcdabcd-1234-5678-9abc-def012345678"
 QOS_ID = "dd445566-7788-99aa-bbcc-ddeeff001122"
 
-
 def _fip(fip_id=FIP_ID, ip="203.0.113.10", status="ACTIVE",
          port_id=PORT_ID, fixed_ip="10.0.0.5"):
     return {
@@ -25,7 +24,6 @@ def _fip(fip_id=FIP_ID, ip="203.0.113.10", status="ACTIVE",
         "status": status,
         "created_at": "2025-01-01T00:00:00Z",
     }
-
 
 def _setup_mock(mock_client, fips=None, fip_detail=None):
     fips = fips if fips is not None else []
@@ -62,11 +60,9 @@ def _setup_mock(mock_client, fips=None, fip_detail=None):
 
     return {"posted": posted, "put_data": put_data, "deleted": deleted}
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  floating-ip list
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestFipList:
 
@@ -109,11 +105,9 @@ class TestFipList:
         result = invoke(["floating-ip", "list"])
         assert result.exit_code == 0
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  floating-ip show
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestFipShow:
 
@@ -134,11 +128,9 @@ class TestFipShow:
         result = invoke(["floating-ip", "show", FIP_ID])
         assert "DOWN" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  floating-ip create
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestFipCreate:
 
@@ -160,11 +152,9 @@ class TestFipCreate:
         result = invoke(["floating-ip", "create"])
         assert result.exit_code != 0
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  floating-ip delete
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestFipDelete:
 
@@ -186,11 +176,9 @@ class TestFipDelete:
         _ = invoke(["floating-ip", "delete", FIP_ID], input="n\n")
         assert len(state["deleted"]) == 0
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  floating-ip associate / disassociate
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestFipAssociate:
 
@@ -232,11 +220,9 @@ class TestFipAssociate:
         assert "disassociated" in result.output.lower()
         assert state["put_data"]["floatingip"]["port_id"] is None
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  floating-ip set
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestFipSet:
 
@@ -295,11 +281,9 @@ class TestFipSet:
         assert result.exit_code == 0
         assert "Nothing" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  floating-ip unset
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestFipUnset:
 
@@ -330,11 +314,9 @@ class TestFipUnset:
         assert result.exit_code == 0
         assert "Nothing" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  floating-ip bulk-release
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestFipBulkRelease:
 
@@ -406,11 +388,9 @@ class TestFipBulkRelease:
         assert result.exit_code == 0
         assert "1 failed" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestFipHelp:
 

@@ -24,27 +24,21 @@ def _images():
     return [{"id": IMG, "name": "Ubuntu 22.04", "status": "active",
              "os_distro": "ubuntu", "size": 2_000_000_000}]
 
-
 def _flavors():
     return [{"id": FLV, "name": "m1.small", "vcpus": 2, "ram": 2048, "disk": 20}]
 
-
 def _networks():
     return [{"id": NET, "name": "private", "status": "ACTIVE", "shared": False}]
-
 
 def _keypairs():
     return [{"keypair": {"name": "my-key", "type": "ssh",
                          "fingerprint": "aa:bb:cc:dd:ee:ff:00:11:22:33"}}]
 
-
 def _sgs():
     return [{"id": "sg-1", "name": "default", "description": "Default SG"}]
 
-
 def _vtypes():
     return [{"id": "vt-1", "name": "ceph-ssd", "description": "Fast SSD"}]
-
 
 def _limits():
     return {"limits": {"absolute": {
@@ -52,7 +46,6 @@ def _limits():
         "totalCoresUsed": 4, "maxTotalCores": 20,
         "totalRAMUsed": 4096, "maxTotalRAMSize": 51200,
     }}}
-
 
 def _mock_client_for_server():
     mc = MagicMock()
@@ -80,7 +73,6 @@ def _mock_client_for_server():
     mc.post.return_value = {"server": {"id": SRV, "adminPass": ""}}
     return mc
 
-
 def _mock_client_for_volume():
     mc = MagicMock()
     mc.compute_url = "https://nova.example.com/v2.1"
@@ -96,7 +88,6 @@ def _mock_client_for_volume():
     mc.get.side_effect = _get
     mc.post.return_value = {"volume": {"id": VOL, "name": "my-vol", "size": 50}}
     return mc
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Unit tests — wizard helpers
@@ -157,7 +148,6 @@ class TestWizardSelect:
         # Should abort (Abort exception or non-zero exit)
         assert r.exit_code != 0 or "No item" in r.output
 
-
 class TestWizardFormatHelpers:
 
     def test_fmt_bytes_gb(self):
@@ -174,7 +164,6 @@ class TestWizardFormatHelpers:
 
     def test_fmt_ram_mb(self):
         assert "MB" in wiz._fmt_ram(512)
-
 
 class TestBuildServerCommand:
 
@@ -200,7 +189,6 @@ class TestBuildServerCommand:
         cmd = wiz.build_server_command("vm1", IMG, FLV, 20, None, None, ["sg1", "sg2"])
         assert "sg1" in cmd
         assert "sg2" in cmd
-
 
 class TestSelectSecurityGroups:
     """Multi-select parser for SGs: comma-separated indices, skip blank, skip bad ints."""
@@ -252,7 +240,6 @@ class TestSelectSecurityGroups:
         r = CliRunner().invoke(cmd, input="1,foo,99\n")
         assert "SGS:['only']" in r.output
 
-
 class TestSelectCidr:
 
     def test_option_1_returns_open(self):
@@ -272,7 +259,6 @@ class TestSelectCidr:
             click.echo(f"CIDR:{result}")
         r = runner.invoke(cmd, input="2\n192.168.1.0/24\n")
         assert "CIDR:192.168.1.0/24" in r.output
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Integration tests — server create -i
@@ -393,7 +379,6 @@ class TestServerCreateInteractive:
         assert result.exit_code != 0
         assert "--name" in result.output or "Missing" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Integration tests — volume create -i
 # ══════════════════════════════════════════════════════════════════════════
@@ -445,13 +430,11 @@ class TestVolumeCreateInteractive:
         assert result.exit_code == 0
         assert "interactive" in result.output.lower() or "-i" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Integration tests — doctor --fix --cidr
 # ══════════════════════════════════════════════════════════════════════════
 
 PRJ_ID = "proj-1111-1111-1111-111111111111"
-
 
 def _sg(has_ssh=True, has_icmp=True):
     rules = []
@@ -462,7 +445,6 @@ def _sg(has_ssh=True, has_icmp=True):
         rules.append({"direction": "ingress", "protocol": "icmp"})
     return {"security_groups": [{"id": "sg-default", "name": "default",
                                   "security_group_rules": rules}]}
-
 
 def _setup_doctor(mock_client, sg_data=None):
     mock_client.compute_url = "https://nova.example.com/v2.1"
@@ -502,7 +484,6 @@ def _setup_doctor(mock_client, sg_data=None):
 
     mock_client.get.side_effect = _get
 
-
 class TestDoctorFixCidr:
 
     def test_fix_uses_cidr_option(self, invoke, mock_client):
@@ -540,7 +521,6 @@ class TestDoctorFixCidr:
         invoke(["doctor", "--fix", "--cidr", "10.0.0.0/8"])
         mock_client.post.assert_not_called()
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Helpers
 # ══════════════════════════════════════════════════════════════════════════
@@ -569,7 +549,6 @@ def _setup(mock_client):
 
     mock_client.get.side_effect = _get
     mock_client.post.return_value = {"server": {"id": SRV, "adminPass": ""}}
-
 
 def _setup_vol(mock_client):
     """Configure mock_client for volume create -i tests."""

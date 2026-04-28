@@ -6,7 +6,6 @@ from orca_cli.core.config import save_profile, set_active_profile
 
 # ── Helpers ────────────────────────────────────────────────────────────────
 
-
 def _keypair(name="mykey", ktype="ssh", fingerprint="aa:bb:cc:dd"):
     return {
         "keypair": {
@@ -17,7 +16,6 @@ def _keypair(name="mykey", ktype="ssh", fingerprint="aa:bb:cc:dd"):
             "created_at": "2025-01-01T00:00:00Z",
         }
     }
-
 
 def _setup_mock(mock_client, keypairs=None, kp_detail=None):
     keypairs = keypairs if keypairs is not None else []
@@ -57,11 +55,9 @@ def _setup_mock(mock_client, keypairs=None, kp_detail=None):
 
     return {"posted": posted, "deleted": deleted}
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  keypair list
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestKeypairList:
 
@@ -103,11 +99,9 @@ class TestKeypairList:
         result = invoke(["keypair", "list"])
         assert "aa:bb" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  keypair show
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestKeypairShow:
 
@@ -141,11 +135,9 @@ class TestKeypairShow:
         result = invoke(["keypair", "show", "mykey"])
         assert "ssh-ed25519" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  keypair create
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestKeypairCreate:
 
@@ -175,11 +167,9 @@ class TestKeypairCreate:
         pem = tmp_path / "mykey2.pem"
         assert pem.exists()
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  keypair upload
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestKeypairUpload:
 
@@ -218,11 +208,9 @@ class TestKeypairUpload:
         result = invoke(["keypair", "upload", "nokey"])
         assert result.exit_code != 0
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  keypair delete
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestKeypairDelete:
 
@@ -244,11 +232,9 @@ class TestKeypairDelete:
         _ = invoke(["keypair", "delete", "old-key"], input="n\n")
         assert len(state["deleted"]) == 0
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ═══════��══════════════════════════════════════════════════════════════════
-
 
 class TestKeypairHelp:
 

@@ -6,7 +6,6 @@ from orca_cli.core.config import save_profile, set_active_profile
 
 # ── Helpers ────────────────────────────────────────────────────────────────
 
-
 def _setup_mock(mock_client, server_usages=None, empty=False):
     mock_client.compute_url = "https://nova.example.com/v2.1"
 
@@ -38,11 +37,9 @@ def _setup_mock(mock_client, server_usages=None, empty=False):
 
     mock_client.get = _get
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  usage
 # ══════════���═══════════════════════════════════════════════════════════════
-
 
 class TestUsage:
 
@@ -85,11 +82,9 @@ class TestUsage:
         assert "vCPU" in result.output
         assert "1441" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestUsageHelp:
 

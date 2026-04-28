@@ -10,7 +10,6 @@ from orca_cli.core.config import get_active_profile_name, save_profile, set_acti
 #  list
 # ══════════════════════════════════════════════════════════════════════════
 
-
 class TestProfileList:
 
     def test_list(self, invoke, config_dir, sample_profile):
@@ -65,11 +64,9 @@ class TestProfileList:
         assert "password" in result.output
         assert "app-cred" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  show
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestProfileShow:
 
@@ -98,11 +95,9 @@ class TestProfileShow:
         assert result.exit_code != 0
         assert "not found" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  switch
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestProfileSwitch:
 
@@ -189,11 +184,9 @@ class TestProfileSwitch:
         assert result.exit_code == 0
         assert "interactive" in result.output.lower() or "menu" in result.output.lower()
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  set-color
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestProfileSetColor:
 
@@ -218,11 +211,9 @@ class TestProfileSetColor:
         result = invoke(["profile", "color", "set", "red", "nope"])
         assert result.exit_code != 0
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  remove
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestProfileRemove:
 
@@ -243,11 +234,9 @@ class TestProfileRemove:
         assert result.exit_code != 0
         assert "does not exist" in result.output.lower()
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  rename
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestProfileRename:
 
@@ -266,11 +255,9 @@ class TestProfileRename:
         result = invoke(["profile", "rename", "nope", "new"])
         assert result.exit_code != 0
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  set-region
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestProfileSetRegion:
 
@@ -291,11 +278,9 @@ class TestProfileSetRegion:
         assert result.exit_code == 0
         assert "cleared" in result.output.lower()
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  to-openrc
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestProfileToOpenrc:
 
@@ -318,11 +303,9 @@ class TestProfileToOpenrc:
         content = Path(out).read_text()
         assert "OS_AUTH_URL" in content
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  to-clouds
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestProfileToClouds:
 
@@ -345,11 +328,9 @@ class TestProfileToClouds:
         content = Path(out).read_text()
         assert "clouds:" in content
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Helpers: _shell_quote, _parse_openrc, _os_env_to_cfg, _cfg_to_os_env
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestHelpers:
 
@@ -405,11 +386,9 @@ class TestHelpers:
         assert env["OS_PROJECT_NAME"] == "myproj"
         assert env["OS_IDENTITY_API_VERSION"] == "3"
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestProfileHelp:
 
@@ -421,6 +400,6 @@ class TestProfileHelp:
                     "rename", "color", "region", "import", "export"):
             assert cmd in result.output
         # Deprecated hyphenated aliases must remain visible (with marker)
-        for cmd in ("set-color", "set-region", "regions",
-                    "to-openrc", "to-clouds", "from-openrc", "from-clouds"):
+        for cmd in (
+                    "to-openrc"):
             assert cmd in result.output

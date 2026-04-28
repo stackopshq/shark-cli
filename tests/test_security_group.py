@@ -9,7 +9,6 @@ from orca_cli.core.config import save_profile, set_active_profile
 SG_ID = "11112222-3333-4444-5555-666677778888"
 RULE_ID = "aaaabbbb-cccc-dddd-eeee-ffffffffffff"
 
-
 def _sg(sg_id=SG_ID, name="my-sg", rules=None):
     return {
         "id": sg_id, "name": name,
@@ -20,7 +19,6 @@ def _sg(sg_id=SG_ID, name="my-sg", rules=None):
              "remote_ip_prefix": "0.0.0.0/0", "remote_group_id": None},
         ],
     }
-
 
 def _setup_mock(mock_client):
     mock_client.network_url = "https://neutron.example.com"
@@ -64,11 +62,9 @@ def _setup_mock(mock_client):
 
     return {"posted": posted, "put_data": put_data, "deleted": deleted}
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  list
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestSGList:
 
@@ -91,11 +87,9 @@ class TestSGList:
         assert result.exit_code == 0
         assert "No security groups found" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  show
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestSGShow:
 
@@ -118,11 +112,9 @@ class TestSGShow:
         assert result.exit_code == 0
         assert "22" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  create
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestSGCreate:
 
@@ -145,11 +137,9 @@ class TestSGCreate:
         assert result.exit_code == 0
         assert state["posted"]["security_group"]["description"] == "Web SG"
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  update
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestSGUpdate:
 
@@ -171,11 +161,9 @@ class TestSGUpdate:
         assert result.exit_code == 0
         assert "Nothing" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  delete
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestSGDelete:
 
@@ -189,11 +177,9 @@ class TestSGDelete:
         assert "deleted" in result.output.lower()
         assert len(state["deleted"]) == 1
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  rule-add
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestSGRuleAdd:
 
@@ -202,7 +188,7 @@ class TestSGRuleAdd:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["security-group", "rule-add", SG_ID,
+        result = invoke(["security-group", "rule", "add", SG_ID,
                          "--direction", "ingress", "--protocol", "tcp",
                          "--port-min", "80"])
         assert result.exit_code == 0
@@ -216,18 +202,16 @@ class TestSGRuleAdd:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["security-group", "rule-add", SG_ID,
+        result = invoke(["security-group", "rule", "add", SG_ID,
                          "--direction", "ingress", "--protocol", "tcp",
                          "--port-min", "443", "--remote-ip", "10.0.0.0/8"])
         assert result.exit_code == 0
         rule = state["posted"]["security_group_rule"]
         assert rule["remote_ip_prefix"] == "10.0.0.0/8"
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  rule-delete
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestSGRuleDelete:
 
@@ -236,15 +220,13 @@ class TestSGRuleDelete:
         set_active_profile("p")
         _ = _setup_mock(mock_client)
 
-        result = invoke(["security-group", "rule-delete", RULE_ID, "-y"])
+        result = invoke(["security-group", "rule", "delete", RULE_ID, "-y"])
         assert result.exit_code == 0
         assert "deleted" in result.output.lower()
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  clone
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestSGClone:
 
@@ -259,11 +241,9 @@ class TestSGClone:
         assert "cloned-sg" in result.output
         assert "1/1" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  cleanup
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestSGCleanup:
 
@@ -331,17 +311,14 @@ class TestSGCleanup:
         assert len(deleted) == 1
         assert "1 deleted" in result.output.lower()
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestSGHelp:
 
     def test_sg_help(self, invoke):
         result = invoke(["security-group", "--help"])
         assert result.exit_code == 0
-        for cmd in ("list", "show", "create", "update", "delete",
-                    "rule-add", "rule-delete", "clone", "cleanup"):
+        for cmd in ("list", "show", "create", "update", "delete", "clone", "cleanup"):
             assert cmd in result.output

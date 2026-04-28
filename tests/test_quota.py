@@ -6,7 +6,6 @@ from orca_cli.core.config import save_profile, set_active_profile
 
 # ── Helpers ────────────────────────────────────────────────────────────────
 
-
 def _setup_mock(mock_client, nova=None, cinder=None, neutron_quotas=None,
                 nets=0, subnets=0, ports=0, routers=0, fips=0, sgs=0):
     mock_client.compute_url = "https://nova.example.com/v2.1"
@@ -65,11 +64,9 @@ def _setup_mock(mock_client, nova=None, cinder=None, neutron_quotas=None,
 
     mock_client.get = _get
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  quota
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestQuota:
 
@@ -177,11 +174,9 @@ class TestQuota:
         assert "unavailable" in result.output
         assert "Volume" in result.output  # other sections still render
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  _row helper
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestRow:
 
@@ -229,11 +224,9 @@ class TestRow:
         assert "green" in r["usage"]
         assert "25%" in r["usage"]
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestQuotaHelp:
 

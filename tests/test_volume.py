@@ -9,7 +9,6 @@ from orca_cli.core.config import save_profile, set_active_profile
 VOL_ID = "11112222-3333-4444-5555-666677778888"
 SNAP_ID = "aaaabbbb-cccc-dddd-eeee-ffffffffffff"
 
-
 def _vol(vol_id=VOL_ID, name="my-vol", status="available", size=50):
     return {
         "id": vol_id, "name": name, "status": status, "size": size,
@@ -22,14 +21,12 @@ def _vol(vol_id=VOL_ID, name="my-vol", status="available", size=50):
         "attachments": [],
     }
 
-
 def _snap(snap_id=SNAP_ID, name="my-snap", vol_id=VOL_ID):
     return {
         "id": snap_id, "name": name, "volume_id": vol_id,
         "size": 50, "status": "available",
         "description": "test snap", "created_at": "2025-01-01",
     }
-
 
 def _setup_mock(mock_client):
     mock_client.volume_url = "https://cinder.example.com/v3"
@@ -82,11 +79,9 @@ def _setup_mock(mock_client):
 
     return {"posted": posted, "put_data": put_data, "deleted": deleted}
 
-
 # ═════════════��══════════════════════════════���═════════════════════════════
 #  list
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestVolumeList:
 
@@ -109,11 +104,9 @@ class TestVolumeList:
         assert result.exit_code == 0
         assert "No volumes found" in result.output
 
-
 # ══════��══════════════════════════��════════════════════════════���═══════════
 #  show
 # ════════════════════��═════════════════════════════════════════════════════
-
 
 class TestVolumeShow:
 
@@ -127,11 +120,9 @@ class TestVolumeShow:
         assert "my-" in result.output
         assert "50 GB" in result.output
 
-
 # ═══���══════════════════════════��═══════════════════════════════��═══════════
 #  create
 # ════���════════════���═════════════════════════════���══════════════════════════
-
 
 class TestVolumeCreate:
 
@@ -159,11 +150,9 @@ class TestVolumeCreate:
         body = state["posted"]["last_body"]["volume"]
         assert body["volume_type"] == "SSD"
 
-
 # ═════���═══════════════════════════���══════════════════════════════���═════════
 #  update
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestVolumeUpdate:
 
@@ -185,11 +174,9 @@ class TestVolumeUpdate:
         assert result.exit_code == 0
         assert "Nothing" in result.output
 
-
 # ═════════════���══════════════════════════���═════════════════════════════════
 #  extend / retype / set-bootable / set-readonly
 # ═════════════════════���═══════════════════════════��════════════════════════
-
 
 class TestVolumeActions:
 
@@ -229,11 +216,9 @@ class TestVolumeActions:
         assert result.exit_code == 0
         assert "readonly" in result.output.lower()
 
-
 # ═════════════════════════════════════════════════════���════════════════════
 #  delete
 # ═══════════════════════════���═══════════════════════════��══════════════════
-
 
 class TestVolumeDelete:
 
@@ -247,11 +232,9 @@ class TestVolumeDelete:
         assert "deleted" in result.output.lower()
         assert len(state["deleted"]) == 1
 
-
 # ═══���══════════════════════════════════════════════════════════════════════
 #  snapshot-list / show / create / delete
 # ══════���══════════════════════��═════════════════════════��══════════════════
-
 
 class TestSnapshots:
 
@@ -260,7 +243,7 @@ class TestSnapshots:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["volume", "snapshot-list"])
+        result = invoke(["volume", "snapshot", "list"])
         assert result.exit_code == 0
         assert "my-s" in result.output
 
@@ -270,7 +253,7 @@ class TestSnapshots:
         mock_client.volume_url = "https://cinder.example.com/v3"
         mock_client.get = lambda url, **kw: {"snapshots": []}
 
-        result = invoke(["volume", "snapshot-list"])
+        result = invoke(["volume", "snapshot", "list"])
         assert result.exit_code == 0
         assert "No snapshots found" in result.output
 
@@ -279,7 +262,7 @@ class TestSnapshots:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["volume", "snapshot-show", SNAP_ID])
+        result = invoke(["volume", "snapshot", "show", SNAP_ID])
         assert result.exit_code == 0
         assert "my-snap" in result.output
 
@@ -288,7 +271,7 @@ class TestSnapshots:
         set_active_profile("p")
         _ = _setup_mock(mock_client)
 
-        result = invoke(["volume", "snapshot-create", VOL_ID, "--name", "backup"])
+        result = invoke(["volume", "snapshot", "create", VOL_ID, "--name", "backup"])
         assert result.exit_code == 0
         assert "created" in result.output.lower()
 
@@ -297,15 +280,13 @@ class TestSnapshots:
         set_active_profile("p")
         _ = _setup_mock(mock_client)
 
-        result = invoke(["volume", "snapshot-delete", SNAP_ID, "-y"])
+        result = invoke(["volume", "snapshot", "delete", SNAP_ID, "-y"])
         assert result.exit_code == 0
         assert "deleted" in result.output.lower()
-
 
 # ═════════════════════════════════════════════���════════════════════════════
 #  tree
 # ════════���═════════════════════════════════════════════════════════════════
-
 
 class TestVolumeTree:
 
@@ -319,11 +300,9 @@ class TestVolumeTree:
         assert "my-" in result.output
         assert "1 volumes" in result.output or "50 GB" in result.output
 
-
 # ═════��══════════════════════════���═════════════════════════════════════════
 #  Help
 # ═══��══════════════════════════════════════════════════════════════════════
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  migrate / revert-to-snapshot / summary
@@ -334,7 +313,6 @@ ATT_ID = "bb222222-2222-2222-2222-222222222222"
 GRP_ID = "cc333333-3333-3333-3333-333333333333"
 GT_ID  = "dd444444-4444-4444-4444-444444444444"
 VT_ID  = "ee555555-5555-5555-5555-555555555555"
-
 
 def _setup_extended(mock_client):
     """Extended mock adding messages, attachments, groups and summary."""
@@ -392,7 +370,6 @@ def _setup_extended(mock_client):
     mock_client.post = _post
     return state
 
-
 class TestVolumeMigrate:
 
     def test_migrate(self, invoke, config_dir, mock_client, sample_profile):
@@ -419,17 +396,15 @@ class TestVolumeMigrate:
         result = invoke(["volume", "migrate", VOL_ID])
         assert result.exit_code != 0
 
-
 class TestVolumeRevertToSnapshot:
 
     def test_revert(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
         state = _setup_mock(mock_client)
-        result = invoke(["volume", "revert-to-snapshot", VOL_ID, SNAP_ID])
+        result = invoke(["volume", "snapshot", "revert", VOL_ID, SNAP_ID])
         assert result.exit_code == 0
         assert state["posted"]["last_body"]["revert"]["snapshot_id"] == SNAP_ID
-
 
 class TestVolumeSummary:
 
@@ -442,11 +417,9 @@ class TestVolumeSummary:
         assert "5" in result.output
         assert "250" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  messages
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestVolumeMessages:
 
@@ -454,7 +427,7 @@ class TestVolumeMessages:
         save_profile("p", sample_profile)
         set_active_profile("p")
         _setup_extended(mock_client)
-        result = invoke(["volume", "message-list"])
+        result = invoke(["volume", "message", "list"])
         assert result.exit_code == 0
         assert "VOLU" in result.output or "No space" in result.output
 
@@ -462,14 +435,14 @@ class TestVolumeMessages:
         save_profile("p", sample_profile)
         set_active_profile("p")
         _setup_extended(mock_client)
-        result = invoke(["volume", "message-list", "--resource-type", "VOLUME"])
+        result = invoke(["volume", "message", "list", "--resource-type", "VOLUME"])
         assert result.exit_code == 0
 
     def test_message_show(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
         _setup_extended(mock_client)
-        result = invoke(["volume", "message-show", MSG_ID])
+        result = invoke(["volume", "message", "show", MSG_ID])
         assert result.exit_code == 0
         assert "No space left" in result.output
 
@@ -477,21 +450,19 @@ class TestVolumeMessages:
         save_profile("p", sample_profile)
         set_active_profile("p")
         state = _setup_extended(mock_client)
-        result = invoke(["volume", "message-delete", MSG_ID, "--yes"])
+        result = invoke(["volume", "message", "delete", MSG_ID, "--yes"])
         assert result.exit_code == 0
         assert any(MSG_ID in u for u in state["deleted"])
 
     def test_invalid_resource_type(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        result = invoke(["volume", "message-list", "--resource-type", "INVALID"])
+        result = invoke(["volume", "message", "list", "--resource-type", "INVALID"])
         assert result.exit_code != 0
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  attachments
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestVolumeAttachments:
 
@@ -499,7 +470,7 @@ class TestVolumeAttachments:
         save_profile("p", sample_profile)
         set_active_profile("p")
         _setup_extended(mock_client)
-        result = invoke(["volume", "attachment-list"])
+        result = invoke(["volume", "attachment", "list"])
         assert result.exit_code == 0
         assert "att" in result.output.lower() or "attached" in result.output
 
@@ -507,14 +478,14 @@ class TestVolumeAttachments:
         save_profile("p", sample_profile)
         set_active_profile("p")
         _setup_extended(mock_client)
-        result = invoke(["volume", "attachment-list", "--volume-id", VOL_ID])
+        result = invoke(["volume", "attachment", "list", "--volume-id", VOL_ID])
         assert result.exit_code == 0
 
     def test_attachment_show(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
         _setup_extended(mock_client)
-        result = invoke(["volume", "attachment-show", ATT_ID])
+        result = invoke(["volume", "attachment", "show", ATT_ID])
         assert result.exit_code == 0
         assert "attached" in result.output
 
@@ -522,15 +493,13 @@ class TestVolumeAttachments:
         save_profile("p", sample_profile)
         set_active_profile("p")
         state = _setup_extended(mock_client)
-        result = invoke(["volume", "attachment-delete", ATT_ID, "--yes"])
+        result = invoke(["volume", "attachment", "delete", ATT_ID, "--yes"])
         assert result.exit_code == 0
         assert any(ATT_ID in u for u in state["deleted"])
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  groups
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestVolumeGroups:
 
@@ -538,7 +507,7 @@ class TestVolumeGroups:
         save_profile("p", sample_profile)
         set_active_profile("p")
         _setup_extended(mock_client)
-        result = invoke(["volume", "group-list"])
+        result = invoke(["volume", "group", "list"])
         assert result.exit_code == 0
         assert "my-" in result.output
 
@@ -546,7 +515,7 @@ class TestVolumeGroups:
         save_profile("p", sample_profile)
         set_active_profile("p")
         _setup_extended(mock_client)
-        result = invoke(["volume", "group-show", GRP_ID])
+        result = invoke(["volume", "group", "show", GRP_ID])
         assert result.exit_code == 0
         assert "my-group" in result.output
 
@@ -554,7 +523,7 @@ class TestVolumeGroups:
         save_profile("p", sample_profile)
         set_active_profile("p")
         state = _setup_extended(mock_client)
-        result = invoke(["volume", "group-create", "my-group",
+        result = invoke(["volume", "group", "create", "my-group",
                          "--group-type", GT_ID, "--volume-type", VT_ID])
         assert result.exit_code == 0
         body = state["posted"]["last_body"]["group"]
@@ -564,14 +533,14 @@ class TestVolumeGroups:
     def test_group_create_requires_group_type(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
-        result = invoke(["volume", "group-create", "grp", "--volume-type", VT_ID])
+        result = invoke(["volume", "group", "create", "grp", "--volume-type", VT_ID])
         assert result.exit_code != 0
 
     def test_group_update_name(self, invoke, config_dir, mock_client, sample_profile):
         save_profile("p", sample_profile)
         set_active_profile("p")
         state = _setup_mock(mock_client)
-        result = invoke(["volume", "group-update", GRP_ID, "--name", "new-name"])
+        result = invoke(["volume", "group", "update", GRP_ID, "--name", "new-name"])
         assert result.exit_code == 0
         assert state["put_data"]["last_body"]["group"]["name"] == "new-name"
 
@@ -579,7 +548,7 @@ class TestVolumeGroups:
         save_profile("p", sample_profile)
         set_active_profile("p")
         state = _setup_mock(mock_client)
-        result = invoke(["volume", "group-update", GRP_ID,
+        result = invoke(["volume", "group", "update", GRP_ID,
                          "--add-volume", VOL_ID, "--remove-volume", SNAP_ID])
         assert result.exit_code == 0
         body = state["put_data"]["last_body"]["group"]
@@ -590,7 +559,7 @@ class TestVolumeGroups:
         save_profile("p", sample_profile)
         set_active_profile("p")
         _setup_mock(mock_client)
-        result = invoke(["volume", "group-update", GRP_ID])
+        result = invoke(["volume", "group", "update", GRP_ID])
         assert result.exit_code == 0
         assert "Nothing to update" in result.output
 
@@ -598,7 +567,7 @@ class TestVolumeGroups:
         save_profile("p", sample_profile)
         set_active_profile("p")
         state = _setup_mock(mock_client)
-        result = invoke(["volume", "group-delete", GRP_ID, "--yes"])
+        result = invoke(["volume", "group", "delete", GRP_ID, "--yes"])
         assert result.exit_code == 0
         body = state["posted"]["last_body"]["delete"]
         assert body["delete-volumes"] is False
@@ -607,17 +576,15 @@ class TestVolumeGroups:
         save_profile("p", sample_profile)
         set_active_profile("p")
         state = _setup_mock(mock_client)
-        result = invoke(["volume", "group-delete", GRP_ID, "--delete-volumes", "--yes"])
+        result = invoke(["volume", "group", "delete", GRP_ID, "--delete-volumes", "--yes"])
         assert result.exit_code == 0
         assert state["posted"]["last_body"]["delete"]["delete-volumes"] is True
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  backup-create / backup-restore
 # ══════════════════════════════════════════════════════════════════════════
 
 BKP_ID = "ff001122-3344-5566-7788-99aabbccddee"
-
 
 class TestVolumeBackupCreate:
 
@@ -626,7 +593,7 @@ class TestVolumeBackupCreate:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["volume", "backup-create", VOL_ID, "--name", "my-backup"])
+        result = invoke(["volume", "backup", "create", VOL_ID, "--name", "my-backup"])
         assert result.exit_code == 0
         body = state["posted"]["last_body"]["backup"]
         assert body["volume_id"] == VOL_ID
@@ -637,7 +604,7 @@ class TestVolumeBackupCreate:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["volume", "backup-create", VOL_ID,
+        result = invoke(["volume", "backup", "create", VOL_ID,
                          "--incremental", "--force"])
         assert result.exit_code == 0
         body = state["posted"]["last_body"]["backup"]
@@ -649,10 +616,9 @@ class TestVolumeBackupCreate:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["volume", "backup-create", VOL_ID, "--snapshot-id", SNAP_ID])
+        result = invoke(["volume", "backup", "create", VOL_ID, "--snapshot-id", SNAP_ID])
         assert result.exit_code == 0
         assert state["posted"]["last_body"]["backup"]["snapshot_id"] == SNAP_ID
-
 
 class TestVolumeBackupRestore:
 
@@ -661,7 +627,7 @@ class TestVolumeBackupRestore:
         set_active_profile("p")
         _ = _setup_mock(mock_client)
 
-        result = invoke(["volume", "backup-restore", BKP_ID])
+        result = invoke(["volume", "backup", "restore", BKP_ID])
         assert result.exit_code == 0
         assert "restore" in result.output.lower() or "backup" in result.output.lower()
 
@@ -670,7 +636,7 @@ class TestVolumeBackupRestore:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["volume", "backup-restore", BKP_ID, "--volume-id", VOL_ID])
+        result = invoke(["volume", "backup", "restore", BKP_ID, "--volume-id", VOL_ID])
         assert result.exit_code == 0
         body = state["posted"]["last_body"]["restore"]
         assert body["volume_id"] == VOL_ID
@@ -680,10 +646,9 @@ class TestVolumeBackupRestore:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["volume", "backup-restore", BKP_ID, "--name", "restored-vol"])
+        result = invoke(["volume", "backup", "restore", BKP_ID, "--name", "restored-vol"])
         assert result.exit_code == 0
         assert state["posted"]["last_body"]["restore"]["name"] == "restored-vol"
-
 
 class TestVolumeHelp:
 
@@ -691,14 +656,6 @@ class TestVolumeHelp:
         result = invoke(["volume", "--help"])
         assert result.exit_code == 0
         for cmd in ("list", "show", "create", "update", "delete",
-                    "extend", "retype", "set-bootable", "set-readonly",
-                    "snapshot-list", "snapshot-show", "snapshot-create",
-                    "snapshot-delete", "tree",
-                    "migrate", "revert-to-snapshot", "summary",
-                    "message-list", "message-show", "message-delete",
-                    "attachment-list", "attachment-show", "attachment-delete",
-                    "group-list", "group-show", "group-create",
-                    "group-update", "group-delete",
-                    "backup-list", "backup-show", "backup-create",
-                    "backup-delete", "backup-restore"):
+                    "extend", "retype", "set-bootable", "set-readonly", "tree",
+                    "migrate", "summary"):
             assert cmd in result.output

@@ -13,7 +13,6 @@ from orca_cli.core import cache
 def _patch_dir(tmp_path: Path):
     return patch.object(cache, "_CACHE_DIR", tmp_path)
 
-
 class TestCache:
 
     def test_save_then_load_roundtrip(self, tmp_path):

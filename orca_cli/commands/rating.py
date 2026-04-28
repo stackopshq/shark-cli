@@ -7,7 +7,6 @@ from datetime import datetime, timedelta, timezone
 
 import click
 
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
 from orca_cli.core.output import console, output_options, print_detail, print_list
@@ -216,7 +215,7 @@ def rating_quote(ctx, resources):
             raise click.BadParameter(f"Invalid JSON: {exc}", param_hint="--resource") from exc
     payload = {"resources": body_items}
     data = svc.create_quote(payload)
-    if isinstance(data, (int, float, str)):
+    if isinstance(data, int | float | str):
         console.print(f"Estimated price: [bold]{data}[/bold]")
     else:
         console.print_json(json.dumps(data, indent=2, default=str))
@@ -633,25 +632,3 @@ def hm_group_delete(ctx, group_id, yes):
 
 
 # ── ADR-0008 deprecated aliases (backward compatibility) ────────────────
-
-add_command_with_alias(rating, rating_metric_list,
-                        legacy_name="metric-list",
-                        primary_path="rating metric list")
-add_command_with_alias(rating, rating_metric_show,
-                        legacy_name="metric-show",
-                        primary_path="rating metric show")
-add_command_with_alias(rating, rating_module_list,
-                        legacy_name="module-list",
-                        primary_path="rating module list")
-add_command_with_alias(rating, rating_module_show,
-                        legacy_name="module-show",
-                        primary_path="rating module show")
-add_command_with_alias(rating, rating_module_enable,
-                        legacy_name="module-enable",
-                        primary_path="rating module enable")
-add_command_with_alias(rating, rating_module_disable,
-                        legacy_name="module-disable",
-                        primary_path="rating module disable")
-add_command_with_alias(rating, rating_module_set_priority,
-                        legacy_name="module-set-priority",
-                        primary_path="rating module set-priority")

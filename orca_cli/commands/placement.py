@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import click
 
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
@@ -693,91 +692,3 @@ def rp_inventory_delete_all(ctx, uuid, yes):
 
 
 # ── ADR-0008 deprecated aliases (backward compatibility) ──
-
-add_command_with_alias(placement, rp_list,
-                        legacy_name="resource-provider-list",
-                        primary_path="placement resource-provider list")
-add_command_with_alias(placement, rp_show,
-                        legacy_name="resource-provider-show",
-                        primary_path="placement resource-provider show")
-add_command_with_alias(placement, rp_create,
-                        legacy_name="resource-provider-create",
-                        primary_path="placement resource-provider create")
-add_command_with_alias(placement, rp_set,
-                        legacy_name="resource-provider-set",
-                        primary_path="placement resource-provider set")
-add_command_with_alias(placement, rp_delete,
-                        legacy_name="resource-provider-delete",
-                        primary_path="placement resource-provider delete")
-add_command_with_alias(placement, rp_inventory_list,
-                        legacy_name="resource-provider-inventory-list",
-                        primary_path="placement resource-provider inventory-list")
-add_command_with_alias(placement, rp_inventory_set,
-                        legacy_name="resource-provider-inventory-set",
-                        primary_path="placement resource-provider inventory-set")
-add_command_with_alias(placement, rp_inventory_delete,
-                        legacy_name="resource-provider-inventory-delete",
-                        primary_path="placement resource-provider inventory-delete")
-add_command_with_alias(placement, rp_inventory_show,
-                        legacy_name="resource-provider-inventory-show",
-                        primary_path="placement resource-provider inventory-show")
-add_command_with_alias(placement, rp_inventory_delete_all,
-                        legacy_name="resource-provider-inventory-delete-all",
-                        primary_path="placement resource-provider inventory-delete-all")
-add_command_with_alias(placement, rp_usage,
-                        legacy_name="resource-provider-usage",
-                        primary_path="placement resource-provider usage")
-add_command_with_alias(placement, rp_trait_list,
-                        legacy_name="resource-provider-trait-list",
-                        primary_path="placement resource-provider trait-list")
-add_command_with_alias(placement, rp_trait_set,
-                        legacy_name="resource-provider-trait-set",
-                        primary_path="placement resource-provider trait-set")
-add_command_with_alias(placement, rp_trait_delete,
-                        legacy_name="resource-provider-trait-delete",
-                        primary_path="placement resource-provider trait-delete")
-add_command_with_alias(placement, rp_aggregate_list,
-                        legacy_name="resource-provider-aggregate-list",
-                        primary_path="placement resource-provider aggregate-list")
-add_command_with_alias(placement, rp_aggregate_set,
-                        legacy_name="resource-provider-aggregate-set",
-                        primary_path="placement resource-provider aggregate-set")
-add_command_with_alias(placement, rp_aggregate_delete,
-                        legacy_name="resource-provider-aggregate-delete",
-                        primary_path="placement resource-provider aggregate-delete")
-add_command_with_alias(placement, usage_list,
-                        legacy_name="usage-list",
-                        primary_path="placement usage list")
-add_command_with_alias(placement, rc_list,
-                        legacy_name="resource-class-list",
-                        primary_path="placement resource-class list")
-add_command_with_alias(placement, rc_show,
-                        legacy_name="resource-class-show",
-                        primary_path="placement resource-class show")
-add_command_with_alias(placement, rc_create,
-                        legacy_name="resource-class-create",
-                        primary_path="placement resource-class create")
-add_command_with_alias(placement, rc_delete,
-                        legacy_name="resource-class-delete",
-                        primary_path="placement resource-class delete")
-add_command_with_alias(placement, trait_list,
-                        legacy_name="trait-list",
-                        primary_path="placement trait list")
-add_command_with_alias(placement, trait_create,
-                        legacy_name="trait-create",
-                        primary_path="placement trait create")
-add_command_with_alias(placement, trait_delete,
-                        legacy_name="trait-delete",
-                        primary_path="placement trait delete")
-add_command_with_alias(placement, allocation_show,
-                        legacy_name="allocation-show",
-                        primary_path="placement allocation show")
-add_command_with_alias(placement, allocation_delete,
-                        legacy_name="allocation-delete",
-                        primary_path="placement allocation delete")
-add_command_with_alias(placement, allocation_set,
-                        legacy_name="allocation-set",
-                        primary_path="placement allocation set")
-add_command_with_alias(placement, allocation_candidate_list,
-                        legacy_name="allocation-candidate-list",
-                        primary_path="placement allocation candidate-list")

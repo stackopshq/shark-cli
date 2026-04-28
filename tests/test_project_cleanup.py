@@ -18,7 +18,6 @@ def _make_net_svc(monkeypatch, **attrs):
     monkeypatch.setattr(proj_mod, "NetworkService", lambda _c: net_svc)
     return net_svc
 
-
 class TestDeleteRouter:
     def test_clears_gateway_before_detaching_and_deleting(self, monkeypatch):
         net = _make_net_svc(monkeypatch)
@@ -111,7 +110,6 @@ class TestDeleteRouter:
         assert net.remove_router_interface.call_count == 2
         net.delete_router.assert_called_once_with("r-1")
 
-
 class TestDeleteNetwork:
     def test_deletes_orphan_and_stale_compute_ports(self, monkeypatch):
         net = _make_net_svc(monkeypatch)
@@ -160,7 +158,6 @@ class TestDeleteNetwork:
         net.delete_port.assert_not_called()
         net.delete.assert_called_once_with("n-1")
 
-
 def _svc_that_raises(monkeypatch, service_attr: str, exc: Exception) -> MagicMock:
     """Replace one Service class on the project module so its delete raises exc."""
     svc = MagicMock()
@@ -179,7 +176,6 @@ def _svc_that_raises(monkeypatch, service_attr: str, exc: Exception) -> MagicMoc
     monkeypatch.setattr(proj_mod, service_attr, lambda _c: svc)
     return svc
 
-
 class TestClassifyApiError:
     @pytest.mark.parametrize("status,expected", [
         (404, Outcome.ALREADY_GONE),
@@ -190,7 +186,6 @@ class TestClassifyApiError:
     ])
     def test_status_to_outcome(self, status, expected):
         assert proj_mod._classify_api_error(APIError(status, "detail")) is expected
-
 
 class TestDeleteOneOutcomes:
     """_delete_one must map HTTP status to the right Outcome."""
@@ -238,7 +233,6 @@ class TestDeleteOneOutcomes:
                          RuntimeError("boom"))
         out = proj_mod._delete_one(object(), "volume", "v-1", "—")
         assert out is Outcome.FAILED
-
 
 class TestRefreshAndWaitVolumes:
     """Volume settle window between server-delete and volume-delete phases.
@@ -327,7 +321,6 @@ class TestRefreshAndWaitVolumes:
         result = proj_mod._refresh_and_wait_volumes(object(), "p-1", cutoff)
 
         assert result == [("old", "o")]
-
 
 class TestSummaryRendering:
     """End-to-end through the Click command: the summary line must aggregate

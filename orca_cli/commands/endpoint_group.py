@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import click
 
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
@@ -162,11 +161,3 @@ def eg_project_remove(ctx, endpoint_group_id, project_id, yes):
     console.print(
         f"Project [bold]{project_id}[/bold] removed from endpoint group [bold]{endpoint_group_id}[/bold]."
     )
-
-
-add_command_with_alias(endpoint_group, eg_project_add,
-                        legacy_name="add-project",
-                        primary_path="endpoint-group project add")
-add_command_with_alias(endpoint_group, eg_project_remove,
-                        legacy_name="remove-project",
-                        primary_path="endpoint-group project remove")

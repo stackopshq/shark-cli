@@ -6,7 +6,6 @@ from datetime import datetime, timezone
 
 import click
 
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.config import (
     _find_clouds_yaml,
     _load_clouds_yaml,
@@ -315,9 +314,3 @@ def auth_token_revoke(ctx: click.Context, token: str) -> None:
     client = ctx.find_object(OrcaContext).ensure_client()
     IdentityService(client).revoke_token(token)
     console.print("[green]Token revoked.[/green]")
-
-
-add_command_with_alias(auth, auth_token_debug,
-                        legacy_name="token-debug", primary_path="auth token debug")
-add_command_with_alias(auth, auth_token_revoke,
-                        legacy_name="token-revoke", primary_path="auth token revoke")

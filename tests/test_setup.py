@@ -17,7 +17,6 @@ from orca_cli.core.shell_completion import (
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
 
-
 class TestSetupHelp:
 
     def test_setup_help(self, invoke):
@@ -26,11 +25,9 @@ class TestSetupHelp:
         assert "--profile" in result.output
         assert "credentials" in result.output.lower()
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  New profile — no other profiles exist → auto-activates
 # ══════════════════════════════════════════════════════════════════════════
-
 
 def _full_answers(
     auth_url="https://keystone.foo:5000",
@@ -55,7 +52,6 @@ def _full_answers(
         insecure,
     ]) + "\n"
 
-
 class TestSetupNewProfileNoExisting:
     """First-time setup: no profiles on disk → new profile becomes active."""
 
@@ -78,11 +74,9 @@ class TestSetupNewProfileNoExisting:
         # region_name was empty → omitted
         assert "region_name" not in data["profiles"]["first"]
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  New profile — other profiles exist → asks "Switch to X now?"
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestSetupNewProfileWithOthers:
 
@@ -111,11 +105,9 @@ class TestSetupNewProfileWithOthers:
         assert "newprof" in data["profiles"]
         assert data["active_profile"] == "existing"
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Edit existing profile — no switch prompt, pre-fills defaults
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestSetupEditExisting:
 
@@ -170,11 +162,9 @@ class TestSetupEditExisting:
         assert saved.get("user_domain_name") == legacy_profile["domain_id"]
         assert saved.get("project_name") == legacy_profile["project_id"]
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Default profile resolution — when --profile is omitted, uses active
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestSetupAppCredential:
     """New profile via the application-credential branch."""
@@ -201,7 +191,6 @@ class TestSetupAppCredential:
         assert "password" not in saved
         assert "project_name" not in saved
 
-
 class TestSetupDefaultProfileResolution:
 
     def test_no_profile_flag_uses_active(self, invoke, write_config, sample_profile):
@@ -218,11 +207,9 @@ class TestSetupDefaultProfileResolution:
         assert result.exit_code == 0, result.output
         assert "editing profile: active-one" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Shell completion auto-install
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestDetectShell:
 
@@ -245,7 +232,6 @@ class TestDetectShell:
     def test_empty_shell_returns_none(self, monkeypatch):
         monkeypatch.delenv("SHELL", raising=False)
         assert detect_shell() is None
-
 
 class TestInstallCompletionBashZsh:
     """Static-script install (ADR 0010): generate the script once, then source.
@@ -363,7 +349,6 @@ class TestInstallCompletionBashZsh:
         else:
             raise AssertionError("expected OrcaCLIError when orca is not on PATH")
 
-
 class TestInstallCompletionFish:
 
     def test_fish_no_orca_on_path(self, tmp_path, monkeypatch):
@@ -412,7 +397,6 @@ class TestInstallCompletionFish:
         msg = install_completion_fish()
         assert "failed" in msg
         assert not target.exists()
-
 
 class TestMaybeInstallCompletion:
 

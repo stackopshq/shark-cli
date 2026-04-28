@@ -10,10 +10,8 @@ from orca_cli.core.exceptions import APIError
 
 PRJ_ID = "proj-1111-1111-1111-111111111111"
 
-
 def _base_token(user="admin", project="demo", project_id=PRJ_ID):
     return {"user": {"name": user}, "project": {"name": project, "id": project_id}}
-
 
 def _limits(inst=2, inst_max=10, cores=4, cores_max=20, ram=4096, ram_max=51200):
     return {"limits": {"absolute": {
@@ -22,20 +20,17 @@ def _limits(inst=2, inst_max=10, cores=4, cores_max=20, ram=4096, ram_max=51200)
         "totalRAMUsed": ram, "maxTotalRAMSize": ram_max,
     }}}
 
-
 def _vol_limits(vol=1, vol_max=10, gb=50, gb_max=1000):
     return {"limits": {"absolute": {
         "totalVolumesUsed": vol, "maxTotalVolumes": vol_max,
         "totalGigabytesUsed": gb, "maxTotalVolumeGigabytes": gb_max,
     }}}
 
-
 def _net_quota(fip_used=2, fip_limit=10, sg_used=3, sg_limit=20):
     return {"quota": {
         "floatingip":     {"used": fip_used,  "limit": fip_limit},
         "security_group": {"used": sg_used,   "limit": sg_limit},
     }}
-
 
 def _sg(has_ssh=True, has_icmp=True):
     rules = []
@@ -46,7 +41,6 @@ def _sg(has_ssh=True, has_icmp=True):
         rules.append({"direction": "ingress", "protocol": "icmp"})
     return {"security_groups": [{"id": "sg-default", "name": "default",
                                   "security_group_rules": rules}]}
-
 
 def _setup_happy_path(mock_client, sg_data=None):
     """Configure mock_client for a fully healthy environment."""
@@ -72,7 +66,6 @@ def _setup_happy_path(mock_client, sg_data=None):
         return {}
 
     mock_client.get.side_effect = _get
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Basic invocation
@@ -101,7 +94,6 @@ class TestDoctorBasic:
         result = invoke(["doctor"])
         assert result.exit_code == 0
         assert "passed" in result.output or "OK" in result.output
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Authentication check & short-circuit
@@ -140,7 +132,6 @@ class TestDoctorAuth:
         result = invoke(["doctor"])
         assert result.exit_code == 0
         assert "Skipped" in result.output or "fix authentication" in result.output.lower()
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Service-level isolation
@@ -206,7 +197,6 @@ class TestDoctorServiceIsolation:
         skipped_count = result.output.count("Skipped")
         assert skipped_count >= 2
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  3-tier quota color thresholds
 # ══════════════════════════════════════════════════════════════════════════
@@ -261,7 +251,6 @@ class TestDoctorQuotaThresholds:
         assert result.exit_code == 0
         assert "critical" in result.output.lower() or "10/10" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Security group checks
 # ══════════════════════════════════════════════════════════════════════════
@@ -287,7 +276,6 @@ class TestDoctorSecurityGroups:
         result = invoke(["doctor"])
         assert result.exit_code == 0
         assert "SSH" in result.output
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  --fix flag

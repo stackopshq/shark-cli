@@ -9,7 +9,6 @@ from orca_cli.core.config import save_profile, set_active_profile
 TARGET_IP = "10.0.0.15"
 FIP_IP = "203.0.113.42"
 
-
 def _setup_mock(mock_client, fips=None, ports=None, servers=None,
                 routers=None, subnets=None, lbs=None):
     fips = fips or []
@@ -40,11 +39,9 @@ def _setup_mock(mock_client, fips=None, ports=None, servers=None,
 
     mock_client.get = _get
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  ip whois
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestIpWhois:
 
@@ -211,11 +208,9 @@ class TestIpWhois:
         assert result.exit_code == 0
         assert "No resource found" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  _ip_in_range
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestIpInRange:
 
@@ -239,11 +234,9 @@ class TestIpInRange:
         from orca_cli.commands.ip_whois import _ip_in_range
         assert _ip_in_range("not-an-ip", "10.0.0.10", "10.0.0.200") is False
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestIpHelp:
 

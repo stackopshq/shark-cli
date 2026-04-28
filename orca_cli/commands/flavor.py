@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import click
 
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.completions import complete_flavors
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
@@ -246,11 +245,3 @@ def flavor_access_remove(ctx: click.Context, flavor_id: str, project_id: str, ye
         click.confirm(f"Remove project {project_id} from flavor {flavor_id}?", abort=True)
     svc.remove_flavor_access(flavor_id, project_id)
     console.print(f"[green]Project {project_id} access to flavor {flavor_id} revoked.[/green]")
-
-
-add_command_with_alias(flavor, flavor_access_list,
-                        legacy_name="access-list", primary_path="flavor access list")
-add_command_with_alias(flavor, flavor_access_add,
-                        legacy_name="access-add", primary_path="flavor access add")
-add_command_with_alias(flavor, flavor_access_remove,
-                        legacy_name="access-remove", primary_path="flavor access remove")

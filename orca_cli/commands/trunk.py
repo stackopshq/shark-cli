@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import click
 
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import validate_id
@@ -175,14 +174,3 @@ def trunk_remove_subport(ctx, trunk_id, port_id, yes):
         click.confirm(f"Remove sub-port {port_id} from trunk {trunk_id}?", abort=True)
     svc.remove_trunk_subports(trunk_id, [{"port_id": port_id}])
     console.print(f"[green]Sub-port {port_id} removed from trunk {trunk_id}.[/green]")
-
-
-add_command_with_alias(trunk, trunk_subport_list,
-                        legacy_name="subport-list",
-                        primary_path="trunk subport list")
-add_command_with_alias(trunk, trunk_add_subport,
-                        legacy_name="add-subport",
-                        primary_path="trunk subport add")
-add_command_with_alias(trunk, trunk_remove_subport,
-                        legacy_name="remove-subport",
-                        primary_path="trunk subport remove")

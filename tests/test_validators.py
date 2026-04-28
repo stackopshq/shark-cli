@@ -51,7 +51,6 @@ class TestValidateId:
         with pytest.raises(click.BadParameter):
             validate_id(None, None, "1234-5678")
 
-
 class TestValidateIp:
 
     def test_accepts_valid_ipv4(self):
@@ -87,7 +86,6 @@ class TestValidateIp:
         with pytest.raises(click.BadParameter):
             validate_ip(None, None, "")
 
-
 class TestSafeOutputPath:
 
     def test_accepts_regular_path(self, tmp_path):
@@ -112,7 +110,6 @@ class TestSafeOutputPath:
         link.symlink_to(target)
         with pytest.raises(click.BadParameter, match="symlink"):
             safe_output_path(link)
-
 
 class TestSafeChildPath:
 

@@ -14,7 +14,6 @@ from orca_cli.core.config import save_profile, set_active_profile
 SRV_ID = "11112222-3333-4444-5555-666677778888"
 IMG_ID = "aaaabbbb-cccc-dddd-eeee-ffffffffffff"
 
-
 def _srv(**overrides):
     base = {
         "id": SRV_ID,
@@ -30,7 +29,6 @@ def _srv(**overrides):
     base.update(overrides)
     return base
 
-
 def _setup_profile(mock_client, sample_profile):
     """Wire mock_client into a saved+active profile so ensure_client works."""
     save_profile("test", sample_profile)
@@ -38,11 +36,9 @@ def _setup_profile(mock_client, sample_profile):
     mock_client.compute_url = "https://nova.example.com/v2.1"
     mock_client.image_url = "https://glance.example.com"
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  _pick_ssh_ip
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestPickSshIp:
 
@@ -63,11 +59,9 @@ class TestPickSshIp:
     def test_none_when_empty(self):
         assert server_mod._pick_ssh_ip(_srv(addresses={})) is None
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  _detect_ssh_user
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestDetectSshUser:
 
@@ -134,11 +128,9 @@ class TestDetectSshUser:
         })
         assert server_mod._detect_ssh_user(mock_client, srv) is None
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  _find_ssh_key
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestFindSshKey:
 
@@ -197,11 +189,9 @@ class TestFindSshKey:
         monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
         assert server_mod._find_ssh_key("any") is None
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Integration — orca server ssh --dry-run
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestServerSshIntegration:
 

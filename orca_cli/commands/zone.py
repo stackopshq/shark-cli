@@ -6,7 +6,6 @@ import time
 
 import click
 
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.output import console, output_options, print_detail, print_list
 from orca_cli.core.validators import safe_output_path, validate_id
@@ -582,27 +581,6 @@ def zone_tld_delete(ctx: click.Context, tld_id: str, yes: bool) -> None:
 
 # ── ADR-0008 deprecated aliases (backward compatibility) ────────────────
 
-add_command_with_alias(zone, zone_tld_list,
-                        legacy_name="tld-list", primary_path="zone tld list")
-add_command_with_alias(zone, zone_tld_create,
-                        legacy_name="tld-create", primary_path="zone tld create")
-add_command_with_alias(zone, zone_tld_delete,
-                        legacy_name="tld-delete", primary_path="zone tld delete")
-add_command_with_alias(zone, zone_transfer_request_create,
-                        legacy_name="transfer-request-create",
-                        primary_path="zone transfer request create")
-add_command_with_alias(zone, zone_transfer_request_list,
-                        legacy_name="transfer-request-list",
-                        primary_path="zone transfer request list")
-add_command_with_alias(zone, zone_transfer_request_show,
-                        legacy_name="transfer-request-show",
-                        primary_path="zone transfer request show")
-add_command_with_alias(zone, zone_transfer_request_delete,
-                        legacy_name="transfer-request-delete",
-                        primary_path="zone transfer request delete")
-add_command_with_alias(zone, zone_transfer_accept,
-                        legacy_name="transfer-accept",
-                        primary_path="zone transfer accept")
 
 
 # ══════════════════════════════════════════════════════════════════════

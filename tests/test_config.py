@@ -85,7 +85,6 @@ class TestProfileCRUD:
     def test_get_nonexistent_profile_returns_empty(self, config_dir):
         assert get_profile("nope") == {}
 
-
 # ── Legacy migration ────────────────────────────────────────────────────
 
 class TestLegacyMigration:
@@ -157,7 +156,6 @@ class TestLegacyMigration:
         assert cfg["project_name"] == "production"
         assert "project_id" not in cfg
 
-
 # ── config_is_complete ──────────────────────────────────────────────────
 
 class TestConfigIsComplete:
@@ -196,7 +194,6 @@ class TestConfigIsComplete:
             "user_domain_name": "Default",
         }
         assert config_is_complete(cfg) is False
-
 
 # ── clouds.yaml ─────────────────────────────────────────────────────────
 
@@ -297,7 +294,6 @@ class TestCloudsYaml:
         assert cfg["username"] == "cloud-user"
         assert cfg["project_name"] == "cloud-proj"
 
-
 # ── OS_* env vars ───────────────────────────────────────────────────────
 
 class TestOSEnvVars:
@@ -357,7 +353,6 @@ class TestOSEnvVars:
         cfg = load_config()
         assert cfg["auth_url"] == "https://os:5000"
         assert cfg["username"] == "orca-override"  # ORCA_* wins
-
 
 # ── load_config priority chain ──────────────────────────────────────────
 
@@ -429,7 +424,6 @@ class TestLoadConfigPriority:
         cfg = load_config()
         assert cfg["username"] == "env-user"  # OS_* wins
 
-
 # ── Edge cases & error paths ─────────────────────────────────────────────
 
 class TestConfigEdgeCases:
@@ -478,7 +472,6 @@ class TestConfigEdgeCases:
         monkeypatch.setattr("orca_cli.core.config._CLOUDS_YAML_PATHS", [p])
         from orca_cli.core.config import _load_clouds_yaml
         assert _load_clouds_yaml("nope") == {}
-
 
 class TestCloudsYamlNormalisation:
     """Cover fallback branches in _normalise_clouds_yaml."""

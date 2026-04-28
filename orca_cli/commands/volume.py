@@ -9,7 +9,6 @@ import click
 
 from orca_cli.commands.image import _parse_property
 from orca_cli.core import cache
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.completions import complete_volumes
 from orca_cli.core.context import OrcaContext
 from orca_cli.core.exceptions import OrcaCLIError
@@ -2211,67 +2210,6 @@ def volume_group_type_delete(ctx: click.Context, group_type_id: str, yes: bool) 
 # so existing scripts keep working. Marked ``deprecated`` in --help and
 # emit a stderr warning. Targeted for removal in v2.0.
 
-for _legacy, _primary, _path in [
-    ("snapshot-list",         volume_snapshot.commands["list"],     "volume snapshot list"),
-    ("snapshot-show",         volume_snapshot.commands["show"],     "volume snapshot show"),
-    ("snapshot-create",       volume_snapshot.commands["create"],   "volume snapshot create"),
-    ("snapshot-delete",       volume_snapshot.commands["delete"],   "volume snapshot delete"),
-    ("snapshot-set",          volume_snapshot.commands["set"],      "volume snapshot set"),
-    ("backup-list",           volume_backup.commands["list"],       "volume backup list"),
-    ("backup-show",           volume_backup.commands["show"],       "volume backup show"),
-    ("backup-create",         volume_backup.commands["create"],     "volume backup create"),
-    ("backup-delete",         volume_backup.commands["delete"],     "volume backup delete"),
-    ("backup-restore",        volume_backup.commands["restore"],    "volume backup restore"),
-    ("type-list",             volume_type.commands["list"],         "volume type list"),
-    ("type-show",             volume_type.commands["show"],         "volume type show"),
-    ("type-create",           volume_type.commands["create"],       "volume type create"),
-    ("type-set",              volume_type.commands["set"],          "volume type set"),
-    ("type-delete",           volume_type.commands["delete"],       "volume type delete"),
-    ("type-access-list",      volume_type_access.commands["list"],  "volume type access list"),
-    ("type-access-add",       volume_type_access.commands["add"],   "volume type access add"),
-    ("type-access-remove",    volume_type_access.commands["remove"], "volume type access remove"),
-    ("transfer-create",       volume_transfer.commands["create"],   "volume transfer create"),
-    ("transfer-list",         volume_transfer.commands["list"],     "volume transfer list"),
-    ("transfer-show",         volume_transfer.commands["show"],     "volume transfer show"),
-    ("transfer-accept",       volume_transfer.commands["accept"],   "volume transfer accept"),
-    ("transfer-delete",       volume_transfer.commands["delete"],   "volume transfer delete"),
-    ("qos-list",              volume_qos.commands["list"],          "volume qos list"),
-    ("qos-show",              volume_qos.commands["show"],          "volume qos show"),
-    ("qos-create",            volume_qos.commands["create"],        "volume qos create"),
-    ("qos-set",               volume_qos.commands["set"],           "volume qos set"),
-    ("qos-delete",            volume_qos.commands["delete"],        "volume qos delete"),
-    ("qos-associate",         volume_qos.commands["associate"],     "volume qos associate"),
-    ("qos-disassociate",      volume_qos.commands["disassociate"],  "volume qos disassociate"),
-    ("service-list",          volume_service.commands["list"],      "volume service list"),
-    ("service-set",           volume_service.commands["set"],       "volume service set"),
-    ("message-list",          volume_message.commands["list"],      "volume message list"),
-    ("message-show",          volume_message.commands["show"],      "volume message show"),
-    ("message-delete",        volume_message.commands["delete"],    "volume message delete"),
-    ("attachment-list",       volume_attachment.commands["list"],     "volume attachment list"),
-    ("attachment-show",       volume_attachment.commands["show"],     "volume attachment show"),
-    ("attachment-delete",     volume_attachment.commands["delete"],   "volume attachment delete"),
-    ("attachment-create",     volume_attachment.commands["create"],   "volume attachment create"),
-    ("attachment-set",        volume_attachment.commands["set"],      "volume attachment set"),
-    ("attachment-complete",   volume_attachment.commands["complete"], "volume attachment complete"),
-    ("group-list",            volume_group.commands["list"],        "volume group list"),
-    ("group-show",            volume_group.commands["show"],        "volume group show"),
-    ("group-create",          volume_group.commands["create"],      "volume group create"),
-    ("group-update",          volume_group.commands["update"],      "volume group update"),
-    ("group-delete",          volume_group.commands["delete"],      "volume group delete"),
-    ("group-snapshot-list",   volume_group_snapshot.commands["list"],   "volume group snapshot list"),
-    ("group-snapshot-show",   volume_group_snapshot.commands["show"],   "volume group snapshot show"),
-    ("group-snapshot-create", volume_group_snapshot.commands["create"], "volume group snapshot create"),
-    ("group-snapshot-delete", volume_group_snapshot.commands["delete"], "volume group snapshot delete"),
-    ("group-type-list",       volume_group_type.commands["list"],   "volume group type list"),
-    ("group-type-show",       volume_group_type.commands["show"],   "volume group type show"),
-    ("group-type-create",     volume_group_type.commands["create"], "volume group type create"),
-    ("group-type-set",        volume_group_type.commands["set"],    "volume group type set"),
-    ("group-type-unset",      volume_group_type.commands["unset"],  "volume group type unset"),
-    ("group-type-delete",     volume_group_type.commands["delete"], "volume group type delete"),
-    ("revert-to-snapshot",    volume_snapshot.commands["revert"],   "volume snapshot revert"),
-]:
-    add_command_with_alias(volume, _primary, legacy_name=_legacy, primary_path=_path)
-del _legacy, _primary, _path
 
 
 @volume.group("pool")

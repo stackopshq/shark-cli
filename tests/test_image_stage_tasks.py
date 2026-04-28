@@ -8,15 +8,12 @@ IMG = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
 TASK_ID = "tttttttt-tttt-tttt-tttt-tttttttttttt"
 GL = "https://glance.example.com"
 
-
 def _setup(mock_client):
     mock_client.image_url = GL
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  image stage
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestImageStage:
 
@@ -65,11 +62,9 @@ class TestImageStage:
         assert result.exit_code == 0
         assert "staging" in result.output.lower()
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  image stores-info
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestImageStoresInfo:
 
@@ -81,7 +76,7 @@ class TestImageStoresInfo:
                 {"id": "ceph2", "description": "Backup Ceph", "is_default": False},
             ]
         }
-        result = invoke(["image", "stores-info"])
+        result = invoke(["image", "stores", "info"])
         assert result.exit_code == 0
         assert "ceph1" in result.output
         assert "ceph2" in result.output
@@ -93,34 +88,32 @@ class TestImageStoresInfo:
                 {"id": "fast", "description": "Fast SSD", "is_default": True},
             ]
         }
-        result = invoke(["image", "stores-info"])
+        result = invoke(["image", "stores", "info"])
         assert result.exit_code == 0
         assert "yes" in result.output
 
     def test_detail_flag_uses_detail_url(self, invoke, mock_client):
         _setup(mock_client)
         mock_client.get.return_value = {"stores": []}
-        invoke(["image", "stores-info", "--detail"])
+        invoke(["image", "stores", "info", "--detail"])
         url = mock_client.get.call_args[0][0]
         assert "/detail" in url
 
     def test_empty_stores(self, invoke, mock_client):
         _setup(mock_client)
         mock_client.get.return_value = {"stores": []}
-        result = invoke(["image", "stores-info"])
+        result = invoke(["image", "stores", "info"])
         assert result.exit_code == 0
         assert "No stores found" in result.output
 
     def test_help(self, invoke):
-        result = invoke(["image", "stores-info", "--help"])
+        result = invoke(["image", "stores", "info", "--help"])
         assert result.exit_code == 0
         assert "--detail" in result.output
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  image task-list
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestImageTaskList:
 
@@ -138,7 +131,7 @@ class TestImageTaskList:
                 }
             ]
         }
-        result = invoke(["image", "task-list"])
+        result = invoke(["image", "task", "list"])
         assert result.exit_code == 0
         assert "impo" in result.output   # "import" may be truncated to "impo…"
         assert "succ" in result.output   # "success" may be truncated to "succ…"
@@ -146,33 +139,31 @@ class TestImageTaskList:
     def test_filter_by_type(self, invoke, mock_client):
         _setup(mock_client)
         mock_client.get.return_value = {"tasks": []}
-        invoke(["image", "task-list", "--type", "import"])
+        invoke(["image", "task", "list", "--type", "import"])
         _, kwargs = mock_client.get.call_args
         assert kwargs.get("params", {}).get("type") == "import"
 
     def test_filter_by_status(self, invoke, mock_client):
         _setup(mock_client)
         mock_client.get.return_value = {"tasks": []}
-        invoke(["image", "task-list", "--status", "pending"])
+        invoke(["image", "task", "list", "--status", "pending"])
         _, kwargs = mock_client.get.call_args
         assert kwargs.get("params", {}).get("status") == "pending"
 
     def test_empty_tasks(self, invoke, mock_client):
         _setup(mock_client)
         mock_client.get.return_value = {"tasks": []}
-        result = invoke(["image", "task-list"])
+        result = invoke(["image", "task", "list"])
         assert result.exit_code == 0
         assert "No tasks found" in result.output
 
     def test_invalid_type(self, invoke, mock_client):
-        result = invoke(["image", "task-list", "--type", "badtype"])
+        result = invoke(["image", "task", "list", "--type", "badtype"])
         assert result.exit_code != 0
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  image task-show
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestImageTaskShow:
 
@@ -190,7 +181,7 @@ class TestImageTaskShow:
             "updated_at": "2025-01-01T01:00:00Z",
             "expires_at": "2025-01-08T00:00:00Z",
         }
-        result = invoke(["image", "task-show", TASK_ID])
+        result = invoke(["image", "task", "show", TASK_ID])
         assert result.exit_code == 0
         assert "import" in result.output
         assert "processing" in result.output
@@ -198,10 +189,10 @@ class TestImageTaskShow:
     def test_show_calls_correct_url(self, invoke, mock_client):
         _setup(mock_client)
         mock_client.get.return_value = {"id": TASK_ID, "type": "import", "status": "success"}
-        invoke(["image", "task-show", TASK_ID])
+        invoke(["image", "task", "show", TASK_ID])
         url = mock_client.get.call_args[0][0]
         assert f"/v2/tasks/{TASK_ID}" in url
 
     def test_help(self, invoke):
-        result = invoke(["image", "task-show", "--help"])
+        result = invoke(["image", "task", "show", "--help"])
         assert result.exit_code == 0

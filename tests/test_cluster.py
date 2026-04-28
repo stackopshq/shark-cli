@@ -9,7 +9,6 @@ from orca_cli.core.config import save_profile, set_active_profile
 CLUSTER_ID = "11112222-3333-4444-5555-666677778888"
 TEMPLATE_ID = "aaaabbbb-cccc-dddd-eeee-ffffffffffff"
 
-
 def _cluster(uuid=CLUSTER_ID, name="my-k8s", status="CREATE_COMPLETE"):
     return {
         "uuid": uuid, "name": name, "status": status,
@@ -22,7 +21,6 @@ def _cluster(uuid=CLUSTER_ID, name="my-k8s", status="CREATE_COMPLETE"):
         "stack_id": "stack-1", "create_timeout": 60,
         "created_at": "2025-01-01", "updated_at": None,
     }
-
 
 def _template(uuid=TEMPLATE_ID, name="k8s-tmpl"):
     return {
@@ -38,7 +36,6 @@ def _template(uuid=TEMPLATE_ID, name="k8s-tmpl"):
         "floating_ip_enabled": True, "labels": {},
         "created_at": "2025-01-01", "updated_at": None,
     }
-
 
 def _setup_mock(mock_client):
     mock_client.container_infra_url = "https://magnum.example.com/v1"
@@ -80,11 +77,9 @@ def _setup_mock(mock_client):
 
     return {"posted": posted, "patched": patched, "deleted": deleted}
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  cluster list
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestClusterList:
 
@@ -107,11 +102,9 @@ class TestClusterList:
         assert result.exit_code == 0
         assert "No clusters found" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  cluster show
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestClusterShow:
 
@@ -124,11 +117,9 @@ class TestClusterShow:
         assert result.exit_code == 0
         assert "my-k8s" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  cluster create
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestClusterCreate:
 
@@ -161,11 +152,9 @@ class TestClusterCreate:
         assert body["keypair"] == "my-key"
         assert body["flavor_id"] == "m1.large"
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  cluster delete
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestClusterDelete:
 
@@ -179,11 +168,9 @@ class TestClusterDelete:
         assert "deletion started" in result.output
         assert len(state["deleted"]) == 1
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  cluster resize
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestClusterResize:
 
@@ -196,11 +183,9 @@ class TestClusterResize:
         assert result.exit_code == 0
         assert "resize" in result.output.lower()
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  cluster kubeconfig
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestClusterKubeconfig:
 
@@ -214,11 +199,9 @@ class TestClusterKubeconfig:
         assert "API URL" in result.output
         assert "10.0.0.5" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  template-list / template-show
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestClusterTemplates:
 
@@ -227,7 +210,7 @@ class TestClusterTemplates:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["cluster", "template-list"])
+        result = invoke(["cluster", "template", "list"])
         assert result.exit_code == 0
         assert "k8s" in result.output
 
@@ -237,7 +220,7 @@ class TestClusterTemplates:
         mock_client.container_infra_url = "https://magnum.example.com/v1"
         mock_client.get = lambda url, **kw: {"clustertemplates": []}
 
-        result = invoke(["cluster", "template-list"])
+        result = invoke(["cluster", "template", "list"])
         assert result.exit_code == 0
         assert "No cluster templates found" in result.output
 
@@ -246,7 +229,7 @@ class TestClusterTemplates:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["cluster", "template-show", TEMPLATE_ID])
+        result = invoke(["cluster", "template", "show", TEMPLATE_ID])
         assert result.exit_code == 0
         assert "k8s-tmpl" in result.output
 
@@ -255,7 +238,7 @@ class TestClusterTemplates:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["cluster", "template-create", "new-tmpl",
+        result = invoke(["cluster", "template", "create", "new-tmpl",
                          "--image", "img-1", "--external-network", "ext-net",
                          "--coe", "kubernetes"])
         assert result.exit_code == 0
@@ -269,16 +252,14 @@ class TestClusterTemplates:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["cluster", "template-delete", TEMPLATE_ID, "-y"])
+        result = invoke(["cluster", "template", "delete", TEMPLATE_ID, "-y"])
         assert result.exit_code == 0
         assert "deleted" in result.output.lower()
         assert len(state["deleted"]) == 1
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestClusterHelp:
 
@@ -286,17 +267,14 @@ class TestClusterHelp:
         result = invoke(["cluster", "--help"])
         assert result.exit_code == 0
         for cmd in ("list", "show", "create", "delete", "resize",
-                    "kubeconfig", "template-list", "template-show",
-                    "template-create", "template-delete"):
+                    "kubeconfig"):
             assert cmd in result.output
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  cluster upgrade / nodegroup CRUD
 # ══════════════════════════════════════════════════════════════════════════
 
 NG_ID = "11111111-1111-1111-1111-111111111111"
-
 
 class TestClusterUpgrade:
 
@@ -311,7 +289,6 @@ class TestClusterUpgrade:
     def test_help(self, invoke):
         assert invoke(["cluster", "upgrade", "--help"]).exit_code == 0
 
-
 class TestNodegroupList:
 
     def test_list(self, invoke, mock_client):
@@ -320,19 +297,18 @@ class TestNodegroupList:
             {"uuid": NG_ID, "name": "default-worker", "role": "worker",
              "node_count": 3, "status": "CREATE_COMPLETE", "flavor_id": "m1.medium"},
         ]}
-        result = invoke(["cluster", "nodegroup-list", CLUSTER_ID])
+        result = invoke(["cluster", "nodegroup", "list", CLUSTER_ID])
         assert result.exit_code == 0
         assert "work" in result.output
 
     def test_list_empty(self, invoke, mock_client):
         mock_client.container_infra_url = "https://magnum.example.com/v1"
         mock_client.get.return_value = {"nodegroups": []}
-        result = invoke(["cluster", "nodegroup-list", CLUSTER_ID])
+        result = invoke(["cluster", "nodegroup", "list", CLUSTER_ID])
         assert "No node groups" in result.output
 
     def test_help(self, invoke):
-        assert invoke(["cluster", "nodegroup-list", "--help"]).exit_code == 0
-
+        assert invoke(["cluster", "nodegroup", "list", "--help"]).exit_code == 0
 
 class TestNodegroupShow:
 
@@ -345,20 +321,19 @@ class TestNodegroupShow:
             "status": "CREATE_COMPLETE", "status_reason": "",
             "created_at": "", "updated_at": "",
         }
-        result = invoke(["cluster", "nodegroup-show", CLUSTER_ID, NG_ID])
+        result = invoke(["cluster", "nodegroup", "show", CLUSTER_ID, NG_ID])
         assert result.exit_code == 0
         assert "work" in result.output
 
     def test_help(self, invoke):
-        assert invoke(["cluster", "nodegroup-show", "--help"]).exit_code == 0
-
+        assert invoke(["cluster", "nodegroup", "show", "--help"]).exit_code == 0
 
 class TestNodegroupCreate:
 
     def test_create(self, invoke, mock_client):
         mock_client.container_infra_url = "https://magnum.example.com/v1"
         mock_client.post.return_value = {"uuid": NG_ID}
-        result = invoke(["cluster", "nodegroup-create", CLUSTER_ID,
+        result = invoke(["cluster", "nodegroup", "create", CLUSTER_ID,
                          "--name", "gpu-pool",
                          "--flavor-id", "gpu.medium",
                          "--node-count", "2"])
@@ -368,14 +343,13 @@ class TestNodegroupCreate:
         assert body["node_count"] == 2
 
     def test_help(self, invoke):
-        assert invoke(["cluster", "nodegroup-create", "--help"]).exit_code == 0
-
+        assert invoke(["cluster", "nodegroup", "create", "--help"]).exit_code == 0
 
 class TestNodegroupUpdate:
 
     def test_update_node_count(self, invoke, mock_client):
         mock_client.container_infra_url = "https://magnum.example.com/v1"
-        result = invoke(["cluster", "nodegroup-update", CLUSTER_ID, NG_ID,
+        result = invoke(["cluster", "nodegroup", "update", CLUSTER_ID, NG_ID,
                          "--node-count", "5"])
         assert result.exit_code == 0
         ops = mock_client.patch.call_args[1]["json"]
@@ -383,27 +357,26 @@ class TestNodegroupUpdate:
 
     def test_update_nothing(self, invoke, mock_client):
         mock_client.container_infra_url = "https://magnum.example.com/v1"
-        result = invoke(["cluster", "nodegroup-update", CLUSTER_ID, NG_ID])
+        result = invoke(["cluster", "nodegroup", "update", CLUSTER_ID, NG_ID])
         assert result.exit_code == 0
         mock_client.patch.assert_not_called()
 
     def test_help(self, invoke):
-        assert invoke(["cluster", "nodegroup-update", "--help"]).exit_code == 0
-
+        assert invoke(["cluster", "nodegroup", "update", "--help"]).exit_code == 0
 
 class TestNodegroupDelete:
 
     def test_delete_yes(self, invoke, mock_client):
         mock_client.container_infra_url = "https://magnum.example.com/v1"
-        result = invoke(["cluster", "nodegroup-delete", CLUSTER_ID, NG_ID, "--yes"])
+        result = invoke(["cluster", "nodegroup", "delete", CLUSTER_ID, NG_ID, "--yes"])
         assert result.exit_code == 0
         mock_client.delete.assert_called_once()
 
     def test_delete_requires_confirm(self, invoke, mock_client):
         mock_client.container_infra_url = "https://magnum.example.com/v1"
-        result = invoke(["cluster", "nodegroup-delete", CLUSTER_ID, NG_ID], input="n\n")
+        result = invoke(["cluster", "nodegroup", "delete", CLUSTER_ID, NG_ID], input="n\n")
         assert result.exit_code != 0
         mock_client.delete.assert_not_called()
 
     def test_help(self, invoke):
-        assert invoke(["cluster", "nodegroup-delete", "--help"]).exit_code == 0
+        assert invoke(["cluster", "nodegroup", "delete", "--help"]).exit_code == 0

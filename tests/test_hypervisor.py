@@ -51,7 +51,6 @@ SAMPLE_HYPERVISORS = {
     ]
 }
 
-
 class TestHypervisorList:
 
     def test_list(self, invoke, mock_client, write_config, sample_profile):
@@ -62,11 +61,9 @@ class TestHypervisorList:
         assert "compute-01" in result.output
         assert "compute-02" in result.output
 
-
 def _hostnames(invoke_result):
     """Extract ordered hostnames from `hypervisor usage -f json` output."""
     return [r["Hostname"] for r in json.loads(invoke_result.output)]
-
 
 class TestHypervisorUsage:
     """Verify the new ``usage`` command — fill rate + sorting."""

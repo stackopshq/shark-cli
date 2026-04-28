@@ -21,7 +21,6 @@ def _capture(fn, *args, **kwargs):
     result = runner.invoke(_wrap, [], catch_exceptions=False)
     return result.output
 
-
 class TestPrintListEmpty:
 
     def test_empty_list_table_mode_shows_yellow_msg(self):
@@ -36,7 +35,6 @@ class TestPrintListEmpty:
         """Non-JSON empty output falls into the same yellow-msg branch."""
         out = _capture(print_list, [], [("ID", "id")], output_format="value")
         assert "No results found." in out
-
 
 class TestPrintListJson:
 
@@ -53,7 +51,6 @@ class TestPrintListJson:
         assert "\n" not in out.strip()
         assert json.loads(out) == [{"ID": "1"}]
 
-
 class TestPrintListValue:
 
     def test_value_mode_space_separated(self):
@@ -63,7 +60,6 @@ class TestPrintListValue:
         )
         lines = out.strip().split("\n")
         assert lines == ["1 foo", "2 bar"]
-
 
 class TestPrintListColumnFilter:
 
@@ -78,7 +74,6 @@ class TestPrintListColumnFilter:
         )
         data = json.loads(out)
         assert data == [{"Name": "foo", "Status": "ACTIVE"}]
-
 
 class TestPrintListTable:
 
@@ -100,7 +95,6 @@ class TestPrintListTable:
         items = [{"id": "1"}]
         out = _capture(print_list, items, [("ID", "id")], max_width=0)
         assert "1" in out
-
 
 class TestPrintDetail:
 

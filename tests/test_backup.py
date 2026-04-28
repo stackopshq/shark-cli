@@ -12,7 +12,6 @@ SESSION_ID = "sess-ghi789"
 CLIENT_ID = "client-jkl012"
 ACTION_ID = "act-mno345"
 
-
 def _setup_mock(mock_client):
     mock_client.backup_url = "https://freezer.example.com"
 
@@ -139,11 +138,9 @@ def _setup_mock(mock_client):
 
     return {"posted": posted, "put_urls": put_urls, "deleted": deleted}
 
-
 # ============================================================================
 #  backup list
 # ============================================================================
-
 
 class TestBackupList:
 
@@ -167,11 +164,9 @@ class TestBackupList:
         assert result.exit_code == 0
         assert "No backups found" in result.output
 
-
 # ============================================================================
 #  backup show
 # ============================================================================
-
 
 class TestBackupShow:
 
@@ -186,11 +181,9 @@ class TestBackupShow:
         assert "swift" in result.output
         assert "extra_val" in result.output
 
-
 # ============================================================================
 #  backup delete
 # ============================================================================
-
 
 class TestBackupDelete:
 
@@ -204,11 +197,9 @@ class TestBackupDelete:
         assert "deleted" in result.output.lower()
         assert len(state["deleted"]) == 1
 
-
 # ============================================================================
 #  backup job-list
 # ============================================================================
-
 
 class TestJobList:
 
@@ -217,7 +208,7 @@ class TestJobList:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["backup", "job-list"])
+        result = invoke(["backup", "job", "list"])
         assert result.exit_code == 0
         assert "daily" in result.output
         assert "runn" in result.output
@@ -228,15 +219,13 @@ class TestJobList:
         mock_client.backup_url = "https://freezer.example.com"
         mock_client.get = lambda url, **kw: {"jobs": []}
 
-        result = invoke(["backup", "job-list"])
+        result = invoke(["backup", "job", "list"])
         assert result.exit_code == 0
         assert "No jobs found" in result.output
-
 
 # ============================================================================
 #  backup job-show
 # ============================================================================
-
 
 class TestJobShow:
 
@@ -245,16 +234,14 @@ class TestJobShow:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["backup", "job-show", JOB_ID])
+        result = invoke(["backup", "job", "show", JOB_ID])
         assert result.exit_code == 0
         assert "daily" in result.output
         assert "backup" in result.output.lower()
 
-
 # ============================================================================
 #  backup job-create
 # ============================================================================
-
 
 class TestJobCreate:
 
@@ -263,7 +250,7 @@ class TestJobCreate:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["backup", "job-create",
+        result = invoke(["backup", "job", "create",
                          "--client-id", CLIENT_ID,
                          "--path", "/var/data",
                          "--container", "my-ct"])
@@ -277,7 +264,7 @@ class TestJobCreate:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["backup", "job-create",
+        result = invoke(["backup", "job", "create",
                          "--client-id", CLIENT_ID,
                          "--path", "/var/restore",
                          "--action", "restore"])
@@ -286,11 +273,9 @@ class TestJobCreate:
         assert fa["restore_abs_path"] == "/var/restore"
         assert fa["action"] == "restore"
 
-
 # ============================================================================
 #  backup job-start / job-stop
 # ============================================================================
-
 
 class TestJobStartStop:
 
@@ -299,7 +284,7 @@ class TestJobStartStop:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["backup", "job-start", JOB_ID])
+        result = invoke(["backup", "job", "start", JOB_ID])
         assert result.exit_code == 0
         assert "started" in result.output.lower()
         assert state["posted"]["event"] == "start"
@@ -309,16 +294,14 @@ class TestJobStartStop:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["backup", "job-stop", JOB_ID])
+        result = invoke(["backup", "job", "stop", JOB_ID])
         assert result.exit_code == 0
         assert "stopped" in result.output.lower()
         assert state["posted"]["event"] == "stop"
 
-
 # ============================================================================
 #  backup job-delete
 # ============================================================================
-
 
 class TestJobDelete:
 
@@ -327,16 +310,14 @@ class TestJobDelete:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["backup", "job-delete", JOB_ID, "-y"])
+        result = invoke(["backup", "job", "delete", JOB_ID, "-y"])
         assert result.exit_code == 0
         assert "deleted" in result.output.lower()
         assert len(state["deleted"]) == 1
 
-
 # ============================================================================
 #  backup session-list
 # ============================================================================
-
 
 class TestSessionList:
 
@@ -345,7 +326,7 @@ class TestSessionList:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["backup", "session-list"])
+        result = invoke(["backup", "session", "list"])
         assert result.exit_code == 0
         assert "weekly" in result.output
         assert "activ" in result.output
@@ -356,15 +337,13 @@ class TestSessionList:
         mock_client.backup_url = "https://freezer.example.com"
         mock_client.get = lambda url, **kw: {"sessions": []}
 
-        result = invoke(["backup", "session-list"])
+        result = invoke(["backup", "session", "list"])
         assert result.exit_code == 0
         assert "No sessions found" in result.output
-
 
 # ============================================================================
 #  backup session-show
 # ============================================================================
-
 
 class TestSessionShow:
 
@@ -373,16 +352,14 @@ class TestSessionShow:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["backup", "session-show", SESSION_ID])
+        result = invoke(["backup", "session", "show", SESSION_ID])
         assert result.exit_code == 0
         assert "weekly" in result.output
         assert "activ" in result.output
 
-
 # ============================================================================
 #  backup session-create
 # ============================================================================
-
 
 class TestSessionCreate:
 
@@ -391,7 +368,7 @@ class TestSessionCreate:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["backup", "session-create", "--description", "my-session"])
+        result = invoke(["backup", "session", "create", "--description", "my-session"])
         assert result.exit_code == 0
         assert "created" in result.output.lower()
         assert state["posted"]["description"] == "my-session"
@@ -401,17 +378,15 @@ class TestSessionCreate:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["backup", "session-create",
+        result = invoke(["backup", "session", "create",
                          "--description", "sched-sess",
                          "--schedule-interval", "24 hours"])
         assert result.exit_code == 0
         assert state["posted"]["schedule"]["schedule_interval"] == "24 hours"
 
-
 # ============================================================================
 #  backup session-start
 # ============================================================================
-
 
 class TestSessionStart:
 
@@ -420,15 +395,13 @@ class TestSessionStart:
         set_active_profile("p")
         _ = _setup_mock(mock_client)
 
-        result = invoke(["backup", "session-start", SESSION_ID])
+        result = invoke(["backup", "session", "start", SESSION_ID])
         assert result.exit_code == 0
         assert "started" in result.output.lower()
-
 
 # ============================================================================
 #  backup session-add-job / session-remove-job
 # ============================================================================
-
 
 class TestSessionAddRemoveJob:
 
@@ -437,7 +410,7 @@ class TestSessionAddRemoveJob:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["backup", "session-add-job", SESSION_ID, JOB_ID])
+        result = invoke(["backup", "session", "add-job", SESSION_ID, JOB_ID])
         assert result.exit_code == 0
         assert "added" in result.output.lower()
         assert len(state["put_urls"]) == 1
@@ -449,17 +422,15 @@ class TestSessionAddRemoveJob:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["backup", "session-remove-job", SESSION_ID, JOB_ID])
+        result = invoke(["backup", "session", "remove-job", SESSION_ID, JOB_ID])
         assert result.exit_code == 0
         assert "removed" in result.output.lower()
         assert len(state["deleted"]) == 1
         assert SESSION_ID in state["deleted"][0]
 
-
 # ============================================================================
 #  backup session-delete
 # ============================================================================
-
 
 class TestSessionDelete:
 
@@ -468,16 +439,14 @@ class TestSessionDelete:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["backup", "session-delete", SESSION_ID, "-y"])
+        result = invoke(["backup", "session", "delete", SESSION_ID, "-y"])
         assert result.exit_code == 0
         assert "deleted" in result.output.lower()
         assert len(state["deleted"]) == 1
 
-
 # ============================================================================
 #  backup client-list
 # ============================================================================
-
 
 class TestClientList:
 
@@ -486,7 +455,7 @@ class TestClientList:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["backup", "client-list"])
+        result = invoke(["backup", "client", "list"])
         assert result.exit_code == 0
         assert "node1" in result.output
 
@@ -496,15 +465,13 @@ class TestClientList:
         mock_client.backup_url = "https://freezer.example.com"
         mock_client.get = lambda url, **kw: {"clients": []}
 
-        result = invoke(["backup", "client-list"])
+        result = invoke(["backup", "client", "list"])
         assert result.exit_code == 0
         assert "No clients found" in result.output
-
 
 # ============================================================================
 #  backup client-show
 # ============================================================================
-
 
 class TestClientShow:
 
@@ -513,16 +480,14 @@ class TestClientShow:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["backup", "client-show", CLIENT_ID])
+        result = invoke(["backup", "client", "show", CLIENT_ID])
         assert result.exit_code == 0
         assert "node1" in result.output
         assert "primary" in result.output
 
-
 # ============================================================================
 #  backup client-register
 # ============================================================================
-
 
 class TestClientRegister:
 
@@ -531,17 +496,15 @@ class TestClientRegister:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["backup", "client-register", "new-host",
+        result = invoke(["backup", "client", "register", "new-host",
                          "--description", "new agent"])
         assert result.exit_code == 0
         assert "registered" in result.output.lower()
         assert state["posted"]["hostname"] == "new-host"
 
-
 # ============================================================================
 #  backup client-delete
 # ============================================================================
-
 
 class TestClientDelete:
 
@@ -550,16 +513,14 @@ class TestClientDelete:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["backup", "client-delete", CLIENT_ID, "-y"])
+        result = invoke(["backup", "client", "delete", CLIENT_ID, "-y"])
         assert result.exit_code == 0
         assert "deleted" in result.output.lower()
         assert len(state["deleted"]) == 1
 
-
 # ============================================================================
 #  backup action-list
 # ============================================================================
-
 
 class TestActionList:
 
@@ -568,7 +529,7 @@ class TestActionList:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["backup", "action-list"])
+        result = invoke(["backup", "action", "list"])
         assert result.exit_code == 0
         assert "backup" in result.output.lower()
 
@@ -578,15 +539,13 @@ class TestActionList:
         mock_client.backup_url = "https://freezer.example.com"
         mock_client.get = lambda url, **kw: {"actions": []}
 
-        result = invoke(["backup", "action-list"])
+        result = invoke(["backup", "action", "list"])
         assert result.exit_code == 0
         assert "No actions found" in result.output
-
 
 # ============================================================================
 #  backup action-show
 # ============================================================================
-
 
 class TestActionShow:
 
@@ -595,16 +554,14 @@ class TestActionShow:
         set_active_profile("p")
         _setup_mock(mock_client)
 
-        result = invoke(["backup", "action-show", ACTION_ID])
+        result = invoke(["backup", "action", "show", ACTION_ID])
         assert result.exit_code == 0
         assert "backup" in result.output.lower()
         assert "swift" in result.output
 
-
 # ============================================================================
 #  backup action-create
 # ============================================================================
-
 
 class TestActionCreate:
 
@@ -613,7 +570,7 @@ class TestActionCreate:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["backup", "action-create",
+        result = invoke(["backup", "action", "create",
                          "--path", "/var/data",
                          "--container", "act-ct"])
         assert result.exit_code == 0
@@ -627,7 +584,7 @@ class TestActionCreate:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["backup", "action-create",
+        result = invoke(["backup", "action", "create",
                          "--action", "restore",
                          "--path", "/var/restore"])
         assert result.exit_code == 0
@@ -635,11 +592,9 @@ class TestActionCreate:
         assert fa["restore_abs_path"] == "/var/restore"
         assert fa["action"] == "restore"
 
-
 # ============================================================================
 #  backup action-delete
 # ============================================================================
-
 
 class TestActionDelete:
 
@@ -648,30 +603,19 @@ class TestActionDelete:
         set_active_profile("p")
         state = _setup_mock(mock_client)
 
-        result = invoke(["backup", "action-delete", ACTION_ID, "-y"])
+        result = invoke(["backup", "action", "delete", ACTION_ID, "-y"])
         assert result.exit_code == 0
         assert "deleted" in result.output.lower()
         assert len(state["deleted"]) == 1
 
-
 # ============================================================================
 #  Help
 # ============================================================================
-
 
 class TestBackupHelp:
 
     def test_backup_help(self, invoke):
         result = invoke(["backup", "--help"])
         assert result.exit_code == 0
-        for cmd in ("list", "show", "delete",
-                    "job-list", "job-show", "job-create", "job-start",
-                    "job-stop", "job-delete",
-                    "session-list", "session-show", "session-create",
-                    "session-start", "session-add-job", "session-remove-job",
-                    "session-delete",
-                    "client-list", "client-show", "client-register",
-                    "client-delete",
-                    "action-list", "action-show", "action-create",
-                    "action-delete"):
+        for cmd in ("list", "show", "delete"):
             assert cmd in result.output, f"'{cmd}' not in help output"

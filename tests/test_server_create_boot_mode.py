@@ -8,7 +8,6 @@ IMG_ID = "55556666-7777-8888-9999-000011112222"
 FLAVOR_WITH_DISK = "flav-disk-20"
 FLAVOR_DISKLESS = "flav-disk-0"
 
-
 def _mock_create_with_flavors(mock_client, flavors):
     """Wire a mock_client that answers GET /flavors/<id> and POST /servers."""
     mock_client.compute_url = "https://nova.example.com/v2.1"
@@ -28,7 +27,6 @@ def _mock_create_with_flavors(mock_client, flavors):
     mock_client.get = _get
     mock_client.post = _post
     return state
-
 
 # ── auto-detection ──────────────────────────────────────────────────────────
 
@@ -75,7 +73,6 @@ class TestAutoDetect:
         assert bdm["destination_type"] == "volume"
         assert bdm["volume_size"] == 30
         assert "imageRef" not in body
-
 
 # ── explicit flags ──────────────────────────────────────────────────────────
 
@@ -162,7 +159,6 @@ class TestExplicitFlags:
         assert result.exit_code != 0
         assert "mutually exclusive" in result.output
         assert "body" not in state["posted"]
-
 
 # ── fallback when flavor lookup fails ───────────────────────────────────────
 

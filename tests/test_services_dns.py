@@ -17,18 +17,15 @@ from orca_cli.services.dns import DnsService
 DESIGNATE = "https://dns.example.com"
 BASE = f"{DESIGNATE}/v2"  # ``with_version()`` appends v2
 
-
 @pytest.fixture
 def dns_client():
     client = MagicMock()
     client.dns_url = DESIGNATE
     return client
 
-
 @pytest.fixture
 def svc(dns_client):
     return DnsService(dns_client)
-
 
 # ── zones ──────────────────────────────────────────────────────────────
 
@@ -37,7 +34,6 @@ def test_find_zones(dns_client, svc):
     out = svc.find_zones()
     dns_client.get.assert_called_once_with(f"{BASE}/zones")
     assert out[0]["id"] == "z1"
-
 
 def test_find_zones_passes_params_and_headers(dns_client, svc):
     dns_client.get.return_value = {"zones": []}
@@ -48,18 +44,15 @@ def test_find_zones_passes_params_and_headers(dns_client, svc):
         headers={"X-Auth-All-Projects": "true"},
     )
 
-
 def test_get_zone_unwraps_envelope(dns_client, svc):
     dns_client.get.return_value = {"zone": {"id": "z1", "name": "ex.com."}}
     out = svc.get_zone("z1")
     dns_client.get.assert_called_once_with(f"{BASE}/zones/z1")
     assert out["name"] == "ex.com."
 
-
 def test_get_zone_falls_back_when_no_envelope(dns_client, svc):
     dns_client.get.return_value = {"id": "raw"}
     assert svc.get_zone("z1") == {"id": "raw"}
-
 
 def test_create_zone(dns_client, svc):
     dns_client.post.return_value = {"zone": {"id": "z-new"}}
@@ -69,11 +62,9 @@ def test_create_zone(dns_client, svc):
     )
     assert out["id"] == "z-new"
 
-
 def test_create_zone_handles_none(dns_client, svc):
     dns_client.post.return_value = None
     assert svc.create_zone({"name": "ex.com."}) == {}
-
 
 def test_update_zone_uses_patch(dns_client, svc):
     dns_client.patch.return_value = {"zone": {"id": "z1", "ttl": 600}}
@@ -81,16 +72,13 @@ def test_update_zone_uses_patch(dns_client, svc):
     dns_client.patch.assert_called_once_with(f"{BASE}/zones/z1", json={"ttl": 600})
     assert out["ttl"] == 600
 
-
 def test_update_zone_handles_none(dns_client, svc):
     dns_client.patch.return_value = None
     assert svc.update_zone("z1", {}) == {}
 
-
 def test_delete_zone(dns_client, svc):
     svc.delete_zone("z1")
     dns_client.delete.assert_called_once_with(f"{BASE}/zones/z1")
-
 
 # ── recordsets ─────────────────────────────────────────────────────────
 
@@ -101,7 +89,6 @@ def test_find_recordsets(dns_client, svc):
         f"{BASE}/zones/z1/recordsets", params={"type": "A"}
     )
 
-
 def test_find_all_recordsets(dns_client, svc):
     dns_client.get.return_value = {"recordsets": [{"id": "r"}]}
     out = svc.find_all_recordsets(params={"name": "x.ex.com."})
@@ -110,13 +97,11 @@ def test_find_all_recordsets(dns_client, svc):
     )
     assert out[0]["id"] == "r"
 
-
 def test_get_recordset(dns_client, svc):
     dns_client.get.return_value = {"recordset": {"id": "r1"}}
     out = svc.get_recordset("z1", "r1")
     dns_client.get.assert_called_once_with(f"{BASE}/zones/z1/recordsets/r1")
     assert out["id"] == "r1"
-
 
 def test_create_recordset(dns_client, svc):
     dns_client.post.return_value = {"recordset": {"id": "r1"}}
@@ -127,11 +112,9 @@ def test_create_recordset(dns_client, svc):
     )
     assert out["id"] == "r1"
 
-
 def test_create_recordset_handles_none(dns_client, svc):
     dns_client.post.return_value = None
     assert svc.create_recordset("z1", {}) == {}
-
 
 def test_update_recordset_uses_put(dns_client, svc):
     dns_client.put.return_value = {"recordset": {"id": "r1", "ttl": 60}}
@@ -141,16 +124,13 @@ def test_update_recordset_uses_put(dns_client, svc):
     )
     assert out["ttl"] == 60
 
-
 def test_update_recordset_handles_none(dns_client, svc):
     dns_client.put.return_value = None
     assert svc.update_recordset("z1", "r1", {}) == {}
 
-
 def test_delete_recordset(dns_client, svc):
     svc.delete_recordset("z1", "r1")
     dns_client.delete.assert_called_once_with(f"{BASE}/zones/z1/recordsets/r1")
-
 
 # ── export / import ───────────────────────────────────────────────────
 
@@ -160,22 +140,18 @@ def test_export_zone(dns_client, svc):
     dns_client.post.assert_called_once_with(f"{BASE}/zones/z1/tasks/export")
     assert out["status"] == "PENDING"
 
-
 def test_export_zone_handles_none(dns_client, svc):
     dns_client.post.return_value = None
     assert svc.export_zone("z1") == {}
-
 
 def test_get_export_task(dns_client, svc):
     dns_client.get.return_value = {"id": "exp1", "status": "COMPLETE"}
     svc.get_export_task("exp1")
     dns_client.get.assert_called_once_with(f"{BASE}/zones/tasks/exports/exp1")
 
-
 def test_get_export_task_handles_none(dns_client, svc):
     dns_client.get.return_value = None
     assert svc.get_export_task("exp1") == {}
-
 
 def test_fetch_export_text_returns_body(dns_client, svc):
     resp = MagicMock(status_code=200, text="$ORIGIN ex.com.\n")
@@ -191,7 +167,6 @@ def test_fetch_export_text_returns_body(dns_client, svc):
     )
     assert "ex.com" in out
 
-
 def test_fetch_export_text_raises_apierror_on_failure(dns_client, svc):
     resp = MagicMock(status_code=500, text="boom")
     cm = MagicMock()
@@ -201,7 +176,6 @@ def test_fetch_export_text_raises_apierror_on_failure(dns_client, svc):
 
     with pytest.raises(APIError):
         svc.fetch_export_text("exp1")
-
 
 def test_import_zone_text_posts_with_text_dns(dns_client, svc):
     resp = MagicMock(status_code=202)
@@ -216,7 +190,6 @@ def test_import_zone_text_posts_with_text_dns(dns_client, svc):
     assert kwargs["content"].startswith(b"$ORIGIN")
     assert out["id"] == "imp1"
 
-
 def test_import_zone_text_accepts_bytes(dns_client, svc):
     resp = MagicMock(status_code=200)
     resp.json.return_value = {"id": "imp1"}
@@ -225,13 +198,11 @@ def test_import_zone_text_accepts_bytes(dns_client, svc):
     args, kwargs = dns_client.post_stream.call_args
     assert kwargs["content"] == b"already-bytes"
 
-
 def test_import_zone_text_raises_on_bad_status(dns_client, svc):
     resp = MagicMock(status_code=400, text="bad zone")
     dns_client.post_stream = MagicMock(return_value=resp)
     with pytest.raises(APIError):
         svc.import_zone_text("garbage")
-
 
 def test_import_zone_text_handles_invalid_json_body(dns_client, svc):
     resp = MagicMock(status_code=202)
@@ -239,17 +210,14 @@ def test_import_zone_text_handles_invalid_json_body(dns_client, svc):
     dns_client.post_stream = MagicMock(return_value=resp)
     assert svc.import_zone_text("...") == {}
 
-
 def test_get_import_task(dns_client, svc):
     dns_client.get.return_value = {"id": "imp1", "status": "PENDING"}
     svc.get_import_task("imp1")
     dns_client.get.assert_called_once_with(f"{BASE}/zones/tasks/imports/imp1")
 
-
 def test_get_import_task_handles_none(dns_client, svc):
     dns_client.get.return_value = None
     assert svc.get_import_task("imp1") == {}
-
 
 # ── transfer requests ─────────────────────────────────────────────────
 
@@ -262,18 +230,15 @@ def test_create_transfer_request(dns_client, svc):
     )
     assert out["key"] == "ABC"
 
-
 def test_create_transfer_request_handles_none(dns_client, svc):
     dns_client.post.return_value = None
     assert svc.create_transfer_request("z1", {}) == {}
-
 
 def test_find_transfer_requests(dns_client, svc):
     dns_client.get.return_value = {"transfer_requests": [{"id": "tr1"}]}
     out = svc.find_transfer_requests()
     dns_client.get.assert_called_once_with(f"{BASE}/zones/tasks/transfer_requests")
     assert out[0]["id"] == "tr1"
-
 
 def test_get_transfer_request(dns_client, svc):
     dns_client.get.return_value = {"transfer_request": {"id": "tr1"}}
@@ -282,13 +247,11 @@ def test_get_transfer_request(dns_client, svc):
         f"{BASE}/zones/tasks/transfer_requests/tr1"
     )
 
-
 def test_delete_transfer_request(dns_client, svc):
     svc.delete_transfer_request("tr1")
     dns_client.delete.assert_called_once_with(
         f"{BASE}/zones/tasks/transfer_requests/tr1"
     )
-
 
 def test_accept_transfer(dns_client, svc):
     dns_client.post.return_value = {"id": "ta1"}
@@ -298,11 +261,9 @@ def test_accept_transfer(dns_client, svc):
         json={"key": "ABC", "zone_transfer_request_id": "tr1"},
     )
 
-
 def test_accept_transfer_handles_none(dns_client, svc):
     dns_client.post.return_value = None
     assert svc.accept_transfer({}) == {}
-
 
 # ── reverse / TLDs / abandon / axfr ───────────────────────────────────
 
@@ -312,12 +273,10 @@ def test_find_reverse_floatingips(dns_client, svc):
     dns_client.get.assert_called_once_with(f"{BASE}/reverse/floatingips")
     assert out[0]["id"] == "fip1"
 
-
 def test_find_tlds(dns_client, svc):
     dns_client.get.return_value = {"tlds": [{"id": "t1", "name": "com"}]}
     svc.find_tlds()
     dns_client.get.assert_called_once_with(f"{BASE}/tlds")
-
 
 def test_create_tld(dns_client, svc):
     dns_client.post.return_value = {"tld": {"id": "t1"}}
@@ -325,26 +284,21 @@ def test_create_tld(dns_client, svc):
     dns_client.post.assert_called_once_with(f"{BASE}/tlds", json={"name": "test"})
     assert out["id"] == "t1"
 
-
 def test_create_tld_handles_none(dns_client, svc):
     dns_client.post.return_value = None
     assert svc.create_tld({}) == {}
-
 
 def test_delete_tld(dns_client, svc):
     svc.delete_tld("t1")
     dns_client.delete.assert_called_once_with(f"{BASE}/tlds/t1")
 
-
 def test_abandon_zone(dns_client, svc):
     svc.abandon_zone("z1")
     dns_client.post.assert_called_once_with(f"{BASE}/zones/z1/tasks/abandon")
 
-
 def test_axfr_zone(dns_client, svc):
     svc.axfr_zone("z1")
     dns_client.post.assert_called_once_with(f"{BASE}/zones/z1/tasks/xfr")
-
 
 # ── shares ────────────────────────────────────────────────────────────
 
@@ -354,18 +308,15 @@ def test_find_shares(dns_client, svc):
     dns_client.get.assert_called_once_with(f"{BASE}/zones/z1/shares")
     assert out[0]["id"] == "sh1"
 
-
 def test_get_share(dns_client, svc):
     dns_client.get.return_value = {"shared_zone": {"id": "sh1"}}
     out = svc.get_share("z1", "sh1")
     dns_client.get.assert_called_once_with(f"{BASE}/zones/z1/shares/sh1")
     assert out["id"] == "sh1"
 
-
 def test_get_share_handles_unexpected(dns_client, svc):
     dns_client.get.return_value = None
     assert svc.get_share("z1", "sh1") == {}
-
 
 def test_create_share(dns_client, svc):
     dns_client.post.return_value = {"shared_zone": {"id": "sh1"}}
@@ -376,16 +327,13 @@ def test_create_share(dns_client, svc):
     )
     assert out["id"] == "sh1"
 
-
 def test_create_share_handles_none(dns_client, svc):
     dns_client.post.return_value = None
     assert svc.create_share("z1", "p2") == {}
 
-
 def test_delete_share(dns_client, svc):
     svc.delete_share("z1", "sh1")
     dns_client.delete.assert_called_once_with(f"{BASE}/zones/z1/shares/sh1")
-
 
 # ── blacklists ───────────────────────────────────────────────────────
 
@@ -394,18 +342,15 @@ def test_find_blacklists(dns_client, svc):
     svc.find_blacklists()
     dns_client.get.assert_called_once_with(f"{BASE}/blacklists")
 
-
 def test_get_blacklist(dns_client, svc):
     dns_client.get.return_value = {"blacklist": {"id": "bl1"}}
     out = svc.get_blacklist("bl1")
     dns_client.get.assert_called_once_with(f"{BASE}/blacklists/bl1")
     assert out["id"] == "bl1"
 
-
 def test_get_blacklist_handles_unexpected(dns_client, svc):
     dns_client.get.return_value = None
     assert svc.get_blacklist("bl1") == {}
-
 
 def test_create_blacklist(dns_client, svc):
     dns_client.post.return_value = {"blacklist": {"id": "bl1"}}
@@ -415,11 +360,9 @@ def test_create_blacklist(dns_client, svc):
     )
     assert out["id"] == "bl1"
 
-
 def test_create_blacklist_handles_none(dns_client, svc):
     dns_client.post.return_value = None
     assert svc.create_blacklist({}) == {}
-
 
 def test_update_blacklist(dns_client, svc):
     dns_client.patch.return_value = {"blacklist": {"id": "bl1"}}
@@ -429,16 +372,13 @@ def test_update_blacklist(dns_client, svc):
     )
     assert out["id"] == "bl1"
 
-
 def test_update_blacklist_handles_none(dns_client, svc):
     dns_client.patch.return_value = None
     assert svc.update_blacklist("bl1", {}) == {}
 
-
 def test_delete_blacklist(dns_client, svc):
     svc.delete_blacklist("bl1")
     dns_client.delete.assert_called_once_with(f"{BASE}/blacklists/bl1")
-
 
 # ── exports / imports listings ────────────────────────────────────────
 
@@ -448,18 +388,15 @@ def test_find_exports(dns_client, svc):
     dns_client.get.assert_called_once_with(f"{BASE}/zones/tasks/exports")
     assert out[0]["id"] == "e1"
 
-
 def test_delete_export(dns_client, svc):
     svc.delete_export("e1")
     dns_client.delete.assert_called_once_with(f"{BASE}/zones/tasks/exports/e1")
-
 
 def test_find_imports(dns_client, svc):
     dns_client.get.return_value = {"imports": [{"id": "i1"}]}
     out = svc.find_imports()
     dns_client.get.assert_called_once_with(f"{BASE}/zones/tasks/imports")
     assert out[0]["id"] == "i1"
-
 
 def test_delete_import(dns_client, svc):
     svc.delete_import("i1")

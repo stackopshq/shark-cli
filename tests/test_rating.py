@@ -9,11 +9,9 @@ THRESHOLD_ID = "44444444-4444-4444-4444-444444444444"
 GROUP_ID     = "55555555-5555-5555-5555-555555555555"
 BASE         = "https://cloudkitty.example.com"
 
-
 def _rating(mc):
     mc.rating_url = BASE
     return mc
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  rating info / metric-list / metric-show
@@ -34,7 +32,7 @@ class TestInfoAndMetrics:
             {"metric_id": "instance_up", "unit": "instance", "metadata": ["flavor"]},
             {"metric_id": "volume.size", "unit": "GiB", "metadata": []},
         ]}
-        result = invoke(["rating", "metric-list"])
+        result = invoke(["rating", "metric", "list"])
         assert result.exit_code == 0
         assert "instance_up" in result.output
         assert "volume.size" in result.output
@@ -44,13 +42,12 @@ class TestInfoAndMetrics:
         mock_client.get.return_value = {
             "metric_id": "instance_up", "unit": "instance", "metadata": ["flavor"]
         }
-        result = invoke(["rating", "metric-show", "instance_up"])
+        result = invoke(["rating", "metric", "show", "instance_up"])
         assert result.exit_code == 0
         # CloudKitty returns 405 on the singular /metric/{id} path.
         # The plural /metrics/{id} is the correct one.
         called_url = mock_client.get.call_args[0][0]
         assert called_url.endswith("/v1/info/metrics/instance_up")
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  rating summary / dataframes / quote
@@ -99,7 +96,6 @@ class TestSummary:
         result = invoke(["rating", "summary", "--filters", "bad-filter"])
         assert result.exit_code != 0
 
-
 class TestDataframes:
 
     def test_dataframes_v2(self, invoke, mock_client):
@@ -132,7 +128,6 @@ class TestDataframes:
         assert result.exit_code == 0
         assert "No dataframes" in result.output
 
-
 class TestQuote:
 
     def test_quote_single_resource(self, invoke, mock_client):
@@ -152,7 +147,6 @@ class TestQuote:
         result = invoke(["rating", "quote", "--resource", "not-json"])
         assert result.exit_code != 0
 
-
 # ══════════════════════════════════════════════════════════════════════════════
 #  rating modules
 # ══════════════════════════════════════════════════════════════════════════════
@@ -165,7 +159,7 @@ class TestModules:
             {"module_id": "hashmap", "enabled": True, "priority": 1, "description": "HashMap"},
             {"module_id": "pyscripts", "enabled": False, "priority": 0, "description": "PyScripts"},
         ]}
-        result = invoke(["rating", "module-list"])
+        result = invoke(["rating", "module", "list"])
         assert result.exit_code == 0
         assert "hashmap" in result.output
         assert "pyscripts" in result.output
@@ -176,7 +170,7 @@ class TestModules:
             "module_id": "hashmap", "enabled": False,
             "priority": 1, "description": "HashMap",
         }
-        result = invoke(["rating", "module-enable", "hashmap"])
+        result = invoke(["rating", "module", "enable", "hashmap"])
         assert result.exit_code == 0
         body = mock_client.put.call_args[1]["json"]
         # CloudKitty PUT wants the full module representation minus module_id
@@ -190,7 +184,7 @@ class TestModules:
         mock_client.get.return_value = {
             "module_id": "hashmap", "enabled": True, "priority": 1, "description": ""
         }
-        result = invoke(["rating", "module-disable", "hashmap"])
+        result = invoke(["rating", "module", "disable", "hashmap"])
         assert result.exit_code == 0
         assert mock_client.put.call_args[1]["json"]["enabled"] is False
 
@@ -199,10 +193,9 @@ class TestModules:
         mock_client.get.return_value = {
             "module_id": "hashmap", "enabled": True, "priority": 1, "description": ""
         }
-        result = invoke(["rating", "module-set-priority", "hashmap", "10"])
+        result = invoke(["rating", "module", "set-priority", "hashmap", "10"])
         assert result.exit_code == 0
         assert mock_client.put.call_args[1]["json"]["priority"] == 10
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  rating hashmap
@@ -233,7 +226,6 @@ class TestHashmapServices:
         mock_client.delete.assert_called_once()
         assert SERVICE_ID in mock_client.delete.call_args[0][0]
 
-
 class TestHashmapMappings:
 
     def test_mapping_create_requires_field_or_service(self, invoke, mock_client):
@@ -262,7 +254,6 @@ class TestHashmapMappings:
         result = invoke(["rating", "hashmap", "mapping-delete", MAPPING_ID, "-y"])
         assert result.exit_code == 0
 
-
 class TestHashmapThresholds:
 
     def test_threshold_create_requires_field_or_service(self, invoke, mock_client):
@@ -281,7 +272,6 @@ class TestHashmapThresholds:
             "--field-id", FIELD_ID, "--level", "100", "--cost", "0.01",
         ])
         assert result.exit_code == 0
-
 
 class TestHashmapGroups:
 
@@ -303,7 +293,6 @@ class TestHashmapGroups:
         _rating(mock_client)
         result = invoke(["rating", "hashmap", "group-delete", GROUP_ID, "-y"])
         assert result.exit_code == 0
-
 
 class TestHashmapFieldsAndLists:
 
@@ -354,7 +343,6 @@ class TestHashmapFieldsAndLists:
         result = invoke(["rating", "hashmap", "threshold-delete", THRESHOLD_ID, "-y"])
         assert result.exit_code == 0
 
-
 class TestModuleShow:
 
     def test_module_show(self, invoke, mock_client):
@@ -363,6 +351,6 @@ class TestModuleShow:
             "module_id": "hashmap", "enabled": True, "priority": 1,
             "description": "HashMap", "hot_config": True,
         }
-        result = invoke(["rating", "module-show", "hashmap"])
+        result = invoke(["rating", "module", "show", "hashmap"])
         assert result.exit_code == 0
         assert "hashmap" in result.output.lower()

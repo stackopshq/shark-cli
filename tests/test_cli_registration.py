@@ -20,7 +20,6 @@ EXPECTED_COMMANDS = [
     "limit", "registered-limit", "access-rule", "token", "endpoint-group",
 ]
 
-
 class TestCLIRegistration:
 
     def test_all_commands_registered(self):
@@ -48,7 +47,6 @@ class TestCLIRegistration:
         assert result.exit_code == 0
         assert "orca" in result.output
 
-
 class TestSubcommandHelp:
     """Verify each command group shows --help without errors."""
 
@@ -56,7 +54,6 @@ class TestSubcommandHelp:
     def test_command_help(self, invoke, cmd):
         result = invoke([cmd, "--help"])
         assert result.exit_code == 0, f"'{cmd} --help' failed: {result.output}"
-
 
 class TestServerSubcommands:
     """Verify key server subcommands including the new port-forward."""
@@ -76,20 +73,17 @@ class TestServerSubcommands:
         # Should fail because SERVER_ID and PORT_MAPPING are required
         assert result.exit_code != 0
 
-
 class TestProfileSubcommands:
     """Verify profile subcommands including conversions."""
 
     PROFILE_SUBCMDS = [
         "list", "show", "add", "edit", "switch", "remove", "rename",
-        "set-color", "to-openrc", "to-clouds", "from-openrc", "from-clouds",
     ]
 
     @pytest.mark.parametrize("sub", PROFILE_SUBCMDS)
     def test_profile_subcommand_help(self, invoke, sub):
         result = invoke(["profile", sub, "--help"])
         assert result.exit_code == 0, f"'profile {sub} --help' failed"
-
 
 class TestNewServiceCommands:
     """Verify the 3 new service command groups have their subcommands."""
@@ -109,8 +103,7 @@ class TestNewServiceCommands:
     def test_stack_subcommands(self, invoke):
         result = invoke(["stack", "--help"])
         assert result.exit_code == 0
-        for sub in ["list", "show", "create", "delete", "event-list",
-                     "resource-list", "output-list", "topology"]:
+        for sub in ["list", "show", "create", "delete", "topology"]:
             assert sub in result.output, f"'stack {sub}' missing"
 
     def test_zone_subcommands(self, invoke):
@@ -134,5 +127,5 @@ class TestNewServiceCommands:
     def test_auth_subcommands(self, invoke):
         result = invoke(["auth", "--help"])
         assert result.exit_code == 0
-        for sub in ["whoami", "token-debug", "check"]:
+        for sub in ["whoami", "check"]:
             assert sub in result.output, f"'auth {sub}' missing"

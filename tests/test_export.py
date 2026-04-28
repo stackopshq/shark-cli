@@ -18,7 +18,6 @@ FIP_ID = "fip-7777"
 SG_ID = "sg-8888"
 PORT_ID = "port-9999"
 
-
 def _server(srv_id=SRV_ID, name="web-1", status="ACTIVE", image_id=IMG_ID):
     return {
         "id": srv_id,
@@ -37,7 +36,6 @@ def _server(srv_id=SRV_ID, name="web-1", status="ACTIVE", image_id=IMG_ID):
         "created": "2025-01-01T00:00:00Z",
     }
 
-
 def _volume(vol_id=VOL_ID, name="boot-vol", status="in-use", attached_srv=SRV_ID):
     attachments = [{"server_id": attached_srv}] if attached_srv else []
     return {
@@ -50,14 +48,12 @@ def _volume(vol_id=VOL_ID, name="boot-vol", status="in-use", attached_srv=SRV_ID
         "attachments": attachments,
     }
 
-
 def _network(net_id=NET_ID, name="private-net", subnet_ids=None):
     return {
         "id": net_id,
         "name": name,
         "subnets": subnet_ids or [SUB_ID],
     }
-
 
 def _subnet(sub_id=SUB_ID, name="private-sub", cidr="10.0.0.0/24"):
     return {
@@ -69,14 +65,12 @@ def _subnet(sub_id=SUB_ID, name="private-sub", cidr="10.0.0.0/24"):
         "allocation_pools": [{"start": "10.0.0.10", "end": "10.0.0.200"}],
     }
 
-
 def _router(rtr_id=RTR_ID, name="main-router", ext_net_id=NET_ID):
     return {
         "id": rtr_id,
         "name": name,
         "external_gateway_info": {"network_id": ext_net_id},
     }
-
 
 def _floating_ip(fip_id=FIP_ID, ip="203.0.113.10", port_id=PORT_ID):
     return {
@@ -85,7 +79,6 @@ def _floating_ip(fip_id=FIP_ID, ip="203.0.113.10", port_id=PORT_ID):
         "status": "ACTIVE",
         "port_id": port_id,
     }
-
 
 def _security_group(sg_id=SG_ID, name="default"):
     return {
@@ -102,7 +95,6 @@ def _security_group(sg_id=SG_ID, name="default"):
         ],
     }
 
-
 def _image(img_id=IMG_ID, name="Ubuntu 22.04", size=2147483648):
     return {
         "id": img_id,
@@ -113,7 +105,6 @@ def _image(img_id=IMG_ID, name="Ubuntu 22.04", size=2147483648):
         "min_ram": 512,
     }
 
-
 def _keypair(name="mykey"):
     return {
         "keypair": {
@@ -122,7 +113,6 @@ def _keypair(name="mykey"):
             "type": "ssh",
         }
     }
-
 
 def _setup_full_mock(mock_client):
     """Wire up mock_client.get to return full infrastructure data."""
@@ -172,11 +162,9 @@ def _setup_full_mock(mock_client):
 
     mock_client.get = _get
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Default export (YAML, all resources)
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestExportDefault:
 
@@ -267,11 +255,9 @@ class TestExportDefault:
         result = invoke(["export"])
         assert "# Profile:" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  JSON format
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestExportJSON:
 
@@ -300,11 +286,9 @@ class TestExportJSON:
         result = invoke(["export", "-f", "json"])
         assert "# orca infrastructure export" not in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Resource filtering (--resources)
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestExportResourceFilter:
 
@@ -351,11 +335,9 @@ class TestExportResourceFilter:
         assert "servers" not in data
         assert "volumes" not in data
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Output to file (--output)
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestExportFile:
 
@@ -392,11 +374,9 @@ class TestExportFile:
         assert result.exit_code == 0
         assert out_file.exists()
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Cross-resolution (names resolved from IDs)
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestExportCrossResolution:
 
@@ -439,11 +419,9 @@ class TestExportCrossResolution:
         fip = data["floating_ips"][0]
         assert fip["attached_to"] == "web-1"
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Edge cases
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestExportEdgeCases:
 
@@ -585,11 +563,9 @@ class TestExportEdgeCases:
         assert rule["port_range"] == "all"
         assert rule["protocol"] == "any"
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestExportHelp:
 

@@ -10,7 +10,6 @@ from orca_cli.core.config import save_profile, set_active_profile
 #  whoami
 # ══════════════════════════════════════════════════════════════════════════
 
-
 class TestWhoami:
 
     def test_whoami_displays_user_info(self, invoke, config_dir, mock_client, sample_profile):
@@ -121,11 +120,9 @@ class TestWhoami:
         # Should show "?" for remaining
         assert "?" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  token-debug
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestTokenDebug:
 
@@ -133,7 +130,7 @@ class TestTokenDebug:
         save_profile("prod", sample_profile)
         set_active_profile("prod")
 
-        result = invoke(["auth", "token-debug"])
+        result = invoke(["auth", "token", "debug"])
         assert result.exit_code == 0
         output = result.output
         assert "Token Debug" in output
@@ -145,7 +142,7 @@ class TestTokenDebug:
         save_profile("prod", sample_profile)
         set_active_profile("prod")
 
-        result = invoke(["auth", "token-debug"])
+        result = invoke(["auth", "token", "debug"])
         assert "Roles" in result.output
         assert "admin" in result.output
         assert "member" in result.output
@@ -154,7 +151,7 @@ class TestTokenDebug:
         save_profile("prod", sample_profile)
         set_active_profile("prod")
 
-        result = invoke(["auth", "token-debug"])
+        result = invoke(["auth", "token", "debug"])
         assert "Service Catalog" in result.output
         assert "compute" in result.output
         assert "nova" in result.output
@@ -177,7 +174,7 @@ class TestTokenDebug:
         save_profile("prod", sample_profile)
         set_active_profile("prod")
 
-        result = invoke(["auth", "token-debug"])
+        result = invoke(["auth", "token", "debug"])
         # Token should be truncated (first 32 chars + "…")
         assert "fake-token-abcdef1234567890abcde" in result.output
 
@@ -185,7 +182,7 @@ class TestTokenDebug:
         save_profile("prod", sample_profile)
         set_active_profile("prod")
 
-        result = invoke(["auth", "token-debug"])
+        result = invoke(["auth", "token", "debug"])
         assert "Lifetime" in result.output
         assert "Remaining" in result.output
         # Token issued/expires in 2099 → remaining time should show "elapsed"
@@ -195,7 +192,7 @@ class TestTokenDebug:
         save_profile("prod", sample_profile)
         set_active_profile("prod")
 
-        result = invoke(["auth", "token-debug"])
+        result = invoke(["auth", "token", "debug"])
         # Check service catalog endpoints
         assert "nova.example.com" in result.output
         assert "keystone.example.com" in result.output
@@ -206,7 +203,7 @@ class TestTokenDebug:
         save_profile("prod", sample_profile)
         set_active_profile("prod")
 
-        result = invoke(["auth", "token-debug"])
+        result = invoke(["auth", "token", "debug"])
         assert "User Domain" in result.output
         assert "Project Domain" in result.output
         assert "Default" in result.output
@@ -216,7 +213,7 @@ class TestTokenDebug:
         set_active_profile("prod")
         mock_client.token_data = {**mock_client.token_data, "roles": []}
 
-        result = invoke(["auth", "token-debug"])
+        result = invoke(["auth", "token", "debug"])
         assert result.exit_code == 0
         assert "Roles" in result.output
 
@@ -225,7 +222,7 @@ class TestTokenDebug:
         set_active_profile("prod")
         mock_client.catalog = []
 
-        result = invoke(["auth", "token-debug"])
+        result = invoke(["auth", "token", "debug"])
         assert result.exit_code == 0
         assert "Service Catalog" in result.output
 
@@ -239,14 +236,12 @@ class TestTokenDebug:
             "expires_at": "",
         }
 
-        result = invoke(["auth", "token-debug"])
+        result = invoke(["auth", "token", "debug"])
         assert result.exit_code == 0
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  check
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestCheck:
 
@@ -455,11 +450,9 @@ class TestCheck:
         assert "Connection" in result.output
         assert "refused" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  CLI Help
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestCLIHelp:
     """Verify all commands are properly registered and show help."""
@@ -468,7 +461,7 @@ class TestCLIHelp:
         result = invoke(["auth", "--help"])
         assert result.exit_code == 0
         assert "whoami" in result.output
-        assert "token-debug" in result.output
+        assert "token" in result.output  # the token sub-group (was "token-debug" pre-3.0)
         assert "check" in result.output
 
     def test_whoami_help(self, invoke):
@@ -477,7 +470,7 @@ class TestCLIHelp:
         assert "identity" in result.output.lower() or "user" in result.output.lower()
 
     def test_token_debug_help(self, invoke):
-        result = invoke(["auth", "token-debug", "--help"])
+        result = invoke(["auth", "token", "debug", "--help"])
         assert result.exit_code == 0
         assert "--raw" in result.output
 

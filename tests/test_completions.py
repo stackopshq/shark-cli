@@ -18,14 +18,12 @@ def fake_ctx():
     ctx.parent = None
     return ctx
 
-
 @pytest.fixture
 def fake_ctx_with_profile():
     ctx = MagicMock(spec=click.Context)
     ctx.params = {"profile": "prod"}
     ctx.parent = None
     return ctx
-
 
 class TestBuildClient:
 
@@ -67,7 +65,6 @@ class TestBuildClient:
             client, profile = completions._build_client(fake_ctx)
         assert client is not None
 
-
 class TestMatches:
 
     def test_match_on_id(self):
@@ -81,7 +78,6 @@ class TestMatches:
 
     def test_case_insensitive(self):
         assert completions._matches({"id": "ABC", "name": ""}, "abc") is True
-
 
 class TestCompleteFromCache:
     """When cache is fresh, no client is built."""
@@ -131,7 +127,6 @@ class TestCompleteFromCache:
             out = completions.complete_servers(fake_ctx, None, "")
         assert out == []
 
-
 class TestAllCompletionFunctions:
     """Exercise every completion callback once with a cache hit."""
 
@@ -147,7 +142,6 @@ class TestAllCompletionFunctions:
         with patch("orca_cli.core.cache.load", return_value=items):
             out = fn(fake_ctx, None, "")
         assert len(out) >= 1
-
 
 class TestFetchPathsPerFunction:
     """Cache miss → fetch → different URLs/payloads per resource type."""
@@ -215,7 +209,6 @@ class TestFetchPathsPerFunction:
              patch.object(completions, "_build_client", return_value=(client, "p")):
             out = completions.complete_security_groups(fake_ctx, None, "")
         assert out[0].value == "default"  # name used, not id
-
 
 class TestClientCloseFailureSwallowed:
     """client.close() exceptions in the finally branch must not propagate."""

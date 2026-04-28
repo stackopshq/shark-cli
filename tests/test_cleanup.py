@@ -11,16 +11,13 @@ from orca_cli.core.config import save_profile, set_active_profile
 def _fip(fip_id, port_id=None):
     return {"id": fip_id, "floating_ip_address": "203.0.113.1", "port_id": port_id}
 
-
 def _volume(vol_id, name="vol", status="available", attachments=None):
     return {"id": vol_id, "name": name, "status": status, "attachments": attachments or []}
-
 
 def _snapshot(snap_id, name="snap", created_at=None):
     if created_at is None:
         created_at = datetime.now(timezone.utc).isoformat()
     return {"id": snap_id, "name": name, "created_at": created_at}
-
 
 def _port(port_id, device_id="", device_owner="", fixed_ips=None):
     return {
@@ -30,10 +27,8 @@ def _port(port_id, device_id="", device_owner="", fixed_ips=None):
         "fixed_ips": fixed_ips or [{"ip_address": "10.0.0.5"}],
     }
 
-
 def _sg(sg_id, name="my-sg"):
     return {"id": sg_id, "name": name, "security_group_rules": []}
-
 
 def _server(srv_id, name="web", status="ACTIVE", security_groups=None):
     return {
@@ -42,7 +37,6 @@ def _server(srv_id, name="web", status="ACTIVE", security_groups=None):
         "status": status,
         "security_groups": security_groups or [{"name": "default"}],
     }
-
 
 def _setup_mock(mock_client, fips=None, volumes=None, snapshots=None,
                 ports=None, sgs=None, servers=None):
@@ -74,11 +68,9 @@ def _setup_mock(mock_client, fips=None, volumes=None, snapshots=None,
     mock_client.network_url = "https://neutron.example.com"
     mock_client.volume_url = "https://cinder.example.com/v3"
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Clean project
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestCleanupClean:
 
@@ -99,11 +91,9 @@ class TestCleanupClean:
         assert result.exit_code == 0
         assert "No orphaned resources found" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Floating IPs
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestCleanupFloatingIPs:
 
@@ -128,11 +118,9 @@ class TestCleanupFloatingIPs:
         assert result.exit_code == 0
         assert "No orphaned resources found" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Volumes
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestCleanupVolumes:
 
@@ -169,11 +157,9 @@ class TestCleanupVolumes:
         assert result.exit_code == 0
         assert "No orphaned resources found" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Snapshots
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestCleanupSnapshots:
 
@@ -212,11 +198,9 @@ class TestCleanupSnapshots:
         assert result.exit_code == 0
         assert "No orphaned resources found" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Ports
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestCleanupPorts:
 
@@ -241,11 +225,9 @@ class TestCleanupPorts:
         assert result.exit_code == 0
         assert "No orphaned resources found" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Security groups
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestCleanupSecurityGroups:
 
@@ -292,11 +274,9 @@ class TestCleanupSecurityGroups:
         assert result.exit_code == 0
         assert "No orphaned resources found" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Servers in ERROR
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestCleanupServers:
 
@@ -321,11 +301,9 @@ class TestCleanupServers:
         assert result.exit_code == 0
         assert "No orphaned resources found" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Delete mode
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestCleanupDelete:
 
@@ -416,11 +394,9 @@ class TestCleanupDelete:
         assert result.exit_code == 0
         assert "2/3" in result.output
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Combined
 # ══════════════════════════════════════════════════════════════════════════
-
 
 class TestCleanupCombined:
 
@@ -447,7 +423,6 @@ class TestCleanupCombined:
         assert "port" in result.output
         assert "security-group" in result.output
         assert "server" in result.output
-
 
 class TestCleanupHelp:
 

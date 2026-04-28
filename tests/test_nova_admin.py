@@ -9,11 +9,9 @@ FLV = "22222222-2222-2222-2222-222222222222"
 PRJ = "33333333-3333-3333-3333-333333333333"
 NOVA = "https://nova.example.com/v2.1"
 
-
 def _nova(mock_client):
     mock_client.compute_url = NOVA
     return mock_client
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  compute-service list
@@ -64,7 +62,6 @@ class TestComputeServiceList:
     def test_help(self, invoke):
         assert invoke(["compute-service", "list", "--help"]).exit_code == 0
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  compute-service set
 # ══════════════════════════════════════════════════════════════════════════
@@ -113,7 +110,6 @@ class TestComputeServiceSet:
     def test_help(self, invoke):
         assert invoke(["compute-service", "set", "--help"]).exit_code == 0
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  compute-service delete
 # ══════════════════════════════════════════════════════════════════════════
@@ -136,7 +132,6 @@ class TestComputeServiceDelete:
     def test_help(self, invoke):
         assert invoke(["compute-service", "delete", "--help"]).exit_code == 0
 
-
 # ══════════════════════════════════════════════════════════════════════════
 #  server migration-list
 # ══════════════════════════════════════════════════════════════════════════
@@ -152,7 +147,7 @@ class TestServerMigrationList:
     def test_list(self, invoke, mock_client):
         _nova(mock_client)
         mock_client.get.return_value = {"migrations": [self._migration()]}
-        result = invoke(["server", "migration-list", SRV])
+        result = invoke(["server", "migration", "list", SRV])
         assert result.exit_code == 0
         assert "host1" in result.output
         assert "host2" in result.output
@@ -160,14 +155,14 @@ class TestServerMigrationList:
     def test_list_calls_correct_url(self, invoke, mock_client):
         _nova(mock_client)
         mock_client.get.return_value = {"migrations": []}
-        invoke(["server", "migration-list", SRV])
+        invoke(["server", "migration", "list", SRV])
         url = mock_client.get.call_args[0][0]
         assert f"/servers/{SRV}/migrations" in url
 
     def test_list_empty(self, invoke, mock_client):
         _nova(mock_client)
         mock_client.get.return_value = {"migrations": []}
-        result = invoke(["server", "migration-list", SRV])
+        result = invoke(["server", "migration", "list", SRV])
         assert result.exit_code == 0
         assert "No migrations" in result.output
 
@@ -176,12 +171,11 @@ class TestServerMigrationList:
         mock_client.get.return_value = {"migrations": [
             self._migration(migration_type="cold-migration")
         ]}
-        result = invoke(["server", "migration-list", SRV])
+        result = invoke(["server", "migration", "list", SRV])
         assert "cold" in result.output.lower()
 
     def test_help(self, invoke):
-        assert invoke(["server", "migration-list", "--help"]).exit_code == 0
-
+        assert invoke(["server", "migration", "list", "--help"]).exit_code == 0
 
 # ══════════════════════════════════════════════════════════════════════════
 #  server migration-show
@@ -198,20 +192,19 @@ class TestServerMigrationShow:
             "old_instance_type_id": FLV, "new_instance_type_id": FLV,
             "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-01-01T00:01:00Z",
         }}
-        result = invoke(["server", "migration-show", SRV, "10"])
+        result = invoke(["server", "migration", "show", SRV, "10"])
         assert result.exit_code == 0
         assert "completed" in result.output
 
     def test_show_calls_correct_url(self, invoke, mock_client):
         _nova(mock_client)
         mock_client.get.return_value = {"migration": {}}
-        invoke(["server", "migration-show", SRV, "10"])
+        invoke(["server", "migration", "show", SRV, "10"])
         url = mock_client.get.call_args[0][0]
         assert f"/servers/{SRV}/migrations/10" in url
 
     def test_help(self, invoke):
-        assert invoke(["server", "migration-show", "--help"]).exit_code == 0
-
+        assert invoke(["server", "migration", "show", "--help"]).exit_code == 0
 
 # ══════════════════════════════════════════════════════════════════════════
 #  flavor access-list
@@ -224,27 +217,26 @@ class TestFlavorAccessList:
         mock_client.get.return_value = {"flavor_access": [
             {"flavor_id": FLV, "tenant_id": PRJ},
         ]}
-        result = invoke(["flavor", "access-list", FLV])
+        result = invoke(["flavor", "access", "list", FLV])
         assert result.exit_code == 0
         assert PRJ[:8] in result.output
 
     def test_list_calls_correct_url(self, invoke, mock_client):
         _nova(mock_client)
         mock_client.get.return_value = {"flavor_access": []}
-        invoke(["flavor", "access-list", FLV])
+        invoke(["flavor", "access", "list", FLV])
         url = mock_client.get.call_args[0][0]
         assert f"/flavors/{FLV}/os-flavor-access" in url
 
     def test_list_empty(self, invoke, mock_client):
         _nova(mock_client)
         mock_client.get.return_value = {"flavor_access": []}
-        result = invoke(["flavor", "access-list", FLV])
+        result = invoke(["flavor", "access", "list", FLV])
         assert result.exit_code == 0
         assert "No access" in result.output or "public" in result.output.lower()
 
     def test_help(self, invoke):
-        assert invoke(["flavor", "access-list", "--help"]).exit_code == 0
-
+        assert invoke(["flavor", "access", "list", "--help"]).exit_code == 0
 
 # ══════════════════════════════════════════════════════════════════════════
 #  flavor access-add
@@ -254,7 +246,7 @@ class TestFlavorAccessAdd:
 
     def test_add(self, invoke, mock_client):
         _nova(mock_client)
-        result = invoke(["flavor", "access-add", FLV, PRJ])
+        result = invoke(["flavor", "access", "add", FLV, PRJ])
         assert result.exit_code == 0
         assert mock_client.post.called
         body = mock_client.post.call_args[1]["json"]
@@ -262,13 +254,12 @@ class TestFlavorAccessAdd:
 
     def test_add_calls_correct_url(self, invoke, mock_client):
         _nova(mock_client)
-        invoke(["flavor", "access-add", FLV, PRJ])
+        invoke(["flavor", "access", "add", FLV, PRJ])
         url = mock_client.post.call_args[0][0]
         assert f"/flavors/{FLV}/action" in url
 
     def test_help(self, invoke):
-        assert invoke(["flavor", "access-add", "--help"]).exit_code == 0
-
+        assert invoke(["flavor", "access", "add", "--help"]).exit_code == 0
 
 # ══════════════════════════════════════════════════════════════════════════
 #  flavor access-remove
@@ -278,20 +269,19 @@ class TestFlavorAccessRemove:
 
     def test_remove_yes(self, invoke, mock_client):
         _nova(mock_client)
-        result = invoke(["flavor", "access-remove", FLV, PRJ, "--yes"])
+        result = invoke(["flavor", "access", "remove", FLV, PRJ, "--yes"])
         assert result.exit_code == 0
         body = mock_client.post.call_args[1]["json"]
         assert body["removeTenantAccess"]["tenant"] == PRJ
 
     def test_remove_requires_confirm(self, invoke, mock_client):
         _nova(mock_client)
-        result = invoke(["flavor", "access-remove", FLV, PRJ], input="n\n")
+        result = invoke(["flavor", "access", "remove", FLV, PRJ], input="n\n")
         assert result.exit_code != 0
         mock_client.post.assert_not_called()
 
     def test_help(self, invoke):
-        assert invoke(["flavor", "access-remove", "--help"]).exit_code == 0
-
+        assert invoke(["flavor", "access", "remove", "--help"]).exit_code == 0
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Registration
@@ -306,10 +296,10 @@ class TestRegistration:
     def test_compute_service_subcommands(self, invoke, sub):
         assert invoke(["compute-service", sub, "--help"]).exit_code == 0
 
-    @pytest.mark.parametrize("sub", ["migration-list", "migration-show"])
-    def test_server_migration_subcommands(self, invoke, sub):
-        assert invoke(["server", sub, "--help"]).exit_code == 0
+    def test_server_migration_subcommands(self, invoke):
+        for sub in ("list", "show", "force-complete", "abort"):
+            assert invoke(["server", "migration", sub, "--help"]).exit_code == 0
 
-    @pytest.mark.parametrize("sub", ["access-list", "access-add", "access-remove"])
-    def test_flavor_access_subcommands(self, invoke, sub):
-        assert invoke(["flavor", sub, "--help"]).exit_code == 0
+    def test_flavor_access_subcommands(self, invoke):
+        for sub in ("list", "add", "remove"):
+            assert invoke(["flavor", "access", sub, "--help"]).exit_code == 0

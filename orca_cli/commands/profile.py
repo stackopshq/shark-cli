@@ -8,7 +8,6 @@ from typing import Any
 
 import click
 
-from orca_cli.core.aliases import add_command_with_alias
 from orca_cli.core.config import (
     _find_clouds_yaml,
     _normalise_legacy_keys,
@@ -855,30 +854,3 @@ def _os_env_to_cfg(env: dict[str, str]) -> dict[str, str]:
     if env.get("OS_INSECURE"):
         cfg["insecure"] = env["OS_INSECURE"]
     return cfg
-
-
-# ══════════════════════════════════════════════════════════════════════════
-#  Deprecated hyphenated aliases (ADR-0008 — backwards compatibility)
-# ══════════════════════════════════════════════════════════════════════════
-
-add_command_with_alias(profile, profile_set_color,
-                       legacy_name="set-color",
-                       primary_path="profile color set")
-add_command_with_alias(profile, profile_set_region,
-                       legacy_name="set-region",
-                       primary_path="profile region set")
-add_command_with_alias(profile, profile_regions,
-                       legacy_name="regions",
-                       primary_path="profile region list")
-add_command_with_alias(profile, profile_to_openrc,
-                       legacy_name="to-openrc",
-                       primary_path="profile export openrc")
-add_command_with_alias(profile, profile_to_clouds,
-                       legacy_name="to-clouds",
-                       primary_path="profile export clouds")
-add_command_with_alias(profile, profile_from_openrc,
-                       legacy_name="from-openrc",
-                       primary_path="profile import openrc")
-add_command_with_alias(profile, profile_from_clouds,
-                       legacy_name="from-clouds",
-                       primary_path="profile import clouds")
