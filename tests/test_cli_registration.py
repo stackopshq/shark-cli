@@ -18,6 +18,7 @@ EXPECTED_COMMANDS = [
     "user", "volume", "watch", "zone", "placement", "alarm", "rating",
     "policy", "identity-provider", "federation-protocol", "mapping", "service-provider",
     "limit", "registered-limit", "access-rule", "token", "endpoint-group",
+    "share",
 ]
 
 

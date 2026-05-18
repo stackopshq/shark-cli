@@ -650,6 +650,25 @@ class OrcaClient:
         """CloudKitty (rating) public endpoint."""
         return self._endpoint_for("rating")
 
+    @property
+    def share_url(self) -> str:
+        """Manila (shared file systems) public endpoint.
+
+        Catalog type was renamed ``share`` → ``sharev2`` when Manila
+        adopted microversioning (2.0). Try the modern type first and
+        fall back so orca works against both eras of catalogue.
+        """
+        for service_type in ("sharev2", "share"):
+            try:
+                return self._endpoint_for(service_type)
+            except APIError:
+                continue
+        raise APIError(
+            0,
+            "Manila/shared-file-system endpoint not found in catalogue. "
+            "Check that Manila is deployed and the project has access.",
+        )
+
     # ── Generic HTTP helpers ──────────────────────────────────────────────────
 
     def _headers(self, extra: dict[str, str] | None = None,
