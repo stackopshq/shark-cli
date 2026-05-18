@@ -6071,6 +6071,10 @@ Examples:
 </table>
 <h4 id="orca-image-list">orca image list<a class="headerlink" href="#orca-image-list" title="Permanent link">&para;</a></h4>
 <p>List available images.</p>
+<p>Examples:
+  orca image list
+  orca image list --visibility public
+  orca image list --visibility shared -f value -c ID -c Name</p>
 <p><strong>Usage:</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>orca image list [OPTIONS]
 </code></pre></div>
@@ -6085,6 +6089,12 @@ Examples:
 </tr>
 </thead>
 <tbody>
+<tr>
+<td><code>--visibility</code></td>
+<td>choice (<code>public</code> &#x7C; <code>private</code> &#x7C; <code>shared</code> &#x7C; <code>community</code> &#x7C; <code>all</code>)</td>
+<td>Filter by image visibility. Glance defaults to 'all' the caller can see.</td>
+<td><code>all</code></td>
+</tr>
 <tr>
 <td><code>--noindent</code></td>
 <td>boolean</td>
